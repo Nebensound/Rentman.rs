@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial project structure
 - Core HTTP client with JWT token authentication
 - API models for:
@@ -31,12 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full documentation in README.md
 
 ### Security
+
 - API token authentication via JWT Bearer tokens
 - Gitignore configured to prevent token leakage
 
 ## [0.1.0] - 2026-01-22
 
 ### Added
+
 - Initial release of rentman.rs
 - Basic CRUD operations for core resources
 - Async/await support with tokio

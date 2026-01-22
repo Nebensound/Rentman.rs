@@ -40,6 +40,7 @@ nano .env  # or vim, code, etc.
 ```
 
 Or manually:
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -65,7 +66,7 @@ async fn main() -> Result<()> {
 
     // List all projects
     let projects = client.projects().list().await?;
-    
+
     for project in projects {
         println!("Project: {}", project.name.unwrap_or_default());
     }
@@ -79,6 +80,7 @@ async fn main() -> Result<()> {
 ### Getting your API Token
 
 Get your API token from the Rentman application:
+
 1. Go to **Configuration → Extensions**
 2. Generate a new **JWT token**
 3. Copy the token
@@ -100,6 +102,7 @@ The examples will automatically load from `.env` file.
 ### GitHub Actions / CI
 
 Add your token as a secret in GitHub:
+
 1. Go to your repo → **Settings → Secrets and variables → Actions**
 2. Click **New repository secret**
 3. Name: `RENTMAN_TOKEN`
@@ -108,7 +111,8 @@ Add your token as a secret in GitHub:
 
 The CI workflow will automatically use this secret for integration tests.
 
-⚠️ **Security Note**: 
+⚠️ **Security Note**:
+
 - `.env` is in `.gitignore` and will never be committed
 - Never commit tokens directly in code
 - Rotate tokens regularly
@@ -174,7 +178,7 @@ async fn main() -> Result<()> {
         .offset(0);
 
     let contacts = client.contacts().list_with_params(params).await?;
-    
+
     for contact in contacts {
         println!("Contact: {}", contact.name.unwrap_or_default());
     }
@@ -195,7 +199,7 @@ async fn main() -> Result<()> {
         .build()?;
 
     let equipment = client.equipment().get(123).await?;
-    
+
     println!("Equipment: {}", equipment.name.unwrap_or_default());
     println!("In stock: {}", equipment.in_stock.unwrap_or(0));
 
@@ -220,9 +224,11 @@ cargo run --example list_equipment
 ```
 
 Or use environment variable directly:
+
 ```bash
 RENTMAN_TOKEN=your-token cargo run --example list_projects
 ```
+
 - `list_projects` - List all projects
 - `create_project` - Create a new project
 - `list_contacts` - List contacts with pagination
@@ -233,6 +239,7 @@ RENTMAN_TOKEN=your-token cargo run --example list_projects
 Currently implemented endpoints:
 
 ### Core Resources
+
 - ✅ Projects (list, get, create, update, delete)
 - ✅ Subprojects (list)
 - ✅ Contacts (list, get)
@@ -241,6 +248,7 @@ Currently implemented endpoints:
 - ✅ Serial Numbers (list, get)
 
 ### Planned
+
 - 🚧 Crew Members
 - 🚧 Appointments
 - 🚧 Quotations
@@ -253,11 +261,13 @@ See the [Rentman API Documentation](https://api.rentman.net) for a complete list
 ## Testing
 
 Run unit tests:
+
 ```sh
 cargo test
 ```
 
 Run integration tests with real API (requires `.env` with `RENTMAN_TOKEN`):
+
 ```sh
 cp .env.example .env
 # Add your token to .env

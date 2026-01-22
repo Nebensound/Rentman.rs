@@ -1,11 +1,7 @@
 //! HTTP client for the Rentman API.
 
+use crate::endpoints::{ContactsEndpoint, EquipmentEndpoint, ProjectsEndpoint};
 use crate::error::{Error, Result};
-use crate::endpoints::{
-    ProjectsEndpoint,
-    ContactsEndpoint,
-    EquipmentEndpoint,
-};
 use reqwest::{Client, RequestBuilder};
 use serde::de::DeserializeOwned;
 
@@ -147,7 +143,9 @@ impl RentmanClientBuilder {
 
     /// Build the client.
     pub fn build(self) -> Result<RentmanClient> {
-        let token = self.token.ok_or_else(|| Error::config("API token is required"))?;
+        let token = self
+            .token
+            .ok_or_else(|| Error::config("API token is required"))?;
 
         let http_client = Client::builder()
             .build()
@@ -155,7 +153,9 @@ impl RentmanClientBuilder {
 
         Ok(RentmanClient {
             http_client,
-            base_url: self.base_url.unwrap_or_else(|| DEFAULT_BASE_URL.to_string()),
+            base_url: self
+                .base_url
+                .unwrap_or_else(|| DEFAULT_BASE_URL.to_string()),
             token,
         })
     }

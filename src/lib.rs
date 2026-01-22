@@ -23,9 +23,9 @@
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub mod client;
+pub mod endpoints;
 pub mod error;
 pub mod models;
-pub mod endpoints;
 pub mod prelude;
 
 // Pagination support is experimental
