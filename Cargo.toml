@@ -1,0 +1,43 @@
+[package]
+name = "rentman"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+authors = ["Joscha Wagner"]
+description = "Rust client library for the Rentman API"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/joschawagner/Rentman.rs"
+keywords = ["rentman", "api", "client", "rental", "event"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+[dependencies]
+# HTTP Client
+reqwest = { version = "0.12", features = ["json"] }
+
+# Async Runtime
+tokio = { version = "1.42", features = ["macros", "rt-multi-thread"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Date/Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Error Handling
+thiserror = "2.0"
+
+# URL Encoding
+urlencoding = "2.1"
+
+[dev-dependencies]
+tokio-test = "0.4"
+dotenvy = "0.15"
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
