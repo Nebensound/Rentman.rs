@@ -100,9 +100,14 @@ The crate version in `Cargo.toml` is a placeholder. Every CI run starts with a
 `version` job that derives the semantic version from git history using
 [PaulHatch/semantic-version](https://github.com/PaulHatch/semantic-version):
 `v*` tags mark releases, and commit messages containing `(MAJOR)` or `(MINOR)`
-bump the respective component. All later jobs (tests, coverage, and any future
-deploy) depend on this job and rewrite the `Cargo.toml` version before
-building, so published artifacts always carry the derived version.
+bump the respective component. All later jobs (tests, coverage, release) depend
+on this job and rewrite the `Cargo.toml` version before building, so published
+artifacts always carry the derived version.
+
+Every merge into `main` triggers the `release` job after tests and coverage
+pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
+repository secret) and creates the matching `v*` git tag and GitHub release,
+which in turn seeds the next version calculation.
 
 ## Coding Guidelines
 
