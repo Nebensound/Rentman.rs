@@ -1,11 +1,4 @@
-//! Client for calling the Rentman API.
-//!
-//! The crate encapsulates authentication, pagination, rate limits, retry
-//! handling, and the JSON formats used by the Rentman API. The public facade
-//! uses narrow domain types following the Nebensound conventions: tokens are
-//! wrapper types, IDs are newtypes, money-like values are exact decimals, and
-//! wire formats are translated at the API boundary.
-
+#![doc = include_str!("../README.md")]
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 pub mod endpoint;
