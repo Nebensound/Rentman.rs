@@ -21,7 +21,7 @@ jobs:
       version_tag: ${{ steps.semantic.outputs.version_tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # semantic-version walks the full history and tags to derive the version.
           fetch-depth: 0
@@ -134,7 +134,7 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Apply semantic version to Cargo.toml
