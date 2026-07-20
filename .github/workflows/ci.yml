@@ -5,10 +5,17 @@ on:
     branches:
       - main
   pull_request:
+  # Dispatched by the version job after it pushes a version commit: pushes made
+  # with GITHUB_TOKEN never trigger workflows, so the required checks for the
+  # new head commit are started explicitly.
+  workflow_dispatch:
 
 jobs:
   version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
     outputs:
       version: ${{ steps.semantic.outputs.version }}
       version_tag: ${{ steps.semantic.outputs.version_tag }}
@@ -18,6 +25,9 @@ jobs:
         with:
           # semantic-version walks the full history and tags to derive the version.
           fetch-depth: 0
+          # On pull requests, check out the branch head instead of the merge
+          # commit so the derived version can be committed back to the branch.
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       - name: Calculate semantic version
         id: semantic
         uses: PaulHatch/semantic-version@v5.4.0
@@ -26,6 +36,23 @@ jobs:
           major_pattern: "(MAJOR)"
           minor_pattern: "(MINOR)"
           version_format: "${major}.${minor}.${patch}"
+      - name: Commit derived version to the branch
+        if: github.event_name == 'pull_request'
+        env:
+          VERSION: ${{ steps.semantic.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          cargo update --workspace
+          if git diff --quiet; then
+            echo "Cargo.toml already carries version $VERSION"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Set crate version to $VERSION"
+          git push
+          gh workflow run ci.yml --ref "$GITHUB_HEAD_REF"
 
   test:
     runs-on: ubuntu-latest

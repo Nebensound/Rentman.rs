@@ -104,6 +104,10 @@ bump the respective component. All later jobs (tests, coverage, release) depend
 on this job and rewrite the `Cargo.toml` version before building, so published
 artifacts always carry the derived version.
 
+On pull request branches the `version` job also commits the derived version to
+`Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
+CI run so the new head commit gets its required status checks.
+
 Every merge into `main` triggers the `release` job after tests and coverage
 pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
 repository secret) and creates the matching `v*` git tag and GitHub release,
