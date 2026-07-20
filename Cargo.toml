@@ -1,0 +1,26 @@
+[package]
+name = "rentman-client"
+version = "0.1.0"
+edition = "2024"
+description = "Typed Rentman API client with OpenAPI contract tests."
+license = "MIT"
+repository = "https://github.com/Nebensound/Rentman.rs"
+
+[dependencies]
+anyhow = "1.0.103"
+backon = "1.6.0"
+chrono = { version = "0.4.45", features = ["serde"] }
+governor = "0.10.4"
+percent-encoding = "2.3.2"
+reqwest = { version = "0.13.4", default-features = false, features = ["json", "query", "rustls"] }
+rust_decimal = { version = "1.42.1", default-features = false, features = ["serde-float", "std"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+serde_urlencoded = "0.7.1"
+tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread", "time"] }
+tracing = "0.1.44"
+url = { version = "2.5.8", features = ["serde"] }
+
+[lints.rust]
+missing_docs = "deny"
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(coverage_nightly)"] }
