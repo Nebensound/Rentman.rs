@@ -243,16 +243,6 @@ struct PaymentListItem {
     invoice: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct RentmanListResponse<T> {
-    #[serde(rename = "itemCount")]
-    item_count: usize,
-    limit: usize,
-    data: Vec<T>,
-    #[serde(default)]
-    next_page_url: Option<String>,
-}
-
 impl RentmanClient {
     /// Creates a client using the default Rentman API base URL.
     pub fn new(token: RentmanApiToken) -> Self {
@@ -300,7 +290,7 @@ impl RentmanClient {
         let mut offset = 0;
 
         loop {
-            let response: RentmanListResponse<RentmanInvoice> = self
+            let response: model::CollectionResponse<RentmanInvoice> = self
                 .paginated_request(next_url.take(), "invoices", offset)
                 .query(&[
                     ("fields", "id,number,is_paid".to_string()),
@@ -314,7 +304,7 @@ impl RentmanClient {
                 && response.item_count >= response.limit
                 && response.limit > 0;
             offset += response.limit;
-            next_url = parse_next_page_url(response.next_page_url.as_deref())?;
+            next_url = response.next_page_url;
             invoices.extend(response.data);
 
             if next_url.is_none() && !should_fallback_to_offset {
@@ -335,7 +325,7 @@ impl RentmanClient {
         let mut offset = 0;
 
         loop {
-            let response: RentmanListResponse<PaymentListItem> = self
+            let response: model::CollectionResponse<PaymentListItem> = self
                 .paginated_request(next_url.take(), "payments", offset)
                 .query(&[
                     ("fields", "id,moment,invoice".to_string()),
@@ -349,7 +339,7 @@ impl RentmanClient {
                 && response.item_count >= response.limit
                 && response.limit > 0;
             offset += response.limit;
-            next_url = parse_next_page_url(response.next_page_url.as_deref())?;
+            next_url = response.next_page_url;
 
             for item in response.data {
                 let invoice_id = parse_invoice_reference(&item.invoice)?;
@@ -525,13 +515,6 @@ fn parse_invoice_reference(reference: &str) -> Result<InvoiceId> {
         .and_then(|id| id.parse::<u64>().ok())
         .map(InvoiceId::new)
         .with_context(|| format!("Unexpected Rentman invoice reference: {reference}"))
-}
-
-fn parse_next_page_url(next_page_url: Option<&str>) -> Result<Option<Url>> {
-    next_page_url
-        .map(Url::parse)
-        .transpose()
-        .context("Rentman next_page_url is not a valid URL")
 }
 
 // Coverage is disabled because this generic async adapter is monomorphized per
@@ -1119,11 +1102,9 @@ mod tests {
 
         let error = client.all_invoices().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman next_page_url is not a valid URL")
-        );
+        let chain = format!("{error:#}");
+        assert!(chain.contains("Rentman invoice list lookup failed"));
+        assert!(chain.contains("Rentman API response body is invalid JSON"));
         assert_request(&server.next_request(), "GET", "/invoices");
     }
 
@@ -1227,11 +1208,9 @@ mod tests {
 
         let error = client.all_payments_by_invoice().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman next_page_url is not a valid URL")
-        );
+        let chain = format!("{error:#}");
+        assert!(chain.contains("Rentman payment list lookup failed"));
+        assert!(chain.contains("Rentman API response body is invalid JSON"));
         assert_request(&server.next_request(), "GET", "/payments");
     }
 
