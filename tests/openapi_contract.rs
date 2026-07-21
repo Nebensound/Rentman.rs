@@ -60,6 +60,9 @@ fn wire_email_addresses_are_validated() {
     let email: EmailAddress = serde_json::from_str(r#""support@example.test""#).unwrap();
     assert_eq!(email.as_str(), "support@example.test");
 
+    let empty: EmailAddress = serde_json::from_str(r#""""#).unwrap();
+    assert_eq!(empty.as_str(), "");
+
     let error = serde_json::from_str::<EmailAddress>(r#""not-an-email""#).unwrap_err();
     assert!(
         error

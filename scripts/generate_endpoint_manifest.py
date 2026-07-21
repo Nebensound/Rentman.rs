@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OPENAPI = ROOT / "openapi" / "rentman-oas.json"
 ENDPOINT_OUTPUT = ROOT / "src" / "endpoint" / "generated.rs"
 WIRE_OUTPUT = ROOT / "src" / "model" / "generated.rs"
+LIVE_SWEEP_OUTPUT = ROOT / "tests" / "live" / "generated_sweep.rs"
 
 RUST_KEYWORDS = {
     "as",
@@ -42,6 +44,92 @@ RUST_KEYWORDS = {
 
 DATE_TIME_FIELDS = {"created", "modified"}
 URL_FIELDS = {"url", "website", "image", "logo"}
+
+# Deliberate deviations from the documented OpenAPI types, verified against
+# live API payloads on 2026-07-21 (see the live sweep in tests/live_api.rs).
+# They apply to Response schemas only: request bodies keep the documented
+# types because they define what this client sends.
+
+# Fields whose live values contradict the documented type.
+RESPONSE_TYPE_OVERRIDES = {
+    # quantity is documented as string but returned as an integer.
+    ("ActualContentResponse", "quantity"): "i64",
+    ("EquipmentSetContentResponse", "quantity"): "i64",
+    ("ProjectEquipmentResponse", "quantity"): "i64",
+    # factor is documented as string but returned as a number (e.g. 2.8).
+    ("FactorsResponse", "factor"): "Decimal",
+    ("ProjectEquipmentResponse", "factor"): "Decimal",
+    ("ProjectRequestEquipmentResponse", "factor"): "Decimal",
+    ("SubrentalEquipmentResponse", "factor"): "Decimal",
+    # number is documented as string but returned as an integer here; it is a
+    # real string on contracts, invoices, and purchase orders.
+    ("ProjectResponse", "number"): "i64",
+    ("RepairResponse", "number"): "i64",
+    ("SubrentalResponse", "number"): "i64",
+    # contract is documented as string but returned as an integer.
+    ("CrewResponse", "contract"): "i64",
+    # public is documented as the string enum "0"/"1" but returned as an
+    # integer.
+    ("TaskResponse", "public"): "i64",
+    # project is documented as a resource reference but returns the project
+    # display name.
+    ("PurchaseOrderCostResponse", "project"): "String",
+    # website holds user-entered text (often empty, or missing a scheme).
+    ("ContactResponse", "website"): "String",
+}
+
+# Fields that are documented as non-nullable but return null in live data.
+RESPONSE_NULLABLE_FIELDS = {
+    ("ContactResponse", "mailing_unit_number"),
+    ("ContactResponse", "mailing_district"),
+    ("ContactResponse", "mailing_extra_address_line"),
+    ("ContactResponse", "visit_unit_number"),
+    ("ContactResponse", "visit_district"),
+    ("ContactResponse", "visit_extra_address_line"),
+    ("ContactResponse", "invoice_unit_number"),
+    ("ContactResponse", "invoice_district"),
+    ("ContactResponse", "invoice_extra_address_line"),
+    ("CrewResponse", "unit_number"),
+    ("CrewResponse", "district"),
+    ("CrewResponse", "extraaddressline"),
+    ("FactuurResponse", "integration_reference_id"),
+    ("ProjectFunctionGroupResponse", "remark"),
+    ("PurchaseOrderResponse", "export_message"),
+    ("TaskResponse", "color"),
+}
+
+# Documented-required fields that live collection responses omit (most are
+# financial aggregates that only appear when explicitly requested).
+_PROJECT_PRICE_FIELDS = (
+    "project_total_price",
+    "project_total_price_cancelled",
+    "project_rental_price",
+    "project_sale_price",
+    "project_crew_price",
+    "project_transport_price",
+    "project_other_price",
+    "project_insurance_price",
+)
+_PROJECT_COST_FIELDS = ("estimated_cost", "planned_cost", "actual_cost")
+RESPONSE_OPTIONAL_FIELDS = {
+    "ContractResponse": set(_PROJECT_PRICE_FIELDS),
+    "FactuurResponse": set(_PROJECT_PRICE_FIELDS),
+    "QuotationResponse": set(_PROJECT_PRICE_FIELDS),
+    "ProjectResponse": set(_PROJECT_PRICE_FIELDS + _PROJECT_COST_FIELDS),
+    "SubprojectResponse": set(_PROJECT_PRICE_FIELDS + _PROJECT_COST_FIELDS),
+    "EquipmentResponse": {
+        "current_quantity",
+        "current_quantity_excl_cases",
+        "quantity_in_cases",
+    },
+    "FileFolderResponse": {"parent_api_path"},
+    "FileResponse": {"parent_api_path", "itemtype"},
+    "InvoiceLineResponse": {"parent_api_path"},
+    "TaskResponse": {"parent_api_path"},
+    "PaymentResponse": {"payment_import_source"},
+    "ExtraInputFieldResponse": {"linkedItemType"},
+    "PurchaseOrderResponse": {"previous_status"},
+}
 
 
 def escape(value: str) -> str:
@@ -145,6 +233,15 @@ def is_url_field(field: str) -> bool:
 
 
 def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
+    if schema_name_value.endswith("Response"):
+        override = RESPONSE_TYPE_OVERRIDES.get((schema_name_value, field))
+        if override:
+            return override
+        # order is documented as string on many response schemas but is an
+        # integer in every observed live payload.
+        if field == "order" and openapi_type(schema)[0] == "string":
+            return "i64"
+
     if "enum" in schema:
         return enum_type_name(schema_name_value, field)
 
@@ -173,10 +270,17 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
 
 def rust_field_type(schema_name_value: str, field: str, schema: dict, required: set[str]) -> str:
     _, nullable = openapi_type(schema)
+    if (schema_name_value, field) in RESPONSE_NULLABLE_FIELDS:
+        nullable = True
     base = base_rust_type(schema_name_value, field, schema)
     if nullable or field not in required:
         return f"Option<{base}>"
     return base
+
+
+def effective_required(schema_name_value: str, schema: dict) -> set[str]:
+    required = set(schema.get("required") or [])
+    return required - RESPONSE_OPTIONAL_FIELDS.get(schema_name_value, set())
 
 
 def endpoint_type_name(method: str, path: str, operation_id: str, seen: set[str]) -> str:
@@ -414,7 +518,7 @@ def generate_wire(spec: dict) -> None:
         "    }",
         "}",
         "",
-        "/// Email address string from Rentman.",
+        "/// Email address string from Rentman. Empty when the address is not set.",
         "#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]",
         "#[serde(transparent)]",
         "pub struct EmailAddress(String);",
@@ -432,7 +536,8 @@ def generate_wire(spec: dict) -> None:
         "    #[cfg_attr(coverage_nightly, coverage(off))]",
         "    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {",
         "        let value = String::deserialize(deserializer)?;",
-        "        if !value.contains('@') {",
+        "        // Live payloads use an empty string when no address is set.",
+        "        if !value.is_empty() && !value.contains('@') {",
         "            return Err(serde::de::Error::custom(\"Rentman email address must contain '@'\"));",
         "        }",
         "        Ok(Self(value))",
@@ -504,7 +609,7 @@ def generate_wire(spec: dict) -> None:
         lines.append(f"/// {description}")
         lines.append("#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]")
         lines.append(f"pub struct {schema_name_value} {{")
-        required = set(schema.get("required") or [])
+        required = effective_required(schema_name_value, schema)
         for field, field_schema in (schema.get("properties") or {}).items():
             rust_name = rust_field(field)
             field_type = rust_field_type(schema_name_value, field, field_schema, required)
@@ -647,10 +752,67 @@ def generate_endpoints(operations: list[dict]) -> None:
     ENDPOINT_OUTPUT.write_text("\n".join(lines))
 
 
+def generate_live_sweep(operations: list[dict]) -> None:
+    sweep = [
+        operation
+        for operation in operations
+        if operation["method"] == "GET"
+        and operation["response_kind"] == "Collection"
+        and not any(
+            parameter["location"] == "Path" for parameter in operation["parameters"]
+        )
+    ]
+    lines = [
+        "//! One live test per documented `GET` collection endpoint without path",
+        "//! parameters: each calls the endpoint with `limit=1` and decodes the",
+        "//! response through the typed models.",
+        "//!",
+        "//! This file is generated by `scripts/generate_endpoint_manifest.py`.",
+        "",
+        "use super::live_client;",
+        "use rentman_client::endpoint::{self, ExecutableEndpoint};",
+        "use serde::{Serialize, de::DeserializeOwned};",
+        "",
+        "async fn check<E>()",
+        "where",
+        "    E: ExecutableEndpoint,",
+        "    E::Request: Serialize,",
+        "    E::Response: DeserializeOwned,",
+        "{",
+        "    if let Err(error) = live_client()",
+        "        .endpoint::<E>()",
+        '        .query_param("limit", 1)',
+        "        .send()",
+        "        .await",
+        "    {",
+        '        panic!("{} failed against the live API: {error:#}", E::SPEC.operation_id);',
+        "    }",
+        "}",
+        "",
+    ]
+    for operation in sweep:
+        test_name = rust_field(operation["operation_id"])
+        lines.extend(
+            [
+                "#[tokio::test]",
+                '#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]',
+                f"async fn {test_name}() {{",
+                f"    check::<endpoint::{operation['endpoint_name']}>().await;",
+                "}",
+                "",
+            ]
+        )
+    LIVE_SWEEP_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    LIVE_SWEEP_OUTPUT.write_text("\n".join(lines))
+
+
 def main() -> None:
     spec = json.loads(OPENAPI.read_text())
     generate_wire(spec)
-    generate_endpoints(collect_operations(spec))
+    operations = collect_operations(spec)
+    generate_endpoints(operations)
+    generate_live_sweep(operations)
+    subprocess.run(["cargo", "fmt", "--all"], cwd=ROOT, check=True)
 
 
 if __name__ == "__main__":
