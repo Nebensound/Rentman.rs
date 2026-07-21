@@ -4,9 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    # Raise the Cargo.toml requirements alongside the lockfile so published
-    # releases document the dependency versions the crate is tested against.
-    versioning-strategy: "increase"
     groups:
       # Collect routine version bumps in one PR; majors stay separate so
       # breaking changes get their own review.
