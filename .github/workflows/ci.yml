@@ -5,10 +5,84 @@ on:
     branches:
       - main
   pull_request:
+  # Dispatched by the version job after it pushes a version commit: pushes made
+  # with GITHUB_TOKEN never trigger workflows, so the required checks for the
+  # new head commit are started explicitly.
+  workflow_dispatch:
 
 jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    outputs:
+      version: ${{ steps.effective.outputs.version }}
+      version_tag: ${{ steps.effective.outputs.version_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # semantic-version walks the full history and tags to derive the version.
+          fetch-depth: 0
+          # On pull requests, check out the branch head instead of the merge
+          # commit so the derived version can be committed back to the branch.
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+      - name: Calculate semantic version
+        id: semantic
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "(MINOR)"
+          version_format: "${major}.${minor}.${patch}"
+      - name: Resolve effective version
+        id: effective
+        env:
+          DERIVED: ${{ steps.semantic.outputs.version }}
+        run: |
+          manifest="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          version="$DERIVED"
+          if [ -n "$manifest" ] && [ "$manifest" != "$DERIVED" ] && \
+             [ "$(printf '%s\n%s\n' "$DERIVED" "$manifest" | sort -V | tail -n 1)" = "$manifest" ]; then
+            echo "Keeping manually raised Cargo.toml version $manifest (derived: $DERIVED)"
+            version="$manifest"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version_tag=v$version" >> "$GITHUB_OUTPUT"
+      # Outside pull requests there is no branch the job could push a fix to,
+      # so a version mismatch must fail loudly instead of being papered over.
+      - name: Verify Cargo.toml carries the effective version
+        if: github.event_name != 'pull_request'
+        env:
+          VERSION: ${{ steps.effective.outputs.version }}
+        run: |
+          manifest="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          if [ "$manifest" != "$VERSION" ]; then
+            echo "::error::Cargo.toml version $manifest does not match the effective version $VERSION. The version job cannot commit a fix outside pull requests; raise the version on a pull request branch instead."
+            exit 1
+          fi
+      - name: Commit derived version to the branch
+        if: github.event_name == 'pull_request'
+        env:
+          VERSION: ${{ steps.effective.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+          if git diff --quiet; then
+            echo "Cargo.toml already carries version $VERSION"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Set crate version to $VERSION"
+          git push
+          gh workflow run ci.yml --ref "$GITHUB_HEAD_REF"
+
   test:
     runs-on: ubuntu-latest
+    needs: version
     env:
       CARGO_TERM_COLOR: always
     steps:
@@ -22,6 +96,13 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+      - name: Apply semantic version to Cargo.toml
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+          grep '^version = ' Cargo.toml
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Run tests
@@ -37,6 +118,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    needs: version
     env:
       CARGO_TERM_COLOR: always
     steps:
@@ -54,9 +136,45 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-llvm-cov
+      - name: Apply semantic version to Cargo.toml
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+          grep '^version = ' Cargo.toml
       - name: "Coverage-Gate (100%: regions, lines, functions)"
         run: |
           cargo +nightly llvm-cov --workspace --locked \
             --fail-under-regions 100 \
             --fail-under-lines 100 \
             --fail-under-functions 100
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [version, test, coverage]
+    permissions:
+      contents: write
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Apply semantic version to Cargo.toml
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --allow-dirty
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.version_tag }}
+        run: gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
