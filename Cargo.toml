@@ -1,6 +1,6 @@
 [package]
 name = "rentman-client"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
