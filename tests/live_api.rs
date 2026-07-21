@@ -6,33 +6,27 @@
 //! ```bash
 //! RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored
 //! ```
+//!
+//! Every documented `GET` collection endpoint has its own generated test in
+//! `live/generated_sweep.rs`, so a drifted endpoint shows up as an individual
+//! test failure.
 
 #[path = "live/generated_sweep.rs"]
 mod generated_sweep;
 
 use rentman_client::{RentmanApiToken, RentmanClient};
+use std::sync::OnceLock;
 
+/// Shared client so all parallel tests go through one rate limiter.
 fn live_client() -> RentmanClient {
-    let token = std::env::var("RENTMAN_API_TOKEN")
-        .expect("RENTMAN_API_TOKEN must be set to run live Rentman API tests");
-    RentmanClient::new(RentmanApiToken::new(token))
-}
-
-#[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
-async fn every_get_collection_endpoint_deserializes_live_data() {
-    let failures = generated_sweep::sweep_collections(&live_client()).await;
-
-    assert!(
-        failures.is_empty(),
-        "live responses no longer match the typed models for {} operations:\n{}",
-        failures.len(),
-        failures
-            .iter()
-            .map(|(operation, error)| format!("- {operation}: {error}"))
-            .collect::<Vec<_>>()
-            .join("\n")
-    );
+    static CLIENT: OnceLock<RentmanClient> = OnceLock::new();
+    CLIENT
+        .get_or_init(|| {
+            let token = std::env::var("RENTMAN_API_TOKEN")
+                .expect("RENTMAN_API_TOKEN must be set to run live Rentman API tests");
+            RentmanClient::new(RentmanApiToken::new(token))
+        })
+        .clone()
 }
 
 #[tokio::test]
