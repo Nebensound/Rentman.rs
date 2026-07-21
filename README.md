@@ -20,31 +20,12 @@ It is an internal contract source, not the public abstraction. The generated
 files `src/model/generated.rs` and `src/endpoint/generated.rs` are exposed as
 Rentman API models and endpoints through `model` and `endpoint`.
 
-Every documented endpoint is executable through the typed endpoint layer:
+Every documented endpoint is executable through the typed endpoint layer.
 
-```rust
-use rentman_client::{RentmanApiToken, RentmanClient, Url, endpoint, model};
-
-# async fn example() -> anyhow::Result<()> {
-let client = RentmanClient::with_base_url(
-    Url::parse("https://api.rentman.net")?,
-    RentmanApiToken::new("token"),
-);
-
-let response: model::CollectionResponse<model::FactuurResponse> = client
-    .endpoint::<endpoint::GetFactuurCollectionEndpoint>()
-    .query(&[("limit", "1500")])?
-    .send()
-    .await?;
-
-let response: model::ItemResponse<model::AccessoryResponse> = client
-    .endpoint::<endpoint::GetAccessoryItemEndpoint>()
-    .id(model::RentmanId(42))
-    .send()
-    .await?;
-# Ok(())
-# }
-```
+User-facing crate documentation lives in `crates-io.md`: it is published as
+the crates.io README and included as the crate-level rustdoc, so its Rust
+example is compile-checked by `cargo test --doc`. This README is the
+contributor documentation and stays out of the published package.
 
 The hand-written domain facade translates API formats into narrower domain
 types such as
