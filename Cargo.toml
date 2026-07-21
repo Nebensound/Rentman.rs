@@ -5,6 +5,7 @@ edition = "2024"
 description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
 repository = "https://github.com/Nebensound/Rentman.rs"
+exclude = ["/.github"]
 
 [dependencies]
 anyhow = "1.0.103"

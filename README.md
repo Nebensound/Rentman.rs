@@ -2,9 +2,8 @@
 
 Typed Rust client for calling the Rentman API.
 
-The hand-written client code follows the Nebensound worker style: small domain
-types, explicit API boundaries, redacted secrets, retry handling, and rate
-limiting.
+The hand-written client code favors small domain types, explicit API
+boundaries, redacted secrets, retry handling, and rate limiting.
 
 The public crate surface is Rentman-focused:
 
@@ -85,7 +84,7 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Coverage gate matching the Nebensound workers:
+Coverage gate:
 
 ```bash
 cargo +nightly llvm-cov --workspace --locked \
