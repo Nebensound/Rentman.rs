@@ -1,0 +1,34 @@
+name: Live API
+
+# Non-blocking verification against the real Rentman API: the checked-in
+# OpenAPI contract can drift from reality, and only live calls catch that.
+# Deliberately not part of the required pull request checks so a Rentman
+# outage never blocks merges.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+jobs:
+  live-api:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+      - name: Run live API tests
+        env:
+          RENTMAN_API_TOKEN: ${{ secrets.RENTMAN_API_TOKEN }}
+        run: |
+          if [ -z "$RENTMAN_API_TOKEN" ]; then
+            echo "::error::The RENTMAN_API_TOKEN repository secret is not configured"
+            exit 1
+          fi
+          cargo test --test live_api -- --ignored
