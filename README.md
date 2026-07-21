@@ -43,6 +43,14 @@ When Rentman adds, removes, or renames endpoints, fields, schemas, enum values,
 request bodies, response types, or error status codes, the contract tests fail
 until the generated contract is updated and reviewed.
 
+Where live API payloads contradict the documented schema, the generator applies
+deliberate, documented overrides for response models (see the `RESPONSE_*`
+tables in `scripts/generate_endpoint_manifest.py`) — for example fields that
+are documented as strings but returned as integers, documented-required fields
+that collection responses omit, and documented non-nullable fields that return
+null. Request models always keep the documented types. The live API tests
+guard these overrides against future drift.
+
 ## Checks
 
 Tests:
