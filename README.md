@@ -108,6 +108,10 @@ On pull request branches the `version` job also commits the derived version to
 `Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
 CI run so the new head commit gets its required status checks.
 
+A manually raised version wins: when a commit sets a higher version in
+`Cargo.toml` than the derived one, that version is kept, is not overwritten,
+and the release publishes it; later versions then derive from its tag.
+
 Every merge into `main` triggers the `release` job after tests and coverage
 pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
 repository secret) and creates the matching `v*` git tag and GitHub release,

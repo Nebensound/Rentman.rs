@@ -17,8 +17,8 @@ jobs:
       contents: write
       actions: write
     outputs:
-      version: ${{ steps.semantic.outputs.version }}
-      version_tag: ${{ steps.semantic.outputs.version_tag }}
+      version: ${{ steps.effective.outputs.version }}
+      version_tag: ${{ steps.effective.outputs.version_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -36,10 +36,24 @@ jobs:
           major_pattern: "(MAJOR)"
           minor_pattern: "(MINOR)"
           version_format: "${major}.${minor}.${patch}"
+      - name: Resolve effective version
+        id: effective
+        env:
+          DERIVED: ${{ steps.semantic.outputs.version }}
+        run: |
+          manifest="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          version="$DERIVED"
+          if [ -n "$manifest" ] && [ "$manifest" != "$DERIVED" ] && \
+             [ "$(printf '%s\n%s\n' "$DERIVED" "$manifest" | sort -V | tail -n 1)" = "$manifest" ]; then
+            echo "Keeping manually raised Cargo.toml version $manifest (derived: $DERIVED)"
+            version="$manifest"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version_tag=v$version" >> "$GITHUB_OUTPUT"
       - name: Commit derived version to the branch
         if: github.event_name == 'pull_request'
         env:
-          VERSION: ${{ steps.semantic.outputs.version }}
+          VERSION: ${{ steps.effective.outputs.version }}
           GH_TOKEN: ${{ github.token }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
