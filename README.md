@@ -2,9 +2,8 @@
 
 Typed Rust client for calling the Rentman API.
 
-The hand-written client code follows the Nebensound worker style: small domain
-types, explicit API boundaries, redacted secrets, retry handling, and rate
-limiting.
+The hand-written client code favors small domain types, explicit API
+boundaries, redacted secrets, retry handling, and rate limiting.
 
 The public crate surface is Rentman-focused:
 
@@ -85,7 +84,7 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Coverage gate matching the Nebensound workers:
+Coverage gate:
 
 ```bash
 cargo +nightly llvm-cov --workspace --locked \
@@ -93,6 +92,33 @@ cargo +nightly llvm-cov --workspace --locked \
   --fail-under-lines 100 \
   --fail-under-functions 100
 ```
+
+## Versioning
+
+The crate version in `Cargo.toml` is a placeholder. Every CI run starts with a
+`version` job that derives the semantic version from git history using
+[PaulHatch/semantic-version](https://github.com/PaulHatch/semantic-version):
+`v*` tags mark releases, and commit messages containing `(MAJOR)` or `(MINOR)`
+bump the respective component. All later jobs (tests, coverage, release) depend
+on this job and rewrite the `Cargo.toml` version before building, so published
+artifacts always carry the derived version.
+
+On pull request branches the `version` job also commits the derived version to
+`Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
+CI run so the new head commit gets its required status checks.
+
+A manually raised version wins: when a commit sets a higher version in
+`Cargo.toml` than the derived one, that version is kept, is not overwritten,
+and the release publishes it; later versions then derive from its tag.
+
+Outside pull requests the version job cannot push a fix, so it fails when the
+`Cargo.toml` version does not match the effective version; the mismatch is
+then resolved on a pull request branch.
+
+Every merge into `main` triggers the `release` job after tests and coverage
+pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
+repository secret) and creates the matching `v*` git tag and GitHub release,
+which in turn seeds the next version calculation.
 
 ## Coding Guidelines
 
