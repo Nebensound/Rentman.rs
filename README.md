@@ -112,6 +112,10 @@ A manually raised version wins: when a commit sets a higher version in
 `Cargo.toml` than the derived one, that version is kept, is not overwritten,
 and the release publishes it; later versions then derive from its tag.
 
+Outside pull requests the version job cannot push a fix, so it fails when the
+`Cargo.toml` version does not match the effective version; the mismatch is
+then resolved on a pull request branch.
+
 Every merge into `main` triggers the `release` job after tests and coverage
 pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
 repository secret) and creates the matching `v*` git tag and GitHub release,

@@ -50,6 +50,18 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "version_tag=v$version" >> "$GITHUB_OUTPUT"
+      # Outside pull requests there is no branch the job could push a fix to,
+      # so a version mismatch must fail loudly instead of being papered over.
+      - name: Verify Cargo.toml carries the effective version
+        if: github.event_name != 'pull_request'
+        env:
+          VERSION: ${{ steps.effective.outputs.version }}
+        run: |
+          manifest="$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)"
+          if [ "$manifest" != "$VERSION" ]; then
+            echo "::error::Cargo.toml version $manifest does not match the effective version $VERSION. The version job cannot commit a fix outside pull requests; raise the version on a pull request branch instead."
+            exit 1
+          fi
       - name: Commit derived version to the branch
         if: github.event_name == 'pull_request'
         env:
