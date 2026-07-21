@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
-          cargo update --workspace
+          cargo update --workspace --offline
           if git diff --quiet; then
             echo "Cargo.toml already carries version $VERSION"
             exit 0
@@ -75,7 +75,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
-          cargo update --workspace
+          cargo update --workspace --offline
           grep '^version = ' Cargo.toml
       - name: Check formatting
         run: cargo fmt --all -- --check
@@ -115,7 +115,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
-          cargo update --workspace
+          cargo update --workspace --offline
           grep '^version = ' Cargo.toml
       - name: "Coverage-Gate (100%: regions, lines, functions)"
         run: |
@@ -142,7 +142,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
-          cargo update --workspace
+          cargo update --workspace --offline
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
