@@ -17,7 +17,7 @@ use reqwest::{
 };
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use serde_json::Value;
+use serde_json::{Value, value::RawValue};
 use std::{
     collections::HashMap, fmt, marker::PhantomData, num::NonZeroU32, sync::Arc, time::Duration,
 };
@@ -182,7 +182,9 @@ pub enum PaymentImportSource {
 ///
 /// Rentman reads and writes amounts as bare numbers without a currency field.
 /// This type makes the API boundary explicit and prevents floating point values
-/// for money-like amounts.
+/// for money-like amounts: JSON numbers are read and written from their exact
+/// decimal text, never through `f64`. Values with more than 28 significant
+/// digits are rejected instead of being rounded.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RentmanAmount(Decimal);
 
@@ -206,14 +208,34 @@ impl From<Decimal> for RentmanAmount {
 
 impl Serialize for RentmanAmount {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        Serialize::serialize(&self.0, serializer)
+        // `Decimal`'s own serde-float support would go through `f64`; the raw
+        // value writes the exact decimal text as a JSON number instead.
+        RawValue::from_string(self.0.to_string())
+            .expect("a decimal always formats as a valid JSON number")
+            .serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for RentmanAmount {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        <Decimal as Deserialize>::deserialize(deserializer).map(Self)
+        let raw = Box::<RawValue>::deserialize(deserializer)?;
+        parse_exact_amount(raw.get()).map_err(serde::de::Error::custom)
     }
+}
+
+fn parse_exact_amount(text: &str) -> Result<RentmanAmount, String> {
+    let is_number = text.starts_with(|c: char| c == '-' || c.is_ascii_digit());
+    if !is_number {
+        return Err(format!("Rentman amount must be a JSON number, got {text}"));
+    }
+    let parsed = if text.contains(['e', 'E']) {
+        Decimal::from_scientific(text)
+    } else {
+        Decimal::from_str_exact(text)
+    };
+    parsed
+        .map(RentmanAmount)
+        .map_err(|error| format!("Rentman amount {text} is not an exact decimal: {error}"))
 }
 
 /// Rentman invoice with the fields needed for payment reconciliation.
@@ -1662,8 +1684,38 @@ mod tests {
     fn reads_amounts_exactly_and_exposes_equipment_ids() {
         let amount: RentmanAmount = serde_json::from_str("19.99").unwrap();
         assert_eq!(amount.as_decimal(), Decimal::new(1999, 2));
+        let scientific: RentmanAmount = serde_json::from_str("1.5e2").unwrap();
+        assert_eq!(scientific.as_decimal(), Decimal::new(150, 0));
+        let negative: RentmanAmount = serde_json::from_str("-0.01").unwrap();
+        assert_eq!(negative.as_decimal(), Decimal::new(-1, 2));
         assert!(serde_json::from_str::<RentmanAmount>("\"expensive\"").is_err());
+        assert!(serde_json::from_str::<RentmanAmount>("true").is_err());
+        assert!(serde_json::from_str::<RentmanAmount>("").is_err());
+        let error = serde_json::from_str::<RentmanAmount>("0.12345678901234567890123456789")
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("is not an exact decimal"), "{error}");
         assert_eq!(EquipmentId::new(2163).to_string(), "2163");
+    }
+
+    #[test]
+    fn keeps_amounts_beyond_f64_precision_exact() {
+        // 19 significant digits: an `f64` round trip would lose the tail.
+        let text = "0.1234567890123456789";
+        let expected: Decimal = text.parse().unwrap();
+
+        let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+        assert_eq!(amount.as_decimal(), expected);
+        assert_eq!(serde_json::to_string(&amount).unwrap(), text);
+
+        let payload = EquipmentPricePayload {
+            list_price: Some(amount),
+            ..EquipmentPricePayload::default()
+        };
+        assert_eq!(
+            serde_json::to_string(&payload).unwrap(),
+            r#"{"list_price":0.1234567890123456789}"#
+        );
     }
 
     #[tokio::test]

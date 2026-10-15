@@ -87,6 +87,7 @@ fn high_level_invoice_fields_match_openapi_schema() {
     assert_type(property(invoice, "id"), "integer");
     assert_type(property(invoice, "number"), "string");
     assert_type(property(invoice, "is_paid"), "boolean");
+    assert_type(property(invoice, "price_invat"), "number");
 }
 
 #[test]
@@ -101,6 +102,31 @@ fn high_level_payment_fields_match_openapi_schema() {
     assert_type(property(payment, "invoice"), "string");
     assert_type(property(payment, "moment"), "string");
     assert_eq!(property(payment, "moment")["format"], "date-time");
+    assert_type(property(payment, "amount"), "number");
+    assert_type(property(payment, "description"), "string");
+}
+
+#[test]
+fn high_level_equipment_fields_match_openapi_schema() {
+    let spec = openapi_spec();
+    let equipment = schema(&spec, "EquipmentResponse");
+
+    assert_required(equipment, "id");
+    assert_type(property(equipment, "id"), "integer");
+    for field in ["price", "list_price", "subrental_costs"] {
+        assert_type(property(equipment, field), "number");
+    }
+    assert_type(property(equipment, "in_archive"), "boolean");
+}
+
+#[test]
+fn equipment_price_payload_matches_openapi_schema() {
+    let spec = openapi_spec();
+    let equipment = schema(&spec, "EquipmentRequest");
+
+    for field in ["price", "list_price", "subrental_costs"] {
+        assert_type(property(equipment, field), "number");
+    }
 }
 
 #[test]
@@ -147,6 +173,18 @@ fn high_level_methods_still_point_to_documented_operations() {
         "/invoices/{id}/payments",
         "createPayment",
         "invoices"
+    )));
+    assert!(operations.iter().any(|operation| operation.matches(
+        "GET",
+        "/equipment",
+        "getEquipmentCollection",
+        "equipment"
+    )));
+    assert!(operations.iter().any(|operation| operation.matches(
+        "PUT",
+        "/equipment/{id}",
+        "updateEquipment",
+        "equipment"
     )));
 }
 
