@@ -108,6 +108,24 @@ impl fmt::Display for PaymentId {
     }
 }
 
+/// Internal Rentman equipment ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
+#[serde(transparent)]
+pub struct EquipmentId(u64);
+
+impl EquipmentId {
+    /// Creates a Rentman equipment ID.
+    pub fn new(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl fmt::Display for EquipmentId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Rentman invoice number.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(transparent)]
@@ -160,9 +178,9 @@ pub enum PaymentImportSource {
     None,
 }
 
-/// Exact decimal amount for Rentman payment payloads.
+/// Exact decimal amount at the Rentman API boundary.
 ///
-/// Rentman expects payment amounts as a bare number without a currency field.
+/// Rentman reads and writes amounts as bare numbers without a currency field.
 /// This type makes the API boundary explicit and prevents floating point values
 /// for money-like amounts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -192,6 +210,12 @@ impl Serialize for RentmanAmount {
     }
 }
 
+impl<'de> Deserialize<'de> for RentmanAmount {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        <Decimal as Deserialize>::deserialize(deserializer).map(Self)
+    }
+}
+
 /// Rentman invoice with the fields needed for payment reconciliation.
 #[derive(Debug, Clone, Deserialize)]
 pub struct RentmanInvoice {
@@ -202,6 +226,10 @@ pub struct RentmanInvoice {
     /// Payment status translated from Rentman's `is_paid` field.
     #[serde(rename = "is_paid")]
     pub payment_status: InvoicePaymentStatus,
+    /// Gross invoice total (`price_invat`). `None` when Rentman omits the
+    /// field.
+    #[serde(default)]
+    pub price_invat: Option<RentmanAmount>,
 }
 
 /// Existing Rentman payment.
@@ -211,6 +239,10 @@ pub struct RentmanPayment {
     pub id: PaymentId,
     /// Payment timestamp.
     pub moment: DateTime<FixedOffset>,
+    /// Payment amount. `None` when Rentman omits the field.
+    pub amount: Option<RentmanAmount>,
+    /// Payment description, e.g. to recognize automatically booked payments.
+    pub description: Option<String>,
 }
 
 /// Payload for creating or updating a Rentman payment.
@@ -241,6 +273,47 @@ struct PaymentListItem {
     id: PaymentId,
     moment: DateTime<FixedOffset>,
     invoice: String,
+    #[serde(default)]
+    amount: Option<RentmanAmount>,
+    #[serde(default)]
+    description: Option<String>,
+}
+
+/// Rentman equipment with the fields needed for price maintenance.
+#[derive(Debug, Clone, Deserialize)]
+pub struct RentmanEquipment {
+    /// Internal Rentman equipment ID.
+    pub id: EquipmentId,
+    /// Rental price per unit. `None` when no value is set in Rentman.
+    pub price: Option<RentmanAmount>,
+    /// List price (new price). `None` when no value is set in Rentman.
+    pub list_price: Option<RentmanAmount>,
+    /// Subrental costs. `None` when no value is set in Rentman.
+    pub subrental_costs: Option<RentmanAmount>,
+}
+
+/// Payload for updating the price fields of an equipment item.
+///
+/// All fields are optional: Rentman leaves fields that are not sent untouched
+/// on `PUT`, so callers only send the fields that actually change.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+pub struct EquipmentPricePayload {
+    /// New rental price. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
+    /// New list price. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub list_price: Option<RentmanAmount>,
+    /// New subrental costs. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subrental_costs: Option<RentmanAmount>,
+}
+
+impl EquipmentPricePayload {
+    /// Returns whether the payload would not change any field.
+    pub fn is_empty(&self) -> bool {
+        self.price.is_none() && self.list_price.is_none() && self.subrental_costs.is_none()
+    }
 }
 
 impl RentmanClient {
@@ -293,7 +366,7 @@ impl RentmanClient {
             let response: model::CollectionResponse<RentmanInvoice> = self
                 .paginated_request(next_url.take(), "invoices", offset)
                 .query(&[
-                    ("fields", "id,number,is_paid".to_string()),
+                    ("fields", "id,number,is_paid,price_invat".to_string()),
                     ("limit", DEFAULT_PAGE_LIMIT.to_string()),
                 ])
                 .send_json()
@@ -328,7 +401,7 @@ impl RentmanClient {
             let response: model::CollectionResponse<PaymentListItem> = self
                 .paginated_request(next_url.take(), "payments", offset)
                 .query(&[
-                    ("fields", "id,moment,invoice".to_string()),
+                    ("fields", "id,moment,invoice,amount,description".to_string()),
                     ("limit", DEFAULT_PAGE_LIMIT.to_string()),
                 ])
                 .send_json()
@@ -346,6 +419,8 @@ impl RentmanClient {
                 result.entry(invoice_id).or_default().push(RentmanPayment {
                     id: item.id,
                     moment: item.moment,
+                    amount: item.amount,
+                    description: item.description,
                 });
             }
 
@@ -385,6 +460,54 @@ impl RentmanClient {
             .send_unit()
             .await
             .with_context(|| format!("Rentman payment create failed for invoice {invoice_id}"))
+    }
+
+    /// Loads all equipment that is not archived, with its price fields.
+    pub async fn all_active_equipment(&self) -> Result<Vec<RentmanEquipment>> {
+        let mut equipment = Vec::new();
+        let mut next_url = None;
+        let mut offset = 0;
+
+        loop {
+            let response: model::CollectionResponse<RentmanEquipment> = self
+                .paginated_request(next_url.take(), "equipment", offset)
+                .query(&[
+                    ("fields", "id,price,list_price,subrental_costs".to_string()),
+                    ("in_archive", "0".to_string()),
+                    ("limit", DEFAULT_PAGE_LIMIT.to_string()),
+                ])
+                .send_json()
+                .await
+                .context("Rentman equipment list lookup failed")?;
+
+            let should_fallback_to_offset = response.next_page_url.is_none()
+                && response.item_count >= response.limit
+                && response.limit > 0;
+            offset += response.limit;
+            next_url = response.next_page_url;
+            equipment.extend(response.data);
+
+            if next_url.is_none() && !should_fallback_to_offset {
+                break;
+            }
+        }
+
+        Ok(equipment)
+    }
+
+    /// Updates the price fields of an equipment item.
+    pub async fn update_equipment_prices(
+        &self,
+        equipment_id: EquipmentId,
+        payload: &EquipmentPricePayload,
+    ) -> Result<()> {
+        self.request(Method::PUT, &format!("equipment/{equipment_id}"))
+            .json(payload)
+            .send_unit()
+            .await
+            .with_context(|| {
+                format!("Rentman equipment update failed for equipment {equipment_id}")
+            })
     }
 
     fn paginated_request(
@@ -470,6 +593,33 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
             &self.path_params,
             &self.query_params,
             self.body,
+            self.client.retry_policy,
+        )
+        .await
+    }
+
+    /// Sends the request exactly once, without retrying.
+    ///
+    /// Use this for non-idempotent writes such as creating items: when only
+    /// the response gets lost, a retry would write twice. On an error the
+    /// outcome is unknown and the caller has to reconcile, e.g. by reading the
+    /// affected collection.
+    // Coverage is disabled because this generic async glue is monomorphized per
+    // endpoint; all branching is delegated to non-generic helpers below.
+    #[cfg_attr(coverage_nightly, coverage(off))]
+    pub async fn send_once(self) -> Result<E::Response>
+    where
+        E: endpoint::ExecutableEndpoint,
+        E::Request: Serialize,
+        E::Response: DeserializeOwned,
+    {
+        send_typed_endpoint(
+            &self.client,
+            E::SPEC,
+            &self.path_params,
+            &self.query_params,
+            self.body,
+            self.client.retry_policy.single_attempt(),
         )
         .await
     }
@@ -499,8 +649,15 @@ impl RentmanRequestBuilder {
     }
 
     async fn send_json<T: for<'de> Deserialize<'de>>(self) -> Result<T> {
-        let client = self.client;
-        send_with_retry(client.limiter, client.retry_policy, self.request).await
+        let retry_policy = self.client.retry_policy;
+        self.send_json_with(retry_policy).await
+    }
+
+    async fn send_json_with<T: for<'de> Deserialize<'de>>(
+        self,
+        retry_policy: RetryPolicy,
+    ) -> Result<T> {
+        send_with_retry(self.client.limiter, retry_policy, self.request).await
     }
 
     async fn send_unit(self) -> Result<()> {
@@ -526,9 +683,10 @@ async fn send_typed_endpoint<T: DeserializeOwned>(
     path_params: &[(String, String)],
     query_params: &[(String, String)],
     body: Option<Value>,
+    retry_policy: RetryPolicy,
 ) -> Result<T> {
     build_endpoint_request(client, spec, path_params, query_params, body)?
-        .send_json()
+        .send_json_with(retry_policy)
         .await
         .with_context(|| format!("Rentman endpoint {} failed", spec.operation_id))
 }
@@ -779,6 +937,14 @@ impl RetryPolicy {
         }
     }
 
+    /// The same policy without retries.
+    fn single_attempt(self) -> Self {
+        Self {
+            max_attempts: 1,
+            ..self
+        }
+    }
+
     fn backoff(self) -> backon::ExponentialBackoff {
         ExponentialBuilder::default()
             .with_min_delay(self.base_delay)
@@ -867,8 +1033,9 @@ async fn sleep_before_retry(
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::{
-        InvoiceId, InvoiceNumber, InvoicePaymentStatus, PaymentId, PaymentImportSource,
-        RentmanAmount, RentmanApiToken, RentmanClient, RentmanPaymentPayload, Url,
+        EquipmentId, EquipmentPricePayload, InvoiceId, InvoiceNumber, InvoicePaymentStatus,
+        PaymentId, PaymentImportSource, RentmanAmount, RentmanApiToken, RentmanClient,
+        RentmanPaymentPayload, Url,
         endpoint::{
             CreatePaymentEndpoint, DeleteAccessoryEndpoint, GetAccessoryCollectionEndpoint,
             GetAccessoryItemEndpoint,
@@ -1003,7 +1170,7 @@ mod tests {
                 r#"{"itemCount":1,"limit":1500,"next_page_url":"{base}/page-2","data":[{"id":1,"number":"RE-1","is_paid":false}]}"#,
             ),
             json_response(
-                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":2,"number":"RE-2","is_paid":true}]}"#,
+                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":2,"number":"RE-2","is_paid":true,"price_invat":119.5}]}"#,
             ),
         ]);
         let client = RentmanClient::with_base_url(
@@ -1017,9 +1184,14 @@ mod tests {
         assert_eq!(invoices[0].id, InvoiceId::new(1));
         assert_eq!(invoices[0].number, InvoiceNumber::new("RE-1"));
         assert_eq!(invoices[0].payment_status, InvoicePaymentStatus::Open);
+        assert_eq!(invoices[0].price_invat, None);
         assert_eq!(invoices[1].id, InvoiceId::new(2));
         assert_eq!(invoices[1].number, InvoiceNumber::new("RE-2"));
         assert_eq!(invoices[1].payment_status, InvoicePaymentStatus::Paid);
+        assert_eq!(
+            invoices[1].price_invat,
+            Some(RentmanAmount::new(Decimal::new(1195, 1)))
+        );
 
         let first_request = server.next_request();
         assert_request(&first_request, "GET", "/invoices");
@@ -1027,7 +1199,7 @@ mod tests {
         assert_eq!(first_request.query_value("offset").as_deref(), Some("0"));
         assert_eq!(
             first_request.query_value("fields").as_deref(),
-            Some("id,number,is_paid")
+            Some("id,number,is_paid,price_invat")
         );
         assert_eq!(first_request.query_value("limit").as_deref(), Some("1500"));
 
@@ -1111,7 +1283,7 @@ mod tests {
     #[tokio::test]
     async fn groups_all_payments_by_invoice_sorted_by_id() {
         let server = spawn_server(vec![json_response(
-            r#"{"itemCount":3,"limit":1500,"next_page_url":null,"data":[{"id":11,"moment":"2026-07-05T00:00:00.000+02:00","invoice":"/invoices/1"},{"id":10,"moment":"2026-07-04T00:00:00.000+02:00","invoice":"/invoices/1"},{"id":12,"moment":"2026-07-06T00:00:00.000+02:00","invoice":"/invoices/2"}]}"#,
+            r#"{"itemCount":3,"limit":1500,"next_page_url":null,"data":[{"id":11,"moment":"2026-07-05T00:00:00.000+02:00","invoice":"/invoices/1","amount":0.01,"description":"Rounding"},{"id":10,"moment":"2026-07-04T00:00:00.000+02:00","invoice":"/invoices/1","amount":null,"description":null},{"id":12,"moment":"2026-07-06T00:00:00.000+02:00","invoice":"/invoices/2"}]}"#,
         )]);
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
@@ -1125,6 +1297,13 @@ mod tests {
         assert_eq!(first_invoice.len(), 2);
         assert_eq!(first_invoice[0].id, PaymentId::new(10));
         assert_eq!(first_invoice[1].id, PaymentId::new(11));
+        assert_eq!(first_invoice[0].amount, None);
+        assert_eq!(first_invoice[0].description, None);
+        assert_eq!(
+            first_invoice[1].amount,
+            Some(RentmanAmount::new(Decimal::new(1, 2)))
+        );
+        assert_eq!(first_invoice[1].description.as_deref(), Some("Rounding"));
         assert_eq!(
             first_invoice[0].moment,
             DateTime::parse_from_rfc3339("2026-07-04T00:00:00.000+02:00").unwrap()
@@ -1137,7 +1316,7 @@ mod tests {
         assert_eq!(request.query_value("offset").as_deref(), Some("0"));
         assert_eq!(
             request.query_value("fields").as_deref(),
-            Some("id,moment,invoice")
+            Some("id,moment,invoice,amount,description")
         );
         assert_eq!(request.query_value("limit").as_deref(), Some("1500"));
     }
@@ -1477,6 +1656,150 @@ mod tests {
                 .contains("Rentman payment create failed for invoice 1")
         );
         assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+    }
+
+    #[test]
+    fn reads_amounts_exactly_and_exposes_equipment_ids() {
+        let amount: RentmanAmount = serde_json::from_str("19.99").unwrap();
+        assert_eq!(amount.as_decimal(), Decimal::new(1999, 2));
+        assert!(serde_json::from_str::<RentmanAmount>("\"expensive\"").is_err());
+        assert_eq!(EquipmentId::new(2163).to_string(), "2163");
+    }
+
+    #[tokio::test]
+    async fn reads_all_active_equipment_from_both_pagination_styles() {
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"itemCount":1,"limit":1500,"next_page_url":"{base}/page-2","data":[{"id":1,"price":12.5,"list_price":null,"subrental_costs":3}]}"#,
+            ),
+            json_response(
+                r#"{"itemCount":1500,"limit":1500,"next_page_url":null,"data":[{"id":2,"price":null,"list_price":499,"subrental_costs":null}]}"#,
+            ),
+            json_response(r#"{"itemCount":0,"limit":1500,"next_page_url":null,"data":[]}"#),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let equipment = client.all_active_equipment().await.unwrap();
+
+        assert_eq!(equipment.len(), 2);
+        assert_eq!(equipment[0].id, EquipmentId::new(1));
+        assert_eq!(
+            equipment[0].price,
+            Some(RentmanAmount::new(Decimal::new(125, 1)))
+        );
+        assert_eq!(equipment[0].list_price, None);
+        assert_eq!(
+            equipment[0].subrental_costs,
+            Some(RentmanAmount::new(Decimal::new(3, 0)))
+        );
+        assert_eq!(
+            equipment[1].list_price,
+            Some(RentmanAmount::new(Decimal::new(499, 0)))
+        );
+
+        let first_request = server.next_request();
+        assert_request(&first_request, "GET", "/equipment");
+        assert_bearer_token(&first_request);
+        assert_eq!(
+            first_request.query_value("fields").as_deref(),
+            Some("id,price,list_price,subrental_costs")
+        );
+        assert_eq!(
+            first_request.query_value("in_archive").as_deref(),
+            Some("0")
+        );
+        assert_request(&server.next_request(), "GET", "/page-2");
+        let third_request = server.next_request();
+        assert_request(&third_request, "GET", "/equipment");
+        assert_eq!(third_request.query_value("offset").as_deref(), Some("3000"));
+    }
+
+    #[tokio::test]
+    async fn adds_context_to_equipment_list_errors() {
+        let server = spawn_server(vec![text_response("HTTP/1.1 400 Bad Request", "broken")]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client.all_active_equipment().await.unwrap_err();
+
+        assert!(
+            error
+                .to_string()
+                .contains("Rentman equipment list lookup failed")
+        );
+    }
+
+    #[tokio::test]
+    async fn updates_only_changed_equipment_prices() {
+        let server = spawn_server(vec![
+            empty_response("HTTP/1.1 200 OK"),
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+        assert!(!payload.is_empty());
+        assert!(EquipmentPricePayload::default().is_empty());
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        let request = server.next_request();
+        assert_request(&request, "PUT", "/equipment/2163");
+        assert_bearer_token(&request);
+        assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+
+        let error = client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("Rentman equipment update failed for equipment 2163")
+        );
+    }
+
+    #[tokio::test]
+    async fn send_once_does_not_retry_transient_errors() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 204 No Content"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client
+            .endpoint::<DeleteAccessoryEndpoint>()
+            .id(RentmanId(10))
+            .send_once()
+            .await
+            .unwrap_err();
+        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_request(&server.next_request(), "DELETE", "/accessories/10");
+
+        // Without a retry the second prepared response is still unused.
+        let response = client
+            .endpoint::<DeleteAccessoryEndpoint>()
+            .id(RentmanId(10))
+            .send_once()
+            .await
+            .unwrap();
+        assert_eq!(response, NoContent);
     }
 
     #[test]
