@@ -47,9 +47,12 @@ let response: model::ItemResponse<model::AccessoryResponse> = client
 - `model` contains typed models for every documented schema: timestamps are
   `DateTime<FixedOffset>`, money-like values are exact decimals, identifiers
   and tokens are dedicated types — never bare strings or floats.
-- High-level helpers such as `all_invoices()` and `all_payments_by_invoice()`
-  handle pagination (`next_page_url` with offset fallback) for common
-  workflows.
+- High-level helpers such as `all_invoices()`, `all_payments_by_invoice()`
+  and `all_active_equipment()` handle pagination (`next_page_url` with offset
+  fallback) for common workflows; amounts are exact `RentmanAmount` decimals
+  (values beyond `Decimal`'s precision are rounded with a `tracing` warning).
+- `send_once()` sends a typed request without retries, for non-idempotent
+  writes where a lost response must not cause a second write.
 
 The API token is a dedicated `RentmanApiToken` type whose `Debug` output is
 redacted, so the secret does not leak into logs.

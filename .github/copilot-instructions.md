@@ -163,9 +163,6 @@ repositories.
 
 - A deliberate deviation from these rules is documented in the README with its
   rationale, risk, and a linked follow-up issue.
-- `create_payment` still retries transient failures, which can book a payment
-  twice when only the response gets lost. Until #15 is fixed, callers reconcile
-  with `all_payments_by_invoice` before repeating a failed create.
 - `RentmanAmount` is a wire-boundary type without a currency, because the
   Rentman API sends bare numbers. It must not be used as a general money type in
   domain logic; consumers convert it into their own currency-carrying type.

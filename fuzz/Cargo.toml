@@ -1,0 +1,26 @@
+[package]
+name = "rentman-client-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+bigdecimal = "0.4.11"
+libfuzzer-sys = "0.4.13"
+rentman-client = { path = ".." }
+rust_decimal = { version = "1.42.1", default-features = false, features = ["serde-float", "std"] }
+serde_json = { version = "1.0.151", features = ["raw_value"] }
+
+# Separate from the library crate: built only by `cargo fuzz` on nightly.
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "amount"
+path = "fuzz_targets/amount.rs"
+test = false
+doc = false
+bench = false
