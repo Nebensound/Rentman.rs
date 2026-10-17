@@ -4,7 +4,9 @@ The README is the canonical technical documentation for humans and AI. Do not
 let rules in this file drift from the README.
 
 This repository is a typed Rust client for the Rentman API. Keep the public API
-small, explicit, and close to the style used in the Nebensound workers.
+small and explicit. The repository is self-contained: every rule a change is
+reviewed against is written down here and in the README, not in other
+repositories.
 
 ## Working Rules
 
@@ -75,21 +77,95 @@ small, explicit, and close to the style used in the Nebensound workers.
 - Contract tests must fail when any documented endpoint, schema, request body,
   response type, enum variant, or error status is missing from the generated
   Rust contract.
-- New production code requires 100% coverage, matching the Nebensound workers.
-  Coverage is measured for regions, lines, and functions with `cargo-llvm-cov`
-  on nightly.
+- All hand-written production code requires 100% coverage, not only new or
+  changed lines. Coverage is measured for regions, lines, and functions with
+  `cargo-llvm-cov` on nightly.
 - The local/CI coverage gate is:
   `cargo +nightly llvm-cov --workspace --locked --fail-under-regions 100 --fail-under-lines 100 --fail-under-functions 100`.
 - Tests must assert behavior, not just execute code for the coverage counter.
   Tests without concrete result assertions are review failures.
 - Test modules are excluded from production coverage with
   `#[cfg_attr(coverage_nightly, coverage(off))]`.
-- Coverage exclusions are only allowed for structurally untestable production
-  paths, for example process entrypoints, signal waiting, or nondeterministic
-  external IO failures. Every exclusion must sit directly on the affected item
-  and include a short reason.
+- Coverage exclusions are only allowed for code the instrumentation cannot
+  measure structurally. "Async IO", "timers", or "hard to test" are not valid
+  reasons: retries, backoff, rate limiting, and transport failures are tested
+  against the local test server, with controllable timing where needed. Every
+  exclusion must sit directly on the affected item and name the concrete
+  reason.
 - Do not add broad file-level exclusions for production code.
+- Cover the happy path, error paths, boundary values, and every enum variant and
+  branch of hand-written code.
+- Parsers and conversions, for example exact amount parsing, additionally get
+  property-based tests (`proptest`) for round trips, equivalent notations, and
+  "never panics" on arbitrary input.
+- Unit tests live in a `#[cfg(test)] mod tests` next to the module they test.
+  Integration and contract tests live in `tests/`. Do not grow one test module
+  for the whole crate.
+- Assert error behavior on typed error variants, not on error message
+  substrings.
 - Do not require real Rentman credentials for default tests.
 - When adding a high-level client method, add both:
   - a behavior test using the local test server, and
   - an OpenAPI contract assertion for the documented operation and schema fields.
+
+## Live API Tests
+
+- Live tests call the real Rentman API, are `#[ignore]`d, and run only in the
+  separate, non-blocking live workflow or locally on demand.
+- Read-only live tests may run against any account. Live tests that write must
+  be opt-in through a dedicated environment variable, must skip with a clear
+  message when it is unset, and must either be a verifiable no-op (write back
+  the value just read) or run against a dedicated test account.
+- Never create data in a production account from a live test.
+- Document every live-test variable in `.env.example` and the README.
+
+## Errors And Configuration
+
+- The library returns its own typed, matchable error type. Public signatures do
+  not expose `anyhow`. Callers must never need to compare error strings.
+- Errors carry structured context (operation, resource ID, HTTP status) as
+  fields, not only as text.
+- For writes, the error states whether the request was certainly not applied or
+  whether the outcome is unknown and the caller has to reconcile.
+- Client configuration is typed and validated when the client is built. A
+  present but invalid value fails with an error naming the setting and value;
+  it never falls back to a default silently. Reading environment variables is
+  an explicit opt-in, not hidden in a constructor.
+- No `.unwrap()` in production code. `expect("reason")` only for an invariant
+  that holds by construction, with the reason in the message.
+
+## Writes And Retries
+
+- Only idempotent requests (`GET`, `PUT`, `DELETE`) are retried automatically.
+- Requests that create data (`POST`) are sent exactly once. Their docs state
+  that the caller has to reconcile after an error, and which read method to use
+  for it.
+- Every high-level write method documents its retry behavior, and a test proves
+  how many requests reach the server on a transient failure.
+
+## Toolchain And CI
+
+- The crate declares its MSRV in `Cargo.toml` (`rust-version`); CI builds and
+  tests with exactly that toolchain. Raising the MSRV is a minor version bump.
+- `unsafe` code is forbidden by a crate-level lint.
+- Every cargo command in CI that resolves dependencies (build, test, clippy,
+  doc, coverage, package) uses `--locked`. `cargo fmt` takes no `--locked`.
+- Required pull request checks: formatting, clippy with `-D warnings`, tests and
+  documentation tests, `cargo doc` with warnings as errors, the coverage gate,
+  the MSRV build, and a package build with a smoke test outside the source tree.
+- Every documented local check command matches what CI runs.
+- Third-party actions are pinned to a commit SHA or an immutable version tag,
+  never to a moving branch. Jobs get explicit, minimal `permissions`.
+- The release publishes exactly the package that was verified, never with
+  `--allow-dirty`.
+
+## Deviations
+
+- A deliberate deviation from these rules is documented in the README with its
+  rationale, risk, and a linked follow-up issue.
+- `create_payment` still retries transient failures, which can book a payment
+  twice when only the response gets lost. Until #15 is fixed, callers reconcile
+  with `all_payments_by_invoice` before repeating a failed create.
+- `RentmanAmount` is a wire-boundary type without a currency, because the
+  Rentman API sends bare numbers. It must not be used as a general money type in
+  domain logic; consumers convert it into their own currency-carrying type.
