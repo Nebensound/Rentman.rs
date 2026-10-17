@@ -24,6 +24,7 @@ use rentman_client::{
     EquipmentId, EquipmentPricePayload, RentmanApiToken, RentmanClient, RentmanEquipment, endpoint,
     model,
 };
+use rust_decimal::Decimal;
 use std::sync::OnceLock;
 
 /// Rows per page for the `in_archive` filter checks: enough to contain both
@@ -125,11 +126,15 @@ async fn equipment_page(client: &RentmanClient, in_archive: &str) -> Vec<model::
 #[ignore = "writes to the real Rentman API; requires RENTMAN_API_TOKEN and RENTMAN_LIVE_WRITE_EQUIPMENT_ID"]
 async fn equipment_price_write_is_a_no_op_live() {
     let client = live_client();
-    // Opt-in: without a designated test item this test writes nothing.
-    let Ok(raw_id) = std::env::var("RENTMAN_LIVE_WRITE_EQUIPMENT_ID") else {
+    // Opt-in: without a designated test item this test writes nothing. The
+    // live workflow always exports the variable, so an unset repository
+    // variable arrives as an empty string; `.env.example` leaves it empty too.
+    let raw_id = std::env::var("RENTMAN_LIVE_WRITE_EQUIPMENT_ID").unwrap_or_default();
+    let raw_id = raw_id.trim();
+    if raw_id.is_empty() {
         eprintln!("RENTMAN_LIVE_WRITE_EQUIPMENT_ID is not set; skipping the live write test");
         return;
-    };
+    }
     let id: u64 = raw_id
         .parse()
         .expect("RENTMAN_LIVE_WRITE_EQUIPMENT_ID must be a numeric equipment ID");
@@ -146,10 +151,14 @@ async fn equipment_price_write_is_a_no_op_live() {
         .expect("live no-op equipment price update succeeds");
     assert_prices_unchanged(&before, &active_equipment(&client, equipment_id).await);
 
-    // The same no-op through a typed endpoint sent exactly once.
+    // The same no-op through a typed endpoint sent exactly once. The generated
+    // request goes through `serde_json::Value` and `Decimal`'s float
+    // serialization, so first check that exactly the current prices would be
+    // sent; otherwise this write would change the test item.
     let request: model::EquipmentRequest =
         serde_json::from_value(serde_json::to_value(&payload).expect("payload serializes"))
             .expect("price payload is a valid EquipmentRequest");
+    assert_typed_request_is_exact(&request, &payload);
     client
         .endpoint::<endpoint::UpdateEquipmentEndpoint>()
         .id(model::RentmanId(id))
@@ -186,6 +195,29 @@ fn no_op_payload(equipment: &RentmanEquipment) -> EquipmentPricePayload {
         equipment.id
     );
     payload
+}
+
+/// Refuses the typed write unless the body that `.body()` would build carries
+/// exactly the payload's prices.
+fn assert_typed_request_is_exact(
+    request: &model::EquipmentRequest,
+    payload: &EquipmentPricePayload,
+) {
+    let body = serde_json::to_value(request).expect("typed request serializes");
+    for (field, expected) in [
+        ("price", payload.price),
+        ("list_price", payload.list_price),
+        ("subrental_costs", payload.subrental_costs),
+    ] {
+        let sent = body.get(field).map(|value| {
+            Decimal::from_str_exact(&value.to_string()).expect("sent price is a decimal")
+        });
+        assert_eq!(
+            sent,
+            expected.map(|amount| amount.as_decimal()),
+            "the typed request would not send {field} exactly; refusing the live write"
+        );
+    }
 }
 
 fn assert_prices_unchanged(before: &RentmanEquipment, after: &RentmanEquipment) {
