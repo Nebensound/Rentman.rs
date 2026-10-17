@@ -147,7 +147,10 @@ with an exponent up to ±1000 gives the same value as an independent
 arbitrary-precision reference (`bigdecimal`), and that every accepted amount
 survives a JSON round trip with value and scale. Every pull request runs it
 for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
-for 30 minutes every week and on manual dispatch. A crashing input is
+for 30 minutes every week and on manual dispatch. CI adds
+`--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
+the triple its own binary was built for, and a musl build has no address
+sanitizer. A crashing input is
 uploaded as a workflow artifact and reproduced with
 `cargo +nightly fuzz run amount <file>`; every finding becomes a regression
 test in the library. `fuzz/` is a separate crate with its own lockfile, kept

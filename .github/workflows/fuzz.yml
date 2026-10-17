@@ -29,15 +29,17 @@ jobs:
           workspaces: fuzz
           cache-on-failure: true
       - name: Install cargo-fuzz
-        # Built from source: the prebuilt binary is a musl build, and cargo
-        # fuzz then targets musl, where the address sanitizer is unavailable.
         run: cargo install cargo-fuzz --version 0.13.2 --locked
       - name: Check the fuzz lockfile
         run: cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /dev/null
       - name: Fuzz amount parsing
         run: |
           mkdir -p fuzz/corpus/amount
-          cargo +nightly fuzz run amount fuzz/corpus/amount fuzz/seeds/amount -- \
+          # cargo fuzz builds for the triple its own binary was built for; a
+          # cached musl build would target musl, where the address sanitizer
+          # is unavailable. The explicit target makes that irrelevant.
+          cargo +nightly fuzz run --target x86_64-unknown-linux-gnu \
+            amount fuzz/corpus/amount fuzz/seeds/amount -- \
             -max_total_time=1800 -dict=fuzz/amount.dict
       - name: Upload crashing inputs
         if: failure()
