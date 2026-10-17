@@ -82,6 +82,7 @@ jobs:
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
           sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" fuzz/Cargo.lock
           if git diff --quiet; then
             echo "Cargo.toml already carries version $VERSION"
             exit 0
@@ -249,14 +250,12 @@ jobs:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
+          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" fuzz/Cargo.lock
           grep '^version = ' Cargo.toml
       - name: Check the fuzz lockfile
-        # `cargo fuzz` has no `--locked`. Only the version of the path
-        # dependency may follow the applied version; `--locked` then proves
-        # that every other entry is unchanged.
-        run: |
-          cargo update --manifest-path fuzz/Cargo.toml --package rentman-client
-          cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /dev/null
+        # `cargo fuzz` has no `--locked`, so prove up front that the fuzz
+        # lockfile is complete and needs no change.
+        run: cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /dev/null
       - name: Fuzz amount parsing
         run: |
           mkdir -p fuzz/corpus/amount

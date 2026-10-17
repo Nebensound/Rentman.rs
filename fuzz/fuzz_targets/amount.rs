@@ -63,7 +63,10 @@ fn json_number(text: &str) -> Option<&str> {
         Some((_, exponent)) => exponent.parse::<i64>().ok()?,
         None => 0,
     };
-    (exponent.abs() <= MAX_REFERENCE_EXPONENT).then_some(number)
+    // A signed range: `abs()` would overflow for `i64::MIN`.
+    (-MAX_REFERENCE_EXPONENT..=MAX_REFERENCE_EXPONENT)
+        .contains(&exponent)
+        .then_some(number)
 }
 
 fn reference_parse(number: &str) -> Option<Decimal> {
