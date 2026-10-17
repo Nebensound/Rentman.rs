@@ -12,7 +12,6 @@ readme = "crates-io.md"
 exclude = ["/.github", "/README.md"]
 
 [dependencies]
-anyhow = "1.0.104"
 backon = "1.6.0"
 chrono = { version = "0.4.45", features = ["serde"] }
 governor = "0.10.4"
@@ -22,6 +21,7 @@ rust_decimal = { version = "1.42.1", default-features = false, features = ["serd
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["raw_value"] }
 serde_urlencoded = "0.7.1"
+thiserror = "2.0.21"
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.44"
 url = { version = "2.5.8", features = ["serde"] }

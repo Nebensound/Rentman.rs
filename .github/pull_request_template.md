@@ -15,7 +15,7 @@
 
 ## Version and migration
 
-<!-- Patch, (MINOR), or (MAJOR) in the title? For breaking changes: how do users migrate? -->
+<!-- Patch or (MINOR) in the title? The crate stays on 0.x, so breaking changes are (MINOR) too; never use (MAJOR). For breaking changes: how do users migrate? -->
 
 ## Security impact
 

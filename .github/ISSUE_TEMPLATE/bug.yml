@@ -27,7 +27,7 @@ body:
     id: crate-version
     attributes:
       label: rentman-client version
-      placeholder: "1.0.0"
+      placeholder: "0.6.0"
     validations:
       required: true
   - type: input

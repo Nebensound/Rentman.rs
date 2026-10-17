@@ -2,17 +2,17 @@
 
 use crate::{
     RentmanApiToken, RentmanEndpointRequest, endpoint,
-    transport::{
-        CompositeRateLimiter, RetryPolicy, configured_duration_ms, send_with_retry,
-        send_with_retry_unit,
-    },
+    transport::{CompositeRateLimiter, RetryPolicy, send_with_retry, send_with_retry_unit},
 };
-use anyhow::Result;
+use crate::{
+    config::{ConfigError, RentmanClientConfig, validate_base_url},
+    error::Result,
+};
 use reqwest::{Client as HttpClient, Method, Url};
 use serde::{Deserialize, Serialize};
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 
-const DEFAULT_RENTMAN_MIN_INTERVAL: Duration = Duration::from_millis(100);
+const DEFAULT_BASE_URL: &str = "https://api.rentman.net";
 
 pub(crate) const DEFAULT_PAGE_LIMIT: usize = 1500;
 
@@ -71,19 +71,39 @@ impl RentmanRequestBuilder {
 }
 
 impl RentmanClient {
-    /// Creates a client using the default Rentman API base URL.
+    /// Creates a client for the Rentman API with the default configuration.
+    ///
+    /// Nothing is read from the environment; use [`Self::with_config`] with
+    /// [`RentmanClientConfig::from_env`] for that.
     pub fn new(token: RentmanApiToken) -> Self {
-        Self::with_base_url(
-            Url::parse("https://api.rentman.net").expect("default URL is valid"),
+        Self::build(
+            Url::parse(DEFAULT_BASE_URL).expect("default URL is valid"),
             token,
+            RentmanClientConfig::default(),
         )
     }
 
-    /// Creates a client using an explicit base URL.
+    /// Creates a client for an explicit base URL with the default
+    /// configuration, e.g. for tests, staging environments, or local proxies.
     ///
-    /// This is mainly intended for tests, staging environments, and local
-    /// proxies.
-    pub fn with_base_url(mut base_url: Url, token: RentmanApiToken) -> Self {
+    /// Fails unless the base URL is an `http` or `https` URL.
+    pub fn with_base_url(base_url: Url, token: RentmanApiToken) -> Result<Self, ConfigError> {
+        Self::with_config(base_url, token, RentmanClientConfig::default())
+    }
+
+    /// Creates a client for an explicit base URL and configuration.
+    ///
+    /// Fails unless the base URL is an `http` or `https` URL.
+    pub fn with_config(
+        base_url: Url,
+        token: RentmanApiToken,
+        config: RentmanClientConfig,
+    ) -> Result<Self, ConfigError> {
+        validate_base_url(&base_url)?;
+        Ok(Self::build(base_url, token, config))
+    }
+
+    fn build(mut base_url: Url, token: RentmanApiToken, config: RentmanClientConfig) -> Self {
         if !base_url.path().ends_with('/') {
             base_url.set_path(&format!("{}/", base_url.path()));
         }
@@ -91,11 +111,8 @@ impl RentmanClient {
             base_url,
             token,
             http: HttpClient::new(),
-            retry_policy: RetryPolicy::from_env("RENTMAN", DEFAULT_RENTMAN_MIN_INTERVAL),
-            limiter: Arc::new(CompositeRateLimiter::new(configured_duration_ms(
-                "RENTMAN_REQUEST_MIN_INTERVAL_MS",
-                DEFAULT_RENTMAN_MIN_INTERVAL,
-            ))),
+            retry_policy: RetryPolicy::from_config(&config),
+            limiter: Arc::new(CompositeRateLimiter::new(config.min_request_interval())),
         }
     }
 
@@ -122,6 +139,7 @@ impl RentmanClient {
         let url = self
             .base_url
             .join(path.trim_start_matches('/'))
+            // The base URL was validated as an http(s) URL, which can be a base.
             .expect("relative API path can be joined onto the base URL");
         self.request_url(method, url)
     }
@@ -142,8 +160,8 @@ impl RentmanClient {
 // library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
-
-    use crate::{RentmanApiToken, RentmanClient, Url};
+    use crate::{RentmanApiToken, RentmanClient, RentmanClientConfig, Url, transport::RetryPolicy};
+    use std::{num::NonZeroUsize, time::Duration};
 
     #[test]
     fn configures_default_and_custom_base_urls() {
@@ -153,7 +171,8 @@ mod tests {
         let custom_client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
         assert_eq!(custom_client.base_url.as_str(), "http://example.test/");
     }
 
@@ -162,7 +181,35 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/api").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
         assert_eq!(client.base_url.as_str(), "http://example.test/api/");
+    }
+
+    #[test]
+    fn rejects_base_urls_that_api_paths_cannot_be_joined_onto() {
+        let error = match RentmanClient::with_base_url(
+            Url::parse("mailto:api@example.test").unwrap(),
+            RentmanApiToken::new("token"),
+        ) {
+            Ok(_) => panic!("mailto URL must be rejected"),
+            Err(error) => error,
+        };
+        assert_eq!(error.setting(), "base_url");
+    }
+
+    #[test]
+    fn applies_the_configuration() {
+        let config = RentmanClientConfig::default()
+            .with_max_attempts(NonZeroUsize::new(2).unwrap())
+            .with_retry_base_delay(Duration::from_millis(7));
+        let client = RentmanClient::with_config(
+            Url::parse("http://example.test/").unwrap(),
+            RentmanApiToken::new("token"),
+            config,
+        )
+        .unwrap();
+
+        assert_eq!(client.retry_policy, RetryPolicy::from_config(&config));
     }
 }
