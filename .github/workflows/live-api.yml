@@ -9,6 +9,9 @@ on:
   schedule:
     - cron: "17 4 * * 1"
 
+permissions:
+  contents: read
+
 jobs:
   live-api:
     runs-on: ubuntu-latest
@@ -16,11 +19,13 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master, 2026-09-12
+        with:
+          toolchain: stable
       - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
       - name: Run live API tests
@@ -31,4 +36,4 @@ jobs:
             echo "::error::The RENTMAN_API_TOKEN repository secret is not configured"
             exit 1
           fi
-          cargo test --test live_api -- --ignored
+          cargo test --locked --test live_api -- --ignored

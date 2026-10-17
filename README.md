@@ -56,21 +56,37 @@ guard these overrides against future drift.
 Tests:
 
 ```bash
-cargo test --workspace
+cargo test --workspace --locked
 ```
 
 Rustdoc including documentation examples:
 
 ```bash
-cargo test --workspace --doc
-env RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --no-deps
+cargo test --workspace --locked --doc
+env RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --locked --no-deps
 ```
 
 Formatting and static checks:
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
+cargo clippy --workspace --locked --all-targets -- -D warnings
+```
+
+Minimum supported Rust version (MSRV): the `rust-version` in `Cargo.toml`
+(currently 1.88). CI builds and tests with exactly that toolchain:
+
+```bash
+cargo +1.88 test --workspace --locked
+```
+
+Package build and smoke test: `cargo package` builds the crate from its
+packaged contents, then a throwaway binary outside the source tree depends on
+the unpacked package and runs in the release profile. It needs a clean working
+tree:
+
+```bash
+scripts/package_smoke_test.sh
 ```
 
 Live API tests call the real Rentman API and are ignored by default. They read
@@ -127,10 +143,11 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 `Cargo.toml` version does not match the effective version; the mismatch is
 then resolved on a pull request branch.
 
-Every merge into `main` triggers the `release` job after tests and coverage
-pass: it publishes the crate to crates.io (using the `CARGO_REGISTRY_TOKEN`
-repository secret) and creates the matching `v*` git tag and GitHub release,
-which in turn seeds the next version calculation.
+Every merge into `main` triggers the `release` job after tests, coverage, the
+MSRV build, and the package smoke test pass. It verifies the package again from
+the merged commit, publishes it to crates.io without `--allow-dirty` (using the
+`CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
+tag and GitHub release, which in turn seeds the next version calculation.
 
 ## Coding Guidelines
 
