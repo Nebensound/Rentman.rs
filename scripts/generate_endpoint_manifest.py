@@ -45,7 +45,15 @@ RUST_KEYWORDS = {
 DATE_TIME_FIELDS = {"created", "modified"}
 # Integer fields documented as resource IDs whose names do not follow the
 # `id`/`*_id` convention.
-ID_FIELDS = {("ProjectsCreateFromTemplateRequest", "template")}
+ID_FIELDS = {
+    ("ProjectsCreateFromTemplateRequest", "template"),
+    # Polymorphic link: `itemtype` names the resource, `item` holds its ID.
+    *(
+        (f"{resource}{direction}", "item")
+        for resource in ("File", "FileFolder", "InvoiceLine", "Task")
+        for direction in ("Request", "Response")
+    ),
+}
 URL_FIELDS = {"url", "website", "image", "logo"}
 
 # Deliberate deviations from the documented OpenAPI types, verified against

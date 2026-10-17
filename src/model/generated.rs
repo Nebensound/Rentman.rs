@@ -14423,7 +14423,7 @@ pub struct FileFolderRequest {
     pub classified: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileFolderRequestItemtype>,
@@ -14449,7 +14449,7 @@ pub struct FileFolderResponse {
     /// Confidential folders are only visible with the user right to download all files.
     pub classified: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderResponse.itemtype`.
     pub itemtype: Option<FileFolderResponseItemtype>,
     /// Rentman API field `FileFolderResponse.is_template`.
@@ -14476,7 +14476,7 @@ pub struct FileRequest {
     pub image: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileRequestItemtype>,
@@ -14537,7 +14537,7 @@ pub struct FileResponse {
     /// Rentman API field `FileResponse.image`.
     pub image: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileResponse.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileResponseItemtype>,
@@ -14722,7 +14722,7 @@ pub struct InvitationsResponse {
 pub struct InvoiceLineRequest {
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `InvoiceLineRequest.base`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base: Option<Decimal>,
@@ -14745,7 +14745,7 @@ pub struct InvoiceLineResponse {
     /// GENERATED FIELD.
     pub displayname: String,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `InvoiceLineResponse.base`.
     pub base: Decimal,
     /// Rentman API field `InvoiceLineResponse.ledger`.
@@ -17639,7 +17639,7 @@ pub struct TaskRequest {
     pub status: Option<ResourceReference>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `TaskRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<TaskRequestItemtype>,
@@ -17717,7 +17717,7 @@ pub struct TaskResponse {
     /// Rentman API field `TaskResponse.status`.
     pub status: ResourceReference,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `TaskResponse.itemtype`.
     pub itemtype: Option<TaskResponseItemtype>,
     /// Rentman API field `TaskResponse.synchronization_id`.
