@@ -6,7 +6,7 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: Include the error, ideally its kind, operation, and status (`error.kind()`, `error.operation()`, `error.status()`).
+      description: Include the full error chain (print it with `{error:#}` or `{error:?}`) and, if known, the failing operation and HTTP status. On versions with the typed error API, `error.kind()`, `error.operation()`, and `error.status()` give these directly.
     validations:
       required: true
   - type: textarea
