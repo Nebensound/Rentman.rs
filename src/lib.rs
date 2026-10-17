@@ -243,11 +243,13 @@ fn parse_exact_amount(text: &str) -> Result<RentmanAmount, String> {
 /// Parses a JSON number exactly, or returns `None` when `Decimal` cannot hold
 /// its exact value.
 ///
-/// The number is first normalized as text into significant digits and a
-/// power of ten, and `Decimal`'s bounds (96-bit mantissa, 28 decimal places)
-/// are checked only on that normalized form. So `0.00000000000000000000000000001e1`
-/// and `100000000000000000000000000000e-1` are accepted because their values
-/// fit, while `1e-29` is rejected. Parsing never rounds: unlike
+/// A number that fits `Decimal` as written keeps its scale, so `12.50` stays
+/// `12.50` and `0.00` keeps two decimal places. Otherwise the number is
+/// normalized as text into significant digits and a power of ten, and
+/// `Decimal`'s bounds (96-bit mantissa, 28 decimal places) are checked only on
+/// that normalized form. So `0.00000000000000000000000000001e1` and
+/// `100000000000000000000000000000e-1` are accepted because their values fit,
+/// while `1e-29` is rejected. Parsing never rounds: unlike
 /// `Decimal::from_scientific`, an over-precise value is rejected.
 fn parse_exact_decimal(text: &str) -> Option<Decimal> {
     let (negative, unsigned) = match text.strip_prefix('-') {
@@ -264,8 +266,15 @@ fn parse_exact_decimal(text: &str) -> Option<Decimal> {
         return None;
     }
 
-    // value = significant × 10^power, with leading and trailing zeros removed.
     let digits = format!("{integer}{fraction}");
+    // `i128` holds every scale and power that `i64` exponents and string
+    // lengths produce.
+    let written_scale = fraction.len() as i128 - i128::from(exponent);
+    if let Some(decimal) = decimal_as_written(&digits, written_scale, negative) {
+        return Some(decimal);
+    }
+
+    // value = significant × 10^power, with leading and trailing zeros removed.
     let digits = digits.trim_start_matches('0');
     let significant = digits.trim_end_matches('0');
     if significant.is_empty() {
@@ -273,8 +282,7 @@ fn parse_exact_decimal(text: &str) -> Option<Decimal> {
         return Some(Decimal::ZERO);
     }
     let trailing_zeros = digits.len() - significant.len();
-    // `i128` holds every power that `i64` exponents and string lengths produce.
-    let power = i128::from(exponent) - fraction.len() as i128 + trailing_zeros as i128;
+    let power = trailing_zeros as i128 - written_scale;
 
     let magnitude: i128 = significant.parse().ok()?;
     let mantissa = if negative { -magnitude } else { magnitude };
@@ -284,6 +292,18 @@ fn parse_exact_decimal(text: &str) -> Option<Decimal> {
     } else {
         Decimal::try_from_i128_with_scale(mantissa, u32::try_from(-power).ok()?).ok()
     }
+}
+
+/// The decimal with exactly the written digits and scale, if `Decimal` can
+/// hold it without normalizing.
+fn decimal_as_written(digits: &str, scale: i128, negative: bool) -> Option<Decimal> {
+    let scale = u32::try_from(scale).ok().filter(|scale| *scale <= 28)?;
+    let magnitude: i128 = match digits.trim_start_matches('0') {
+        "" => 0,
+        significant => significant.parse().ok()?,
+    };
+    let mantissa = if negative { -magnitude } else { magnitude };
+    Decimal::try_from_i128_with_scale(mantissa, scale).ok()
 }
 
 /// Rentman invoice with the fields needed for payment reconciliation.
@@ -1130,7 +1150,7 @@ mod tests {
     use super::{
         EquipmentId, EquipmentPricePayload, InvoiceId, InvoiceNumber, InvoicePaymentStatus,
         PaymentId, PaymentImportSource, RentmanAmount, RentmanApiToken, RentmanClient,
-        RentmanPaymentPayload, Url,
+        RentmanPaymentPayload, RetryPolicy, Url,
         endpoint::{
             CreatePaymentEndpoint, DeleteAccessoryEndpoint, GetAccessoryCollectionEndpoint,
             GetAccessoryItemEndpoint,
@@ -1827,6 +1847,27 @@ mod tests {
     }
 
     #[test]
+    fn keeps_the_written_scale_when_it_fits() {
+        for (text, mantissa, scale) in [
+            ("12.50", 1250, 2),
+            ("0.00", 0, 2),
+            ("-0.050", -50, 3),
+            ("1.5e2", 150, 0),
+            ("125e-1", 125, 1),
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            let decimal = amount.as_decimal();
+            assert_eq!(decimal, Decimal::new(mantissa, scale), "{text}");
+            assert_eq!(decimal.scale(), scale, "{text}");
+            assert_eq!(serde_json::to_string(&amount).unwrap(), decimal.to_string());
+        }
+        // Written with 29 decimal places, so it is normalized to 28.
+        let normalized: RentmanAmount =
+            serde_json::from_str("0.00000000000000000000000000010").unwrap();
+        assert_eq!(normalized.as_decimal().scale(), 28);
+    }
+
+    #[test]
     fn normalizes_before_checking_decimal_bounds() {
         // Coefficient beyond 96 bits, final value 1e28 within them.
         let amount: RentmanAmount =
@@ -1869,6 +1910,7 @@ mod tests {
             "99e37",
             // More significant digits than `i128` holds.
             "0.123456789012345678901234567890123456789",
+            "1234567890123456789012345678901234567890.5",
         ] {
             let error = serde_json::from_str::<RentmanAmount>(text)
                 .unwrap_err()
@@ -1889,7 +1931,9 @@ mod tests {
         fn amount_round_trips_through_json(value in any_decimal()) {
             let json = serde_json::to_string(&RentmanAmount::new(value)).unwrap();
             let parsed: RentmanAmount = serde_json::from_str(&json).unwrap();
+            // `Decimal` equality ignores the scale, so compare it separately.
             prop_assert_eq!(parsed.as_decimal(), value, "{}", json);
+            prop_assert_eq!(parsed.as_decimal().scale(), value.scale(), "{}", json);
         }
 
         #[test]
@@ -2066,6 +2110,40 @@ mod tests {
                 .to_string()
                 .contains("Rentman equipment list lookup failed")
         );
+    }
+
+    #[tokio::test]
+    async fn retries_equipment_price_update_after_transient_error() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        let mut client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+        // Fixed policy, independent of the environment.
+        client.retry_policy = RetryPolicy {
+            max_attempts: 2,
+            base_delay: Duration::from_millis(1),
+        };
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        // The idempotent PUT reached the server twice, both times unchanged.
+        for _ in 0..2 {
+            let request = server.next_request();
+            assert_request(&request, "PUT", "/equipment/2163");
+            assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+            assert_eq!(String::from_utf8_lossy(&request.body), r#"{"price":12.50}"#);
+        }
     }
 
     #[tokio::test]
