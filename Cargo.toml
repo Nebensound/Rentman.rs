@@ -2,6 +2,9 @@
 name = "rentman-client"
 version = "1.0.0"
 edition = "2024"
+# Minimum supported Rust version. CI builds and tests with exactly this
+# toolchain; raising it is a minor version bump.
+rust-version = "1.88"
 description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
 repository = "https://github.com/Nebensound/Rentman.rs"
@@ -25,6 +28,7 @@ url = { version = "2.5.8", features = ["serde"] }
 
 [lints.rust]
 missing_docs = "deny"
+unsafe_code = "forbid"
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(coverage_nightly)"] }
 
 [dev-dependencies]
