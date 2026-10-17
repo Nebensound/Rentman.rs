@@ -251,6 +251,18 @@ async fn get_project_collection() {
 
 #[tokio::test]
 #[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+async fn get_project_status_collection() {
+    check::<endpoint::GetProjectStatusCollectionEndpoint>().await;
+}
+
+#[tokio::test]
+#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+async fn get_project_template_collection() {
+    check::<endpoint::GetProjectTemplateCollectionEndpoint>().await;
+}
+
+#[tokio::test]
+#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
 async fn get_project_type_collection() {
     check::<endpoint::GetProjectTypeCollectionEndpoint>().await;
 }
@@ -403,4 +415,10 @@ async fn get_time_registration_activity_collection() {
 #[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
 async fn get_vehicle_collection() {
     check::<endpoint::GetVehicleCollectionEndpoint>().await;
+}
+
+#[tokio::test]
+#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+async fn get_warehouse_status_collection() {
+    check::<endpoint::GetWarehouseStatusCollectionEndpoint>().await;
 }

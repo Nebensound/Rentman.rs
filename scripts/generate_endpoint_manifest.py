@@ -109,6 +109,7 @@ _PROJECT_PRICE_FIELDS = (
     "project_transport_price",
     "project_other_price",
     "project_insurance_price",
+    "project_services_price",
 )
 _PROJECT_COST_FIELDS = ("estimated_cost", "planned_cost", "actual_cost")
 RESPONSE_OPTIONAL_FIELDS = {
