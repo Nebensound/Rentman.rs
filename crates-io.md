@@ -18,7 +18,7 @@ Create a client with your Rentman API token and call any documented endpoint:
 ```rust
 use rentman_client::{RentmanApiToken, RentmanClient, endpoint, model};
 
-# async fn example() -> anyhow::Result<()> {
+# async fn example() -> rentman_client::Result<()> {
 let client = RentmanClient::new(RentmanApiToken::new("token"));
 
 let response: model::CollectionResponse<model::FactuurResponse> = client
@@ -52,19 +52,44 @@ let response: model::ItemResponse<model::AccessoryResponse> = client
   fallback) for common workflows; amounts are exact `RentmanAmount` decimals.
 - `send_once()` sends a typed request without retries, for non-idempotent
   writes where a lost response must not cause a second write.
+  `create_payment()` always sends exactly once.
+- Errors are a typed `rentman_client::Error`: match on `kind()` (HTTP status,
+  transport, decode, unexpected response, invalid request), read the failed
+  `operation()` and `resource()`, and use `outcome()` to learn whether a
+  failed write may have been applied (`NotApplied`, `Applied`, `Unknown`).
 
 The API token is a dedicated `RentmanApiToken` type whose `Debug` output is
 redacted, so the secret does not leak into logs.
 
 ## Configuration
 
-The client reads optional environment variables:
+`RentmanClient::new` uses the defaults below and reads nothing from the
+environment. Pass a `RentmanClientConfig` to `RentmanClient::with_config` to
+change them, built in code or read explicitly with
+`RentmanClientConfig::from_env()`:
 
-| Variable | Default | Effect |
-| --- | --- | --- |
-| `RENTMAN_API_MAX_ATTEMPTS` | `4` | Attempts per request before giving up. |
-| `RENTMAN_RETRY_BASE_DELAY_MS` | `100` | Base delay for the retry backoff. |
-| `RENTMAN_REQUEST_MIN_INTERVAL_MS` | `100` | Minimum interval between requests. |
+```rust
+use rentman_client::{RentmanApiToken, RentmanClient, RentmanClientConfig, Url};
+
+# fn example() -> Result<(), Box<dyn std::error::Error>> {
+let client = RentmanClient::with_config(
+    Url::parse("https://api.rentman.net")?,
+    RentmanApiToken::new("token"),
+    RentmanClientConfig::from_env()?,
+)?;
+# Ok(())
+# }
+```
+
+| Variable | Default | Valid values | Effect |
+| --- | --- | --- | --- |
+| `RENTMAN_API_MAX_ATTEMPTS` | `4` | integer ≥ 1 | Attempts per request, including the first. |
+| `RENTMAN_RETRY_BASE_DELAY_MS` | `100` | integer ≥ 0 | First retry delay; backoff doubles up to 16×. |
+| `RENTMAN_REQUEST_MIN_INTERVAL_MS` | `100` | integer ≥ 1 | Minimum interval between requests. |
+
+Unset or empty variables keep the default. A variable set to an invalid value
+makes `from_env()` fail with a `ConfigError` naming the variable and value; it
+never falls back silently.
 
 ## License
 

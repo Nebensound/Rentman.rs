@@ -7,7 +7,6 @@ use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     sync::mpsc::{self, Receiver},
-    sync::{Arc, Mutex},
     thread,
     time::Duration,
 };
@@ -194,18 +193,37 @@ pub(crate) fn refresh_content_length(response: String) -> String {
     format!("{headers}\r\n\r\n{body}")
 }
 
-/// Tracing subscriber that records warnings and errors as `field=value` text, so tests
-/// can assert what the library logs.
-#[derive(Clone, Default)]
-pub(crate) struct RecordingSubscriber {
-    events: Arc<Mutex<Vec<String>>>,
+thread_local! {
+    static WARNINGS: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
-impl RecordingSubscriber {
+/// Starts recording the warnings and errors logged on the current thread and
+/// returns a handle to read them.
+///
+/// The recording subscriber is installed once as the global default: scoped
+/// subscribers race with tracing's global callsite cache when tests run in
+/// parallel. Events are kept per thread, and each `#[tokio::test]` runs on its
+/// own thread, so tests do not see each other's logs.
+pub(crate) fn capture_warnings() -> WarningCapture {
+    static INSTALL: std::sync::Once = std::sync::Once::new();
+    INSTALL.call_once(|| {
+        tracing::subscriber::set_global_default(RecordingSubscriber)
+            .expect("no other global tracing subscriber is installed in tests");
+    });
+    WARNINGS.with(|events| events.borrow_mut().clear());
+    WarningCapture
+}
+
+/// Handle to the warnings recorded on the current thread.
+pub(crate) struct WarningCapture;
+
+impl WarningCapture {
     pub(crate) fn events(&self) -> Vec<String> {
-        self.events.lock().unwrap().clone()
+        WARNINGS.with(|events| events.borrow().clone())
     }
 }
+
+struct RecordingSubscriber;
 
 impl tracing::Subscriber for RecordingSubscriber {
     fn enabled(&self, metadata: &tracing::Metadata<'_>) -> bool {
@@ -224,10 +242,8 @@ impl tracing::Subscriber for RecordingSubscriber {
     fn event(&self, event: &tracing::Event<'_>) {
         let mut text = FieldText::default();
         event.record(&mut text);
-        self.events
-            .lock()
-            .unwrap()
-            .push(text.0.trim_end().to_string());
+        let text = text.0.trim_end().to_string();
+        WARNINGS.with(|events| events.borrow_mut().push(text));
     }
 
     fn enter(&self, _: &tracing::span::Id) {}

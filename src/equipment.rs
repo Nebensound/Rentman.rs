@@ -3,10 +3,10 @@
 use crate::{
     RentmanAmount,
     client::{DEFAULT_PAGE_LIMIT, RentmanClient},
+    error::{Resource, Result},
     ids::EquipmentId,
     model,
 };
-use anyhow::{Context, Result};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 
@@ -69,7 +69,7 @@ impl RentmanClient {
                 ])
                 .send_json()
                 .await
-                .context("Rentman equipment list lookup failed")?;
+                .map_err(|error| error.in_operation("getEquipmentCollection"))?;
 
             let should_fallback_to_offset = response.next_page_url.is_none()
                 && response.item_count >= response.limit
@@ -98,8 +98,10 @@ impl RentmanClient {
             .json(payload)
             .send_unit()
             .await
-            .with_context(|| {
-                format!("Rentman equipment update failed for equipment {equipment_id}")
+            .map_err(|error| {
+                error
+                    .in_operation("updateEquipment")
+                    .about(Resource::Equipment(equipment_id))
             })
     }
 }
@@ -114,6 +116,8 @@ mod tests {
     use crate::{
         EquipmentId, EquipmentPricePayload, RentmanAmount, RentmanApiToken, RentmanClient, Url,
     };
+    use crate::{RequestOutcome, Resource};
+    use reqwest::StatusCode;
 
     use rust_decimal::Decimal;
 
@@ -131,7 +135,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let equipment = client.all_active_equipment().await.unwrap();
 
@@ -176,7 +181,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let equipment = client.all_active_equipment().await.unwrap();
 
@@ -198,15 +204,14 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_active_equipment().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman equipment list lookup failed")
-        );
+        assert_eq!(error.operation(), Some("getEquipmentCollection"));
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
     }
 
     #[tokio::test]
@@ -218,7 +223,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
         let payload = EquipmentPricePayload {
             price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
             ..EquipmentPricePayload::default()
@@ -240,10 +246,15 @@ mod tests {
             .update_equipment_prices(EquipmentId::new(2163), &payload)
             .await
             .unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman equipment update failed for equipment 2163")
+        assert_eq!(error.operation(), Some("updateEquipment"));
+        assert_eq!(
+            error.resource(),
+            Some(Resource::Equipment(EquipmentId::new(2163)))
+        );
+        assert_eq!(
+            error.to_string(),
+            "Rentman updateEquipment failed for equipment 2163: \
+             Rentman API returned 400 Bad Request: broken"
         );
     }
 }

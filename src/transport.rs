@@ -1,6 +1,9 @@
 //! Sending requests with rate limiting and retries.
 
-use anyhow::{Context, Result, anyhow};
+use crate::{
+    RentmanClientConfig,
+    error::{Error, ErrorKind, InvalidRequest, RequestOutcome, Result},
+};
 use backon::{BackoffBuilder, ExponentialBuilder};
 use chrono::{DateTime, Utc};
 use governor::{Quota, RateLimiter};
@@ -24,7 +27,10 @@ pub(crate) async fn send_with_retry<T: for<'de> Deserialize<'de>>(
     request: reqwest::RequestBuilder,
 ) -> Result<T> {
     let response = send_with_retries(&limiter, retry_policy, request).await?;
-    let body = response.bytes().await?;
+    let body = response
+        .bytes()
+        .await
+        .map_err(|error| Error::new(ErrorKind::Transport(error)))?;
     decode_json_response(&body)
 }
 
@@ -48,9 +54,10 @@ async fn send_with_retries(
 ) -> Result<reqwest::Response> {
     // Invalid requests (e.g. a malformed header) fail here, before any attempt.
     let (http, request) = request.build_split();
-    let request = request?;
+    let request = request.map_err(|error| Error::invalid_request(InvalidRequest::Http(error)))?;
     let mut backoff = retry_policy.backoff();
     let mut attempts = 0;
+    let mut uncertain = false;
 
     loop {
         limiter.acquire().await;
@@ -65,21 +72,26 @@ async fn send_with_retries(
                 let status = response.status();
                 let retry_after = retry_after_delay(response.headers());
                 let body = response.text().await.unwrap_or_default();
-                let error = anyhow!("Rentman API returned {status}: {body}");
+                let error = Error::new(ErrorKind::Status { status, body });
                 if !is_retryable_status(status) {
-                    return Err(error);
+                    return Err(error.after_uncertain_attempt(uncertain));
                 }
                 (error, retry_after)
             }
             Err(error) if is_retryable_transport_error(&error) => {
-                (anyhow!("Rentman API request failed: {error}"), None)
+                (Error::new(ErrorKind::Transport(error)), None)
             }
-            Err(error) => return Err(error.into()),
+            Err(error) => {
+                return Err(
+                    Error::new(ErrorKind::Transport(error)).after_uncertain_attempt(uncertain)
+                );
+            }
         };
 
         let Some(delay) = retry_delay(retry_policy, attempts, retry_after, &mut backoff) else {
-            return Err(error);
+            return Err(error.after_uncertain_attempt(uncertain));
         };
+        uncertain |= error.outcome() != RequestOutcome::NotApplied;
         tracing::warn!(
             attempt = attempts,
             max_attempts = retry_policy.max_attempts,
@@ -116,7 +128,7 @@ fn retry_delay(
 
 fn decode_json_response<T: for<'de> Deserialize<'de>>(body: &[u8]) -> Result<T> {
     serde_json::from_slice(json_decode_body(body))
-        .context("Rentman API response body is invalid JSON")
+        .map_err(|error| Error::new(ErrorKind::Decode(error)))
 }
 
 fn json_decode_body(body: &[u8]) -> &[u8] {
@@ -145,20 +157,17 @@ impl CompositeRateLimiter {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct RetryPolicy {
     max_attempts: usize,
     base_delay: Duration,
 }
 
 impl RetryPolicy {
-    pub(crate) fn from_env(prefix: &str, default_base_delay: Duration) -> Self {
-        let max_attempts = configured_usize(&format!("{prefix}_API_MAX_ATTEMPTS"), 4).max(1);
-        let base_delay =
-            configured_duration_ms(&format!("{prefix}_RETRY_BASE_DELAY_MS"), default_base_delay);
+    pub(crate) fn from_config(config: &RentmanClientConfig) -> Self {
         Self {
-            max_attempts,
-            base_delay,
+            max_attempts: config.max_attempts().get(),
+            base_delay: config.retry_base_delay(),
         }
     }
 
@@ -181,29 +190,8 @@ impl RetryPolicy {
 
 fn quota_with_burst(replenish_1_per: Duration, burst: u32) -> Quota {
     Quota::with_period(replenish_1_per)
-        .expect("API minimum interval must be greater than zero")
+        .expect("the configuration rejects a zero request interval")
         .allow_burst(NonZeroU32::new(burst).expect("burst must be greater than zero"))
-}
-
-fn configured_usize(name: &str, default: usize) -> usize {
-    parse_usize(std::env::var(name).ok(), default)
-}
-
-fn parse_usize(value: Option<String>, default: usize) -> usize {
-    value
-        .and_then(|value| value.parse().ok())
-        .unwrap_or(default)
-}
-
-pub(crate) fn configured_duration_ms(name: &str, default: Duration) -> Duration {
-    parse_duration_ms(std::env::var(name).ok(), default)
-}
-
-fn parse_duration_ms(value: Option<String>, default: Duration) -> Duration {
-    value
-        .and_then(|value| value.parse::<u64>().ok())
-        .map(Duration::from_millis)
-        .unwrap_or(default)
 }
 
 fn is_retryable_status(status: StatusCode) -> bool {
@@ -241,21 +229,6 @@ mod tests {
     };
 
     use std::time::Duration;
-
-    #[test]
-    fn parses_configured_values_with_fallback() {
-        assert_eq!(parse_usize(Some("7".into()), 4), 7);
-        assert_eq!(parse_usize(Some("not-a-number".into()), 4), 4);
-        assert_eq!(parse_usize(None, 4), 4);
-
-        let default = Duration::from_millis(50);
-        assert_eq!(
-            parse_duration_ms(Some("250".into()), default),
-            Duration::from_millis(250)
-        );
-        assert_eq!(parse_duration_ms(Some("nope".into()), default), default);
-        assert_eq!(parse_duration_ms(None, default), default);
-    }
 
     #[test]
     fn classifies_transient_http_statuses_for_retry() {
@@ -319,15 +292,14 @@ mod tests {
             json_response(r#"{"ok":true}"#),
         ]);
 
-        let subscriber = RecordingSubscriber::default();
-        let _logging = tracing::subscriber::set_default(subscriber.clone());
+        let warnings = capture_warnings();
 
         let response = send_with_retries(&fast_limiter(), fast_policy(3), get(&server))
             .await
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-        let events = subscriber.events();
+        let events = warnings.events();
         assert_eq!(events.len(), 2, "{events:?}");
         assert!(events[0].contains("attempt=1"), "{events:?}");
         assert!(events[0].contains("max_attempts=3"), "{events:?}");
@@ -355,6 +327,10 @@ mod tests {
             .await
             .unwrap_err();
 
+        assert_eq!(error.status(), Some(StatusCode::TOO_MANY_REQUESTS));
+        // A 429 alone means "not applied", but the earlier 503 attempt may
+        // have been applied.
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
         assert_eq!(
             error.to_string(),
             "Rentman API returned 429 Too Many Requests: second"
@@ -375,10 +351,11 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert_eq!(
-            error.to_string(),
-            "Rentman API returned 400 Bad Request: broken"
-        );
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::Status { status: StatusCode::BAD_REQUEST, body } if body == "broken"
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
         server.next_request();
         server.assert_no_more_requests();
     }
@@ -413,10 +390,11 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            error.to_string().starts_with("Rentman API request failed:"),
-            "{error:#}"
-        );
+        let ErrorKind::Transport(transport) = error.kind() else {
+            panic!("expected a transport error, got {error:?}");
+        };
+        assert!(transport.is_connect(), "{transport:#}");
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
     }
 
     #[tokio::test]
@@ -429,7 +407,10 @@ mod tests {
             .await
             .unwrap_err();
 
-        let error = error.downcast::<reqwest::Error>().unwrap();
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
+        let ErrorKind::InvalidRequest(InvalidRequest::Http(error)) = error.kind() else {
+            panic!("expected an invalid HTTP request, got {error:?}");
+        };
         assert!(error.is_builder(), "{error:#}");
     }
 
@@ -511,7 +492,9 @@ mod tests {
             .await
             .unwrap_err();
 
-        let error = error.downcast::<reqwest::Error>().unwrap();
+        let ErrorKind::Transport(error) = error.kind() else {
+            panic!("expected a transport error, got {error:?}");
+        };
         assert!(error.is_redirect(), "{error:#}");
         server.next_request();
         server.assert_no_more_requests();
@@ -549,15 +532,22 @@ mod tests {
             send_with_retry::<serde_json::Value>(limiter.clone(), fast_policy(1), get(&server))
                 .await
                 .unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "Rentman API response body is invalid JSON"
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)), "{error:?}");
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert!(
+            error
+                .to_string()
+                .starts_with("Rentman API response body is invalid JSON: "),
+            "{error}"
         );
 
         let error = send_with_retry::<serde_json::Value>(limiter, fast_policy(1), get(&server))
             .await
             .unwrap_err();
-        let error = error.downcast::<reqwest::Error>().unwrap();
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
+        let ErrorKind::Transport(error) = error.kind() else {
+            panic!("expected a transport error, got {error:?}");
+        };
         assert!(error.is_body() || error.is_decode(), "{error:#}");
 
         let error = send_with_retry::<serde_json::Value>(
@@ -567,9 +557,6 @@ mod tests {
         )
         .await
         .unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "Rentman API returned 404 Not Found: missing"
-        );
+        assert_eq!(error.status(), Some(StatusCode::NOT_FOUND));
     }
 }
