@@ -174,6 +174,12 @@ the upper bound of strict typing:
 - API fields with a finite set of values are modeled as enums.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
+  `RentmanAmount` reads and writes JSON numbers from their exact text. An
+  amount with more precision than `Decimal` holds (more than 28 decimal places
+  or a mantissa beyond 96 bits) is rounded half away from zero to the nearest
+  value that fits, with a `tracing` warning naming the original and the
+  rounded value, so one such value cannot make a whole listing unreadable. An
+  integer part that does not fit is rejected.
 - Identifiers, domain keys, URLs, and API tokens are dedicated types.
 - `bool` is only acceptable for real on/off switches; domain states are modeled
   as enums.
@@ -214,6 +220,9 @@ instrumentation cannot measure the code structurally; "async IO", "timers", or
 "hard to test" are not valid reasons. Retries, backoff, rate limiting, and
 transport failures are tested against the local test server. Parsers and
 conversions such as exact amount parsing additionally get property-based tests.
+Amount parsing is also checked differentially: for generated number texts, an
+independent arbitrary-precision computation (`bigdecimal`) decides the expected
+value and whether it is exact or rounded, and the parser must agree.
 Unit tests live next to the module they test; integration and contract tests
 live in `tests/`. Error behavior is asserted on typed error variants, not on
 message substrings.
