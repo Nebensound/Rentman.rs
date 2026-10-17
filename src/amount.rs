@@ -61,48 +61,54 @@ fn parse_exact_amount(text: &str) -> Result<RentmanAmount, String> {
     if !is_number {
         return Err(format!("Rentman amount must be a JSON number, got {text}"));
     }
-    let parsed = match text.split_once(['e', 'E']) {
-        Some((significand, exponent)) => parse_exact_scientific(significand, exponent),
-        None => Decimal::from_str_exact(trim_fraction_zeros(text)).ok(),
-    };
-    parsed
+    parse_exact_decimal(text)
         .map(RentmanAmount)
         .ok_or_else(|| format!("Rentman amount {text} is not an exact decimal"))
 }
 
-/// Drops trailing zeros of a fractional part, which do not change the value
-/// but would count against the 28 decimal places of `Decimal`.
-fn trim_fraction_zeros(number: &str) -> &str {
-    if number.contains('.') {
-        number.trim_end_matches('0').trim_end_matches('.')
-    } else {
-        number
+/// Parses a JSON number exactly, or returns `None` when `Decimal` cannot hold
+/// its exact value.
+///
+/// The number is first normalized as text into significant digits and a
+/// power of ten, and `Decimal`'s bounds (96-bit mantissa, 28 decimal places)
+/// are checked only on that normalized form. So `0.00000000000000000000000000001e1`
+/// and `100000000000000000000000000000e-1` are accepted because their values
+/// fit, while `1e-29` is rejected. Parsing never rounds: unlike
+/// `Decimal::from_scientific`, an over-precise value is rejected.
+fn parse_exact_decimal(text: &str) -> Option<Decimal> {
+    let (negative, unsigned) = match text.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, text),
+    };
+    let (significand, exponent) = match unsigned.split_once(['e', 'E']) {
+        Some((significand, exponent)) => (significand, exponent.parse::<i64>().ok()?),
+        None => (unsigned, 0),
+    };
+    let (integer, fraction) = significand.split_once('.').unwrap_or((significand, ""));
+    let is_digits = |part: &str| part.bytes().all(|byte| byte.is_ascii_digit());
+    if integer.is_empty() || !is_digits(integer) || !is_digits(fraction) {
+        return None;
     }
-}
 
-/// Applies the exponent to an exactly parsed significand with checked integer
-/// arithmetic. `Decimal::from_scientific` would round an over-precise
-/// significand instead of rejecting it.
-fn parse_exact_scientific(significand: &str, exponent: &str) -> Option<Decimal> {
-    let significand = Decimal::from_str_exact(trim_fraction_zeros(significand)).ok()?;
-    if significand.is_zero() {
+    // value = significant × 10^power, with leading and trailing zeros removed.
+    let digits = format!("{integer}{fraction}");
+    let digits = digits.trim_start_matches('0');
+    let significant = digits.trim_end_matches('0');
+    if significant.is_empty() {
         // Zero is exact for any exponent.
         return Some(Decimal::ZERO);
     }
-    let exponent: i64 = exponent.parse().ok()?;
-    let mut scale = i64::from(significand.scale()).checked_sub(exponent)?;
-    if scale >= 0 {
-        // Trailing powers of ten do not change the value: `10e-29` is
-        // exactly `1e-28`. A non-zero mantissa has at most 38 of them.
-        let mut mantissa = significand.mantissa();
-        while scale > 28 && mantissa % 10 == 0 {
-            mantissa /= 10;
-            scale -= 1;
-        }
-        Decimal::try_from_i128_with_scale(mantissa, u32::try_from(scale).ok()?).ok()
+    let trailing_zeros = digits.len() - significant.len();
+    // `i128` holds every power that `i64` exponents and string lengths produce.
+    let power = i128::from(exponent) - fraction.len() as i128 + trailing_zeros as i128;
+
+    let magnitude: i128 = significant.parse().ok()?;
+    let mantissa = if negative { -magnitude } else { magnitude };
+    if power >= 0 {
+        let factor = 10_i128.checked_pow(u32::try_from(power).ok()?)?;
+        Decimal::try_from_i128_with_scale(mantissa.checked_mul(factor)?, 0).ok()
     } else {
-        let factor = 10_i128.checked_pow(u32::try_from(-scale).ok()?)?;
-        Decimal::try_from_i128_with_scale(significand.mantissa().checked_mul(factor)?, 0).ok()
+        Decimal::try_from_i128_with_scale(mantissa, u32::try_from(-power).ok()?).ok()
     }
 }
 
@@ -156,6 +162,8 @@ mod tests {
             "10e-29",
             "1000e-31",
             "0.00000000000000000000000000010",
+            // Significand beyond `Decimal`'s scale, final value within it.
+            "0.00000000000000000000000000001e1",
         ] {
             let amount: RentmanAmount = serde_json::from_str(text).unwrap();
             assert_eq!(amount.as_decimal(), smallest, "{text}");
@@ -167,6 +175,27 @@ mod tests {
         for text in ["0e-50", "0.0e5000000000", "-0e3"] {
             let amount: RentmanAmount = serde_json::from_str(text).unwrap();
             assert!(amount.as_decimal().is_zero(), "{text}");
+        }
+    }
+
+    #[test]
+    fn normalizes_before_checking_decimal_bounds() {
+        // Coefficient beyond 96 bits, final value 1e28 within them.
+        let amount: RentmanAmount =
+            serde_json::from_str("100000000000000000000000000000e-1").unwrap();
+        assert_eq!(
+            amount.as_decimal(),
+            Decimal::from_i128_with_scale(10_i128.pow(28), 0)
+        );
+        let negative: RentmanAmount =
+            serde_json::from_str("-0.000000000000000000000000000010e1").unwrap();
+        assert_eq!(negative.as_decimal(), Decimal::new(-1, 28));
+    }
+
+    #[test]
+    fn rejects_text_that_is_not_a_json_number() {
+        for text in ["-", "-.5", "-+5", "1.2.3", "1x", "1.x", "1e", "1e+"] {
+            assert!(parse_exact_amount(text).is_err(), "{text}");
         }
     }
 
@@ -188,6 +217,10 @@ mod tests {
             "20e38",
             // Integer beyond the 96 bits of `Decimal`.
             "1e30",
+            // Product outside `i128` although the power of ten fits.
+            "99e37",
+            // More significant digits than `i128` holds.
+            "0.123456789012345678901234567890123456789",
         ] {
             let error = serde_json::from_str::<RentmanAmount>(text)
                 .unwrap_err()
