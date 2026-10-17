@@ -9,7 +9,7 @@ description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
 repository = "https://github.com/Nebensound/Rentman.rs"
 readme = "crates-io.md"
-exclude = ["/.github", "/README.md"]
+exclude = ["/.github", "/README.md", "/fuzz"]
 
 [dependencies]
 anyhow = "1.0.104"

@@ -132,6 +132,28 @@ cargo +nightly llvm-cov --workspace --locked \
   --fail-under-functions 100
 ```
 
+Fuzzing of amount parsing (nightly, [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)):
+
+```bash
+cargo install cargo-fuzz --version 0.13.2 --locked
+mkdir -p fuzz/corpus/amount
+cargo +nightly fuzz run amount fuzz/corpus/amount fuzz/seeds/amount -- \
+  -max_total_time=60 -dict=fuzz/amount.dict
+```
+
+The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
+deserialization. It checks that parsing never panics, that every JSON number
+with an exponent up to ±1000 gives the same value as an independent
+arbitrary-precision reference (`bigdecimal`), and that every accepted amount
+survives a JSON round trip with value and scale. Every pull request runs it
+for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
+for 30 minutes every week and on manual dispatch. A crashing input is
+uploaded as a workflow artifact and reproduced with
+`cargo +nightly fuzz run amount <file>`; every finding becomes a regression
+test in the library. `fuzz/` is a separate crate with its own lockfile, kept
+in line with the library's `Cargo.lock`, and is not part of the published
+package.
+
 ## Versioning
 
 The crate version in `Cargo.toml` is a placeholder. Every CI run starts with a
