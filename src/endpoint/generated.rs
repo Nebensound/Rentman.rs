@@ -8289,6 +8289,51 @@ impl Endpoint for CreateProjectEndpoint {
     };
 }
 
+const CREATEFROMTEMPLATEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
+
+const CREATEFROMTEMPLATEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `POST /projects/:createFromTemplate`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateFromTemplateEndpoint;
+
+impl Endpoint for CreateFromTemplateEndpoint {
+    type Request = ProjectsCreateFromTemplateRequest;
+    type Response = ItemResponse<ProjectReferenceResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "POST",
+        path: "/projects/:createFromTemplate",
+        operation_id: "createFromTemplate",
+        tag: "projects",
+        parameters: CREATEFROMTEMPLATEENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::Json("ProjectsCreateFromTemplateRequest"),
+        response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
+        errors: CREATEFROMTEMPLATEENDPOINT_ERRORS,
+    };
+}
+
 const GETPROJECTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
     location: EndpointParameterLocation::Path,
@@ -9291,6 +9336,202 @@ impl Endpoint for PostProjectsIdTasksEndpoint {
 }
 
 impl EndpointWithId for PostProjectsIdTasksEndpoint {}
+
+const GETPROJECTSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
+
+const GETPROJECTSTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /projectstatuses`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetProjectStatusCollectionEndpoint;
+
+impl Endpoint for GetProjectStatusCollectionEndpoint {
+    type Request = NoRequest;
+    type Response = CollectionResponse<ProjectStatusResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/projectstatuses",
+        operation_id: "getProjectStatusCollection",
+        tag: "projectstatuses",
+        parameters: GETPROJECTSTATUSCOLLECTIONENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Collection("ProjectStatusResponse"),
+        errors: GETPROJECTSTATUSCOLLECTIONENDPOINT_ERRORS,
+    };
+}
+
+const GETPROJECTSTATUSITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
+    &[EndpointParameterSpec {
+        name: "id",
+        location: EndpointParameterLocation::Path,
+        required: true,
+        value: EndpointParameterValueSpec::Integer,
+    }];
+
+const GETPROJECTSTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /projectstatuses/{id}`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetProjectStatusItemEndpoint;
+
+impl Endpoint for GetProjectStatusItemEndpoint {
+    type Request = NoRequest;
+    type Response = ItemResponse<ProjectStatusResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/projectstatuses/{id}",
+        operation_id: "getProjectStatusItem",
+        tag: "projectstatuses",
+        parameters: GETPROJECTSTATUSITEMENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Item("ProjectStatusResponse"),
+        errors: GETPROJECTSTATUSITEMENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for GetProjectStatusItemEndpoint {}
+
+const GETPROJECTTEMPLATECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
+
+const GETPROJECTTEMPLATECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /projecttemplates`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetProjectTemplateCollectionEndpoint;
+
+impl Endpoint for GetProjectTemplateCollectionEndpoint {
+    type Request = NoRequest;
+    type Response = CollectionResponse<ProjectTemplateResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/projecttemplates",
+        operation_id: "getProjectTemplateCollection",
+        tag: "projecttemplates",
+        parameters: GETPROJECTTEMPLATECOLLECTIONENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Collection("ProjectTemplateResponse"),
+        errors: GETPROJECTTEMPLATECOLLECTIONENDPOINT_ERRORS,
+    };
+}
+
+const GETPROJECTTEMPLATEITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
+    &[EndpointParameterSpec {
+        name: "id",
+        location: EndpointParameterLocation::Path,
+        required: true,
+        value: EndpointParameterValueSpec::Integer,
+    }];
+
+const GETPROJECTTEMPLATEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /projecttemplates/{id}`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetProjectTemplateItemEndpoint;
+
+impl Endpoint for GetProjectTemplateItemEndpoint {
+    type Request = NoRequest;
+    type Response = ItemResponse<ProjectTemplateResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/projecttemplates/{id}",
+        operation_id: "getProjectTemplateItem",
+        tag: "projecttemplates",
+        parameters: GETPROJECTTEMPLATEITEMENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Item("ProjectTemplateResponse"),
+        errors: GETPROJECTTEMPLATEITEMENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for GetProjectTemplateItemEndpoint {}
 
 const GETPROJECTTYPECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15752,6 +15993,104 @@ impl Endpoint for PostVehiclesIdTasksEndpoint {
 
 impl EndpointWithId for PostVehiclesIdTasksEndpoint {}
 
+const GETWAREHOUSESTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
+
+const GETWAREHOUSESTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /warehousestatuses`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetWarehouseStatusCollectionEndpoint;
+
+impl Endpoint for GetWarehouseStatusCollectionEndpoint {
+    type Request = NoRequest;
+    type Response = CollectionResponse<WarehouseStatusResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/warehousestatuses",
+        operation_id: "getWarehouseStatusCollection",
+        tag: "warehousestatuses",
+        parameters: GETWAREHOUSESTATUSCOLLECTIONENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Collection("WarehouseStatusResponse"),
+        errors: GETWAREHOUSESTATUSCOLLECTIONENDPOINT_ERRORS,
+    };
+}
+
+const GETWAREHOUSESTATUSITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
+    &[EndpointParameterSpec {
+        name: "id",
+        location: EndpointParameterLocation::Path,
+        required: true,
+        value: EndpointParameterValueSpec::Integer,
+    }];
+
+const GETWAREHOUSESTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `GET /warehousestatuses/{id}`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GetWarehouseStatusItemEndpoint;
+
+impl Endpoint for GetWarehouseStatusItemEndpoint {
+    type Request = NoRequest;
+    type Response = ItemResponse<WarehouseStatusResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "GET",
+        path: "/warehousestatuses/{id}",
+        operation_id: "getWarehouseStatusItem",
+        tag: "warehousestatuses",
+        parameters: GETWAREHOUSESTATUSITEMENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::None,
+        response: EndpointResponseSpec::Item("WarehouseStatusResponse"),
+        errors: GETWAREHOUSESTATUSITEMENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for GetWarehouseStatusItemEndpoint {}
+
 /// All operations in the checked-in Rentman API document.
 pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <GetAccessoryCollectionEndpoint as Endpoint>::SPEC,
@@ -15918,6 +16257,7 @@ pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <CreateProjectRequestEquipmentEndpoint as Endpoint>::SPEC,
     <GetProjectCollectionEndpoint as Endpoint>::SPEC,
     <CreateProjectEndpoint as Endpoint>::SPEC,
+    <CreateFromTemplateEndpoint as Endpoint>::SPEC,
     <GetProjectItemEndpoint as Endpoint>::SPEC,
     <GetProjectContractCollectionEndpoint as Endpoint>::SPEC,
     <GetProjectProjectCostCollectionEndpoint as Endpoint>::SPEC,
@@ -15937,6 +16277,10 @@ pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <CreateSubprojectEndpoint as Endpoint>::SPEC,
     <GetProjectTaskCollectionEndpoint as Endpoint>::SPEC,
     <PostProjectsIdTasksEndpoint as Endpoint>::SPEC,
+    <GetProjectStatusCollectionEndpoint as Endpoint>::SPEC,
+    <GetProjectStatusItemEndpoint as Endpoint>::SPEC,
+    <GetProjectTemplateCollectionEndpoint as Endpoint>::SPEC,
+    <GetProjectTemplateItemEndpoint as Endpoint>::SPEC,
     <GetProjectTypeCollectionEndpoint as Endpoint>::SPEC,
     <GetProjectTypeItemEndpoint as Endpoint>::SPEC,
     <GetProjectVehicleCollectionEndpoint as Endpoint>::SPEC,
@@ -16064,6 +16408,8 @@ pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <GetVehicleFileCollectionEndpoint as Endpoint>::SPEC,
     <GetVehicleTaskCollectionEndpoint as Endpoint>::SPEC,
     <PostVehiclesIdTasksEndpoint as Endpoint>::SPEC,
+    <GetWarehouseStatusCollectionEndpoint as Endpoint>::SPEC,
+    <GetWarehouseStatusItemEndpoint as Endpoint>::SPEC,
 ];
 
 #[allow(dead_code)]
@@ -16236,6 +16582,7 @@ where
     CreateProjectRequestEquipmentEndpoint: ExecutableEndpoint,
     GetProjectCollectionEndpoint: ExecutableEndpoint,
     CreateProjectEndpoint: ExecutableEndpoint,
+    CreateFromTemplateEndpoint: ExecutableEndpoint,
     GetProjectItemEndpoint: ExecutableEndpoint,
     GetProjectContractCollectionEndpoint: ExecutableEndpoint,
     GetProjectProjectCostCollectionEndpoint: ExecutableEndpoint,
@@ -16255,6 +16602,10 @@ where
     CreateSubprojectEndpoint: ExecutableEndpoint,
     GetProjectTaskCollectionEndpoint: ExecutableEndpoint,
     PostProjectsIdTasksEndpoint: ExecutableEndpoint,
+    GetProjectStatusCollectionEndpoint: ExecutableEndpoint,
+    GetProjectStatusItemEndpoint: ExecutableEndpoint,
+    GetProjectTemplateCollectionEndpoint: ExecutableEndpoint,
+    GetProjectTemplateItemEndpoint: ExecutableEndpoint,
     GetProjectTypeCollectionEndpoint: ExecutableEndpoint,
     GetProjectTypeItemEndpoint: ExecutableEndpoint,
     GetProjectVehicleCollectionEndpoint: ExecutableEndpoint,
@@ -16382,5 +16733,7 @@ where
     GetVehicleFileCollectionEndpoint: ExecutableEndpoint,
     GetVehicleTaskCollectionEndpoint: ExecutableEndpoint,
     PostVehiclesIdTasksEndpoint: ExecutableEndpoint,
+    GetWarehouseStatusCollectionEndpoint: ExecutableEndpoint,
+    GetWarehouseStatusItemEndpoint: ExecutableEndpoint,
 {
 }

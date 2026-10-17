@@ -4,7 +4,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, NaiveDate};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fmt};
@@ -12423,12 +12423,12 @@ pub enum TaskRequestItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
-    /// `Container`.
-    #[serde(rename = "Container")]
-    Container,
     /// `Contract`.
     #[serde(rename = "Contract")]
     Contract,
+    /// `DefaultService`.
+    #[serde(rename = "DefaultService")]
+    DefaultService,
     /// `SerialNumber`.
     #[serde(rename = "SerialNumber")]
     SerialNumber,
@@ -12594,12 +12594,12 @@ pub enum TaskResponseItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
-    /// `Container`.
-    #[serde(rename = "Container")]
-    Container,
     /// `Contract`.
     #[serde(rename = "Contract")]
     Contract,
+    /// `DefaultService`.
+    #[serde(rename = "DefaultService")]
+    DefaultService,
     /// `SerialNumber`.
     #[serde(rename = "SerialNumber")]
     SerialNumber,
@@ -13539,6 +13539,9 @@ pub struct ContractResponse {
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_insurance_price: Option<Decimal>,
+    /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_services_price: Option<Decimal>,
     /// GENERATED FIELD.
     pub price: Decimal,
     /// GENERATED FIELD.
@@ -14227,7 +14230,7 @@ pub struct EquipmentSetContentRequest {
     /// Permanently reduce the stock by the amount from this combination.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_fixed: Option<EquipmentSetContentRequestIsFixed>,
-    /// When emptying the combination in the warehouse, this equipment will stay inside the combination. Removing it from the combination is always possible.
+    /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_physically_connected: Option<EquipmentSetContentRequestIsPhysicallyConnected>,
 }
@@ -14255,7 +14258,7 @@ pub struct EquipmentSetContentResponse {
     pub equipment: ResourceReference,
     /// Permanently reduce the stock by the amount from this combination.
     pub is_fixed: EquipmentSetContentResponseIsFixed,
-    /// When emptying the combination in the warehouse, this equipment will stay inside the combination. Removing it from the combination is always possible.
+    /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
     pub is_physically_connected: EquipmentSetContentResponseIsPhysicallyConnected,
 }
 
@@ -14420,7 +14423,7 @@ pub struct FileFolderRequest {
     pub classified: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileFolderRequestItemtype>,
@@ -14446,7 +14449,7 @@ pub struct FileFolderResponse {
     /// Confidential folders are only visible with the user right to download all files.
     pub classified: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderResponse.itemtype`.
     pub itemtype: Option<FileFolderResponseItemtype>,
     /// Rentman API field `FileFolderResponse.is_template`.
@@ -14473,7 +14476,7 @@ pub struct FileRequest {
     pub image: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileRequestItemtype>,
@@ -14534,7 +14537,7 @@ pub struct FileResponse {
     /// Rentman API field `FileResponse.image`.
     pub image: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `FileResponse.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileResponseItemtype>,
@@ -14719,7 +14722,7 @@ pub struct InvitationsResponse {
 pub struct InvoiceLineRequest {
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `InvoiceLineRequest.base`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base: Option<Decimal>,
@@ -14742,7 +14745,7 @@ pub struct InvoiceLineResponse {
     /// GENERATED FIELD.
     pub displayname: String,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `InvoiceLineResponse.base`.
     pub base: Decimal,
     /// Rentman API field `InvoiceLineResponse.ledger`.
@@ -14867,6 +14870,9 @@ pub struct FactuurResponse {
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_insurance_price: Option<Decimal>,
+    /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_services_price: Option<Decimal>,
     /// GENERATED FIELD.
     pub sum_factuurregels: Decimal,
     /// GENERATED FIELD.
@@ -15304,6 +15310,12 @@ pub struct ProjectEquipmentRequest {
     /// Rentman API field `ProjectEquipmentRequest.delay_notified`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delay_notified: Option<bool>,
+    /// Rentman API field `ProjectEquipmentRequest.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<Decimal>,
+    /// Rentman API field `ProjectEquipmentRequest.is_delayed`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_delayed: Option<bool>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -15354,10 +15366,18 @@ pub struct ProjectEquipmentResponse {
     pub internal_remark: String,
     /// Rentman API field `ProjectEquipmentResponse.delay_notified`.
     pub delay_notified: bool,
+    /// Rentman API field `ProjectEquipmentResponse.duration`.
+    pub duration: Option<Decimal>,
+    /// Rentman API field `ProjectEquipmentResponse.is_delayed`.
+    pub is_delayed: bool,
     /// GENERATED FIELD.
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
     pub planperiod_end: Option<DateTime<FixedOffset>>,
+    /// GENERATED FIELD.
+    pub usageperiod_start: Option<DateTime<FixedOffset>>,
+    /// GENERATED FIELD.
+    pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
     pub has_missings: bool,
     /// GENERATED FIELD.
@@ -16075,6 +16095,9 @@ pub struct ProjectResponse {
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_insurance_price: Option<Decimal>,
+    /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_services_price: Option<Decimal>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub estimated_cost: Option<Decimal>,
@@ -16112,6 +16135,56 @@ pub struct ProjectResponse {
     pub volume: Decimal,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+}
+
+/// Rentman API schema `ProjectStatusRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectStatusRequest {
+    /// Rentman API field `ProjectStatusRequest.name`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Rentman API schema `ProjectStatusResponse`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectStatusResponse {
+    /// Rentman API field `ProjectStatusResponse.id`.
+    pub id: RentmanId,
+    /// Rentman API field `ProjectStatusResponse.created`.
+    pub created: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `ProjectStatusResponse.modified`.
+    pub modified: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `ProjectStatusResponse.creator`.
+    pub creator: Option<ResourceReference>,
+    /// GENERATED FIELD.
+    pub displayname: String,
+    /// Rentman API field `ProjectStatusResponse.name`.
+    pub name: String,
+}
+
+/// Rentman API schema `ProjectTemplateRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectTemplateRequest {
+    /// Rentman API field `ProjectTemplateRequest.name`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Rentman API schema `ProjectTemplateResponse`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectTemplateResponse {
+    /// Rentman API field `ProjectTemplateResponse.id`.
+    pub id: RentmanId,
+    /// Rentman API field `ProjectTemplateResponse.created`.
+    pub created: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `ProjectTemplateResponse.modified`.
+    pub modified: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `ProjectTemplateResponse.creator`.
+    pub creator: Option<ResourceReference>,
+    /// GENERATED FIELD.
+    pub displayname: String,
+    /// Rentman API field `ProjectTemplateResponse.name`.
+    pub name: String,
 }
 
 /// Rentman API schema `ProjectTypeRequest`.
@@ -16530,6 +16603,9 @@ pub struct QuotationResponse {
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_insurance_price: Option<Decimal>,
+    /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_services_price: Option<Decimal>,
     /// GENERATED FIELD.
     pub price: Decimal,
     /// GENERATED FIELD.
@@ -16659,7 +16735,7 @@ pub struct RepairRequest {
     /// Rentman API field `RepairRequest.repair_costs`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repair_costs: Option<Decimal>,
-    /// Rentman API field `RepairRequest.is_usable`.
+    /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_usable: Option<RepairRequestIsUsable>,
     /// Rentman API field `RepairRequest.costs_charged_to_customer`.
@@ -16719,7 +16795,7 @@ pub struct RepairResponse {
     pub remark: String,
     /// Rentman API field `RepairResponse.repair_costs`.
     pub repair_costs: Decimal,
-    /// Rentman API field `RepairResponse.is_usable`.
+    /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     pub is_usable: RepairResponseIsUsable,
     /// Rentman API field `RepairResponse.costs_charged_to_customer`.
     pub costs_charged_to_customer: Option<ResourceReference>,
@@ -17042,6 +17118,8 @@ pub struct SubprojectResponse {
     pub discount_transport: Decimal,
     /// Rentman API field `SubprojectResponse.discount_additional_costs`.
     pub discount_additional_costs: Decimal,
+    /// Rentman API field `SubprojectResponse.discount_services`.
+    pub discount_services: Decimal,
     /// Rentman API field `SubprojectResponse.discount_subproject`.
     pub discount_subproject: Decimal,
     /// Rentman API field `SubprojectResponse.discount_fixed`.
@@ -17080,6 +17158,9 @@ pub struct SubprojectResponse {
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_insurance_price: Option<Decimal>,
+    /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_services_price: Option<Decimal>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub estimated_cost: Option<Decimal>,
@@ -17558,7 +17639,7 @@ pub struct TaskRequest {
     pub status: Option<ResourceReference>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `TaskRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<TaskRequestItemtype>,
@@ -17636,7 +17717,7 @@ pub struct TaskResponse {
     /// Rentman API field `TaskResponse.status`.
     pub status: ResourceReference,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<i64>,
+    pub item: Option<RentmanId>,
     /// Rentman API field `TaskResponse.itemtype`.
     pub itemtype: Option<TaskResponseItemtype>,
     /// Rentman API field `TaskResponse.synchronization_id`.
@@ -17992,6 +18073,48 @@ pub struct VehicleResponse {
     pub custom: CustomFields,
 }
 
+/// Rentman API schema `WarehouseStatusRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WarehouseStatusRequest {
+    /// Rentman API field `WarehouseStatusRequest.name`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+/// Rentman API schema `WarehouseStatusResponse`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct WarehouseStatusResponse {
+    /// Rentman API field `WarehouseStatusResponse.id`.
+    pub id: RentmanId,
+    /// Rentman API field `WarehouseStatusResponse.created`.
+    pub created: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `WarehouseStatusResponse.modified`.
+    pub modified: Option<DateTime<FixedOffset>>,
+    /// Rentman API field `WarehouseStatusResponse.creator`.
+    pub creator: Option<ResourceReference>,
+    /// GENERATED FIELD.
+    pub displayname: String,
+    /// Rentman API field `WarehouseStatusResponse.name`.
+    pub name: String,
+}
+
+/// Reference to created project
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectReferenceResponse {
+    /// API path
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<ResourceReference>,
+}
+
+/// Rentman API schema `ProjectsCreateFromTemplateRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectsCreateFromTemplateRequest {
+    /// ID of the project template
+    pub template: RentmanId,
+    /// First date of the project
+    pub start_date: NaiveDate,
+}
+
 /// All Rentman API component schemas represented by this module.
 pub const ALL_SCHEMAS: &[&str] = &[
     "AccessoryRequest",
@@ -18067,16 +18190,22 @@ pub const ALL_SCHEMAS: &[&str] = &[
     "ProjectFunctionGroupResponse",
     "ProjectFunctionRequest",
     "ProjectFunctionResponse",
+    "ProjectReferenceResponse",
     "ProjectRequest",
     "ProjectRequestEquipmentRequest",
     "ProjectRequestEquipmentResponse",
     "ProjectRequestRequest",
     "ProjectRequestResponse",
     "ProjectResponse",
+    "ProjectStatusRequest",
+    "ProjectStatusResponse",
+    "ProjectTemplateRequest",
+    "ProjectTemplateResponse",
     "ProjectTypeRequest",
     "ProjectTypeResponse",
     "ProjectVehicleRequest",
     "ProjectVehicleResponse",
+    "ProjectsCreateFromTemplateRequest",
     "PurchaseOrderCostRequest",
     "PurchaseOrderCostResponse",
     "PurchaseOrderGlobalCostRequest",
@@ -18121,4 +18250,6 @@ pub const ALL_SCHEMAS: &[&str] = &[
     "TimeRegistrationResponse",
     "VehicleRequest",
     "VehicleResponse",
+    "WarehouseStatusRequest",
+    "WarehouseStatusResponse",
 ];

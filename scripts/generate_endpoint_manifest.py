@@ -43,6 +43,17 @@ RUST_KEYWORDS = {
 }
 
 DATE_TIME_FIELDS = {"created", "modified"}
+# Integer fields documented as resource IDs whose names do not follow the
+# `id`/`*_id` convention.
+ID_FIELDS = {
+    ("ProjectsCreateFromTemplateRequest", "template"),
+    # Polymorphic link: `itemtype` names the resource, `item` holds its ID.
+    *(
+        (f"{resource}{direction}", "item")
+        for resource in ("File", "FileFolder", "InvoiceLine", "Task")
+        for direction in ("Request", "Response")
+    ),
+}
 URL_FIELDS = {"url", "website", "image", "logo"}
 
 # Deliberate deviations from the documented OpenAPI types, verified against
@@ -109,6 +120,7 @@ _PROJECT_PRICE_FIELDS = (
     "project_transport_price",
     "project_other_price",
     "project_insurance_price",
+    "project_services_price",
 )
 _PROJECT_COST_FIELDS = ("estimated_cost", "planned_cost", "actual_cost")
 RESPONSE_OPTIONAL_FIELDS = {
@@ -247,7 +259,9 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
 
     kind, _ = openapi_type(schema)
     if kind == "integer":
-        return "RentmanId" if field == "id" or field.endswith("_id") else "i64"
+        if field == "id" or field.endswith("_id") or (schema_name_value, field) in ID_FIELDS:
+            return "RentmanId"
+        return "i64"
     if kind == "number":
         return "Decimal"
     if kind == "boolean":
@@ -257,6 +271,8 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
     if kind == "string":
         if schema.get("format") == "date-time" or field in DATE_TIME_FIELDS:
             return "DateTime<FixedOffset>"
+        if schema.get("format") == "date":
+            return "NaiveDate"
         if schema.get("format") == "email":
             return "EmailAddress"
         if is_reference_field(field, schema):
@@ -436,7 +452,7 @@ def generate_wire(spec: dict) -> None:
         "",
         "#![allow(clippy::module_name_repetitions)]",
         "",
-        "use chrono::{DateTime, FixedOffset};",
+        "use chrono::{DateTime, FixedOffset, NaiveDate};",
         "use rust_decimal::Decimal;",
         "use serde::{Deserialize, Serialize};",
         "use std::{collections::BTreeMap, fmt};",
