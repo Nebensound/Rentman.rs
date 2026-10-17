@@ -1,10 +1,13 @@
 //! Contract tests against the checked-in Rentman OpenAPI document.
 
+use chrono::NaiveDate;
 use rentman_client::endpoint::{
     ALL_ENDPOINTS, EndpointErrorSpec, EndpointParameterLocation, EndpointParameterSpec,
     EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
 };
-use rentman_client::model::{ALL_SCHEMAS, EmailAddress, RentmanId, ResourceReference};
+use rentman_client::model::{
+    ALL_SCHEMAS, EmailAddress, ProjectsCreateFromTemplateRequest, RentmanId, ResourceReference,
+};
 use serde_json::Value;
 use std::{collections::BTreeSet, fs};
 
@@ -74,6 +77,40 @@ fn wire_email_addresses_are_validated() {
 #[test]
 fn wire_rentman_id_displays_plain_number() {
     assert_eq!(RentmanId(42).to_string(), "42");
+}
+
+#[test]
+fn wire_date_fields_serialize_as_date_only() {
+    let spec = openapi_spec();
+    let request_schema = schema(&spec, "ProjectsCreateFromTemplateRequest");
+    assert_type(property(request_schema, "template"), "integer");
+    assert_eq!(property(request_schema, "start_date")["format"], "date");
+
+    let request = ProjectsCreateFromTemplateRequest {
+        template: RentmanId(7),
+        start_date: NaiveDate::from_ymd_opt(2026, 10, 20).expect("valid date"),
+    };
+    let json = serde_json::to_value(&request).expect("request serializes");
+    assert_eq!(
+        json,
+        serde_json::json!({"template": 7, "start_date": "2026-10-20"})
+    );
+    assert_eq!(
+        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(json).expect("request parses"),
+        request
+    );
+    assert!(
+        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(
+            serde_json::json!({"template": 7, "start_date": "2026-10-20T00:00:00Z"})
+        )
+        .is_err()
+    );
+    assert!(
+        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(
+            serde_json::json!({"template": -1, "start_date": "2026-10-20"})
+        )
+        .is_err()
+    );
 }
 
 #[test]

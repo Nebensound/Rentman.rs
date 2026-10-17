@@ -73,11 +73,18 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Live API tests call the real Rentman API and are ignored by default:
+Live API tests call the real Rentman API and are ignored by default. They read
+`RENTMAN_API_TOKEN` from the environment or, locally, from a `.env` file in the
+crate root. Generate the token in Rentman under Configuration → Integrations;
+`.env` is git-ignored and must never be committed:
 
 ```bash
-RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored
+cp .env.example .env   # then fill in RENTMAN_API_TOKEN
+cargo test --test live_api -- --ignored
 ```
+
+A token already set in the environment takes precedence over `.env`, so
+`RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored` keeps working.
 
 Every documented `GET` collection endpoint without path parameters has its own
 generated test in `tests/live/generated_sweep.rs`: each calls the endpoint
