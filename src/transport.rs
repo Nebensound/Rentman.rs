@@ -319,15 +319,14 @@ mod tests {
             json_response(r#"{"ok":true}"#),
         ]);
 
-        let subscriber = RecordingSubscriber::default();
-        let _logging = tracing::subscriber::set_default(subscriber.clone());
+        let warnings = capture_warnings();
 
         let response = send_with_retries(&fast_limiter(), fast_policy(3), get(&server))
             .await
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-        let events = subscriber.events();
+        let events = warnings.events();
         assert_eq!(events.len(), 2, "{events:?}");
         assert!(events[0].contains("attempt=1"), "{events:?}");
         assert!(events[0].contains("max_attempts=3"), "{events:?}");
