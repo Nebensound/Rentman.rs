@@ -162,6 +162,15 @@ impl RetryPolicy {
         }
     }
 
+    /// Fixed policy for tests, independent of the environment.
+    #[cfg(test)]
+    pub(crate) fn fixed(max_attempts: usize, base_delay: Duration) -> Self {
+        Self {
+            max_attempts,
+            base_delay,
+        }
+    }
+
     /// The same policy without retries.
     pub(crate) fn single_attempt(self) -> Self {
         Self {

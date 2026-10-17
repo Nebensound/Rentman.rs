@@ -111,9 +111,11 @@ impl RentmanClient {
 mod tests {
 
     use crate::test_support::*;
+    use crate::transport::RetryPolicy;
     use crate::{
         EquipmentId, EquipmentPricePayload, RentmanAmount, RentmanApiToken, RentmanClient, Url,
     };
+    use std::time::Duration;
 
     use rust_decimal::Decimal;
 
@@ -207,6 +209,37 @@ mod tests {
                 .to_string()
                 .contains("Rentman equipment list lookup failed")
         );
+    }
+
+    #[tokio::test]
+    async fn retries_equipment_price_update_after_transient_error() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        let mut client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+        // Fixed policy, independent of the environment.
+        client.retry_policy = RetryPolicy::fixed(2, Duration::from_millis(1));
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        // The idempotent PUT reached the server twice, both times unchanged.
+        for _ in 0..2 {
+            let request = server.next_request();
+            assert_request(&request, "PUT", "/equipment/2163");
+            assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+            assert_eq!(String::from_utf8_lossy(&request.body), r#"{"price":12.50}"#);
+        }
     }
 
     #[tokio::test]
