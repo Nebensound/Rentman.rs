@@ -163,9 +163,11 @@ The crate version in `Cargo.toml` is a placeholder. Every CI run starts with a
 `version` job that derives the semantic version from git history using
 [PaulHatch/semantic-version](https://github.com/PaulHatch/semantic-version):
 `v*` tags mark releases, and commit messages containing `(MAJOR)` or `(MINOR)`
-bump the respective component. All later jobs (tests, coverage, release) depend
-on this job and rewrite the `Cargo.toml` version before building, so published
-artifacts always carry the derived version.
+bump the respective component. The crate stays on `0.x` for now: breaking
+changes are marked `(MINOR)`, because a `0.x` minor bump is already breaking
+under Cargo's semver rules, and `(MAJOR)` is not used. All later jobs (tests,
+coverage, release) depend on this job and rewrite the `Cargo.toml` version
+before building, so published artifacts always carry the derived version.
 
 On pull request branches the `version` job also commits the derived version to
 `Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
