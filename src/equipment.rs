@@ -116,8 +116,9 @@ mod tests {
     use crate::{
         EquipmentId, EquipmentPricePayload, RentmanAmount, RentmanApiToken, RentmanClient, Url,
     };
-    use crate::{RequestOutcome, Resource};
+    use crate::{RentmanClientConfig, RequestOutcome, Resource};
     use reqwest::StatusCode;
+    use std::{num::NonZeroUsize, time::Duration};
 
     use rust_decimal::Decimal;
 
@@ -212,6 +213,41 @@ mod tests {
         assert_eq!(error.operation(), Some("getEquipmentCollection"));
         assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
         assert_eq!(error.outcome(), RequestOutcome::NotApplied);
+    }
+
+    #[tokio::test]
+    async fn retries_equipment_price_update_after_transient_error() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        // Fixed retry policy, independent of the environment.
+        let config = RentmanClientConfig::default()
+            .with_max_attempts(NonZeroUsize::new(2).unwrap())
+            .with_retry_base_delay(Duration::from_millis(1));
+        let client = RentmanClient::with_config(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+            config,
+        )
+        .unwrap();
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        // The idempotent PUT reached the server twice, both times unchanged.
+        for _ in 0..2 {
+            let request = server.next_request();
+            assert_request(&request, "PUT", "/equipment/2163");
+            assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+            assert_eq!(String::from_utf8_lossy(&request.body), r#"{"price":12.50}"#);
+        }
     }
 
     #[tokio::test]
