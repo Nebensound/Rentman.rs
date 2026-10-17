@@ -230,22 +230,43 @@ fn parse_exact_amount(text: &str) -> Result<RentmanAmount, String> {
     }
     let parsed = match text.split_once(['e', 'E']) {
         Some((significand, exponent)) => parse_exact_scientific(significand, exponent),
-        None => Decimal::from_str_exact(text).ok(),
+        None => Decimal::from_str_exact(trim_fraction_zeros(text)).ok(),
     };
     parsed
         .map(RentmanAmount)
         .ok_or_else(|| format!("Rentman amount {text} is not an exact decimal"))
 }
 
+/// Drops trailing zeros of a fractional part, which do not change the value
+/// but would count against the 28 decimal places of `Decimal`.
+fn trim_fraction_zeros(number: &str) -> &str {
+    if number.contains('.') {
+        number.trim_end_matches('0').trim_end_matches('.')
+    } else {
+        number
+    }
+}
+
 /// Applies the exponent to an exactly parsed significand with checked integer
 /// arithmetic. `Decimal::from_scientific` would round an over-precise
 /// significand instead of rejecting it.
 fn parse_exact_scientific(significand: &str, exponent: &str) -> Option<Decimal> {
-    let significand = Decimal::from_str_exact(significand).ok()?;
+    let significand = Decimal::from_str_exact(trim_fraction_zeros(significand)).ok()?;
+    if significand.is_zero() {
+        // Zero is exact for any exponent.
+        return Some(Decimal::ZERO);
+    }
     let exponent: i64 = exponent.parse().ok()?;
-    let scale = i64::from(significand.scale()).checked_sub(exponent)?;
+    let mut scale = i64::from(significand.scale()).checked_sub(exponent)?;
     if scale >= 0 {
-        Decimal::try_from_i128_with_scale(significand.mantissa(), u32::try_from(scale).ok()?).ok()
+        // Trailing powers of ten do not change the value: `10e-29` is
+        // exactly `1e-28`. A non-zero mantissa has at most 38 of them.
+        let mut mantissa = significand.mantissa();
+        while scale > 28 && mantissa % 10 == 0 {
+            mantissa /= 10;
+            scale -= 1;
+        }
+        Decimal::try_from_i128_with_scale(mantissa, u32::try_from(scale).ok()?).ok()
     } else {
         let factor = 10_i128.checked_pow(u32::try_from(-scale).ok()?)?;
         Decimal::try_from_i128_with_scale(significand.mantissa().checked_mul(factor)?, 0).ok()
@@ -1712,6 +1733,29 @@ mod tests {
             .to_string();
         assert!(error.contains("is not an exact decimal"), "{error}");
         assert_eq!(EquipmentId::new(2163).to_string(), "2163");
+    }
+
+    #[test]
+    fn accepts_exact_amounts_with_trailing_zeros() {
+        let smallest = Decimal::new(1, 28);
+        for text in [
+            "1e-28",
+            "1.0e-28",
+            "10e-29",
+            "1000e-31",
+            "0.00000000000000000000000000010",
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert_eq!(amount.as_decimal(), smallest, "{text}");
+        }
+        for (text, expected) in [("10.0", Decimal::new(10, 0)), ("100", Decimal::new(100, 0))] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert_eq!(amount.as_decimal(), expected, "{text}");
+        }
+        for text in ["0e-50", "0.0e5000000000", "-0e3"] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert!(amount.as_decimal().is_zero(), "{text}");
+        }
     }
 
     #[test]
