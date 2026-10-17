@@ -393,4 +393,16 @@ mod tests {
         assert_eq!(error.to_string(), "unexpected Rentman API response: odd");
         assert!(error.source().is_none());
     }
+
+    #[test]
+    fn errors_can_cross_threads_and_convert_into_boxed_errors() {
+        fn assert_thread_safe_error<T: std::error::Error + Send + Sync + 'static>() {}
+        assert_thread_safe_error::<Error>();
+
+        let boxed: Box<dyn std::error::Error + Send + Sync> = status(500).into();
+        assert_eq!(
+            boxed.to_string(),
+            "Rentman API returned 500 Internal Server Error: body"
+        );
+    }
 }
