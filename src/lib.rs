@@ -341,11 +341,16 @@ struct PaymentListItem {
 pub struct RentmanEquipment {
     /// Internal Rentman equipment ID.
     pub id: EquipmentId,
-    /// Rental price per unit. `None` when no value is set in Rentman.
+    /// Rental price per unit. `None` when Rentman sends `null` or omits the
+    /// field.
+    #[serde(default)]
     pub price: Option<RentmanAmount>,
-    /// List price (new price). `None` when no value is set in Rentman.
+    /// List price (new price). `None` when Rentman sends `null` or omits the
+    /// field.
+    #[serde(default)]
     pub list_price: Option<RentmanAmount>,
-    /// Subrental costs. `None` when no value is set in Rentman.
+    /// Subrental costs. `None` when Rentman sends `null` or omits the field.
+    #[serde(default)]
     pub subrental_costs: Option<RentmanAmount>,
 }
 
@@ -1853,6 +1858,30 @@ mod tests {
         let third_request = server.next_request();
         assert_request(&third_request, "GET", "/equipment");
         assert_eq!(third_request.query_value("offset").as_deref(), Some("3000"));
+    }
+
+    #[tokio::test]
+    async fn reads_equipment_with_omitted_price_fields() {
+        let server = spawn_server(vec![json_response(
+            r#"{"itemCount":2,"limit":1500,"next_page_url":null,"data":[{"id":1},{"id":2,"list_price":499}]}"#,
+        )]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let equipment = client.all_active_equipment().await.unwrap();
+
+        assert_eq!(equipment.len(), 2);
+        assert_eq!(equipment[0].price, None);
+        assert_eq!(equipment[0].list_price, None);
+        assert_eq!(equipment[0].subrental_costs, None);
+        assert_eq!(equipment[1].price, None);
+        assert_eq!(
+            equipment[1].list_price,
+            Some(RentmanAmount::new(Decimal::new(499, 0)))
+        );
+        assert_eq!(equipment[1].subrental_costs, None);
     }
 
     #[tokio::test]

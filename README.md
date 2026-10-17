@@ -86,6 +86,14 @@ cargo test --test live_api -- --ignored
 A token already set in the environment takes precedence over `.env`, so
 `RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored` keeps working.
 
+Live tests only read, with one opt-in exception: when
+`RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
+equipment item, a test writes its current price back unchanged through
+`update_equipment_prices()` and through a typed `send_once()` request, and
+checks that no price field changed. Without the variable nothing is written.
+Payments are not covered, because a created payment cannot be undone without
+side effects.
+
 Every documented `GET` collection endpoint without path parameters has its own
 generated test in `tests/live/generated_sweep.rs`: each calls the endpoint
 with `limit=1` and fails individually when the live payload no longer matches
