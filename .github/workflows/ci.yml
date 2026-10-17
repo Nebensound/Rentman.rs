@@ -243,9 +243,9 @@ jobs:
           workspaces: fuzz
           cache-on-failure: true
       - name: Install cargo-fuzz
-        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
-        with:
-          tool: cargo-fuzz@0.13.2
+        # Built from source: the prebuilt binary is a musl build, and cargo
+        # fuzz then targets musl, where the address sanitizer is unavailable.
+        run: cargo install cargo-fuzz --version 0.13.2 --locked
       - name: Apply semantic version to Cargo.toml
         env:
           VERSION: ${{ needs.version.outputs.version }}
