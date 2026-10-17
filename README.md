@@ -186,9 +186,82 @@ All Rentman API I/O is async. Public API operations return futures and are used
 with `.await`; production code must not add blocking HTTP clients, blocking
 sleep calls, or thread-based request execution.
 
-New production code requires 100% coverage. Regions, lines, and functions are
-measured. Tests assert behavior, not the coverage counter. Test modules do not
+All hand-written production code requires 100% coverage, not only new or
+changed lines. Regions, lines, and functions are measured. Tests assert behavior, not the coverage counter. Test modules do not
 count toward production coverage and use
 `#[cfg_attr(coverage_nightly, coverage(off))]`. Exclusions are allowed only for
 structurally untestable code and must be justified directly at the affected
 item.
+
+### Tests
+
+Tests cover the happy path, error paths, boundary values, and every enum variant
+and branch of hand-written code. Coverage exclusions are allowed only where the
+instrumentation cannot measure the code structurally; "async IO", "timers", or
+"hard to test" are not valid reasons. Retries, backoff, rate limiting, and
+transport failures are tested against the local test server. Parsers and
+conversions such as exact amount parsing additionally get property-based tests.
+Unit tests live next to the module they test; integration and contract tests
+live in `tests/`. Error behavior is asserted on typed error variants, not on
+message substrings.
+
+Live tests are `#[ignore]`d and never required for the default checks. Live
+tests that write are opt-in through a dedicated environment variable, skip
+with a clear message when it is unset, and are either a verifiable no-op or run
+against a dedicated test account. They never create data in a production
+account.
+
+### Errors and configuration
+
+The library returns its own typed, matchable error type and does not expose
+`anyhow` in public signatures. Errors carry structured context such as
+operation, resource ID, and HTTP status. For writes, the error states whether
+the request was certainly not applied or whether its outcome is unknown.
+
+Client configuration is typed and validated when the client is built. A present
+but invalid value fails with an error naming the setting; it never falls back to
+a default silently. Reading environment variables is an explicit opt-in.
+Production code does not use `.unwrap()`; `expect` is reserved for invariants
+that hold by construction.
+
+### Writes and retries
+
+Only idempotent requests (`GET`, `PUT`, `DELETE`) are retried automatically.
+Requests that create data (`POST`) are sent exactly once, and their
+documentation names the read method to reconcile with after an error. Every
+high-level write documents its retry behavior, and a test proves how many
+requests reach the server on a transient failure.
+
+### Toolchain and CI
+
+The crate declares its MSRV (`rust-version`) and CI builds and tests with
+exactly that toolchain; raising it is a minor version bump. `unsafe` code is
+forbidden by a crate-level lint. Every cargo command in CI that resolves
+dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
+`cargo fmt` does not resolve dependencies and takes no `--locked`.
+
+Required pull request checks are formatting, clippy with `-D warnings`, tests
+and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
+the MSRV build, and a package build with a smoke test outside the source tree.
+Every check command in this README matches what CI runs. Third-party actions
+are pinned to a commit SHA or an immutable version tag, jobs get explicit
+minimal `permissions`, and the release publishes exactly the verified package.
+
+### Deviations
+
+A deliberate deviation from these rules is documented here with its rationale,
+risk, and a linked follow-up issue. Open deviations are tracked in
+[#14](https://github.com/Nebensound/Rentman.rs/issues/14).
+
+- `create_payment` currently retries transient failures like every other
+  request. If the first `POST` succeeds but its response is lost, the retry
+  can book the payment twice. Until this is fixed, reconcile with
+  `all_payments_by_invoice` after a failed `create_payment` before creating
+  the payment again. Tracked in
+  [#15](https://github.com/Nebensound/Rentman.rs/issues/15).
+- `RentmanAmount` has no currency. Rentman's API sends amounts as bare numbers
+  and the currency is an account setting, so the type is a wire-boundary type,
+  not a money type for domain logic. Consumers convert it into their own
+  currency-carrying type. Risk: mixing amounts of different currencies or
+  meanings (net/gross) if it is used beyond the boundary. Tracked in
+  [#23](https://github.com/Nebensound/Rentman.rs/issues/23).
