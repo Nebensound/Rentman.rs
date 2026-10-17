@@ -4,7 +4,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, NaiveDate};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fmt};
@@ -18110,9 +18110,9 @@ pub struct ProjectReferenceResponse {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsCreateFromTemplateRequest {
     /// ID of the project template
-    pub template: i64,
+    pub template: RentmanId,
     /// First date of the project
-    pub start_date: String,
+    pub start_date: NaiveDate,
 }
 
 /// All Rentman API component schemas represented by this module.
