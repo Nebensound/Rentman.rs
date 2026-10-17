@@ -169,8 +169,8 @@ All Rentman API I/O is async. Public API operations return futures and are used
 with `.await`; production code must not add blocking HTTP clients, blocking
 sleep calls, or thread-based request execution.
 
-New production code requires 100% coverage. Regions, lines, and functions are
-measured. Tests assert behavior, not the coverage counter. Test modules do not
+All hand-written production code requires 100% coverage, not only new or
+changed lines. Regions, lines, and functions are measured. Tests assert behavior, not the coverage counter. Test modules do not
 count toward production coverage and use
 `#[cfg_attr(coverage_nightly, coverage(off))]`. Exclusions are allowed only for
 structurally untestable code and must be justified directly at the affected
@@ -219,7 +219,9 @@ requests reach the server on a transient failure.
 
 The crate declares its MSRV (`rust-version`) and CI builds and tests with
 exactly that toolchain; raising it is a minor version bump. `unsafe` code is
-forbidden by a crate-level lint. Every cargo command in CI uses `--locked`.
+forbidden by a crate-level lint. Every cargo command in CI that resolves
+dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
+`cargo fmt` does not resolve dependencies and takes no `--locked`.
 
 Required pull request checks are formatting, clippy with `-D warnings`, tests
 and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
@@ -234,6 +236,12 @@ A deliberate deviation from these rules is documented here with its rationale,
 risk, and a linked follow-up issue. Open deviations are tracked in
 [#14](https://github.com/Nebensound/Rentman.rs/issues/14).
 
+- `create_payment` currently retries transient failures like every other
+  request. If the first `POST` succeeds but its response is lost, the retry
+  can book the payment twice. Until this is fixed, reconcile with
+  `all_payments_by_invoice` after a failed `create_payment` before creating
+  the payment again. Tracked in
+  [#15](https://github.com/Nebensound/Rentman.rs/issues/15).
 - `RentmanAmount` has no currency. Rentman's API sends amounts as bare numbers
   and the currency is an account setting, so the type is a wire-boundary type,
   not a money type for domain logic. Consumers convert it into their own

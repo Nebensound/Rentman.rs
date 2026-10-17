@@ -148,7 +148,8 @@ repositories.
 - The crate declares its MSRV in `Cargo.toml` (`rust-version`); CI builds and
   tests with exactly that toolchain. Raising the MSRV is a minor version bump.
 - `unsafe` code is forbidden by a crate-level lint.
-- Every cargo command in CI uses `--locked`.
+- Every cargo command in CI that resolves dependencies (build, test, clippy,
+  doc, coverage, package) uses `--locked`. `cargo fmt` takes no `--locked`.
 - Required pull request checks: formatting, clippy with `-D warnings`, tests and
   documentation tests, `cargo doc` with warnings as errors, the coverage gate,
   the MSRV build, and a package build with a smoke test outside the source tree.
@@ -162,6 +163,9 @@ repositories.
 
 - A deliberate deviation from these rules is documented in the README with its
   rationale, risk, and a linked follow-up issue.
+- `create_payment` still retries transient failures, which can book a payment
+  twice when only the response gets lost. Until #15 is fixed, callers reconcile
+  with `all_payments_by_invoice` before repeating a failed create.
 - `RentmanAmount` is a wire-boundary type without a currency, because the
   Rentman API sends bare numbers. It must not be used as a general money type in
   domain logic; consumers convert it into their own currency-carrying type.
