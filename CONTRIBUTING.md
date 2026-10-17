@@ -36,6 +36,15 @@ env RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --locked --no-deps
 cargo +nightly llvm-cov --workspace --locked --fail-under-regions 100 --fail-under-lines 100 --fail-under-functions 100
 ```
 
+CI also builds and tests with the minimum supported Rust version from
+`rust-version` in `Cargo.toml`, and smoke tests the packaged crate outside the
+source tree (needs a clean working tree):
+
+```bash
+cargo +1.88 test --workspace --locked
+scripts/package_smoke_test.sh
+```
+
 Live API tests are optional and need a token; see the README section "Checks".
 
 ## Pull requests and versions
