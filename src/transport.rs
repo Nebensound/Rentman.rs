@@ -17,61 +17,103 @@ type DirectRateLimiter = RateLimiter<
     governor::clock::DefaultClock,
 >;
 
-// Coverage is disabled because this async HTTP/retry loop depends on external
-// transport failures and timer scheduling; client behavior is tested at the
-// request/response boundary with a local server.
-#[cfg_attr(coverage_nightly, coverage(off))]
+/// Sends a request and decodes the JSON response, retrying transient failures.
 pub(crate) async fn send_with_retry<T: for<'de> Deserialize<'de>>(
     limiter: Arc<CompositeRateLimiter>,
     retry_policy: RetryPolicy,
     request: reqwest::RequestBuilder,
 ) -> Result<T> {
-    let mut next_request = Some(request);
-    let mut last_error = None;
+    let response = send_with_retries(&limiter, retry_policy, request).await?;
+    let body = response.bytes().await?;
+    decode_json_response(&body)
+}
+
+/// Sends a request without a response body, retrying transient failures.
+pub(crate) async fn send_with_retry_unit(
+    limiter: Arc<CompositeRateLimiter>,
+    retry_policy: RetryPolicy,
+    request: reqwest::RequestBuilder,
+) -> Result<()> {
+    send_with_retries(&limiter, retry_policy, request)
+        .await
+        .map(drop)
+}
+
+/// Sends a request until it succeeds, fails permanently, or the retry policy
+/// is exhausted, and returns the successful response.
+async fn send_with_retries(
+    limiter: &CompositeRateLimiter,
+    retry_policy: RetryPolicy,
+    request: reqwest::RequestBuilder,
+) -> Result<reqwest::Response> {
+    // Invalid requests (e.g. a malformed header) fail here, before any attempt.
+    let (http, request) = request.build_split();
+    let request = request?;
     let mut backoff = retry_policy.backoff();
+    let mut attempts = 0;
 
-    for attempt in 0..retry_policy.max_attempts {
+    loop {
         limiter.acquire().await;
+        attempts += 1;
 
-        let request = next_request
-            .take()
-            .ok_or_else(|| anyhow!("request could not be cloned for retry"))?;
-        next_request = request.try_clone();
-
-        let response = match request.send().await {
-            Ok(response) => response,
-            Err(error) if error.is_timeout() || error.is_connect() || error.is_request() => {
-                last_error = Some(anyhow!("Rentman API request failed: {error}"));
-                sleep_before_retry("Rentman", retry_policy, attempt, None, &mut backoff).await;
-                continue;
+        let attempt = request
+            .try_clone()
+            .expect("the client never builds streaming request bodies, so requests can be cloned");
+        let (error, retry_after) = match http.execute(attempt).await {
+            Ok(response) if response.status().is_success() => return Ok(response),
+            Ok(response) => {
+                let status = response.status();
+                let retry_after = retry_after_delay(response.headers());
+                let body = response.text().await.unwrap_or_default();
+                let error = anyhow!("Rentman API returned {status}: {body}");
+                if !is_retryable_status(status) {
+                    return Err(error);
+                }
+                (error, retry_after)
+            }
+            Err(error) if is_retryable_transport_error(&error) => {
+                (anyhow!("Rentman API request failed: {error}"), None)
             }
             Err(error) => return Err(error.into()),
         };
 
-        if !response.status().is_success() {
-            let status = response.status();
-            let retry_after = retry_after_delay(response.headers());
-            let body = response.text().await.unwrap_or_default();
-            let error = anyhow!("Rentman API returned {status}: {body}");
-            if is_retryable_status(status) {
-                last_error = Some(error);
-                sleep_before_retry("Rentman", retry_policy, attempt, retry_after, &mut backoff)
-                    .await;
-                continue;
-            }
+        let Some(delay) = retry_delay(retry_policy, attempts, retry_after, &mut backoff) else {
             return Err(error);
-        }
-
-        let body = response.bytes().await?;
-        return decode_json_response(&body);
+        };
+        tracing::warn!(
+            attempt = attempts,
+            max_attempts = retry_policy.max_attempts,
+            delay_ms = delay.as_millis(),
+            "Rentman API request will be retried: {error:#}"
+        );
+        tokio::time::sleep(delay).await;
     }
-
-    Err(last_error.unwrap_or_else(|| anyhow!("Rentman API max retries exceeded")))
 }
 
-// Coverage is disabled because serde's generic deserializer shape is
-// response-specific; empty-body normalization is covered separately.
-#[cfg_attr(coverage_nightly, coverage(off))]
+/// Transport failures where the request may not have reached Rentman or the
+/// response got lost, so repeating an idempotent request is safe.
+fn is_retryable_transport_error(error: &reqwest::Error) -> bool {
+    error.is_timeout() || error.is_connect() || error.is_request()
+}
+
+/// Returns how long to wait before the next attempt, or `None` when the policy
+/// allows no further attempt. A `Retry-After` from Rentman wins over backoff.
+fn retry_delay(
+    retry_policy: RetryPolicy,
+    attempts: usize,
+    retry_after: Option<Duration>,
+    backoff: &mut backon::ExponentialBackoff,
+) -> Option<Duration> {
+    if attempts >= retry_policy.max_attempts {
+        return None;
+    }
+    Some(
+        retry_after
+            .or_else(|| backoff.next())
+            .unwrap_or(retry_policy.base_delay),
+    )
+}
+
 fn decode_json_response<T: for<'de> Deserialize<'de>>(body: &[u8]) -> Result<T> {
     serde_json::from_slice(json_decode_body(body))
         .context("Rentman API response body is invalid JSON")
@@ -81,65 +123,12 @@ fn json_decode_body(body: &[u8]) -> &[u8] {
     if body.is_empty() { b"null" } else { body }
 }
 
-// Coverage is disabled for the same reason as `send_with_retry`: the unit
-// variant differs only in response decoding and still depends on async IO.
-#[cfg_attr(coverage_nightly, coverage(off))]
-pub(crate) async fn send_with_retry_unit(
-    limiter: Arc<CompositeRateLimiter>,
-    retry_policy: RetryPolicy,
-    request: reqwest::RequestBuilder,
-) -> Result<()> {
-    let mut next_request = Some(request);
-    let mut last_error = None;
-    let mut backoff = retry_policy.backoff();
-
-    for attempt in 0..retry_policy.max_attempts {
-        limiter.acquire().await;
-
-        let request = next_request
-            .take()
-            .ok_or_else(|| anyhow!("request could not be cloned for retry"))?;
-        next_request = request.try_clone();
-
-        let response = match request.send().await {
-            Ok(response) => response,
-            Err(error) if error.is_timeout() || error.is_connect() || error.is_request() => {
-                last_error = Some(anyhow!("Rentman API request failed: {error}"));
-                sleep_before_retry("Rentman", retry_policy, attempt, None, &mut backoff).await;
-                continue;
-            }
-            Err(error) => return Err(error.into()),
-        };
-
-        if !response.status().is_success() {
-            let status = response.status();
-            let retry_after = retry_after_delay(response.headers());
-            let body = response.text().await.unwrap_or_default();
-            let error = anyhow!("Rentman API returned {status}: {body}");
-            if is_retryable_status(status) {
-                last_error = Some(error);
-                sleep_before_retry("Rentman", retry_policy, attempt, retry_after, &mut backoff)
-                    .await;
-                continue;
-            }
-            return Err(error);
-        }
-
-        return Ok(());
-    }
-
-    Err(last_error.unwrap_or_else(|| anyhow!("Rentman API max retries exceeded")))
-}
-
 pub(crate) struct CompositeRateLimiter {
     per_request: DirectRateLimiter,
     per_day: DirectRateLimiter,
 }
 
 impl CompositeRateLimiter {
-    // Coverage is disabled because governor's internal clock and token bucket
-    // state are integration behavior, not deterministic client logic.
-    #[cfg_attr(coverage_nightly, coverage(off))]
     pub(crate) fn new(min_interval: Duration) -> Self {
         Self {
             per_request: RateLimiter::direct(quota_with_burst(min_interval, 1)),
@@ -150,9 +139,6 @@ impl CompositeRateLimiter {
         }
     }
 
-    // Coverage is disabled because this waits on governor's async clock; rate
-    // limit configuration is covered through construction and request tests.
-    #[cfg_attr(coverage_nightly, coverage(off))]
     async fn acquire(&self) {
         self.per_request.until_ready().await;
         self.per_day.until_ready().await;
@@ -239,39 +225,13 @@ fn retry_after_delay(headers: &HeaderMap) -> Option<Duration> {
     (retry_at.with_timezone(&Utc) - now).to_std().ok()
 }
 
-// Coverage is disabled because this function intentionally waits on async
-// timers; retry classification and Retry-After parsing are tested separately.
-#[cfg_attr(coverage_nightly, coverage(off))]
-async fn sleep_before_retry(
-    api: &'static str,
-    retry_policy: RetryPolicy,
-    attempt: usize,
-    retry_after: Option<Duration>,
-    backoff: &mut backon::ExponentialBackoff,
-) {
-    if attempt + 1 >= retry_policy.max_attempts {
-        return;
-    }
-
-    let delay = retry_after
-        .or_else(|| backoff.next())
-        .unwrap_or(retry_policy.base_delay);
-    tracing::warn!(
-        api,
-        attempt = attempt + 1,
-        max_attempts = retry_policy.max_attempts,
-        delay_ms = delay.as_millis(),
-        "API request will be retried"
-    );
-    tokio::time::sleep(delay).await;
-}
-
 #[cfg(test)]
 // Coverage is disabled for test code so the production 100% gate measures only
 // library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;
+    use crate::test_support::*;
 
     use chrono::Utc;
 
@@ -334,5 +294,282 @@ mod tests {
 
         headers.insert(RETRY_AFTER, HeaderValue::from_bytes(&[0xFF]).unwrap());
         assert!(retry_after_delay(&headers).is_none());
+    }
+
+    fn fast_policy(max_attempts: usize) -> RetryPolicy {
+        RetryPolicy {
+            max_attempts,
+            base_delay: Duration::from_millis(1),
+        }
+    }
+
+    fn fast_limiter() -> CompositeRateLimiter {
+        CompositeRateLimiter::new(Duration::from_millis(1))
+    }
+
+    fn get(server: &TestServer) -> reqwest::RequestBuilder {
+        reqwest::Client::new().get(format!("{}/items", server.base_url()))
+    }
+
+    #[tokio::test]
+    async fn retries_transient_status_until_success() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            text_response("HTTP/1.1 502 Bad Gateway", "later"),
+            json_response(r#"{"ok":true}"#),
+        ]);
+
+        let subscriber = RecordingSubscriber::default();
+        let _logging = tracing::subscriber::set_default(subscriber.clone());
+
+        let response = send_with_retries(&fast_limiter(), fast_policy(3), get(&server))
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        let events = subscriber.events();
+        assert_eq!(events.len(), 2, "{events:?}");
+        assert!(events[0].contains("attempt=1"), "{events:?}");
+        assert!(events[0].contains("max_attempts=3"), "{events:?}");
+        assert!(
+            events[0].contains("will be retried: Rentman API returned 503"),
+            "{events:?}"
+        );
+        assert!(events[1].contains("attempt=2"), "{events:?}");
+        assert_eq!(response.text().await.unwrap(), r#"{"ok":true}"#);
+        for _ in 0..3 {
+            assert_request(&server.next_request(), "GET", "/items");
+        }
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn returns_last_error_when_attempts_are_exhausted() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "first"),
+            text_response("HTTP/1.1 429 Too Many Requests", "second"),
+            json_response(r#"{"unused":true}"#),
+        ]);
+
+        let error = send_with_retries(&fast_limiter(), fast_policy(2), get(&server))
+            .await
+            .unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "Rentman API returned 429 Too Many Requests: second"
+        );
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn does_not_retry_permanent_status() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+            json_response(r#"{"unused":true}"#),
+        ]);
+
+        let error = send_with_retries(&fast_limiter(), fast_policy(3), get(&server))
+            .await
+            .unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "Rentman API returned 400 Bad Request: broken"
+        );
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn retries_connections_closed_without_response() {
+        // An empty response closes the connection before any status line.
+        let server = spawn_server(vec![
+            String::new(),
+            empty_response("HTTP/1.1 204 No Content"),
+        ]);
+
+        send_with_retry_unit(Arc::new(fast_limiter()), fast_policy(2), get(&server))
+            .await
+            .unwrap();
+
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn reports_transport_failure_after_last_attempt() {
+        // Bind and drop a listener to get a port nothing listens on.
+        let address = std::net::TcpListener::bind("127.0.0.1:0")
+            .unwrap()
+            .local_addr()
+            .unwrap();
+        let request = reqwest::Client::new().get(format!("http://{address}/items"));
+
+        let error = send_with_retries(&fast_limiter(), fast_policy(2), request)
+            .await
+            .unwrap_err();
+
+        assert!(
+            error.to_string().starts_with("Rentman API request failed:"),
+            "{error:#}"
+        );
+    }
+
+    #[tokio::test]
+    async fn does_not_retry_requests_that_cannot_be_built() {
+        let request = reqwest::Client::new()
+            .get("http://127.0.0.1:9/items")
+            .header("x-invalid", "line\nbreak");
+
+        let error = send_with_retries(&fast_limiter(), fast_policy(3), request)
+            .await
+            .unwrap_err();
+
+        let error = error.downcast::<reqwest::Error>().unwrap();
+        assert!(error.is_builder(), "{error:#}");
+    }
+
+    #[test]
+    fn retry_delay_prefers_retry_after_and_stops_at_max_attempts() {
+        let policy = RetryPolicy {
+            max_attempts: 3,
+            base_delay: Duration::from_millis(100),
+        };
+        let mut backoff = policy.backoff();
+
+        assert_eq!(
+            retry_delay(policy, 1, Some(Duration::from_secs(7)), &mut backoff),
+            Some(Duration::from_secs(7))
+        );
+        assert_eq!(
+            retry_delay(policy, 2, None, &mut backoff),
+            Some(Duration::from_millis(100)),
+            "first backoff step equals the base delay"
+        );
+        assert_eq!(
+            retry_delay(policy, 3, Some(Duration::from_secs(7)), &mut backoff),
+            None
+        );
+    }
+
+    #[test]
+    fn retry_delay_falls_back_to_base_delay_when_backoff_is_exhausted() {
+        let policy = RetryPolicy {
+            max_attempts: 5,
+            base_delay: Duration::from_millis(30),
+        };
+        let mut backoff = policy.single_attempt().backoff();
+
+        assert_eq!(
+            retry_delay(policy, 1, None, &mut backoff),
+            Some(Duration::from_millis(30))
+        );
+    }
+
+    #[test]
+    fn single_attempt_policy_never_waits_for_a_retry() {
+        let policy = fast_policy(4).single_attempt();
+        let mut backoff = policy.backoff();
+
+        assert_eq!(retry_delay(policy, 1, None, &mut backoff), None);
+    }
+
+    #[tokio::test]
+    async fn rate_limiter_spaces_requests_by_the_minimum_interval() {
+        let limiter = CompositeRateLimiter::new(Duration::from_millis(50));
+
+        let started = std::time::Instant::now();
+        limiter.acquire().await;
+        limiter.acquire().await;
+        limiter.acquire().await;
+
+        assert!(
+            started.elapsed() >= Duration::from_millis(100),
+            "three requests need at least two intervals, took {:?}",
+            started.elapsed()
+        );
+    }
+
+    #[tokio::test]
+    async fn does_not_retry_permanent_transport_errors() {
+        let server = spawn_server(vec![
+            "HTTP/1.1 302 Found\r\nLocation: /elsewhere\r\nContent-Length: 0\r\n\r\n".to_string(),
+            json_response(r#"{"unused":true}"#),
+        ]);
+        // A redirect beyond the client's limit is a permanent client-side error.
+        let request = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::limited(0))
+            .build()
+            .unwrap()
+            .get(format!("{}/items", server.base_url()));
+
+        let error = send_with_retries(&fast_limiter(), fast_policy(3), request)
+            .await
+            .unwrap_err();
+
+        let error = error.downcast::<reqwest::Error>().unwrap();
+        assert!(error.is_redirect(), "{error:#}");
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn decodes_json_bodies_and_reports_every_failure() {
+        let server = spawn_server(vec![
+            json_response(r#"{"id":7}"#),
+            empty_response("HTTP/1.1 200 OK"),
+            text_response("HTTP/1.1 200 OK", "not json"),
+            // The connection closes in the middle of a chunked body.
+            "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n9\r\n{\"id\"".to_string(),
+            text_response("HTTP/1.1 404 Not Found", "missing"),
+        ]);
+        let limiter = Arc::new(fast_limiter());
+
+        let value: serde_json::Value =
+            send_with_retry(limiter.clone(), fast_policy(1), get(&server))
+                .await
+                .unwrap();
+        assert_eq!(value, serde_json::json!({"id": 7}));
+
+        let empty: serde_json::Value =
+            send_with_retry(limiter.clone(), fast_policy(1), get(&server))
+                .await
+                .unwrap();
+        assert_eq!(
+            empty,
+            serde_json::Value::Null,
+            "an empty body decodes as JSON null"
+        );
+
+        let error =
+            send_with_retry::<serde_json::Value>(limiter.clone(), fast_policy(1), get(&server))
+                .await
+                .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Rentman API response body is invalid JSON"
+        );
+
+        let error = send_with_retry::<serde_json::Value>(limiter, fast_policy(1), get(&server))
+            .await
+            .unwrap_err();
+        let error = error.downcast::<reqwest::Error>().unwrap();
+        assert!(error.is_body() || error.is_decode(), "{error:#}");
+
+        let error = send_with_retry::<serde_json::Value>(
+            Arc::new(fast_limiter()),
+            fast_policy(1),
+            get(&server),
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Rentman API returned 404 Not Found: missing"
+        );
     }
 }

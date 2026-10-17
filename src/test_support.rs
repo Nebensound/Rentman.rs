@@ -7,6 +7,7 @@ use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
     sync::mpsc::{self, Receiver},
+    sync::{Arc, Mutex},
     thread,
     time::Duration,
 };
@@ -25,6 +26,12 @@ impl TestServer {
         self.requests
             .recv_timeout(Duration::from_secs(2))
             .expect("test server recorded request")
+    }
+
+    /// Asserts that no further request reached the server.
+    pub(crate) fn assert_no_more_requests(&self) {
+        let extra = self.requests.recv_timeout(Duration::from_millis(200));
+        assert!(extra.is_err(), "unexpected extra request: {extra:?}");
     }
 }
 
@@ -185,4 +192,54 @@ pub(crate) fn refresh_content_length(response: String) -> String {
         .join("\r\n");
 
     format!("{headers}\r\n\r\n{body}")
+}
+
+/// Tracing subscriber that records warnings and errors as `field=value` text, so tests
+/// can assert what the library logs.
+#[derive(Clone, Default)]
+pub(crate) struct RecordingSubscriber {
+    events: Arc<Mutex<Vec<String>>>,
+}
+
+impl RecordingSubscriber {
+    pub(crate) fn events(&self) -> Vec<String> {
+        self.events.lock().unwrap().clone()
+    }
+}
+
+impl tracing::Subscriber for RecordingSubscriber {
+    fn enabled(&self, metadata: &tracing::Metadata<'_>) -> bool {
+        // Only warnings and errors; dependencies log a lot at debug level.
+        *metadata.level() <= tracing::Level::WARN
+    }
+
+    fn new_span(&self, _: &tracing::span::Attributes<'_>) -> tracing::span::Id {
+        tracing::span::Id::from_u64(1)
+    }
+
+    fn record(&self, _: &tracing::span::Id, _: &tracing::span::Record<'_>) {}
+
+    fn record_follows_from(&self, _: &tracing::span::Id, _: &tracing::span::Id) {}
+
+    fn event(&self, event: &tracing::Event<'_>) {
+        let mut text = FieldText::default();
+        event.record(&mut text);
+        self.events
+            .lock()
+            .unwrap()
+            .push(text.0.trim_end().to_string());
+    }
+
+    fn enter(&self, _: &tracing::span::Id) {}
+
+    fn exit(&self, _: &tracing::span::Id) {}
+}
+
+#[derive(Default)]
+struct FieldText(String);
+
+impl tracing::field::Visit for FieldText {
+    fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
+        self.0.push_str(&format!("{}={value:?} ", field.name()));
+    }
 }
