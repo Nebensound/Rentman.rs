@@ -1,11 +1,17 @@
 //! Live tests against the real Rentman API.
 //!
 //! These tests are ignored by default so `cargo test` never needs real
-//! credentials. Run them explicitly with a real API token:
+//! credentials. Run them explicitly with a real API token, either from the
+//! environment or from a git-ignored `.env` file in the crate root (see
+//! `.env.example`):
 //!
 //! ```bash
-//! RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored
+//! cp .env.example .env   # then fill in RENTMAN_API_TOKEN
+//! cargo test --test live_api -- --ignored
 //! ```
+//!
+//! A `RENTMAN_API_TOKEN` already set in the environment takes precedence over
+//! the `.env` file.
 //!
 //! Every documented `GET` collection endpoint has its own generated test in
 //! `live/generated_sweep.rs`, so a drifted endpoint shows up as an individual
@@ -22,8 +28,11 @@ fn live_client() -> RentmanClient {
     static CLIENT: OnceLock<RentmanClient> = OnceLock::new();
     CLIENT
         .get_or_init(|| {
-            let token = std::env::var("RENTMAN_API_TOKEN")
-                .expect("RENTMAN_API_TOKEN must be set to run live Rentman API tests");
+            // A missing `.env` is fine: CI provides the token via the environment.
+            dotenvy::dotenv().ok();
+            let token = std::env::var("RENTMAN_API_TOKEN").expect(
+                "RENTMAN_API_TOKEN must be set (environment or .env) to run live Rentman API tests",
+            );
             RentmanClient::new(RentmanApiToken::new(token))
         })
         .clone()
