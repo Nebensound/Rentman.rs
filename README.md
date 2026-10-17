@@ -92,7 +92,10 @@ equipment item, a test writes its current price back unchanged through
 `update_equipment_prices()` and through a typed `send_once()` request, and
 checks that no price field changed. Without the variable nothing is written.
 Payments are not covered, because a created payment cannot be undone without
-side effects.
+side effects; that needs a dedicated Rentman test account. In CI the
+`live-api` workflow reads the ID from the optional `RENTMAN_LIVE_WRITE_EQUIPMENT_ID`
+repository variable (a variable, not a secret, because the ID is not
+confidential).
 
 Every documented `GET` collection endpoint without path parameters has its own
 generated test in `tests/live/generated_sweep.rs`: each calls the endpoint

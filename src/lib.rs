@@ -185,6 +185,13 @@ pub enum PaymentImportSource {
 /// for money-like amounts: JSON numbers are read and written from their exact
 /// decimal text, never through `f64`. Values with more than 28 significant
 /// digits are rejected instead of being rounded.
+///
+/// The type deliberately has no currency and no arithmetic: Rentman's API has
+/// no currency field per amount, the currency is an account setting. It is a
+/// wire-boundary type, not a money type for domain logic. Convert it into your
+/// own currency-carrying money type at the boundary, so amounts of different
+/// currencies or meanings (net and gross) cannot be mixed. See "Deviations" in
+/// the [README](https://github.com/Nebensound/Rentman.rs#deviations).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RentmanAmount(Decimal);
 
@@ -499,6 +506,8 @@ impl RentmanClient {
     }
 
     /// Updates an existing Rentman payment.
+    ///
+    /// `PUT` is idempotent, so transient failures are retried.
     pub async fn update_payment(
         &self,
         payment_id: PaymentId,
@@ -512,6 +521,12 @@ impl RentmanClient {
     }
 
     /// Creates a payment on a Rentman invoice.
+    ///
+    /// The request is sent exactly once, without retrying: creating a payment
+    /// is not idempotent, and when only the response gets lost a retry would
+    /// book the payment twice. On an error the outcome is unknown; reconcile by
+    /// reading the invoice's payments with [`Self::all_payments_by_invoice`]
+    /// before creating it again.
     pub async fn create_payment(
         &self,
         invoice_id: InvoiceId,
@@ -519,7 +534,7 @@ impl RentmanClient {
     ) -> Result<()> {
         self.request(Method::POST, &format!("invoices/{invoice_id}/payments"))
             .json(payload)
-            .send_unit()
+            .send_unit_once()
             .await
             .with_context(|| format!("Rentman payment create failed for invoice {invoice_id}"))
     }
@@ -558,6 +573,8 @@ impl RentmanClient {
     }
 
     /// Updates the price fields of an equipment item.
+    ///
+    /// `PUT` is idempotent, so transient failures are retried.
     pub async fn update_equipment_prices(
         &self,
         equipment_id: EquipmentId,
@@ -723,8 +740,18 @@ impl RentmanRequestBuilder {
     }
 
     async fn send_unit(self) -> Result<()> {
-        let client = self.client;
-        send_with_retry_unit(client.limiter, client.retry_policy, self.request).await
+        let retry_policy = self.client.retry_policy;
+        self.send_unit_with(retry_policy).await
+    }
+
+    /// Sends a non-idempotent write exactly once.
+    async fn send_unit_once(self) -> Result<()> {
+        let retry_policy = self.client.retry_policy.single_attempt();
+        self.send_unit_with(retry_policy).await
+    }
+
+    async fn send_unit_with(self, retry_policy: RetryPolicy) -> Result<()> {
+        send_with_retry_unit(self.client.limiter, retry_policy, self.request).await
     }
 }
 
@@ -1108,9 +1135,10 @@ mod tests {
             EmailAddress, ItemResponse, NoContent, NoRequest, PaymentRequest,
             PaymentRequestPaymentImportSource, ResourceReference,
         },
-        parse_duration_ms, parse_usize, retry_after_delay,
+        parse_duration_ms, parse_exact_amount, parse_usize, retry_after_delay,
     };
     use chrono::{DateTime, Utc};
+    use proptest::prelude::*;
     use reqwest::{
         StatusCode,
         header::{HeaderMap, HeaderValue, RETRY_AFTER},
@@ -1499,6 +1527,33 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn creates_payment_exactly_once_on_transient_errors() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap_err();
+        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+
+        // Without a retry the second prepared response is still unused, so the
+        // next call receives it: the failed create reached the server once.
+        client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap();
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+    }
+
+    #[tokio::test]
     async fn creates_missing_payment() {
         let server = spawn_server(vec![empty_response("HTTP/1.1 200 OK")]);
         let client = RentmanClient::with_base_url(
@@ -1786,6 +1841,85 @@ mod tests {
                 .unwrap_err()
                 .to_string();
             assert!(error.contains("is not an exact decimal"), "{text}: {error}");
+        }
+    }
+
+    /// `Decimal` values within the 96-bit mantissa and 28 decimal places.
+    fn any_decimal() -> impl Strategy<Value = Decimal> {
+        let max_mantissa = (1_i128 << 96) - 1;
+        (-max_mantissa..=max_mantissa, 0_u32..=28)
+            .prop_map(|(mantissa, scale)| Decimal::from_i128_with_scale(mantissa, scale))
+    }
+
+    proptest! {
+        #[test]
+        fn amount_round_trips_through_json(value in any_decimal()) {
+            let json = serde_json::to_string(&RentmanAmount::new(value)).unwrap();
+            let parsed: RentmanAmount = serde_json::from_str(&json).unwrap();
+            prop_assert_eq!(parsed.as_decimal(), value, "{}", json);
+        }
+
+        #[test]
+        fn scientific_and_plain_notation_parse_to_the_same_amount(
+            mantissa in any::<i64>(),
+            scale in 0_u32..=28,
+            extra_zeros in 0_u32..=5,
+            upper_case in any::<bool>(),
+        ) {
+            let expected = Decimal::from_i128_with_scale(i128::from(mantissa), scale);
+            let e = if upper_case { 'E' } else { 'e' };
+            // `{m}{zeros}e-{scale + zeros}` is the same value with trailing
+            // powers of ten moved into the exponent.
+            let zeros = "0".repeat(extra_zeros as usize);
+            let shifted = format!("{mantissa}{zeros}{e}-{}", scale + extra_zeros);
+            let plain = expected.to_string();
+
+            prop_assert_eq!(parse_exact_amount(&shifted).unwrap().as_decimal(), expected);
+            prop_assert_eq!(parse_exact_amount(&plain).unwrap().as_decimal(), expected);
+        }
+
+        #[test]
+        fn positive_exponents_multiply_exactly(
+            mantissa in any::<i64>(),
+            exponent in 0_u32..=9,
+        ) {
+            let expected = Decimal::from(mantissa) * Decimal::from(10_i64.pow(exponent));
+            let text = format!("{mantissa}e{exponent}");
+
+            prop_assert_eq!(parse_exact_amount(&text).unwrap().as_decimal(), expected);
+        }
+
+        #[test]
+        fn over_precise_amounts_are_rejected_not_rounded(
+            digits in "[0-9]{28,40}",
+            last in 1_u8..=9,
+            negative in any::<bool>(),
+        ) {
+            // At least 29 decimal places with a non-zero last digit cannot be
+            // represented exactly by `Decimal`.
+            let sign = if negative { "-" } else { "" };
+            let text = format!("{sign}0.{digits}{last}");
+
+            let error = parse_exact_amount(&text).unwrap_err();
+            prop_assert!(error.contains("is not an exact decimal"), "{}", error);
+        }
+
+        #[test]
+        fn number_like_input_never_panics(
+            text in "-?[0-9]{1,40}(\\.[0-9]{0,40})?([eE][-+]?[0-9]{1,25})?",
+        ) {
+            if let Ok(amount) = parse_exact_amount(&text) {
+                // Whatever is accepted is the exact value: it formats back to
+                // a number that parses to the same decimal.
+                let again = parse_exact_amount(&amount.as_decimal().to_string()).unwrap();
+                prop_assert_eq!(again, amount);
+            }
+        }
+
+        #[test]
+        fn arbitrary_input_never_panics(text in any::<String>()) {
+            let _ = parse_exact_amount(&text);
+            let _ = serde_json::from_str::<RentmanAmount>(&text);
         }
     }
 

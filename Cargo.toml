@@ -29,3 +29,4 @@ unexpected_cfgs = { level = "warn", check-cfg = ["cfg(coverage_nightly)"] }
 
 [dev-dependencies]
 dotenvy = "0.15.7"
+proptest = "1.12.0"
