@@ -10,6 +10,18 @@ on:
   # new head commit are started explicitly.
   workflow_dispatch:
 
+# Jobs get write access only where they need it.
+permissions:
+  contents: read
+
+# A newer push to the same ref supersedes a running check. Runs on main
+# publish releases, so every main run gets its own group (per commit): a shared
+# group would let GitHub replace a pending main run, and that merge would never
+# be released.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -21,7 +33,7 @@ jobs:
       version_tag: ${{ steps.effective.outputs.version_tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # semantic-version walks the full history and tags to derive the version.
           fetch-depth: 0
@@ -30,7 +42,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       - name: Calculate semantic version
         id: semantic
-        uses: PaulHatch/semantic-version@v6.0.4
+        uses: PaulHatch/semantic-version@4d6da96a9bc3116da3613309a11ff75fba58eb8d # v6.0.4
         with:
           tag_prefix: "v"
           major_pattern: "(MAJOR)"
@@ -87,13 +99,14 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
+          toolchain: stable
           components: rustfmt, clippy
       - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
       - name: Apply semantic version to Cargo.toml
@@ -106,15 +119,74 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
       - name: Run documentation tests
-        run: cargo test --workspace --doc
+        run: cargo test --workspace --locked --doc
       - name: Build documentation
         env:
           RUSTDOCFLAGS: -Dwarnings
-        run: cargo doc --workspace --no-deps
+        run: cargo doc --workspace --locked --no-deps
       - name: Run clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --locked --all-targets -- -D warnings
+
+  msrv:
+    name: MSRV build and tests
+    runs-on: ubuntu-latest
+    needs: version
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read MSRV from Cargo.toml
+        id: msrv
+        run: |
+          set -euo pipefail
+          msrv="$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml)"
+          if [ -z "$msrv" ]; then
+            echo "::error::Cargo.toml declares no rust-version"
+            exit 1
+          fi
+          echo "version=$msrv" >> "$GITHUB_OUTPUT"
+      - name: Install Rust ${{ steps.msrv.outputs.version }}
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: ${{ steps.msrv.outputs.version }}
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-on-failure: true
+      - name: Build and test with the MSRV
+        run: cargo test --workspace --locked
+
+  package:
+    name: Package build and smoke test
+    runs-on: ubuntu-latest
+    needs: version
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-on-failure: true
+      # The version is not rewritten here: the package is checked as committed,
+      # so the working tree stays clean and no --allow-dirty is needed.
+      - name: Build the package and smoke test it outside the source tree
+        run: scripts/package_smoke_test.sh
+      - name: Upload the verified package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rentman-client-crate-${{ github.sha }}
+          path: target/package/*.crate
+          if-no-files-found: error
+          retention-days: 7
 
   coverage:
     runs-on: ubuntu-latest
@@ -123,17 +195,18 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust nightly
-        uses: dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
+          toolchain: nightly
           components: llvm-tools-preview
       - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           tool: cargo-llvm-cov
       - name: Apply semantic version to Cargo.toml
@@ -153,26 +226,34 @@ jobs:
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: [version, test, coverage]
+    needs: [version, test, coverage, msrv, package]
     permissions:
       contents: write
     env:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
       - name: Apply semantic version to Cargo.toml
         env:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
           sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
+      # On main the version job has already verified that Cargo.toml carries
+      # the effective version, so the step above changes nothing and the tree
+      # is clean. The package is verified again from this exact commit before
+      # it is published; publishing never uses --allow-dirty.
+      - name: Verify the package from this commit
+        run: scripts/package_smoke_test.sh
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish --allow-dirty
+        run: cargo publish --locked
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
