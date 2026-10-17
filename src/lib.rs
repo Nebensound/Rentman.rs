@@ -228,14 +228,28 @@ fn parse_exact_amount(text: &str) -> Result<RentmanAmount, String> {
     if !is_number {
         return Err(format!("Rentman amount must be a JSON number, got {text}"));
     }
-    let parsed = if text.contains(['e', 'E']) {
-        Decimal::from_scientific(text)
-    } else {
-        Decimal::from_str_exact(text)
+    let parsed = match text.split_once(['e', 'E']) {
+        Some((significand, exponent)) => parse_exact_scientific(significand, exponent),
+        None => Decimal::from_str_exact(text).ok(),
     };
     parsed
         .map(RentmanAmount)
-        .map_err(|error| format!("Rentman amount {text} is not an exact decimal: {error}"))
+        .ok_or_else(|| format!("Rentman amount {text} is not an exact decimal"))
+}
+
+/// Applies the exponent to an exactly parsed significand with checked integer
+/// arithmetic. `Decimal::from_scientific` would round an over-precise
+/// significand instead of rejecting it.
+fn parse_exact_scientific(significand: &str, exponent: &str) -> Option<Decimal> {
+    let significand = Decimal::from_str_exact(significand).ok()?;
+    let exponent: i64 = exponent.parse().ok()?;
+    let scale = i64::from(significand.scale()).checked_sub(exponent)?;
+    if scale >= 0 {
+        Decimal::try_from_i128_with_scale(significand.mantissa(), u32::try_from(scale).ok()?).ok()
+    } else {
+        let factor = 10_i128.checked_pow(u32::try_from(-scale).ok()?)?;
+        Decimal::try_from_i128_with_scale(significand.mantissa().checked_mul(factor)?, 0).ok()
+    }
 }
 
 /// Rentman invoice with the fields needed for payment reconciliation.
@@ -1686,6 +1700,8 @@ mod tests {
         assert_eq!(amount.as_decimal(), Decimal::new(1999, 2));
         let scientific: RentmanAmount = serde_json::from_str("1.5e2").unwrap();
         assert_eq!(scientific.as_decimal(), Decimal::new(150, 0));
+        let small: RentmanAmount = serde_json::from_str("1.5E-2").unwrap();
+        assert_eq!(small.as_decimal(), Decimal::new(15, 3));
         let negative: RentmanAmount = serde_json::from_str("-0.01").unwrap();
         assert_eq!(negative.as_decimal(), Decimal::new(-1, 2));
         assert!(serde_json::from_str::<RentmanAmount>("\"expensive\"").is_err());
@@ -1696,6 +1712,32 @@ mod tests {
             .to_string();
         assert!(error.contains("is not an exact decimal"), "{error}");
         assert_eq!(EquipmentId::new(2163).to_string(), "2163");
+    }
+
+    #[test]
+    fn rejects_scientific_amounts_that_are_not_exact() {
+        for text in [
+            // Over-precise significand: would be rounded by `from_scientific`.
+            "0.12345678901234567890123456789e0",
+            // Exponent outside `i64`.
+            "1e99999999999999999999",
+            // Scale computation overflows.
+            "1e-9223372036854775808",
+            // Scale outside `u32`, or beyond the 28 decimal places of `Decimal`.
+            "1e-5000000000",
+            "1e-29",
+            // Exponent outside `u32`, power of ten or product outside `i128`.
+            "1e5000000000",
+            "1e39",
+            "20e38",
+            // Integer beyond the 96 bits of `Decimal`.
+            "1e30",
+        ] {
+            let error = serde_json::from_str::<RentmanAmount>(text)
+                .unwrap_err()
+                .to_string();
+            assert!(error.contains("is not an exact decimal"), "{text}: {error}");
+        }
     }
 
     #[test]
