@@ -9,9 +9,9 @@ Security fixes are released for the latest published version of
 
 Please do **not** open a public issue for security problems.
 
-Report vulnerabilities privately through GitHub:
-[Report a vulnerability](https://github.com/Nebensound/Rentman.rs/security/advisories/new)
-(Security tab → Advisories → "Report a vulnerability").
+Report vulnerabilities privately by e-mail to
+[info@nebensound.com](mailto:info@nebensound.com), with "Security: rentman-client"
+in the subject.
 
 Include the affected version, a description of the impact, and steps or code
 to reproduce. Never include a real Rentman API token; use a placeholder.
