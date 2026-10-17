@@ -14,10 +14,12 @@ on:
 permissions:
   contents: read
 
-# A newer push to the same ref supersedes a running check. Runs on main are
-# never cancelled, because they publish releases.
+# A newer push to the same ref supersedes a running check. Runs on main
+# publish releases, so every main run gets its own group (per commit): a shared
+# group would let GitHub replace a pending main run, and that merge would never
+# be released.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:

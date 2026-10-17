@@ -55,5 +55,22 @@ fn main() {
 }
 RUST
 
+# Build with the versions that `cargo package --locked` verified: start from
+# the repository lockfile, let cargo add only the smoke crate itself, and
+# refuse to continue if any dependency version changed.
+cp "$repo_root/Cargo.lock" "$work_dir/smoke/Cargo.lock"
 cd "$work_dir/smoke"
-cargo run --release --quiet
+cargo update --workspace --quiet
+
+locked_versions() {
+  awk '/^name = /{name=$3} /^version = /{print name, $3}' "$1" | sort -u
+}
+changed="$(comm -23 <(locked_versions Cargo.lock | grep -v '^"rentman-client-smoke" ') \
+  <(locked_versions "$repo_root/Cargo.lock"))"
+if [ -n "$changed" ]; then
+  echo "The smoke build would use dependency versions that Cargo.lock does not pin:" >&2
+  echo "$changed" >&2
+  exit 1
+fi
+
+cargo run --release --locked --quiet
