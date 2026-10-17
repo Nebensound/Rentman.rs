@@ -1,0 +1,22 @@
+name: Maintenance
+description: Refactoring, tests, CI, dependencies, or documentation without new behavior.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is outdated, fragile, or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
