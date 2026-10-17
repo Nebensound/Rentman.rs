@@ -1,0 +1,43 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the error, ideally its kind, operation, and status (`error.kind()`, `error.operation()`, `error.status()`).
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can it be reproduced?
+      description: Minimal code or steps. Never include a real API token.
+      render: rust
+    validations:
+      required: true
+  - type: input
+    id: crate-version
+    attributes:
+      label: rentman-client version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: rust-version
+    attributes:
+      label: Rust version (`rustc --version`)
+    validations:
+      required: true
+  - type: input
+    id: endpoint
+    attributes:
+      label: Affected endpoint or method
+      placeholder: "e.g. all_invoices() or GetFactuurCollectionEndpoint"
