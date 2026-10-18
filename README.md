@@ -102,6 +102,17 @@ cargo test --test live_api -- --ignored
 A token already set in the environment takes precedence over `.env`, so
 `RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored` keeps working.
 
+Live tests only read, with one opt-in exception: when
+`RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
+equipment item, a test writes its current price back unchanged through
+`update_equipment_prices()` and through a typed `send_once()` request, and
+checks that no price field changed. Without the variable nothing is written.
+Payments are not covered, because a created payment cannot be undone without
+side effects; that needs a dedicated Rentman test account. In CI the
+`live-api` workflow reads the ID from the optional `RENTMAN_LIVE_WRITE_EQUIPMENT_ID`
+repository variable (a variable, not a secret, because the ID is not
+confidential).
+
 Every documented `GET` collection endpoint without path parameters has its own
 generated test in `tests/live/generated_sweep.rs`: each calls the endpoint
 with `limit=1` and fails individually when the live payload no longer matches
@@ -120,6 +131,31 @@ cargo +nightly llvm-cov --workspace --locked \
   --fail-under-lines 100 \
   --fail-under-functions 100
 ```
+
+Fuzzing of amount parsing (nightly, [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)):
+
+```bash
+cargo install cargo-fuzz --version 0.13.2 --locked
+mkdir -p fuzz/corpus/amount
+cargo +nightly fuzz run amount fuzz/corpus/amount fuzz/seeds/amount -- \
+  -max_total_time=60 -dict=fuzz/amount.dict
+```
+
+The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
+deserialization. It checks that parsing never panics, that every JSON number
+with an exponent up to ±1000 gives the same value as an independent
+arbitrary-precision reference (`bigdecimal`), and that every accepted amount
+survives a JSON round trip with value and scale. Every pull request runs it
+for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
+for 30 minutes every week and on manual dispatch. CI adds
+`--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
+the triple its own binary was built for, and a musl build has no address
+sanitizer. A crashing input is
+uploaded as a workflow artifact and reproduced with
+`cargo +nightly fuzz run amount <file>`; every finding becomes a regression
+test in the library. `fuzz/` is a separate crate with its own lockfile, kept
+in line with the library's `Cargo.lock`, and is not part of the published
+package.
 
 ## Versioning
 
@@ -161,6 +197,12 @@ the upper bound of strict typing:
 - API fields with a finite set of values are modeled as enums.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
+  `RentmanAmount` reads and writes JSON numbers from their exact text. An
+  amount with more precision than `Decimal` holds (more than 28 decimal places
+  or a mantissa beyond 96 bits) is rounded half away from zero to the nearest
+  value that fits, with a `tracing` warning naming the original and the
+  rounded value, so one such value cannot make a whole listing unreadable. An
+  integer part that does not fit is rejected.
 - Identifiers, domain keys, URLs, and API tokens are dedicated types.
 - `bool` is only acceptable for real on/off switches; domain states are modeled
   as enums.
@@ -201,6 +243,9 @@ instrumentation cannot measure the code structurally; "async IO", "timers", or
 "hard to test" are not valid reasons. Retries, backoff, rate limiting, and
 transport failures are tested against the local test server. Parsers and
 conversions such as exact amount parsing additionally get property-based tests.
+Amount parsing is also checked differentially: for generated number texts, an
+independent arbitrary-precision computation (`bigdecimal`) decides the expected
+value and whether it is exact or rounded, and the parser must agree.
 Unit tests live next to the module they test; integration and contract tests
 live in `tests/`. Error behavior is asserted on typed error variants, not on
 message substrings.
@@ -253,15 +298,10 @@ A deliberate deviation from these rules is documented here with its rationale,
 risk, and a linked follow-up issue. Open deviations are tracked in
 [#14](https://github.com/Nebensound/Rentman.rs/issues/14).
 
-- `create_payment` currently retries transient failures like every other
-  request. If the first `POST` succeeds but its response is lost, the retry
-  can book the payment twice. Until this is fixed, reconcile with
-  `all_payments_by_invoice` after a failed `create_payment` before creating
-  the payment again. Tracked in
-  [#15](https://github.com/Nebensound/Rentman.rs/issues/15).
 - `RentmanAmount` has no currency. Rentman's API sends amounts as bare numbers
   and the currency is an account setting, so the type is a wire-boundary type,
   not a money type for domain logic. Consumers convert it into their own
   currency-carrying type. Risk: mixing amounts of different currencies or
-  meanings (net/gross) if it is used beyond the boundary. Tracked in
-  [#23](https://github.com/Nebensound/Rentman.rs/issues/23).
+  meanings (net/gross) if it is used beyond the boundary. Decided in
+  [#23](https://github.com/Nebensound/Rentman.rs/issues/23); `RentmanAmount`'s
+  documentation states the same.

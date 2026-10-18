@@ -17,7 +17,7 @@ use reqwest::{
 };
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use serde_json::Value;
+use serde_json::{Value, value::RawValue};
 use std::{
     collections::HashMap, fmt, marker::PhantomData, num::NonZeroU32, sync::Arc, time::Duration,
 };
@@ -108,6 +108,24 @@ impl fmt::Display for PaymentId {
     }
 }
 
+/// Internal Rentman equipment ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
+#[serde(transparent)]
+pub struct EquipmentId(u64);
+
+impl EquipmentId {
+    /// Creates a Rentman equipment ID.
+    pub fn new(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl fmt::Display for EquipmentId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 /// Rentman invoice number.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(transparent)]
@@ -160,11 +178,23 @@ pub enum PaymentImportSource {
     None,
 }
 
-/// Exact decimal amount for Rentman payment payloads.
+/// Exact decimal amount at the Rentman API boundary.
 ///
-/// Rentman expects payment amounts as a bare number without a currency field.
+/// Rentman reads and writes amounts as bare numbers without a currency field.
 /// This type makes the API boundary explicit and prevents floating point values
-/// for money-like amounts.
+/// for money-like amounts: JSON numbers are read and written from their exact
+/// decimal text, never through `f64`. A value with more precision than
+/// `Decimal` holds (more than 28 decimal places, or more digits than its
+/// 96-bit mantissa) is rounded half away from zero to the nearest value that
+/// fits, and a warning is logged through `tracing`. Only a value whose integer
+/// part does not fit `Decimal` is rejected.
+///
+/// The type deliberately has no currency and no arithmetic: Rentman's API has
+/// no currency field per amount, the currency is an account setting. It is a
+/// wire-boundary type, not a money type for domain logic. Convert it into your
+/// own currency-carrying money type at the boundary, so amounts of different
+/// currencies or meanings (net and gross) cannot be mixed. See "Deviations" in
+/// the [README](https://github.com/Nebensound/Rentman.rs#deviations).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RentmanAmount(Decimal);
 
@@ -188,8 +218,177 @@ impl From<Decimal> for RentmanAmount {
 
 impl Serialize for RentmanAmount {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        Serialize::serialize(&self.0, serializer)
+        // `Decimal`'s own serde-float support would go through `f64`; the raw
+        // value writes the exact decimal text as a JSON number instead.
+        RawValue::from_string(self.0.to_string())
+            .expect("a decimal always formats as a valid JSON number")
+            .serialize(serializer)
     }
+}
+
+impl<'de> Deserialize<'de> for RentmanAmount {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let raw = Box::<RawValue>::deserialize(deserializer)?;
+        parse_amount(raw.get()).map_err(serde::de::Error::custom)
+    }
+}
+
+fn parse_amount(text: &str) -> Result<RentmanAmount, String> {
+    let is_number = text.starts_with(|c: char| c == '-' || c.is_ascii_digit());
+    if !is_number {
+        return Err(format!("Rentman amount must be a JSON number, got {text}"));
+    }
+    match parse_decimal(text) {
+        Some(ParsedDecimal::Exact(decimal)) => Ok(RentmanAmount(decimal)),
+        Some(ParsedDecimal::Rounded(decimal)) => {
+            tracing::warn!(
+                amount = text,
+                rounded = %decimal,
+                "Rentman amount has more precision than Decimal holds and was rounded"
+            );
+            Ok(RentmanAmount(decimal))
+        }
+        None => Err(format!("Rentman amount {text} does not fit a decimal")),
+    }
+}
+
+/// A parsed JSON number: either its exact value, or the nearest value that
+/// fits `Decimal`.
+enum ParsedDecimal {
+    Exact(Decimal),
+    Rounded(Decimal),
+}
+
+/// Parses a JSON number, or returns `None` when it is no number or its integer
+/// part does not fit `Decimal`.
+///
+/// A number that fits `Decimal` as written keeps its scale, so `12.50` stays
+/// `12.50` and `0.00` keeps two decimal places. Otherwise the number is
+/// normalized as text into significant digits and a power of ten, and
+/// `Decimal`'s bounds (96-bit mantissa, 28 decimal places) are checked only on
+/// that normalized form. So `0.00000000000000000000000000001e1` and
+/// `100000000000000000000000000000e-1` are exact. A value that still does not
+/// fit, such as `1e-29` or one with more digits than the mantissa holds, is
+/// rounded half away from zero instead of going through
+/// `Decimal::from_scientific`, whose rounding is not documented.
+fn parse_decimal(text: &str) -> Option<ParsedDecimal> {
+    let (negative, unsigned) = match text.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, text),
+    };
+    let (significand, exponent) = match unsigned.split_once(['e', 'E']) {
+        Some((significand, exponent)) => (significand, parse_exponent(exponent)?),
+        None => (unsigned, 0),
+    };
+    let (integer, fraction) = significand.split_once('.').unwrap_or((significand, ""));
+    let is_digits = |part: &str| part.bytes().all(|byte| byte.is_ascii_digit());
+    if integer.is_empty() || !is_digits(integer) || !is_digits(fraction) {
+        return None;
+    }
+
+    let digits = format!("{integer}{fraction}");
+    // `i128` holds every scale and power that `i64` exponents and string
+    // lengths produce.
+    let written_scale = fraction.len() as i128 - i128::from(exponent);
+    if let Some(decimal) = decimal_as_written(&digits, written_scale, negative) {
+        return Some(ParsedDecimal::Exact(decimal));
+    }
+
+    // value = significant × 10^power, with leading and trailing zeros removed.
+    let digits = digits.trim_start_matches('0');
+    let significant = digits.trim_end_matches('0');
+    if significant.is_empty() {
+        // Zero is exact for any exponent.
+        return Some(ParsedDecimal::Exact(Decimal::ZERO));
+    }
+    let trailing_zeros = digits.len() - significant.len();
+    let power = trailing_zeros as i128 - written_scale;
+    let sign = |magnitude: i128| if negative { -magnitude } else { magnitude };
+
+    let magnitude = significant.parse::<i128>().ok();
+    if power >= 0 {
+        // An integer that does not fit cannot be rounded without changing its
+        // order of magnitude.
+        let factor = 10_i128.checked_pow(u32::try_from(power).ok()?)?;
+        let mantissa = sign(magnitude?).checked_mul(factor)?;
+        return Decimal::try_from_i128_with_scale(mantissa, 0)
+            .ok()
+            .map(ParsedDecimal::Exact);
+    }
+    let scale = -power;
+    let exact = magnitude
+        .zip(u32::try_from(scale).ok().filter(|scale| *scale <= 28))
+        .and_then(|(magnitude, scale)| {
+            Decimal::try_from_i128_with_scale(sign(magnitude), scale).ok()
+        });
+    match exact {
+        Some(decimal) => Some(ParsedDecimal::Exact(decimal)),
+        None => round_to_fit(significant, scale, negative).map(ParsedDecimal::Rounded),
+    }
+}
+
+/// Rounds `significant × 10^-scale` half away from zero to the largest scale
+/// (at most 28) at which `Decimal` can hold it, or `None` when not even the
+/// integer part fits.
+fn round_to_fit(significant: &str, scale: i128, negative: bool) -> Option<Decimal> {
+    let length = significant.len() as i128;
+    for target in (0..=scale.min(28)).rev() {
+        let dropped = scale - target;
+        let (kept, next_digit) = if dropped > length {
+            ("", b'0')
+        } else {
+            let split = (length - dropped) as usize;
+            let next_digit = significant.as_bytes().get(split).copied().unwrap_or(b'0');
+            (&significant[..split], next_digit)
+        };
+        let kept: i128 = match kept {
+            "" => 0,
+            digits => match digits.parse() {
+                Ok(kept) => kept,
+                Err(_) => continue,
+            },
+        };
+        // Saturating: a saturated value does not fit `Decimal` either.
+        let magnitude = kept.saturating_add(i128::from(next_digit >= b'5'));
+        if magnitude == 0 {
+            return Some(Decimal::ZERO);
+        }
+        let mantissa = if negative { -magnitude } else { magnitude };
+        if let Ok(decimal) = Decimal::try_from_i128_with_scale(mantissa, target as u32) {
+            return Some(decimal);
+        }
+    }
+    None
+}
+
+/// Parses a JSON exponent (optional sign, then digits). An exponent beyond
+/// `i64` is saturated: every exponent that large has the same outcome (zero
+/// stays exact, a tiny value rounds to zero, a huge one is rejected), so the
+/// saturated value keeps those cases reachable instead of failing the parse.
+fn parse_exponent(text: &str) -> Option<i64> {
+    let (negative, digits) = match text.as_bytes().first() {
+        Some(b'-') => (true, &text[1..]),
+        Some(b'+') => (false, &text[1..]),
+        _ => (false, text),
+    };
+    if digits.is_empty() || !digits.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    // Validated digits only fail to parse by overflowing.
+    let magnitude = digits.parse::<i64>().unwrap_or(i64::MAX);
+    Some(if negative { -magnitude } else { magnitude })
+}
+
+/// The decimal with exactly the written digits and scale, if `Decimal` can
+/// hold it without normalizing.
+fn decimal_as_written(digits: &str, scale: i128, negative: bool) -> Option<Decimal> {
+    let scale = u32::try_from(scale).ok().filter(|scale| *scale <= 28)?;
+    let magnitude: i128 = match digits.trim_start_matches('0') {
+        "" => 0,
+        significant => significant.parse().ok()?,
+    };
+    let mantissa = if negative { -magnitude } else { magnitude };
+    Decimal::try_from_i128_with_scale(mantissa, scale).ok()
 }
 
 /// Rentman invoice with the fields needed for payment reconciliation.
@@ -202,6 +401,10 @@ pub struct RentmanInvoice {
     /// Payment status translated from Rentman's `is_paid` field.
     #[serde(rename = "is_paid")]
     pub payment_status: InvoicePaymentStatus,
+    /// Gross invoice total (`price_invat`). `None` when Rentman omits the
+    /// field.
+    #[serde(default)]
+    pub price_invat: Option<RentmanAmount>,
 }
 
 /// Existing Rentman payment.
@@ -211,6 +414,10 @@ pub struct RentmanPayment {
     pub id: PaymentId,
     /// Payment timestamp.
     pub moment: DateTime<FixedOffset>,
+    /// Payment amount. `None` when Rentman omits the field.
+    pub amount: Option<RentmanAmount>,
+    /// Payment description, e.g. to recognize automatically booked payments.
+    pub description: Option<String>,
 }
 
 /// Payload for creating or updating a Rentman payment.
@@ -241,6 +448,52 @@ struct PaymentListItem {
     id: PaymentId,
     moment: DateTime<FixedOffset>,
     invoice: String,
+    #[serde(default)]
+    amount: Option<RentmanAmount>,
+    #[serde(default)]
+    description: Option<String>,
+}
+
+/// Rentman equipment with the fields needed for price maintenance.
+#[derive(Debug, Clone, Deserialize)]
+pub struct RentmanEquipment {
+    /// Internal Rentman equipment ID.
+    pub id: EquipmentId,
+    /// Rental price per unit. `None` when Rentman sends `null` or omits the
+    /// field.
+    #[serde(default)]
+    pub price: Option<RentmanAmount>,
+    /// List price (new price). `None` when Rentman sends `null` or omits the
+    /// field.
+    #[serde(default)]
+    pub list_price: Option<RentmanAmount>,
+    /// Subrental costs. `None` when Rentman sends `null` or omits the field.
+    #[serde(default)]
+    pub subrental_costs: Option<RentmanAmount>,
+}
+
+/// Payload for updating the price fields of an equipment item.
+///
+/// All fields are optional: Rentman leaves fields that are not sent untouched
+/// on `PUT`, so callers only send the fields that actually change.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+pub struct EquipmentPricePayload {
+    /// New rental price. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
+    /// New list price. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub list_price: Option<RentmanAmount>,
+    /// New subrental costs. `None` omits the field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subrental_costs: Option<RentmanAmount>,
+}
+
+impl EquipmentPricePayload {
+    /// Returns whether the payload would not change any field.
+    pub fn is_empty(&self) -> bool {
+        self.price.is_none() && self.list_price.is_none() && self.subrental_costs.is_none()
+    }
 }
 
 impl RentmanClient {
@@ -293,7 +546,7 @@ impl RentmanClient {
             let response: model::CollectionResponse<RentmanInvoice> = self
                 .paginated_request(next_url.take(), "invoices", offset)
                 .query(&[
-                    ("fields", "id,number,is_paid".to_string()),
+                    ("fields", "id,number,is_paid,price_invat".to_string()),
                     ("limit", DEFAULT_PAGE_LIMIT.to_string()),
                 ])
                 .send_json()
@@ -328,7 +581,7 @@ impl RentmanClient {
             let response: model::CollectionResponse<PaymentListItem> = self
                 .paginated_request(next_url.take(), "payments", offset)
                 .query(&[
-                    ("fields", "id,moment,invoice".to_string()),
+                    ("fields", "id,moment,invoice,amount,description".to_string()),
                     ("limit", DEFAULT_PAGE_LIMIT.to_string()),
                 ])
                 .send_json()
@@ -346,6 +599,8 @@ impl RentmanClient {
                 result.entry(invoice_id).or_default().push(RentmanPayment {
                     id: item.id,
                     moment: item.moment,
+                    amount: item.amount,
+                    description: item.description,
                 });
             }
 
@@ -362,6 +617,8 @@ impl RentmanClient {
     }
 
     /// Updates an existing Rentman payment.
+    ///
+    /// `PUT` is idempotent, so transient failures are retried.
     pub async fn update_payment(
         &self,
         payment_id: PaymentId,
@@ -375,6 +632,12 @@ impl RentmanClient {
     }
 
     /// Creates a payment on a Rentman invoice.
+    ///
+    /// The request is sent exactly once, without retrying: creating a payment
+    /// is not idempotent, and when only the response gets lost a retry would
+    /// book the payment twice. On an error the outcome is unknown; reconcile by
+    /// reading the invoice's payments with [`Self::all_payments_by_invoice`]
+    /// before creating it again.
     pub async fn create_payment(
         &self,
         invoice_id: InvoiceId,
@@ -382,9 +645,59 @@ impl RentmanClient {
     ) -> Result<()> {
         self.request(Method::POST, &format!("invoices/{invoice_id}/payments"))
             .json(payload)
-            .send_unit()
+            .send_unit_once()
             .await
             .with_context(|| format!("Rentman payment create failed for invoice {invoice_id}"))
+    }
+
+    /// Loads all equipment that is not archived, with its price fields.
+    pub async fn all_active_equipment(&self) -> Result<Vec<RentmanEquipment>> {
+        let mut equipment = Vec::new();
+        let mut next_url = None;
+        let mut offset = 0;
+
+        loop {
+            let response: model::CollectionResponse<RentmanEquipment> = self
+                .paginated_request(next_url.take(), "equipment", offset)
+                .query(&[
+                    ("fields", "id,price,list_price,subrental_costs".to_string()),
+                    ("in_archive", "0".to_string()),
+                    ("limit", DEFAULT_PAGE_LIMIT.to_string()),
+                ])
+                .send_json()
+                .await
+                .context("Rentman equipment list lookup failed")?;
+
+            let should_fallback_to_offset = response.next_page_url.is_none()
+                && response.item_count >= response.limit
+                && response.limit > 0;
+            offset += response.limit;
+            next_url = response.next_page_url;
+            equipment.extend(response.data);
+
+            if next_url.is_none() && !should_fallback_to_offset {
+                break;
+            }
+        }
+
+        Ok(equipment)
+    }
+
+    /// Updates the price fields of an equipment item.
+    ///
+    /// `PUT` is idempotent, so transient failures are retried.
+    pub async fn update_equipment_prices(
+        &self,
+        equipment_id: EquipmentId,
+        payload: &EquipmentPricePayload,
+    ) -> Result<()> {
+        self.request(Method::PUT, &format!("equipment/{equipment_id}"))
+            .json(payload)
+            .send_unit()
+            .await
+            .with_context(|| {
+                format!("Rentman equipment update failed for equipment {equipment_id}")
+            })
     }
 
     fn paginated_request(
@@ -470,6 +783,33 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
             &self.path_params,
             &self.query_params,
             self.body,
+            self.client.retry_policy,
+        )
+        .await
+    }
+
+    /// Sends the request exactly once, without retrying.
+    ///
+    /// Use this for non-idempotent writes such as creating items: when only
+    /// the response gets lost, a retry would write twice. On an error the
+    /// outcome is unknown and the caller has to reconcile, e.g. by reading the
+    /// affected collection.
+    // Coverage is disabled because this generic async glue is monomorphized per
+    // endpoint; all branching is delegated to non-generic helpers below.
+    #[cfg_attr(coverage_nightly, coverage(off))]
+    pub async fn send_once(self) -> Result<E::Response>
+    where
+        E: endpoint::ExecutableEndpoint,
+        E::Request: Serialize,
+        E::Response: DeserializeOwned,
+    {
+        send_typed_endpoint(
+            &self.client,
+            E::SPEC,
+            &self.path_params,
+            &self.query_params,
+            self.body,
+            self.client.retry_policy.single_attempt(),
         )
         .await
     }
@@ -499,13 +839,30 @@ impl RentmanRequestBuilder {
     }
 
     async fn send_json<T: for<'de> Deserialize<'de>>(self) -> Result<T> {
-        let client = self.client;
-        send_with_retry(client.limiter, client.retry_policy, self.request).await
+        let retry_policy = self.client.retry_policy;
+        self.send_json_with(retry_policy).await
+    }
+
+    async fn send_json_with<T: for<'de> Deserialize<'de>>(
+        self,
+        retry_policy: RetryPolicy,
+    ) -> Result<T> {
+        send_with_retry(self.client.limiter, retry_policy, self.request).await
     }
 
     async fn send_unit(self) -> Result<()> {
-        let client = self.client;
-        send_with_retry_unit(client.limiter, client.retry_policy, self.request).await
+        let retry_policy = self.client.retry_policy;
+        self.send_unit_with(retry_policy).await
+    }
+
+    /// Sends a non-idempotent write exactly once.
+    async fn send_unit_once(self) -> Result<()> {
+        let retry_policy = self.client.retry_policy.single_attempt();
+        self.send_unit_with(retry_policy).await
+    }
+
+    async fn send_unit_with(self, retry_policy: RetryPolicy) -> Result<()> {
+        send_with_retry_unit(self.client.limiter, retry_policy, self.request).await
     }
 }
 
@@ -526,9 +883,10 @@ async fn send_typed_endpoint<T: DeserializeOwned>(
     path_params: &[(String, String)],
     query_params: &[(String, String)],
     body: Option<Value>,
+    retry_policy: RetryPolicy,
 ) -> Result<T> {
     build_endpoint_request(client, spec, path_params, query_params, body)?
-        .send_json()
+        .send_json_with(retry_policy)
         .await
         .with_context(|| format!("Rentman endpoint {} failed", spec.operation_id))
 }
@@ -779,6 +1137,14 @@ impl RetryPolicy {
         }
     }
 
+    /// The same policy without retries.
+    fn single_attempt(self) -> Self {
+        Self {
+            max_attempts: 1,
+            ..self
+        }
+    }
+
     fn backoff(self) -> backon::ExponentialBackoff {
         ExponentialBuilder::default()
             .with_min_delay(self.base_delay)
@@ -867,8 +1233,9 @@ async fn sleep_before_retry(
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::{
-        InvoiceId, InvoiceNumber, InvoicePaymentStatus, PaymentId, PaymentImportSource,
-        RentmanAmount, RentmanApiToken, RentmanClient, RentmanPaymentPayload, Url,
+        EquipmentId, EquipmentPricePayload, InvoiceId, InvoiceNumber, InvoicePaymentStatus,
+        ParsedDecimal, PaymentId, PaymentImportSource, RentmanAmount, RentmanApiToken,
+        RentmanClient, RentmanPaymentPayload, RetryPolicy, Url,
         endpoint::{
             CreatePaymentEndpoint, DeleteAccessoryEndpoint, GetAccessoryCollectionEndpoint,
             GetAccessoryItemEndpoint,
@@ -879,9 +1246,11 @@ mod tests {
             EmailAddress, ItemResponse, NoContent, NoRequest, PaymentRequest,
             PaymentRequestPaymentImportSource, ResourceReference,
         },
-        parse_duration_ms, parse_usize, retry_after_delay,
+        parse_amount, parse_decimal, parse_duration_ms, parse_usize, retry_after_delay,
     };
+    use bigdecimal::{BigDecimal, RoundingMode, Signed, ToPrimitive, num_bigint::BigInt};
     use chrono::{DateTime, Utc};
+    use proptest::prelude::*;
     use reqwest::{
         StatusCode,
         header::{HeaderMap, HeaderValue, RETRY_AFTER},
@@ -893,7 +1262,10 @@ mod tests {
         collections::BTreeMap,
         io::{Read, Write},
         net::{TcpListener, TcpStream},
-        sync::mpsc::{self, Receiver},
+        sync::{
+            Arc, Mutex,
+            mpsc::{self, Receiver},
+        },
         thread,
         time::Duration,
     };
@@ -1003,7 +1375,7 @@ mod tests {
                 r#"{"itemCount":1,"limit":1500,"next_page_url":"{base}/page-2","data":[{"id":1,"number":"RE-1","is_paid":false}]}"#,
             ),
             json_response(
-                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":2,"number":"RE-2","is_paid":true}]}"#,
+                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":2,"number":"RE-2","is_paid":true,"price_invat":119.5}]}"#,
             ),
         ]);
         let client = RentmanClient::with_base_url(
@@ -1017,9 +1389,14 @@ mod tests {
         assert_eq!(invoices[0].id, InvoiceId::new(1));
         assert_eq!(invoices[0].number, InvoiceNumber::new("RE-1"));
         assert_eq!(invoices[0].payment_status, InvoicePaymentStatus::Open);
+        assert_eq!(invoices[0].price_invat, None);
         assert_eq!(invoices[1].id, InvoiceId::new(2));
         assert_eq!(invoices[1].number, InvoiceNumber::new("RE-2"));
         assert_eq!(invoices[1].payment_status, InvoicePaymentStatus::Paid);
+        assert_eq!(
+            invoices[1].price_invat,
+            Some(RentmanAmount::new(Decimal::new(1195, 1)))
+        );
 
         let first_request = server.next_request();
         assert_request(&first_request, "GET", "/invoices");
@@ -1027,7 +1404,7 @@ mod tests {
         assert_eq!(first_request.query_value("offset").as_deref(), Some("0"));
         assert_eq!(
             first_request.query_value("fields").as_deref(),
-            Some("id,number,is_paid")
+            Some("id,number,is_paid,price_invat")
         );
         assert_eq!(first_request.query_value("limit").as_deref(), Some("1500"));
 
@@ -1111,7 +1488,7 @@ mod tests {
     #[tokio::test]
     async fn groups_all_payments_by_invoice_sorted_by_id() {
         let server = spawn_server(vec![json_response(
-            r#"{"itemCount":3,"limit":1500,"next_page_url":null,"data":[{"id":11,"moment":"2026-07-05T00:00:00.000+02:00","invoice":"/invoices/1"},{"id":10,"moment":"2026-07-04T00:00:00.000+02:00","invoice":"/invoices/1"},{"id":12,"moment":"2026-07-06T00:00:00.000+02:00","invoice":"/invoices/2"}]}"#,
+            r#"{"itemCount":3,"limit":1500,"next_page_url":null,"data":[{"id":11,"moment":"2026-07-05T00:00:00.000+02:00","invoice":"/invoices/1","amount":0.01,"description":"Rounding"},{"id":10,"moment":"2026-07-04T00:00:00.000+02:00","invoice":"/invoices/1","amount":null,"description":null},{"id":12,"moment":"2026-07-06T00:00:00.000+02:00","invoice":"/invoices/2"}]}"#,
         )]);
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
@@ -1125,6 +1502,13 @@ mod tests {
         assert_eq!(first_invoice.len(), 2);
         assert_eq!(first_invoice[0].id, PaymentId::new(10));
         assert_eq!(first_invoice[1].id, PaymentId::new(11));
+        assert_eq!(first_invoice[0].amount, None);
+        assert_eq!(first_invoice[0].description, None);
+        assert_eq!(
+            first_invoice[1].amount,
+            Some(RentmanAmount::new(Decimal::new(1, 2)))
+        );
+        assert_eq!(first_invoice[1].description.as_deref(), Some("Rounding"));
         assert_eq!(
             first_invoice[0].moment,
             DateTime::parse_from_rfc3339("2026-07-04T00:00:00.000+02:00").unwrap()
@@ -1137,7 +1521,7 @@ mod tests {
         assert_eq!(request.query_value("offset").as_deref(), Some("0"));
         assert_eq!(
             request.query_value("fields").as_deref(),
-            Some("id,moment,invoice")
+            Some("id,moment,invoice,amount,description")
         );
         assert_eq!(request.query_value("limit").as_deref(), Some("1500"));
     }
@@ -1255,6 +1639,33 @@ mod tests {
         assert_eq!(body["payment_import_source"], "publicapi");
         assert_eq!(body["amount"], serde_json::json!(42.5));
         assert_eq!(body["description"], "Manual booking");
+    }
+
+    #[tokio::test]
+    async fn creates_payment_exactly_once_on_transient_errors() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap_err();
+        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+
+        // Without a retry the second prepared response is still unused, so the
+        // next call receives it: the failed create reached the server once.
+        client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap();
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
     }
 
     #[tokio::test]
@@ -1477,6 +1888,512 @@ mod tests {
                 .contains("Rentman payment create failed for invoice 1")
         );
         assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+    }
+
+    #[test]
+    fn reads_amounts_exactly_and_exposes_equipment_ids() {
+        let amount: RentmanAmount = serde_json::from_str("19.99").unwrap();
+        assert_eq!(amount.as_decimal(), Decimal::new(1999, 2));
+        let scientific: RentmanAmount = serde_json::from_str("1.5e2").unwrap();
+        assert_eq!(scientific.as_decimal(), Decimal::new(150, 0));
+        let small: RentmanAmount = serde_json::from_str("1.5E-2").unwrap();
+        assert_eq!(small.as_decimal(), Decimal::new(15, 3));
+        let negative: RentmanAmount = serde_json::from_str("-0.01").unwrap();
+        assert_eq!(negative.as_decimal(), Decimal::new(-1, 2));
+        assert!(serde_json::from_str::<RentmanAmount>("\"expensive\"").is_err());
+        assert!(serde_json::from_str::<RentmanAmount>("true").is_err());
+        assert!(serde_json::from_str::<RentmanAmount>("").is_err());
+        assert_eq!(EquipmentId::new(2163).to_string(), "2163");
+    }
+
+    #[test]
+    fn accepts_exact_amounts_with_trailing_zeros() {
+        let smallest = Decimal::new(1, 28);
+        for text in [
+            "1e-28",
+            "1.0e-28",
+            "10e-29",
+            "1000e-31",
+            "0.00000000000000000000000000010",
+            // Significand beyond `Decimal`'s scale, final value within it.
+            "0.00000000000000000000000000001e1",
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert_eq!(amount.as_decimal(), smallest, "{text}");
+        }
+        for (text, expected) in [("10.0", Decimal::new(10, 0)), ("100", Decimal::new(100, 0))] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert_eq!(amount.as_decimal(), expected, "{text}");
+        }
+        for text in [
+            "0e-50",
+            "0.0e5000000000",
+            "-0e3",
+            // Zero is exact even with an exponent beyond `i64`.
+            "0e9223372036854775808",
+            "0e-99999999999999999999",
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert!(amount.as_decimal().is_zero(), "{text}");
+        }
+    }
+
+    #[test]
+    fn keeps_the_written_scale_when_it_fits() {
+        for (text, mantissa, scale) in [
+            ("12.50", 1250, 2),
+            ("0.00", 0, 2),
+            ("-0.050", -50, 3),
+            ("1.5e2", 150, 0),
+            ("1.5e+2", 150, 0),
+            ("125e-1", 125, 1),
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            let decimal = amount.as_decimal();
+            assert_eq!(decimal, Decimal::new(mantissa, scale), "{text}");
+            assert_eq!(decimal.scale(), scale, "{text}");
+            assert_eq!(serde_json::to_string(&amount).unwrap(), decimal.to_string());
+        }
+        // Written with 29 decimal places, so it is normalized to 28.
+        let normalized: RentmanAmount =
+            serde_json::from_str("0.00000000000000000000000000010").unwrap();
+        assert_eq!(normalized.as_decimal().scale(), 28);
+    }
+
+    #[test]
+    fn normalizes_before_checking_decimal_bounds() {
+        // Coefficient beyond 96 bits, final value 1e28 within them.
+        let amount: RentmanAmount =
+            serde_json::from_str("100000000000000000000000000000e-1").unwrap();
+        assert_eq!(
+            amount.as_decimal(),
+            Decimal::from_i128_with_scale(10_i128.pow(28), 0)
+        );
+        let negative: RentmanAmount =
+            serde_json::from_str("-0.000000000000000000000000000010e1").unwrap();
+        assert_eq!(negative.as_decimal(), Decimal::new(-1, 28));
+    }
+
+    #[test]
+    fn rejects_text_that_is_not_a_json_number() {
+        for text in [
+            "-", "-.5", "-+5", "1.2.3", "1x", "1.x", "1e", "1e+", "1e5x", "1e--5",
+        ] {
+            assert!(parse_amount(text).is_err(), "{text}");
+        }
+    }
+
+    #[test]
+    fn rejects_amounts_whose_integer_part_does_not_fit() {
+        for text in [
+            // Non-zero value with an exponent beyond `i64`.
+            "1e99999999999999999999",
+            "1e9223372036854775808",
+            // Exponent outside `u32`, power of ten or product outside `i128`.
+            "1e5000000000",
+            "1e39",
+            "20e38",
+            // Integer beyond the 96 bits of `Decimal`.
+            "1e30",
+            // Product outside `i128` although the power of ten fits.
+            "99e37",
+            // Rounding the largest mantissa up leaves the 96 bits.
+            "79228162514264337593543950335.5",
+            // Integer part beyond 96 bits, whatever is dropped after the point.
+            "1234567890123456789012345678901234567890.5",
+            "12345678901234567890123456789012345.1234567890",
+        ] {
+            let error = serde_json::from_str::<RentmanAmount>(text)
+                .unwrap_err()
+                .to_string();
+            assert!(error.contains("does not fit a decimal"), "{text}: {error}");
+        }
+    }
+
+    #[test]
+    fn rounds_over_precise_amounts_half_away_from_zero() {
+        let smallest = Decimal::new(1, 28);
+        for (text, expected) in [
+            (
+                "0.12345678901234567890123456789e0",
+                Decimal::from_i128_with_scale(1234567890123456789012345679, 28),
+            ),
+            (
+                "0.123456789012345678901234567890123456789",
+                Decimal::from_i128_with_scale(1234567890123456789012345679, 28),
+            ),
+            ("1e-29", Decimal::ZERO),
+            ("4e-29", Decimal::ZERO),
+            ("5e-29", smallest),
+            ("-5e-29", -smallest),
+            ("1e-5000000000", Decimal::ZERO),
+            // Exponent beyond `i64`: still rounds to zero.
+            ("1e-9223372036854775809", Decimal::ZERO),
+            ("1e-99999999999999999999", Decimal::ZERO),
+            ("1e-9223372036854775808", Decimal::ZERO),
+            // 30 digits: rounded to one decimal place so the mantissa fits.
+            (
+                "1234567890123456789012345678.95",
+                Decimal::from_i128_with_scale(12345678901234567890123456790, 1),
+            ),
+        ] {
+            let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+            assert_eq!(amount.as_decimal(), expected, "{text}");
+            assert!(
+                matches!(parse_decimal(text), Some(ParsedDecimal::Rounded(_))),
+                "{text} is reported as rounded"
+            );
+        }
+    }
+
+    #[test]
+    fn logs_a_warning_only_for_rounded_amounts() {
+        let log = Arc::new(Mutex::new(Vec::new()));
+        let writer_log = Arc::clone(&log);
+        let subscriber = tracing_subscriber::fmt()
+            .with_writer(move || SharedLog(Arc::clone(&writer_log)))
+            .with_ansi(false)
+            .finish();
+
+        tracing::subscriber::with_default(subscriber, || {
+            parse_amount("12.50").unwrap();
+            assert!(log.lock().unwrap().is_empty(), "exact amounts log nothing");
+            parse_amount("5e-29").unwrap();
+        });
+
+        let log = String::from_utf8(log.lock().unwrap().clone()).unwrap();
+        assert!(log.contains("WARN"), "{log}");
+        assert!(log.contains("was rounded"), "{log}");
+        assert!(log.contains("amount=\"5e-29\""), "{log}");
+        assert!(
+            log.contains("rounded=0.0000000000000000000000000001"),
+            "{log}"
+        );
+    }
+
+    /// Log sink shared between the test and the `tracing` writer.
+    struct SharedLog(Arc<Mutex<Vec<u8>>>);
+
+    impl std::io::Write for SharedLog {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.0.lock().unwrap().extend_from_slice(buf);
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    /// Reference result for a JSON number, computed with arbitrary precision:
+    /// the value rounded half away from zero at the largest scale (at most 28)
+    /// whose mantissa fits 96 bits, and whether that is the exact value.
+    fn reference_parse(text: &str) -> Option<(Decimal, bool)> {
+        let exact: BigDecimal = text.parse().expect("generated text is a number");
+        let max_mantissa = BigInt::from((1_u128 << 96) - 1);
+        (0..=28_i64).rev().find_map(|scale| {
+            let rounded = exact.with_scale_round(scale, RoundingMode::HalfUp);
+            let (mantissa, _) = rounded.as_bigint_and_exponent();
+            if mantissa.abs() > max_mantissa {
+                return None;
+            }
+            let decimal = Decimal::from_i128_with_scale(mantissa.to_i128()?, scale as u32);
+            Some((decimal, rounded == exact))
+        })
+    }
+
+    /// `Decimal` values within the 96-bit mantissa and 28 decimal places.
+    fn any_decimal() -> impl Strategy<Value = Decimal> {
+        let max_mantissa = (1_i128 << 96) - 1;
+        (-max_mantissa..=max_mantissa, 0_u32..=28)
+            .prop_map(|(mantissa, scale)| Decimal::from_i128_with_scale(mantissa, scale))
+    }
+
+    proptest! {
+        #[test]
+        fn amount_round_trips_through_json(value in any_decimal()) {
+            let json = serde_json::to_string(&RentmanAmount::new(value)).unwrap();
+            let parsed: RentmanAmount = serde_json::from_str(&json).unwrap();
+            // `Decimal` equality ignores the scale, so compare it separately.
+            prop_assert_eq!(parsed.as_decimal(), value, "{}", json);
+            prop_assert_eq!(parsed.as_decimal().scale(), value.scale(), "{}", json);
+        }
+
+        #[test]
+        fn scientific_and_plain_notation_parse_to_the_same_amount(
+            mantissa in any::<i64>(),
+            scale in 0_u32..=28,
+            extra_zeros in 0_u32..=5,
+            upper_case in any::<bool>(),
+        ) {
+            let expected = Decimal::from_i128_with_scale(i128::from(mantissa), scale);
+            let e = if upper_case { 'E' } else { 'e' };
+            // `{m}{zeros}e-{scale + zeros}` is the same value with trailing
+            // powers of ten moved into the exponent.
+            let zeros = "0".repeat(extra_zeros as usize);
+            let shifted = format!("{mantissa}{zeros}{e}-{}", scale + extra_zeros);
+            let plain = expected.to_string();
+
+            prop_assert_eq!(parse_amount(&shifted).unwrap().as_decimal(), expected);
+            prop_assert_eq!(parse_amount(&plain).unwrap().as_decimal(), expected);
+        }
+
+        #[test]
+        fn positive_exponents_multiply_exactly(
+            mantissa in any::<i64>(),
+            exponent in 0_u32..=9,
+        ) {
+            let expected = Decimal::from(mantissa) * Decimal::from(10_i64.pow(exponent));
+            let text = format!("{mantissa}e{exponent}");
+
+            prop_assert_eq!(parse_amount(&text).unwrap().as_decimal(), expected);
+        }
+
+        #[test]
+        fn parsing_matches_an_arbitrary_precision_reference(
+            text in "-?[0-9]{1,45}(\\.[0-9]{1,45})?([eE][-+]?[0-9]{1,3})?",
+        ) {
+            // Differential test: an independent `BigDecimal` computation
+            // decides the expected value, and whether it is exact or rounded.
+            let reference = reference_parse(&text);
+            let parsed = parse_decimal(&text).map(|parsed| match parsed {
+                ParsedDecimal::Exact(decimal) => (decimal, true),
+                ParsedDecimal::Rounded(decimal) => (decimal, false),
+            });
+            prop_assert_eq!(parsed, reference, "{}", text);
+        }
+
+        #[test]
+        fn number_like_input_never_panics(
+            text in "-?[0-9]{1,40}(\\.[0-9]{0,40})?([eE][-+]?[0-9]{1,25})?",
+        ) {
+            if let Ok(amount) = parse_amount(&text) {
+                // Whatever is accepted is the exact value: it formats back to
+                // a number that parses to the same decimal.
+                let again = parse_amount(&amount.as_decimal().to_string()).unwrap();
+                prop_assert_eq!(again, amount);
+            }
+        }
+
+        #[test]
+        fn arbitrary_input_never_panics(text in any::<String>()) {
+            let _ = parse_amount(&text);
+            let _ = serde_json::from_str::<RentmanAmount>(&text);
+        }
+    }
+
+    #[test]
+    fn keeps_amounts_beyond_f64_precision_exact() {
+        // 19 significant digits: an `f64` round trip would lose the tail.
+        let text = "0.1234567890123456789";
+        let expected: Decimal = text.parse().unwrap();
+
+        let amount: RentmanAmount = serde_json::from_str(text).unwrap();
+        assert_eq!(amount.as_decimal(), expected);
+        assert_eq!(serde_json::to_string(&amount).unwrap(), text);
+
+        let payload = EquipmentPricePayload {
+            list_price: Some(amount),
+            ..EquipmentPricePayload::default()
+        };
+        assert_eq!(
+            serde_json::to_string(&payload).unwrap(),
+            r#"{"list_price":0.1234567890123456789}"#
+        );
+    }
+
+    #[tokio::test]
+    async fn reads_all_active_equipment_from_both_pagination_styles() {
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"itemCount":1,"limit":1500,"next_page_url":"{base}/page-2","data":[{"id":1,"price":12.5,"list_price":null,"subrental_costs":3}]}"#,
+            ),
+            json_response(
+                r#"{"itemCount":1500,"limit":1500,"next_page_url":null,"data":[{"id":2,"price":null,"list_price":499,"subrental_costs":null}]}"#,
+            ),
+            json_response(r#"{"itemCount":0,"limit":1500,"next_page_url":null,"data":[]}"#),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let equipment = client.all_active_equipment().await.unwrap();
+
+        assert_eq!(equipment.len(), 2);
+        assert_eq!(equipment[0].id, EquipmentId::new(1));
+        assert_eq!(
+            equipment[0].price,
+            Some(RentmanAmount::new(Decimal::new(125, 1)))
+        );
+        assert_eq!(equipment[0].list_price, None);
+        assert_eq!(
+            equipment[0].subrental_costs,
+            Some(RentmanAmount::new(Decimal::new(3, 0)))
+        );
+        assert_eq!(
+            equipment[1].list_price,
+            Some(RentmanAmount::new(Decimal::new(499, 0)))
+        );
+
+        let first_request = server.next_request();
+        assert_request(&first_request, "GET", "/equipment");
+        assert_bearer_token(&first_request);
+        assert_eq!(
+            first_request.query_value("fields").as_deref(),
+            Some("id,price,list_price,subrental_costs")
+        );
+        assert_eq!(
+            first_request.query_value("in_archive").as_deref(),
+            Some("0")
+        );
+        assert_request(&server.next_request(), "GET", "/page-2");
+        let third_request = server.next_request();
+        assert_request(&third_request, "GET", "/equipment");
+        assert_eq!(third_request.query_value("offset").as_deref(), Some("3000"));
+    }
+
+    #[tokio::test]
+    async fn reads_equipment_with_omitted_price_fields() {
+        let server = spawn_server(vec![json_response(
+            r#"{"itemCount":2,"limit":1500,"next_page_url":null,"data":[{"id":1},{"id":2,"list_price":499}]}"#,
+        )]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let equipment = client.all_active_equipment().await.unwrap();
+
+        assert_eq!(equipment.len(), 2);
+        assert_eq!(equipment[0].price, None);
+        assert_eq!(equipment[0].list_price, None);
+        assert_eq!(equipment[0].subrental_costs, None);
+        assert_eq!(equipment[1].price, None);
+        assert_eq!(
+            equipment[1].list_price,
+            Some(RentmanAmount::new(Decimal::new(499, 0)))
+        );
+        assert_eq!(equipment[1].subrental_costs, None);
+    }
+
+    #[tokio::test]
+    async fn adds_context_to_equipment_list_errors() {
+        let server = spawn_server(vec![text_response("HTTP/1.1 400 Bad Request", "broken")]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client.all_active_equipment().await.unwrap_err();
+
+        assert!(
+            error
+                .to_string()
+                .contains("Rentman equipment list lookup failed")
+        );
+    }
+
+    #[tokio::test]
+    async fn retries_equipment_price_update_after_transient_error() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 200 OK"),
+        ]);
+        let mut client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+        // Fixed policy, independent of the environment.
+        client.retry_policy = RetryPolicy {
+            max_attempts: 2,
+            base_delay: Duration::from_millis(1),
+        };
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        // The idempotent PUT reached the server twice, both times unchanged.
+        for _ in 0..2 {
+            let request = server.next_request();
+            assert_request(&request, "PUT", "/equipment/2163");
+            assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+            assert_eq!(String::from_utf8_lossy(&request.body), r#"{"price":12.50}"#);
+        }
+    }
+
+    #[tokio::test]
+    async fn updates_only_changed_equipment_prices() {
+        let server = spawn_server(vec![
+            empty_response("HTTP/1.1 200 OK"),
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+        let payload = EquipmentPricePayload {
+            price: Some(RentmanAmount::new(Decimal::new(1250, 2))),
+            ..EquipmentPricePayload::default()
+        };
+        assert!(!payload.is_empty());
+        assert!(EquipmentPricePayload::default().is_empty());
+
+        client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap();
+
+        let request = server.next_request();
+        assert_request(&request, "PUT", "/equipment/2163");
+        assert_bearer_token(&request);
+        assert_eq!(request.json_body(), serde_json::json!({"price": 12.5}));
+
+        let error = client
+            .update_equipment_prices(EquipmentId::new(2163), &payload)
+            .await
+            .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("Rentman equipment update failed for equipment 2163")
+        );
+    }
+
+    #[tokio::test]
+    async fn send_once_does_not_retry_transient_errors() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            empty_response("HTTP/1.1 204 No Content"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let error = client
+            .endpoint::<DeleteAccessoryEndpoint>()
+            .id(RentmanId(10))
+            .send_once()
+            .await
+            .unwrap_err();
+        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_request(&server.next_request(), "DELETE", "/accessories/10");
+
+        // Without a retry the second prepared response is still unused.
+        let response = client
+            .endpoint::<DeleteAccessoryEndpoint>()
+            .id(RentmanId(10))
+            .send_once()
+            .await
+            .unwrap();
+        assert_eq!(response, NoContent);
     }
 
     #[test]

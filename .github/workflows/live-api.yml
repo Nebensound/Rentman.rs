@@ -31,6 +31,9 @@ jobs:
       - name: Run live API tests
         env:
           RENTMAN_API_TOKEN: ${{ secrets.RENTMAN_API_TOKEN }}
+          # Optional repository variable (not a secret): enables the no-op
+          # equipment price write test. Unset, the test skips itself.
+          RENTMAN_LIVE_WRITE_EQUIPMENT_ID: ${{ vars.RENTMAN_LIVE_WRITE_EQUIPMENT_ID }}
         run: |
           if [ -z "$RENTMAN_API_TOKEN" ]; then
             echo "::error::The RENTMAN_API_TOKEN repository secret is not configured"
