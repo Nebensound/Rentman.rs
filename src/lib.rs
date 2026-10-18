@@ -277,7 +277,7 @@ fn parse_decimal(text: &str) -> Option<ParsedDecimal> {
         None => (false, text),
     };
     let (significand, exponent) = match unsigned.split_once(['e', 'E']) {
-        Some((significand, exponent)) => (significand, exponent.parse::<i64>().ok()?),
+        Some((significand, exponent)) => (significand, parse_exponent(exponent)?),
         None => (unsigned, 0),
     };
     let (integer, fraction) = significand.split_once('.').unwrap_or((significand, ""));
@@ -359,6 +359,24 @@ fn round_to_fit(significant: &str, scale: i128, negative: bool) -> Option<Decima
         }
     }
     None
+}
+
+/// Parses a JSON exponent (optional sign, then digits). An exponent beyond
+/// `i64` is saturated: every exponent that large has the same outcome (zero
+/// stays exact, a tiny value rounds to zero, a huge one is rejected), so the
+/// saturated value keeps those cases reachable instead of failing the parse.
+fn parse_exponent(text: &str) -> Option<i64> {
+    let (negative, digits) = match text.as_bytes().first() {
+        Some(b'-') => (true, &text[1..]),
+        Some(b'+') => (false, &text[1..]),
+        _ => (false, text),
+    };
+    if digits.is_empty() || !digits.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    // Validated digits only fail to parse by overflowing.
+    let magnitude = digits.parse::<i64>().unwrap_or(i64::MAX);
+    Some(if negative { -magnitude } else { magnitude })
 }
 
 /// The decimal with exactly the written digits and scale, if `Decimal` can
@@ -1907,7 +1925,14 @@ mod tests {
             let amount: RentmanAmount = serde_json::from_str(text).unwrap();
             assert_eq!(amount.as_decimal(), expected, "{text}");
         }
-        for text in ["0e-50", "0.0e5000000000", "-0e3"] {
+        for text in [
+            "0e-50",
+            "0.0e5000000000",
+            "-0e3",
+            // Zero is exact even with an exponent beyond `i64`.
+            "0e9223372036854775808",
+            "0e-99999999999999999999",
+        ] {
             let amount: RentmanAmount = serde_json::from_str(text).unwrap();
             assert!(amount.as_decimal().is_zero(), "{text}");
         }
@@ -1920,6 +1945,7 @@ mod tests {
             ("0.00", 0, 2),
             ("-0.050", -50, 3),
             ("1.5e2", 150, 0),
+            ("1.5e+2", 150, 0),
             ("125e-1", 125, 1),
         ] {
             let amount: RentmanAmount = serde_json::from_str(text).unwrap();
@@ -1950,7 +1976,9 @@ mod tests {
 
     #[test]
     fn rejects_text_that_is_not_a_json_number() {
-        for text in ["-", "-.5", "-+5", "1.2.3", "1x", "1.x", "1e", "1e+"] {
+        for text in [
+            "-", "-.5", "-+5", "1.2.3", "1x", "1.x", "1e", "1e+", "1e5x", "1e--5",
+        ] {
             assert!(parse_amount(text).is_err(), "{text}");
         }
     }
@@ -1958,8 +1986,9 @@ mod tests {
     #[test]
     fn rejects_amounts_whose_integer_part_does_not_fit() {
         for text in [
-            // Exponent outside `i64`.
+            // Non-zero value with an exponent beyond `i64`.
             "1e99999999999999999999",
+            "1e9223372036854775808",
             // Exponent outside `u32`, power of ten or product outside `i128`.
             "1e5000000000",
             "1e39",
@@ -1998,6 +2027,9 @@ mod tests {
             ("5e-29", smallest),
             ("-5e-29", -smallest),
             ("1e-5000000000", Decimal::ZERO),
+            // Exponent beyond `i64`: still rounds to zero.
+            ("1e-9223372036854775809", Decimal::ZERO),
+            ("1e-99999999999999999999", Decimal::ZERO),
             ("1e-9223372036854775808", Decimal::ZERO),
             // 30 digits: rounded to one decimal place so the mantissa fits.
             (
