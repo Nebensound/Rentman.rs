@@ -20,11 +20,14 @@
 #[path = "live/generated_sweep.rs"]
 mod generated_sweep;
 
+use bigdecimal::BigDecimal;
 use rentman_client::{
     EquipmentId, EquipmentPricePayload, RentmanApiToken, RentmanClient, RentmanEquipment, endpoint,
     model,
 };
 use rust_decimal::Decimal;
+use serde::Deserialize;
+use serde_json::value::RawValue;
 use std::sync::OnceLock;
 
 /// Rows per page for the `in_archive` filter checks: enough to contain both
@@ -143,8 +146,12 @@ async fn equipment_price_write_is_a_no_op_live() {
     let before = active_equipment(&client, equipment_id).await;
 
     // Partial `PUT` through the facade: only the first set price field is sent,
-    // with its current value.
+    // with its current value. `before` went through the amount deserializer,
+    // which rounds over-precise values; so first prove against the stored JSON
+    // text that exactly the stored value would be written.
     let payload = no_op_payload(&before);
+    let stored = stored_prices(id).await;
+    assert_payload_matches_stored(&payload, &stored);
     client
         .update_equipment_prices(equipment_id, &payload)
         .await
@@ -168,6 +175,94 @@ async fn equipment_price_write_is_a_no_op_live() {
         .await
         .expect("live no-op equipment update with send_once succeeds");
     assert_prices_unchanged(&before, &active_equipment(&client, equipment_id).await);
+    assert_eq!(
+        stored_prices(id).await,
+        stored,
+        "the stored price JSON changed"
+    );
+}
+
+/// The stored price fields of one equipment item as exact decimals, read from
+/// the raw JSON text without going through `RentmanAmount` or `f64`.
+#[derive(Debug, PartialEq)]
+struct StoredPrices {
+    price: Option<BigDecimal>,
+    list_price: Option<BigDecimal>,
+    subrental_costs: Option<BigDecimal>,
+}
+
+async fn stored_prices(id: u64) -> StoredPrices {
+    #[derive(Deserialize)]
+    struct Envelope<'a> {
+        #[serde(borrow)]
+        data: RawPrices<'a>,
+    }
+    #[derive(Deserialize)]
+    struct RawPrices<'a> {
+        #[serde(borrow, default)]
+        price: Option<&'a RawValue>,
+        #[serde(borrow, default)]
+        list_price: Option<&'a RawValue>,
+        #[serde(borrow, default)]
+        subrental_costs: Option<&'a RawValue>,
+    }
+
+    // Same API and token as `live_client()`, which has loaded `.env`.
+    let token = std::env::var("RENTMAN_API_TOKEN").expect("RENTMAN_API_TOKEN is set");
+    let body = reqwest::Client::new()
+        .get(format!(
+            "https://api.rentman.net/equipment/{id}?fields=price,list_price,subrental_costs"
+        ))
+        .bearer_auth(token)
+        .send()
+        .await
+        .and_then(reqwest::Response::error_for_status)
+        .expect("raw equipment lookup succeeds")
+        .text()
+        .await
+        .expect("raw equipment response is text");
+    let raw: Envelope<'_> = serde_json::from_str(&body).expect("raw equipment response is JSON");
+    let exact = |value: Option<&RawValue>| {
+        value.map(|value| {
+            value
+                .get()
+                .parse::<BigDecimal>()
+                .expect("stored price is a JSON number")
+        })
+    };
+    StoredPrices {
+        price: exact(raw.data.price),
+        list_price: exact(raw.data.list_price),
+        subrental_costs: exact(raw.data.subrental_costs),
+    }
+}
+
+/// Refuses the write unless every price in the payload equals the stored
+/// value exactly.
+fn assert_payload_matches_stored(payload: &EquipmentPricePayload, stored: &StoredPrices) {
+    for (field, sent, stored) in [
+        ("price", payload.price, &stored.price),
+        ("list_price", payload.list_price, &stored.list_price),
+        (
+            "subrental_costs",
+            payload.subrental_costs,
+            &stored.subrental_costs,
+        ),
+    ] {
+        let Some(sent) = sent else {
+            continue;
+        };
+        let sent: BigDecimal = sent
+            .as_decimal()
+            .to_string()
+            .parse()
+            .expect("a decimal is a BigDecimal");
+        assert_eq!(
+            Some(&sent),
+            stored.as_ref(),
+            "decoding changed the stored {field}; refusing the live write"
+        );
+    }
 }
 
 async fn active_equipment(client: &RentmanClient, id: EquipmentId) -> RentmanEquipment {
