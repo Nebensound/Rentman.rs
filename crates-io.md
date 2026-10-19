@@ -7,6 +7,20 @@ definition with typed request and response models. Authentication, retry
 handling, and rate limiting are built into the client, and all API I/O is
 async.
 
+## Independence and API access
+
+This is an independent, unofficial project. It is not affiliated with,
+developed by, sponsored by, or endorsed by Rentman. Its only integration
+with Rentman is through Rentman's public API.
+
+Calling the Rentman API with this client requires your own Rentman API key
+(API token). Rentman makes API keys available to customers with a paid
+subscription to its Software as a Service (SaaS). This project does not
+provide API keys or include a Rentman subscription.
+
+See [Rentman's API access instructions](https://support.rentman.io/hc/en-us/articles/360013767839-The-Rentman-API)
+for how to generate your token in your Rentman account.
+
 ## Getting started
 
 ```bash
