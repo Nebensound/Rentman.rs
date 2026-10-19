@@ -194,7 +194,7 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 then resolved on a pull request branch.
 
 Every merge into `main` triggers the `release` job after tests, coverage, the
-MSRV build, and the package smoke test pass. It verifies the package again from
+MSRV build, the package smoke test, and the short fuzz run pass. It verifies the package again from
 the merged commit, publishes it to crates.io without `--allow-dirty` (using the
 `CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
 tag and GitHub release, which in turn seeds the next version calculation.
@@ -301,7 +301,16 @@ dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
 
 Required pull request checks are formatting, clippy with `-D warnings`, tests
 and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
-the MSRV build, and a package build with a smoke test outside the source tree.
+the MSRV build, a package build with a smoke test outside the source tree, and
+the 60-second fuzz run.
+
+The branch rules require the status contexts `test` and `coverage`. The `test`
+job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
+and clippy), `coverage`, `msrv`, `package`, and `fuzz`. It always runs and fails
+unless all six jobs explicitly succeed, including when a dependency fails,
+is skipped, or is cancelled. The scheduled live API and 30-minute fuzz workflows
+remain separate, non-blocking checks. Releases also wait for this gate.
+
 Every check command in this README matches what CI runs. Third-party actions
 are pinned to a commit SHA or an immutable version tag, jobs get explicit
 minimal `permissions`, and the release publishes exactly the verified package.
