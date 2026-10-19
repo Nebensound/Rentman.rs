@@ -59,10 +59,9 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     }
 
     /// Sets the typed JSON request body.
-    // Coverage is disabled because the error branch is unreachable: the
-    // generated request models are plain structs and enums with string keys,
-    // which `serde_json::to_value` always serializes.
-    #[cfg_attr(coverage_nightly, coverage(off))]
+    ///
+    /// Fails when the body cannot be represented as JSON, which only a custom
+    /// [`endpoint::Endpoint`] request type with a failing serializer can cause.
     pub fn body(mut self, body: E::Request) -> Result<Self>
     where
         E::Request: Serialize,
@@ -524,5 +523,65 @@ mod tests {
              Rentman API returned 500 Internal Server Error: rentman broken"
         );
         assert_request(&server.next_request(), "GET", "/accessories");
+    }
+
+    /// Request body whose `Broken` variant cannot be serialized, as a custom
+    /// endpoint's request type might.
+    enum CustomBody {
+        Valid(u8),
+        Broken,
+    }
+
+    impl serde::Serialize for CustomBody {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            match self {
+                Self::Valid(value) => serializer.serialize_u8(*value),
+                Self::Broken => Err(serde::ser::Error::custom("broken body")),
+            }
+        }
+    }
+
+    struct CustomBodyEndpoint;
+
+    impl crate::endpoint::Endpoint for CustomBodyEndpoint {
+        type Request = CustomBody;
+        type Response = NoContent;
+        const SPEC: crate::endpoint::EndpointSpec = crate::endpoint::EndpointSpec {
+            method: "POST",
+            path: "/custom",
+            operation_id: "customBody",
+            tag: "custom",
+            parameters: &[],
+            request: crate::endpoint::EndpointRequestSpec::Json("CustomBody"),
+            response: crate::endpoint::EndpointResponseSpec::NoContent,
+            errors: &[],
+        };
+    }
+
+    #[test]
+    fn body_accepts_serializable_values_and_reports_serialization_errors() {
+        let client = RentmanClient::with_base_url(
+            Url::parse("http://example.test/").unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let request = client
+            .endpoint::<CustomBodyEndpoint>()
+            .body(CustomBody::Valid(7))
+            .unwrap();
+        assert_eq!(request.body, Some(serde_json::json!(7)));
+
+        let error = match client
+            .endpoint::<CustomBodyEndpoint>()
+            .body(CustomBody::Broken)
+        {
+            Ok(_) => panic!("a failing serializer must be reported"),
+            Err(error) => error,
+        };
+        assert_eq!(
+            error.to_string(),
+            "Rentman request body is invalid JSON value"
+        );
+        assert_eq!(error.root_cause().to_string(), "broken body");
     }
 }
