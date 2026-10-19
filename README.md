@@ -159,8 +159,8 @@ The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
 deserialization. It checks that parsing never panics, that every JSON number
 with an exponent up to ±1000 gives the same value as an independent
 arbitrary-precision reference (`bigdecimal`), and that every accepted amount
-survives a JSON round trip with value and scale. Every pull request runs it
-for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
+survives a JSON round trip with value and scale. Pull requests with changes beyond documentation and crate-version-only edits
+run it for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
 for 30 minutes every week and on manual dispatch. CI adds
 `--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
 the triple its own binary was built for, and a musl build has no address
@@ -194,8 +194,9 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 then resolved on a pull request branch.
 
 Every merge into `main` triggers the `release` job after tests, coverage, the
-MSRV build, and the package smoke test pass. It verifies the package again from
-the merged commit, publishes it to crates.io without `--allow-dirty` (using the
+MSRV build, and the package smoke test pass, and the short fuzz run either
+passes or is explicitly skipped for documentation/version-only changes. It
+verifies the package again from the merged commit, publishes it to crates.io without `--allow-dirty` (using the
 `CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
 tag and GitHub release, which in turn seeds the next version calculation.
 
@@ -301,7 +302,24 @@ dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
 
 Required pull request checks are formatting, clippy with `-D warnings`, tests
 and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
-the MSRV build, and a package build with a smoke test outside the source tree.
+the MSRV build, a package build with a smoke test outside the source tree, and
+the 60-second fuzz run.
+
+The branch rules require the status contexts `test` and `coverage`. The `test`
+job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
+and clippy), `coverage`, `msrv`, `package`, `changes`, and `fuzz`. It always
+runs and requires explicit success from all unconditional jobs. The `changes`
+job skips fuzzing only when all changes are documentation (`.md`, `.rst`, `.txt`,
+or license files outside `fuzz/`) or the crate's own version in `Cargo.toml`,
+`Cargo.lock`, and `fuzz/Cargo.lock`. Files under `fuzz/` always require fuzzing,
+regardless of extension, except for that lockfile's crate-version-only changes. Rust code, dependencies, build settings, CI, and other file
+changes require fuzzing. Version-job dispatches compare the entire branch
+against the default branch; manual default-branch runs always fuzz.
+The gate accepts a skipped fuzz job only after a successful, explicit
+`fuzz_required=false` decision. Failure or cancellation always blocks merging.
+The scheduled live API and 30-minute fuzz workflows
+remain separate, non-blocking checks. Releases also wait for this gate.
+
 Every check command in this README matches what CI runs. Third-party actions
 are pinned to a commit SHA or an immutable version tag, jobs get explicit
 minimal `permissions`, and the release publishes exactly the verified package.
