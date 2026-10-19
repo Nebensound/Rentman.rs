@@ -93,7 +93,7 @@ jobs:
           git push
           gh workflow run ci.yml --ref "$GITHUB_HEAD_REF"
 
-  test:
+  checks:
     runs-on: ubuntu-latest
     needs: version
     env:
@@ -272,6 +272,24 @@ jobs:
           name: fuzz-artifacts
           path: fuzz/artifacts
           if-no-files-found: ignore
+
+  # Keep the existing required status context. A skipped dependent job counts
+  # as passing in branch protection, so always run this gate and require an
+  # explicit success from every validation job.
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [version, checks, coverage, msrv, package, fuzz]
+    steps:
+      - name: Require every CI validation job to succeed
+        env:
+          JOB_RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Required CI job results: $JOB_RESULTS"
+          if [ "$JOB_RESULTS" != "success success success success success success" ]; then
+            echo "::error::All six required CI jobs must succeed; failed, skipped, or cancelled jobs block merging."
+            exit 1
+          fi
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
