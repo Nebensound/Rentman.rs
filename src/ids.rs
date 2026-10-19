@@ -39,6 +39,11 @@ impl InvoiceId {
     pub fn new(value: u64) -> Self {
         Self(value)
     }
+
+    /// Returns the numeric Rentman invoice ID.
+    pub fn get(self) -> u64 {
+        self.0
+    }
 }
 
 impl fmt::Display for InvoiceId {
@@ -57,6 +62,11 @@ impl PaymentId {
     pub fn new(value: u64) -> Self {
         Self(value)
     }
+
+    /// Returns the numeric Rentman payment ID.
+    pub fn get(self) -> u64 {
+        self.0
+    }
 }
 
 impl fmt::Display for PaymentId {
@@ -74,6 +84,11 @@ impl EquipmentId {
     /// Creates a Rentman equipment ID.
     pub fn new(value: u64) -> Self {
         Self(value)
+    }
+
+    /// Returns the numeric Rentman equipment ID.
+    pub fn get(self) -> u64 {
+        self.0
     }
 }
 
@@ -112,7 +127,14 @@ impl fmt::Display for InvoiceNumber {
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
 
-    use crate::{InvoiceNumber, RentmanApiToken};
+    use crate::{EquipmentId, InvoiceId, InvoiceNumber, PaymentId, RentmanApiToken};
+
+    #[test]
+    fn numeric_ids_expose_their_value() {
+        assert_eq!(InvoiceId::new(1).get(), 1);
+        assert_eq!(PaymentId::new(2).get(), 2);
+        assert_eq!(EquipmentId::new(2163).get(), 2163);
+    }
 
     #[test]
     fn exposes_invoice_number_as_str_and_display() {
