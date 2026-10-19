@@ -159,8 +159,8 @@ The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
 deserialization. It checks that parsing never panics, that every JSON number
 with an exponent up to ±1000 gives the same value as an independent
 arbitrary-precision reference (`bigdecimal`), and that every accepted amount
-survives a JSON round trip with value and scale. Every pull request runs it
-for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
+survives a JSON round trip with value and scale. Pull requests with changes beyond documentation and crate-version-only edits
+run it for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
 for 30 minutes every week and on manual dispatch. CI adds
 `--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
 the triple its own binary was built for, and a musl build has no address
@@ -306,9 +306,16 @@ the 60-second fuzz run.
 
 The branch rules require the status contexts `test` and `coverage`. The `test`
 job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
-and clippy), `coverage`, `msrv`, `package`, and `fuzz`. It always runs and fails
-unless all six jobs explicitly succeed, including when a dependency fails,
-is skipped, or is cancelled. The scheduled live API and 30-minute fuzz workflows
+and clippy), `coverage`, `msrv`, `package`, `changes`, and `fuzz`. It always
+runs and requires explicit success from all unconditional jobs. The `changes`
+job skips fuzzing only when all changes are documentation (`.md`, `.rst`, `.txt`,
+or license files) or the crate's own version in `Cargo.toml`, `Cargo.lock`, and
+`fuzz/Cargo.lock`. Rust code, dependencies, build settings, CI, and other file
+changes require fuzzing. Version-job dispatches compare the entire branch
+against the default branch; manual default-branch runs always fuzz.
+The gate accepts a skipped fuzz job only after a successful, explicit
+`fuzz_required=false` decision. Failure or cancellation always blocks merging.
+The scheduled live API and 30-minute fuzz workflows
 remain separate, non-blocking checks. Releases also wait for this gate.
 
 Every check command in this README matches what CI runs. Third-party actions
