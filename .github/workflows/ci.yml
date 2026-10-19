@@ -59,6 +59,10 @@ jobs:
           def relevant(path, base):
               # Unknown paths are relevant; only documentation and the CI-generated
               # crate version are exempt. Dependency and toolchain changes still run fuzzing.
+              # Fuzz inputs can be text files; their path takes priority over extensions.
+              # Keep the generated crate-version exception for the fuzz lockfile.
+              if path.startswith("fuzz/") and path != "fuzz/Cargo.lock":
+                  return True
               if path.endswith((".md", ".rst", ".txt")) or path in ("LICENSE", "LICENSE-MIT", "LICENSE-APACHE"):
                   return False
               if path in ("Cargo.toml", "Cargo.lock", "fuzz/Cargo.lock"):
