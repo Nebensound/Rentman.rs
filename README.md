@@ -194,8 +194,9 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 then resolved on a pull request branch.
 
 Every merge into `main` triggers the `release` job after tests, coverage, the
-MSRV build, the package smoke test, and the short fuzz run pass. It verifies the package again from
-the merged commit, publishes it to crates.io without `--allow-dirty` (using the
+MSRV build, and the package smoke test pass, and the short fuzz run either
+passes or is explicitly skipped for documentation/version-only changes. It
+verifies the package again from the merged commit, publishes it to crates.io without `--allow-dirty` (using the
 `CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
 tag and GitHub release, which in turn seeds the next version calculation.
 
@@ -309,8 +310,9 @@ job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
 and clippy), `coverage`, `msrv`, `package`, `changes`, and `fuzz`. It always
 runs and requires explicit success from all unconditional jobs. The `changes`
 job skips fuzzing only when all changes are documentation (`.md`, `.rst`, `.txt`,
-or license files) or the crate's own version in `Cargo.toml`, `Cargo.lock`, and
-`fuzz/Cargo.lock`. Rust code, dependencies, build settings, CI, and other file
+or license files outside `fuzz/`) or the crate's own version in `Cargo.toml`,
+`Cargo.lock`, and `fuzz/Cargo.lock`. Files under `fuzz/` always require fuzzing,
+regardless of extension, except for that lockfile's crate-version-only changes. Rust code, dependencies, build settings, CI, and other file
 changes require fuzzing. Version-job dispatches compare the entire branch
 against the default branch; manual default-branch runs always fuzz.
 The gate accepts a skipped fuzz job only after a successful, explicit
