@@ -48,7 +48,9 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     /// Fails with [`InvalidRequest::Query`] when the value cannot be encoded
     /// as flat URL query parameters, e.g. for nested objects.
     pub fn query<T: Serialize + ?Sized>(mut self, query: &T) -> Result<Self> {
-        self.query_params.extend(serialize_query_params(query)?);
+        let params = serialize_query_params(query)
+            .map_err(|error| error.in_operation(E::SPEC.operation_id))?;
+        self.query_params.extend(params);
         Ok(self)
     }
 
@@ -484,6 +486,7 @@ mod tests {
             error.kind(),
             ErrorKind::InvalidRequest(InvalidRequest::Query(_))
         ));
+        assert_eq!(error.operation(), Some("getAccessoryCollection"));
         assert!(std::error::Error::source(&error).is_some());
     }
 
