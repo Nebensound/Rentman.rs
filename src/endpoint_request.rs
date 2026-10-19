@@ -563,7 +563,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let request = client
             .endpoint::<CustomBodyEndpoint>()
@@ -578,10 +579,14 @@ mod tests {
             Ok(_) => panic!("a failing serializer must be reported"),
             Err(error) => error,
         };
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::Body(_))
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
         assert_eq!(
             error.to_string(),
-            "Rentman request body is invalid JSON value"
+            "invalid Rentman API request: the body cannot be encoded as JSON: broken body"
         );
-        assert_eq!(error.root_cause().to_string(), "broken body");
     }
 }
