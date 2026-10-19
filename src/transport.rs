@@ -322,23 +322,35 @@ mod tests {
 
     #[tokio::test]
     async fn retries_transient_status_until_success() {
+        // The first answer asks for a 1 s pause, far above the 1 ms backoff.
         let server = spawn_server(vec![
-            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            text_response("HTTP/1.1 503 Service Unavailable", "later").replacen(
+                "\r\n",
+                "\r\nRetry-After: 1\r\n",
+                1,
+            ),
             text_response("HTTP/1.1 502 Bad Gateway", "later"),
             json_response(r#"{"ok":true}"#),
         ]);
 
         let warnings = capture_warnings();
 
+        let started = std::time::Instant::now();
         let response = send_with_retries(&fast_limiter(), fast_policy(3), get(&server))
             .await
             .unwrap();
+        let elapsed = started.elapsed();
 
         assert_eq!(response.status(), StatusCode::OK);
+        assert!(
+            elapsed >= Duration::from_secs(1),
+            "the loop must wait for Retry-After, took {elapsed:?}"
+        );
         let events = warnings.events();
         assert_eq!(events.len(), 2, "{events:?}");
         assert!(events[0].contains("attempt=1"), "{events:?}");
         assert!(events[0].contains("max_attempts=3"), "{events:?}");
+        assert!(events[0].contains("delay_ms=1000"), "{events:?}");
         assert!(
             events[0].contains("will be retried: Rentman API returned 503"),
             "{events:?}"
