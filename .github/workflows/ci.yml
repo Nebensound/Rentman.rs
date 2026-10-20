@@ -92,6 +92,7 @@ jobs:
     permissions:
       contents: write
       actions: write
+      pull-requests: read
     outputs:
       version: ${{ steps.effective.outputs.version }}
       version_tag: ${{ steps.effective.outputs.version_tag }}
@@ -104,6 +105,24 @@ jobs:
           # On pull requests, check out the branch head instead of the merge
           # commit so the derived version can be committed back to the branch.
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+      - name: Identify the pull request branch
+        id: pull-request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "branch=$HEAD_REF" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ] && \
+               [ "$GITHUB_REF" != "refs/heads/$DEFAULT_BRANCH" ]; then
+            pr="$(gh pr list --state open --head "$GITHUB_REF_NAME" --base "$DEFAULT_BRANCH" \
+              --json number,isCrossRepository --jq '[.[] | select(.isCrossRepository == false)][0].number // empty')"
+            if [ -n "$pr" ]; then
+              echo "branch=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+            fi
+          fi
       - name: Calculate semantic version
         id: semantic
         uses: PaulHatch/semantic-version@4d6da96a9bc3116da3613309a11ff75fba58eb8d # v6.0.4
@@ -129,7 +148,7 @@ jobs:
       # Outside pull requests there is no branch the job could push a fix to,
       # so a version mismatch must fail loudly instead of being papered over.
       - name: Verify Cargo.toml carries the effective version
-        if: github.event_name != 'pull_request'
+        if: steps.pull-request.outputs.branch == ''
         env:
           VERSION: ${{ steps.effective.outputs.version }}
         run: |
@@ -139,10 +158,11 @@ jobs:
             exit 1
           fi
       - name: Commit derived version to the branch
-        if: github.event_name == 'pull_request'
+        if: steps.pull-request.outputs.branch != ''
         env:
           VERSION: ${{ steps.effective.outputs.version }}
           GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ steps.pull-request.outputs.branch }}
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
           sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
@@ -154,8 +174,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -am "Set crate version to $VERSION"
-          git push
-          gh workflow run ci.yml --ref "$GITHUB_HEAD_REF"
+          git push origin "HEAD:refs/heads/$PR_BRANCH"
+          gh workflow run ci.yml --ref "$PR_BRANCH"
 
   checks:
     runs-on: ubuntu-latest
