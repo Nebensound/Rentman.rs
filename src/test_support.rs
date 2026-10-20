@@ -63,26 +63,52 @@ impl RecordedRequest {
 }
 
 pub(crate) fn spawn_server(responses: Vec<String>) -> TestServer {
+    spawn_delayed_server(
+        responses
+            .into_iter()
+            .map(|response| (Duration::ZERO, response))
+            .collect(),
+    )
+}
+
+/// Like [`spawn_server`], but waits the given time before writing each
+/// response, without blocking later connections. A delayed response may find
+/// the client already gone (e.g. after a client timeout), so writing it is
+/// allowed to fail.
+pub(crate) fn spawn_delayed_server(responses: Vec<(Duration, String)>) -> TestServer {
     let listener = TcpListener::bind("127.0.0.1:0").expect("test server binds");
     let address = listener.local_addr().expect("test server has address");
     let base_url = format!("http://{address}");
     let (request_tx, request_rx) = mpsc::channel();
     let responses = responses
         .into_iter()
-        .map(|response| response.replace("{base}", &base_url))
-        .map(refresh_content_length)
+        .map(|(delay, response)| {
+            (
+                delay,
+                refresh_content_length(response.replace("{base}", &base_url)),
+            )
+        })
         .collect::<Vec<_>>();
 
     thread::spawn(move || {
-        for response in responses {
+        for (delay, response) in responses {
             let (mut stream, _) = listener.accept().expect("test server accepts request");
             let request = read_request(&mut stream);
             request_tx
                 .send(request)
                 .expect("test server sends recorded request");
-            stream
-                .write_all(response.as_bytes())
-                .expect("test server writes response");
+            if delay.is_zero() {
+                stream
+                    .write_all(response.as_bytes())
+                    .expect("test server writes response");
+            } else {
+                // Answer late on a separate thread, so the next connection
+                // (e.g. the client's retry) is accepted right away.
+                thread::spawn(move || {
+                    thread::sleep(delay);
+                    let _ = stream.write_all(response.as_bytes());
+                });
+            }
         }
     });
 
