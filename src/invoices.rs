@@ -2,10 +2,10 @@
 
 use crate::{
     RentmanAmount,
-    client::{DEFAULT_PAGE_LIMIT, RentmanClient},
+    client::RentmanClient,
     error::{Error, ErrorKind, Resource, Result},
     ids::{InvoiceId, InvoiceNumber, PaymentId},
-    model,
+    paging::{CollectionRequest, PageSize},
 };
 use chrono::{DateTime, FixedOffset, SecondsFormat};
 use reqwest::Method;
@@ -119,34 +119,13 @@ fn parse_invoice_reference(reference: &str) -> Result<InvoiceId> {
 impl RentmanClient {
     /// Loads all Rentman invoices through the documented collection endpoint.
     pub async fn all_invoices(&self) -> Result<Vec<RentmanInvoice>> {
-        let mut invoices = Vec::new();
-        let mut next_url = None;
-        let mut offset = 0;
-
-        loop {
-            let response: model::CollectionResponse<RentmanInvoice> = self
-                .paginated_request(next_url.take(), "invoices", offset)
-                .query(&[
-                    ("fields", "id,number,is_paid,price_invat".to_string()),
-                    ("limit", DEFAULT_PAGE_LIMIT.to_string()),
-                ])
-                .send_json()
-                .await
-                .map_err(|error| error.in_operation("getFactuurCollection"))?;
-
-            let should_fallback_to_offset = response.next_page_url.is_none()
-                && response.item_count >= response.limit
-                && response.limit > 0;
-            offset += response.limit;
-            next_url = response.next_page_url;
-            invoices.extend(response.data);
-
-            if next_url.is_none() && !should_fallback_to_offset {
-                break;
-            }
-        }
-
-        Ok(invoices)
+        self.read_all(CollectionRequest {
+            path: "invoices",
+            query: &[("fields", "id,number,is_paid,price_invat")],
+            page_size: PageSize::MAX,
+            operation: "getFactuurCollection",
+        })
+        .await
     }
 
     /// Loads all Rentman payments and groups them by invoice.
@@ -154,41 +133,25 @@ impl RentmanClient {
     /// The payments for each invoice are sorted by ID to keep creation order
     /// stable.
     pub async fn all_payments_by_invoice(&self) -> Result<HashMap<InvoiceId, Vec<RentmanPayment>>> {
+        let items: Vec<PaymentListItem> = self
+            .read_all(CollectionRequest {
+                path: "payments",
+                query: &[("fields", "id,moment,invoice,amount,description")],
+                page_size: PageSize::MAX,
+                operation: "getPaymentCollection",
+            })
+            .await?;
+
         let mut result: HashMap<InvoiceId, Vec<RentmanPayment>> = HashMap::new();
-        let mut next_url = None;
-        let mut offset = 0;
-
-        loop {
-            let response: model::CollectionResponse<PaymentListItem> = self
-                .paginated_request(next_url.take(), "payments", offset)
-                .query(&[
-                    ("fields", "id,moment,invoice,amount,description".to_string()),
-                    ("limit", DEFAULT_PAGE_LIMIT.to_string()),
-                ])
-                .send_json()
-                .await
+        for item in items {
+            let invoice_id = parse_invoice_reference(&item.invoice)
                 .map_err(|error| error.in_operation("getPaymentCollection"))?;
-
-            let should_fallback_to_offset = response.next_page_url.is_none()
-                && response.item_count >= response.limit
-                && response.limit > 0;
-            offset += response.limit;
-            next_url = response.next_page_url;
-
-            for item in response.data {
-                let invoice_id = parse_invoice_reference(&item.invoice)
-                    .map_err(|error| error.in_operation("getPaymentCollection"))?;
-                result.entry(invoice_id).or_default().push(RentmanPayment {
-                    id: item.id,
-                    moment: item.moment,
-                    amount: item.amount,
-                    description: item.description,
-                });
-            }
-
-            if next_url.is_none() && !should_fallback_to_offset {
-                break;
-            }
+            result.entry(invoice_id).or_default().push(RentmanPayment {
+                id: item.id,
+                moment: item.moment,
+                amount: item.amount,
+                description: item.description,
+            });
         }
 
         for payments in result.values_mut() {

@@ -233,6 +233,15 @@ in the generated contract or in an explicit hand-written boundary type. The
 public API must expose this as Rentman API models/endpoints, not as an
 `openapi` user-facing module.
 
+Complete collections are read through one shared paging core (`src/paging.rs`);
+no other code pages by itself. It follows Rentman's `next_page_url` unchanged
+until it is `null` (the cursor carries `fields`, filters, and the page size),
+and requests the next offset only when an older response has a full page
+without `next_page_url`. A `next_page_url` that repeats an earlier page or
+leaves the configured API origin (it would receive the API token) fails with
+an `UnexpectedResponse` error. Page sizes are a validated `PageSize` (1 to
+1500, default 300).
+
 Every generated endpoint must be executable. The build checks that each endpoint
 has a serializable request type and a deserializable response type, and unit
 tests verify the shared execution path for path parameters, query parameters,

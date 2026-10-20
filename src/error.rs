@@ -81,6 +81,12 @@ pub enum InvalidRequest {
     /// The request body cannot be encoded as JSON.
     #[error("the body cannot be encoded as JSON: {0}")]
     Body(#[source] serde_json::Error),
+    /// The page size is outside the range Rentman documents (1 to 1500).
+    #[error("page size {requested} is outside the documented range 1..=1500")]
+    PageSize {
+        /// Requested number of items per page.
+        requested: usize,
+    },
     /// The HTTP request is malformed, e.g. a header value with a line break.
     #[error("{0}")]
     Http(#[source] reqwest::Error),
@@ -389,6 +395,10 @@ mod tests {
             (
                 InvalidRequest::UnexpectedBody,
                 "the endpoint does not accept a JSON request body",
+            ),
+            (
+                InvalidRequest::PageSize { requested: 0 },
+                "page size 0 is outside the documented range 1..=1500",
             ),
         ];
         for (reason, text) in cases {
