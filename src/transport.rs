@@ -421,6 +421,30 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn retries_requests_that_time_out() {
+        // The first answer comes long after the client's 200 ms timeout.
+        let server = spawn_delayed_server(vec![
+            (Duration::from_secs(1), json_response(r#"{"late":true}"#)),
+            (Duration::ZERO, json_response(r#"{"ok":true}"#)),
+        ]);
+        let request = reqwest::Client::builder()
+            .timeout(Duration::from_millis(200))
+            .build()
+            .unwrap()
+            .get(format!("{}/items", server.base_url()));
+
+        let response = send_with_retries(&fast_limiter(), fast_policy(2), request)
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.text().await.unwrap(), r#"{"ok":true}"#);
+        assert_request(&server.next_request(), "GET", "/items");
+        assert_request(&server.next_request(), "GET", "/items");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn reports_transport_failure_after_last_attempt() {
         // Bind and drop a listener to get a port nothing listens on.
         let address = std::net::TcpListener::bind("127.0.0.1:0")
