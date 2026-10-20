@@ -6,10 +6,15 @@ use rentman_client::endpoint::{
     EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
 };
 use rentman_client::model::{
-    ALL_SCHEMAS, EmailAddress, ProjectsCreateFromTemplateRequest, RentmanId, ResourceReference,
+    ALL_SCHEMAS, CollectionResponse, EmailAddress, ProjectsCreateFromTemplateRequest, RentmanId,
+    ResourceReference, TaxClassResponse, TaxClassResponseType,
 };
-use serde_json::Value;
-use std::{collections::BTreeSet, fs};
+use serde::{Serialize, de::DeserializeOwned};
+use serde_json::{Value, json};
+use std::{collections::BTreeSet, fmt::Debug, fs};
+
+#[path = "contract/generated_response_enums.rs"]
+mod generated_response_enums;
 
 #[test]
 fn endpoint_manifest_covers_every_documented_operation() {
@@ -493,6 +498,108 @@ fn reference_name(reference: &str) -> &str {
         .rsplit_once('/')
         .map(|(_, name)| name)
         .expect("OpenAPI reference has a schema name")
+}
+
+#[test]
+fn every_documented_response_enum_is_open() {
+    let spec = openapi_spec();
+    let documented = spec["components"]["schemas"]
+        .as_object()
+        .expect("OpenAPI schemas are an object")
+        .iter()
+        .filter(|(name, _)| name.ends_with("Response"))
+        .flat_map(|(name, schema)| {
+            schema["properties"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .filter(|(_, property)| property.get("enum").is_some())
+                .map(move |(field, _)| (name.clone(), field.clone()))
+        })
+        .collect::<BTreeSet<_>>();
+    let covered = generated_response_enums::RESPONSE_ENUM_FIELDS
+        .iter()
+        .map(|(schema, field)| (schema.to_string(), field.to_string()))
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(
+        documented, covered,
+        "response enums drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+    );
+}
+
+#[test]
+fn undocumented_response_enum_values_are_kept_as_unknown() {
+    let documented: TaxClassResponseType = serde_json::from_value(json!("vat")).unwrap();
+    assert_eq!(documented, TaxClassResponseType::Vat);
+    assert_eq!(serde_json::to_value(&documented).unwrap(), json!("vat"));
+
+    let unknown: TaxClassResponseType = serde_json::from_value(json!("reverse_charge")).unwrap();
+    assert_eq!(
+        unknown,
+        TaxClassResponseType::Unknown("reverse_charge".to_string())
+    );
+    assert_eq!(
+        serde_json::to_value(&unknown).unwrap(),
+        json!("reverse_charge")
+    );
+
+    // Values are matched exactly; a different spelling is not documented.
+    let unknown: TaxClassResponseType = serde_json::from_value(json!("VAT")).unwrap();
+    assert_eq!(unknown, TaxClassResponseType::Unknown("VAT".to_string()));
+
+    // Only strings are enum values; other JSON types still fail.
+    assert!(serde_json::from_value::<TaxClassResponseType>(json!(1)).is_err());
+}
+
+#[test]
+fn an_undocumented_enum_value_does_not_fail_the_collection() {
+    let page: CollectionResponse<TaxClassResponse> = serde_json::from_value(json!({
+        "itemCount": 2,
+        "limit": 300,
+        "data": [
+            {"id": 1, "created": null, "modified": null, "creator": null,
+             "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat"},
+            {"id": 2, "created": null, "modified": null, "creator": null,
+             "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge"}
+        ]
+    }))
+    .unwrap();
+
+    assert_eq!(page.data[0].type_, TaxClassResponseType::Vat);
+    assert_eq!(
+        page.data[1].type_,
+        TaxClassResponseType::Unknown("reverse_charge".to_string())
+    );
+    assert_eq!(
+        serde_json::to_value(&page.data[1]).unwrap()["type"],
+        json!("reverse_charge")
+    );
+}
+
+/// Asserts that every value the OpenAPI document lists for `schema.field`
+/// deserializes to a named variant and serializes back unchanged.
+fn assert_documented_values_are_named<E>(schema_name: &str, field: &str, is_unknown: fn(&E) -> bool)
+where
+    E: DeserializeOwned + Serialize + Debug,
+{
+    let spec = openapi_spec();
+    let values = property(schema(&spec, schema_name), field)["enum"]
+        .as_array()
+        .unwrap_or_else(|| panic!("{schema_name}.{field} is no longer an enum in OpenAPI"));
+    for value in values {
+        // The generator models every enum value as its string form.
+        let text = value
+            .as_str()
+            .map_or_else(|| value.to_string(), str::to_string);
+        let parsed: E = serde_json::from_value(json!(text))
+            .unwrap_or_else(|error| panic!("{schema_name}.{field} = {text:?}: {error}"));
+        assert!(
+            !is_unknown(&parsed),
+            "{schema_name}.{field} = {text:?} is documented but has no named variant; run scripts/generate_endpoint_manifest.py"
+        );
+        assert_eq!(serde_json::to_value(&parsed).unwrap(), json!(text));
+    }
 }
 
 fn openapi_spec() -> Value {

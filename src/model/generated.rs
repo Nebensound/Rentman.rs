@@ -146,7 +146,7 @@ impl fmt::Display for RentmanId {
 }
 
 /// Values documented for `AppointmentResponse.recurrence_interval_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum AppointmentResponseRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
@@ -166,10 +166,13 @@ pub enum AppointmentResponseRecurrenceIntervalUnit {
     /// `specific_days`.
     #[serde(rename = "specific_days")]
     SpecificDays,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ContactPersonRequest.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactPersonRequestCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -906,7 +909,7 @@ pub enum ContactPersonRequestCountry {
 }
 
 /// Values documented for `ContactPersonResponse.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactPersonResponseCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -1640,10 +1643,13 @@ pub enum ContactPersonResponseCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ContactRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactRequestType {
     /// `private`.
     #[serde(rename = "private")]
@@ -1654,7 +1660,7 @@ pub enum ContactRequestType {
 }
 
 /// Values documented for `ContactRequest.mailing_country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactRequestMailingCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -2391,7 +2397,7 @@ pub enum ContactRequestMailingCountry {
 }
 
 /// Values documented for `ContactRequest.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactRequestCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -3128,7 +3134,7 @@ pub enum ContactRequestCountry {
 }
 
 /// Values documented for `ContactRequest.invoice_country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactRequestInvoiceCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -3865,7 +3871,7 @@ pub enum ContactRequestInvoiceCountry {
 }
 
 /// Values documented for `ContactResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactResponseType {
     /// `private`.
     #[serde(rename = "private")]
@@ -3873,10 +3879,13 @@ pub enum ContactResponseType {
     /// `company`.
     #[serde(rename = "company")]
     Company,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ContactResponse.mailing_country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactResponseMailingCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -4610,10 +4619,13 @@ pub enum ContactResponseMailingCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ContactResponse.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactResponseCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -5347,10 +5359,13 @@ pub enum ContactResponseCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ContactResponse.invoice_country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ContactResponseInvoiceCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -6084,10 +6099,13 @@ pub enum ContactResponseInvoiceCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `CrewRequest.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewRequestCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -6824,7 +6842,7 @@ pub enum CrewRequestCountry {
 }
 
 /// Values documented for `CrewResponse.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewResponseCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -7558,10 +7576,13 @@ pub enum CrewResponseCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `CrewAvailabilityRequest.status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewAvailabilityRequestStatus {
     /// `B`.
     #[serde(rename = "B")]
@@ -7575,7 +7596,7 @@ pub enum CrewAvailabilityRequestStatus {
 }
 
 /// Values documented for `CrewAvailabilityRequest.recurrence_interval_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewAvailabilityRequestRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
@@ -7598,7 +7619,7 @@ pub enum CrewAvailabilityRequestRecurrenceIntervalUnit {
 }
 
 /// Values documented for `CrewAvailabilityResponse.status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewAvailabilityResponseStatus {
     /// `B`.
     #[serde(rename = "B")]
@@ -7609,10 +7630,13 @@ pub enum CrewAvailabilityResponseStatus {
     /// `O`.
     #[serde(rename = "O")]
     O,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `CrewAvailabilityResponse.recurrence_interval_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewAvailabilityResponseRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
@@ -7632,10 +7656,13 @@ pub enum CrewAvailabilityResponseRecurrenceIntervalUnit {
     /// `specific_days`.
     #[serde(rename = "specific_days")]
     SpecificDays,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestType {
     /// `set`.
     #[serde(rename = "set")]
@@ -7649,7 +7676,7 @@ pub enum EquipmentRequestType {
 }
 
 /// Values documented for `EquipmentRequest.rental_sales`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestRentalSales {
     /// `Sale`.
     #[serde(rename = "Sale")]
@@ -7660,7 +7687,7 @@ pub enum EquipmentRequestRentalSales {
 }
 
 /// Values documented for `EquipmentRequest.stock_management`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestStockManagement {
     /// `Exclude from stock tracking`.
     #[serde(rename = "Exclude from stock tracking")]
@@ -7671,7 +7698,7 @@ pub enum EquipmentRequestStockManagement {
 }
 
 /// Values documented for `EquipmentRequest.country_of_origin`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestCountryOfOrigin {
     /// `oo`.
     #[serde(rename = "oo")]
@@ -8411,7 +8438,7 @@ pub enum EquipmentRequestCountryOfOrigin {
 }
 
 /// Values documented for `EquipmentRequest.is_physical`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestIsPhysical {
     /// `Virtual package`.
     #[serde(rename = "Virtual package")]
@@ -8422,7 +8449,7 @@ pub enum EquipmentRequestIsPhysical {
 }
 
 /// Values documented for `EquipmentRequest.strict_container_content`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentRequestStrictContainerContent {
     /// `Unrestricted`.
     #[serde(rename = "Unrestricted")]
@@ -8433,7 +8460,7 @@ pub enum EquipmentRequestStrictContainerContent {
 }
 
 /// Values documented for `EquipmentResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseType {
     /// `set`.
     #[serde(rename = "set")]
@@ -8444,10 +8471,13 @@ pub enum EquipmentResponseType {
     /// `item`.
     #[serde(rename = "item")]
     Item,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentResponse.rental_sales`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseRentalSales {
     /// `Sale`.
     #[serde(rename = "Sale")]
@@ -8455,10 +8485,13 @@ pub enum EquipmentResponseRentalSales {
     /// `Rental`.
     #[serde(rename = "Rental")]
     Rental,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentResponse.stock_management`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseStockManagement {
     /// `Exclude from stock tracking`.
     #[serde(rename = "Exclude from stock tracking")]
@@ -8466,10 +8499,13 @@ pub enum EquipmentResponseStockManagement {
     /// `Track stock`.
     #[serde(rename = "Track stock")]
     TrackStock,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentResponse.country_of_origin`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseCountryOfOrigin {
     /// `oo`.
     #[serde(rename = "oo")]
@@ -9206,10 +9242,13 @@ pub enum EquipmentResponseCountryOfOrigin {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentResponse.is_physical`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseIsPhysical {
     /// `Virtual package`.
     #[serde(rename = "Virtual package")]
@@ -9217,10 +9256,13 @@ pub enum EquipmentResponseIsPhysical {
     /// `Physical equipment`.
     #[serde(rename = "Physical equipment")]
     PhysicalEquipment,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentResponse.strict_container_content`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentResponseStrictContainerContent {
     /// `Unrestricted`.
     #[serde(rename = "Unrestricted")]
@@ -9228,10 +9270,13 @@ pub enum EquipmentResponseStrictContainerContent {
     /// `Strict`.
     #[serde(rename = "Strict")]
     Strict,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentSetContentRequest.is_fixed`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentSetContentRequestIsFixed {
     /// `Available outside this combination`.
     #[serde(rename = "Available outside this combination")]
@@ -9242,7 +9287,7 @@ pub enum EquipmentSetContentRequestIsFixed {
 }
 
 /// Values documented for `EquipmentSetContentRequest.is_physically_connected`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentSetContentRequestIsPhysicallyConnected {
     /// `Will be removed when emptying combinations`.
     #[serde(rename = "Will be removed when emptying combinations")]
@@ -9253,7 +9298,7 @@ pub enum EquipmentSetContentRequestIsPhysicallyConnected {
 }
 
 /// Values documented for `EquipmentSetContentResponse.is_fixed`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentSetContentResponseIsFixed {
     /// `Available outside this combination`.
     #[serde(rename = "Available outside this combination")]
@@ -9261,10 +9306,13 @@ pub enum EquipmentSetContentResponseIsFixed {
     /// `Reserved from stock`.
     #[serde(rename = "Reserved from stock")]
     ReservedFromStock,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `EquipmentSetContentResponse.is_physically_connected`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EquipmentSetContentResponseIsPhysicallyConnected {
     /// `Will be removed when emptying combinations`.
     #[serde(rename = "Will be removed when emptying combinations")]
@@ -9272,10 +9320,13 @@ pub enum EquipmentSetContentResponseIsPhysicallyConnected {
     /// `Will remain in the combination when emptying combinations`.
     #[serde(rename = "Will remain in the combination when emptying combinations")]
     WillRemainInTheCombinationWhenEmptyingCombinations,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ExtraInputFieldRequest.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldRequestItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9355,7 +9406,7 @@ pub enum ExtraInputFieldRequestItemtype {
 }
 
 /// Values documented for `ExtraInputFieldRequest.linkedItemType`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldRequestLinkedItemType {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9366,7 +9417,7 @@ pub enum ExtraInputFieldRequestLinkedItemType {
 }
 
 /// Values documented for `ExtraInputFieldRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldRequestType {
     /// `bool`.
     #[serde(rename = "bool")]
@@ -9413,7 +9464,7 @@ pub enum ExtraInputFieldRequestType {
 }
 
 /// Values documented for `ExtraInputFieldResponse.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldResponseItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9490,10 +9541,13 @@ pub enum ExtraInputFieldResponseItemtype {
     /// `Taak`.
     #[serde(rename = "Taak")]
     Taak,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ExtraInputFieldResponse.linkedItemType`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldResponseLinkedItemType {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9501,10 +9555,13 @@ pub enum ExtraInputFieldResponseLinkedItemType {
     /// `Medewerker`.
     #[serde(rename = "Medewerker")]
     Medewerker,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ExtraInputFieldResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExtraInputFieldResponseType {
     /// `bool`.
     #[serde(rename = "bool")]
@@ -9548,10 +9605,13 @@ pub enum ExtraInputFieldResponseType {
     /// `phone`.
     #[serde(rename = "phone")]
     Phone,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `FileFolderRequest.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileFolderRequestItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9604,7 +9664,7 @@ pub enum FileFolderRequestItemtype {
 }
 
 /// Values documented for `FileFolderResponse.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileFolderResponseItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9654,10 +9714,13 @@ pub enum FileFolderResponseItemtype {
     /// `Vehicle`.
     #[serde(rename = "Vehicle")]
     Vehicle,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `FileRequest.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileRequestItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9740,7 +9803,7 @@ pub enum FileRequestItemtype {
 }
 
 /// Values documented for `FileRequest.previewstatus`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileRequestPreviewstatus {
     /// `no`.
     #[serde(rename = "no")]
@@ -9754,7 +9817,7 @@ pub enum FileRequestPreviewstatus {
 }
 
 /// Values documented for `FileResponse.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileResponseItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -9834,10 +9897,13 @@ pub enum FileResponseItemtype {
     /// `Vehicle`.
     #[serde(rename = "Vehicle")]
     Vehicle,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `FileResponse.previewstatus`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FileResponsePreviewstatus {
     /// `no`.
     #[serde(rename = "no")]
@@ -9848,10 +9914,13 @@ pub enum FileResponsePreviewstatus {
     /// `failed`.
     #[serde(rename = "failed")]
     Failed,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `FolderRequest.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FolderRequestItemtype {
     /// `equipment`.
     #[serde(rename = "equipment")]
@@ -9877,7 +9946,7 @@ pub enum FolderRequestItemtype {
 }
 
 /// Values documented for `FolderResponse.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FolderResponseItemtype {
     /// `equipment`.
     #[serde(rename = "equipment")]
@@ -9900,10 +9969,13 @@ pub enum FolderResponseItemtype {
     /// `default function`.
     #[serde(rename = "default function")]
     DefaultFunction,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `InvitationsRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InvitationsRequestType {
     /// `availability`.
     #[serde(rename = "availability")]
@@ -9920,7 +9992,7 @@ pub enum InvitationsRequestType {
 }
 
 /// Values documented for `InvitationsRequest.emailstatus`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InvitationsRequestEmailstatus {
     /// `pending`.
     #[serde(rename = "pending")]
@@ -9940,7 +10012,7 @@ pub enum InvitationsRequestEmailstatus {
 }
 
 /// Values documented for `InvitationsResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InvitationsResponseType {
     /// `availability`.
     #[serde(rename = "availability")]
@@ -9954,10 +10026,13 @@ pub enum InvitationsResponseType {
     /// `draft_planning`.
     #[serde(rename = "draft_planning")]
     DraftPlanning,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `InvitationsResponse.emailstatus`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum InvitationsResponseEmailstatus {
     /// `pending`.
     #[serde(rename = "pending")]
@@ -9974,10 +10049,13 @@ pub enum InvitationsResponseEmailstatus {
     /// `processed`.
     #[serde(rename = "processed")]
     Processed,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `FactuurResponse.invoicetype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FactuurResponseInvoicetype {
     /// `C`.
     #[serde(rename = "C")]
@@ -9985,10 +10063,13 @@ pub enum FactuurResponseInvoicetype {
     /// `F`.
     #[serde(rename = "F")]
     F,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `LeaveRequestRequest.approval_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveRequestRequestApprovalStatus {
     /// `pending`.
     #[serde(rename = "pending")]
@@ -10005,7 +10086,7 @@ pub enum LeaveRequestRequestApprovalStatus {
 }
 
 /// Values documented for `LeaveRequestResponse.approval_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveRequestResponseApprovalStatus {
     /// `pending`.
     #[serde(rename = "pending")]
@@ -10019,10 +10100,13 @@ pub enum LeaveRequestResponseApprovalStatus {
     /// `canceled`.
     #[serde(rename = "canceled")]
     Canceled,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `LeaveTypesRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveTypesRequestType {
     /// `C`.
     #[serde(rename = "C")]
@@ -10042,7 +10126,7 @@ pub enum LeaveTypesRequestType {
 }
 
 /// Values documented for `LeaveTypesRequest.is_labor`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveTypesRequestIsLabor {
     /// `leave`.
     #[serde(rename = "leave")]
@@ -10053,7 +10137,7 @@ pub enum LeaveTypesRequestIsLabor {
 }
 
 /// Values documented for `LeaveTypesResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveTypesResponseType {
     /// `C`.
     #[serde(rename = "C")]
@@ -10070,10 +10154,13 @@ pub enum LeaveTypesResponseType {
     /// `G`.
     #[serde(rename = "G")]
     G,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `LeaveTypesResponse.is_labor`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum LeaveTypesResponseIsLabor {
     /// `leave`.
     #[serde(rename = "leave")]
@@ -10081,10 +10168,13 @@ pub enum LeaveTypesResponseIsLabor {
     /// `worked`.
     #[serde(rename = "worked")]
     Worked,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PaymentRequest.payment_import_source`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PaymentRequestPaymentImportSource {
     /// `none`.
     #[serde(rename = "none")]
@@ -10104,7 +10194,7 @@ pub enum PaymentRequestPaymentImportSource {
 }
 
 /// Values documented for `PaymentResponse.payment_import_source`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PaymentResponsePaymentImportSource {
     /// `none`.
     #[serde(rename = "none")]
@@ -10121,10 +10211,13 @@ pub enum PaymentResponsePaymentImportSource {
     /// `publicapi`.
     #[serde(rename = "publicapi")]
     Publicapi,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectCrewRequest.transport`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectCrewRequestTransport {
     /// `no_transport`.
     #[serde(rename = "no_transport")]
@@ -10141,7 +10234,7 @@ pub enum ProjectCrewRequestTransport {
 }
 
 /// Values documented for `ProjectCrewResponse.transport`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectCrewResponseTransport {
     /// `no_transport`.
     #[serde(rename = "no_transport")]
@@ -10155,10 +10248,13 @@ pub enum ProjectCrewResponseTransport {
     /// `only_way_back`.
     #[serde(rename = "only_way_back")]
     OnlyWayBack,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectCrewResponse.activity_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectCrewResponseActivityStatus {
     /// `no_registration`.
     #[serde(rename = "no_registration")]
@@ -10175,10 +10271,13 @@ pub enum ProjectCrewResponseActivityStatus {
     /// `under_time`.
     #[serde(rename = "under_time")]
     UnderTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
@@ -10186,10 +10285,13 @@ pub enum ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart {
     /// `is_start`.
     #[serde(rename = "is_start")]
     IsStart,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
@@ -10197,10 +10299,13 @@ pub enum ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart {
     /// `is_start`.
     #[serde(rename = "is_start")]
     IsStart,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionGroupResponse.planperiod_end_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
@@ -10208,10 +10313,13 @@ pub enum ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart {
     /// `is_start`.
     #[serde(rename = "is_start")]
     IsStart,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionGroupResponse.usageperiod_end_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
@@ -10219,10 +10327,13 @@ pub enum ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart {
     /// `is_start`.
     #[serde(rename = "is_start")]
     IsStart,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionRequestType {
     /// `crew_function`.
     #[serde(rename = "crew_function")]
@@ -10239,7 +10350,7 @@ pub enum ProjectFunctionRequestType {
 }
 
 /// Values documented for `ProjectFunctionResponse.planperiod_start_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponsePlanperiodStartScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
@@ -10247,10 +10358,13 @@ pub enum ProjectFunctionResponsePlanperiodStartScheduleIsStart {
     /// `Start time`.
     #[serde(rename = "Start time")]
     StartTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionResponse.usageperiod_start_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponseUsageperiodStartScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
@@ -10258,10 +10372,13 @@ pub enum ProjectFunctionResponseUsageperiodStartScheduleIsStart {
     /// `Start time`.
     #[serde(rename = "Start time")]
     StartTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionResponse.planperiod_end_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponsePlanperiodEndScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
@@ -10269,10 +10386,13 @@ pub enum ProjectFunctionResponsePlanperiodEndScheduleIsStart {
     /// `Start time`.
     #[serde(rename = "Start time")]
     StartTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionResponse.usageperiod_end_schedule_is_start`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponseUsageperiodEndScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
@@ -10280,10 +10400,13 @@ pub enum ProjectFunctionResponseUsageperiodEndScheduleIsStart {
     /// `Start time`.
     #[serde(rename = "Start time")]
     StartTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponseType {
     /// `crew_function`.
     #[serde(rename = "crew_function")]
@@ -10297,10 +10420,13 @@ pub enum ProjectFunctionResponseType {
     /// `shift`.
     #[serde(rename = "shift")]
     Shift,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectFunctionResponse.recurrence_interval_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectFunctionResponseRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
@@ -10320,10 +10446,13 @@ pub enum ProjectFunctionResponseRecurrenceIntervalUnit {
     /// `specific_days`.
     #[serde(rename = "specific_days")]
     SpecificDays,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectRequestResponse.source`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectRequestResponseSource {
     /// `rentaround`.
     #[serde(rename = "rentaround")]
@@ -10337,10 +10466,13 @@ pub enum ProjectRequestResponseSource {
     /// `api`.
     #[serde(rename = "api")]
     Api,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectRequestResponse.status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectRequestResponseStatus {
     /// `accepted`.
     #[serde(rename = "accepted")]
@@ -10351,10 +10483,13 @@ pub enum ProjectRequestResponseStatus {
     /// `open`.
     #[serde(rename = "open")]
     Open,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectResponse.deposit_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectResponseDepositStatus {
     /// `no_deposit_paid`.
     #[serde(rename = "no_deposit_paid")]
@@ -10365,10 +10500,13 @@ pub enum ProjectResponseDepositStatus {
     /// `deposit_returned`.
     #[serde(rename = "deposit_returned")]
     DepositReturned,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectTypeRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectTypeRequestType {
     /// `regular`.
     #[serde(rename = "regular")]
@@ -10385,7 +10523,7 @@ pub enum ProjectTypeRequestType {
 }
 
 /// Values documented for `ProjectTypeResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectTypeResponseType {
     /// `regular`.
     #[serde(rename = "regular")]
@@ -10399,10 +10537,13 @@ pub enum ProjectTypeResponseType {
     /// `shifts`.
     #[serde(rename = "shifts")]
     Shifts,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `ProjectVehicleRequest.transport`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectVehicleRequestTransport {
     /// `No transport`.
     #[serde(rename = "No transport")]
@@ -10419,7 +10560,7 @@ pub enum ProjectVehicleRequestTransport {
 }
 
 /// Values documented for `ProjectVehicleResponse.transport`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ProjectVehicleResponseTransport {
     /// `No transport`.
     #[serde(rename = "No transport")]
@@ -10433,10 +10574,13 @@ pub enum ProjectVehicleResponseTransport {
     /// `Only way back`.
     #[serde(rename = "Only way back")]
     OnlyWayBack,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PurchaseOrderCostRequest.costitemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderCostRequestCostitemtype {
     /// `Inhuur`.
     #[serde(rename = "Inhuur")]
@@ -10456,7 +10600,7 @@ pub enum PurchaseOrderCostRequestCostitemtype {
 }
 
 /// Values documented for `PurchaseOrderCostResponse.costitemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderCostResponseCostitemtype {
     /// `Inhuur`.
     #[serde(rename = "Inhuur")]
@@ -10473,10 +10617,13 @@ pub enum PurchaseOrderCostResponseCostitemtype {
     /// `Planningpersoneel`.
     #[serde(rename = "Planningpersoneel")]
     Planningpersoneel,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PurchaseOrderRequest.approval_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderRequestApprovalStatus {
     /// `draft`.
     #[serde(rename = "draft")]
@@ -10502,7 +10649,7 @@ pub enum PurchaseOrderRequestApprovalStatus {
 }
 
 /// Values documented for `PurchaseOrderRequest.previous_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderRequestPreviousStatus {
     /// `draft`.
     #[serde(rename = "draft")]
@@ -10528,7 +10675,7 @@ pub enum PurchaseOrderRequestPreviousStatus {
 }
 
 /// Values documented for `PurchaseOrderRequest.delivery_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderRequestDeliveryType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
@@ -10545,7 +10692,7 @@ pub enum PurchaseOrderRequestDeliveryType {
 }
 
 /// Values documented for `PurchaseOrderRequest.export_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderRequestExportStatus {
     /// `failed`.
     #[serde(rename = "failed")]
@@ -10565,7 +10712,7 @@ pub enum PurchaseOrderRequestExportStatus {
 }
 
 /// Values documented for `PurchaseOrderResponse.approval_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderResponseApprovalStatus {
     /// `draft`.
     #[serde(rename = "draft")]
@@ -10588,10 +10735,13 @@ pub enum PurchaseOrderResponseApprovalStatus {
     /// `cancelled`.
     #[serde(rename = "cancelled")]
     Cancelled,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PurchaseOrderResponse.previous_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderResponsePreviousStatus {
     /// `draft`.
     #[serde(rename = "draft")]
@@ -10614,10 +10764,13 @@ pub enum PurchaseOrderResponsePreviousStatus {
     /// `cancelled`.
     #[serde(rename = "cancelled")]
     Cancelled,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PurchaseOrderResponse.delivery_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderResponseDeliveryType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
@@ -10631,10 +10784,13 @@ pub enum PurchaseOrderResponseDeliveryType {
     /// `Not applicable/No delivery`.
     #[serde(rename = "Not applicable/No delivery")]
     NotApplicableNoDelivery,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `PurchaseOrderResponse.export_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PurchaseOrderResponseExportStatus {
     /// `failed`.
     #[serde(rename = "failed")]
@@ -10651,10 +10807,13 @@ pub enum PurchaseOrderResponseExportStatus {
     /// `processed`.
     #[serde(rename = "processed")]
     Processed,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `CrewRateRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewRateRequestType {
     /// `price`.
     #[serde(rename = "price")]
@@ -10665,7 +10824,7 @@ pub enum CrewRateRequestType {
 }
 
 /// Values documented for `CrewRateRequest.subtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewRateRequestSubtype {
     /// `global`.
     #[serde(rename = "global")]
@@ -10679,7 +10838,7 @@ pub enum CrewRateRequestSubtype {
 }
 
 /// Values documented for `CrewRateResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewRateResponseType {
     /// `price`.
     #[serde(rename = "price")]
@@ -10687,10 +10846,13 @@ pub enum CrewRateResponseType {
     /// `cost`.
     #[serde(rename = "cost")]
     Cost,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `CrewRateResponse.subtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CrewRateResponseSubtype {
     /// `global`.
     #[serde(rename = "global")]
@@ -10701,10 +10863,13 @@ pub enum CrewRateResponseSubtype {
     /// `temp`.
     #[serde(rename = "temp")]
     Temp,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `RepairRequest.is_usable`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RepairRequestIsUsable {
     /// `take_from_stock`.
     #[serde(rename = "take_from_stock")]
@@ -10715,7 +10880,7 @@ pub enum RepairRequestIsUsable {
 }
 
 /// Values documented for `RepairRequest.repair_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RepairRequestRepairStatus {
     /// `in-progress`.
     #[serde(rename = "in-progress")]
@@ -10729,7 +10894,7 @@ pub enum RepairRequestRepairStatus {
 }
 
 /// Values documented for `RepairResponse.is_usable`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RepairResponseIsUsable {
     /// `take_from_stock`.
     #[serde(rename = "take_from_stock")]
@@ -10737,10 +10902,13 @@ pub enum RepairResponseIsUsable {
     /// `keep_usable`.
     #[serde(rename = "keep_usable")]
     KeepUsable,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `RepairResponse.repair_status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RepairResponseRepairStatus {
     /// `in-progress`.
     #[serde(rename = "in-progress")]
@@ -10751,10 +10919,13 @@ pub enum RepairResponseRepairStatus {
     /// `unrepairable`.
     #[serde(rename = "unrepairable")]
     Unrepairable,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `StockLocationRequest.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum StockLocationRequestCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -11491,7 +11662,7 @@ pub enum StockLocationRequestCountry {
 }
 
 /// Values documented for `StockLocationRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum StockLocationRequestType {
     /// `plannable`.
     #[serde(rename = "plannable")]
@@ -11502,7 +11673,7 @@ pub enum StockLocationRequestType {
 }
 
 /// Values documented for `StockLocationResponse.country`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum StockLocationResponseCountry {
     /// `af`.
     #[serde(rename = "af")]
@@ -12236,10 +12407,13 @@ pub enum StockLocationResponseCountry {
     /// `ax`.
     #[serde(rename = "ax")]
     Ax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `StockLocationResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum StockLocationResponseType {
     /// `plannable`.
     #[serde(rename = "plannable")]
@@ -12247,10 +12421,13 @@ pub enum StockLocationResponseType {
     /// `nonplannable`.
     #[serde(rename = "nonplannable")]
     Nonplannable,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `StockMovementResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum StockMovementResponseType {
     /// `manual`.
     #[serde(rename = "manual")]
@@ -12303,10 +12480,13 @@ pub enum StockMovementResponseType {
     /// `unrepairable_undo`.
     #[serde(rename = "unrepairable_undo")]
     UnrepairableUndo,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `SubrentalRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SubrentalRequestType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
@@ -12320,7 +12500,7 @@ pub enum SubrentalRequestType {
 }
 
 /// Values documented for `SubrentalResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SubrentalResponseType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
@@ -12331,10 +12511,13 @@ pub enum SubrentalResponseType {
     /// `Delivery at location`.
     #[serde(rename = "Delivery at location")]
     DeliveryAtLocation,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskRequest.recurhoe`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestRecurhoe {
     /// `once`.
     #[serde(rename = "once")]
@@ -12357,7 +12540,7 @@ pub enum TaskRequestRecurhoe {
 }
 
 /// Values documented for `TaskRequest.priority`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestPriority {
     /// `no_priority`.
     #[serde(rename = "no_priority")]
@@ -12374,7 +12557,7 @@ pub enum TaskRequestPriority {
 }
 
 /// Values documented for `TaskRequest.deadline_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestDeadlineType {
     /// `specific_date`.
     #[serde(rename = "specific_date")]
@@ -12385,7 +12568,7 @@ pub enum TaskRequestDeadlineType {
 }
 
 /// Values documented for `TaskRequest.deadline_relative_offset_base`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestDeadlineRelativeOffsetBase {
     /// `start_of_period`.
     #[serde(rename = "start_of_period")]
@@ -12396,7 +12579,7 @@ pub enum TaskRequestDeadlineRelativeOffsetBase {
 }
 
 /// Values documented for `TaskRequest.deadline_relative_offset_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestDeadlineRelativeOffsetUnit {
     /// `days`.
     #[serde(rename = "days")]
@@ -12407,7 +12590,7 @@ pub enum TaskRequestDeadlineRelativeOffsetUnit {
 }
 
 /// Values documented for `TaskRequest.deadline_relative_offset_direction`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestDeadlineRelativeOffsetDirection {
     /// `before`.
     #[serde(rename = "before")]
@@ -12418,7 +12601,7 @@ pub enum TaskRequestDeadlineRelativeOffsetDirection {
 }
 
 /// Values documented for `TaskRequest.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -12480,7 +12663,7 @@ pub enum TaskRequestItemtype {
 }
 
 /// Values documented for `TaskRequest.public`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestPublic {
     /// `0`.
     #[serde(rename = "0")]
@@ -12491,7 +12674,7 @@ pub enum TaskRequestPublic {
 }
 
 /// Values documented for `TaskRequest.assignment_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskRequestAssignmentType {
     /// `all_crewmembers`.
     #[serde(rename = "all_crewmembers")]
@@ -12505,7 +12688,7 @@ pub enum TaskRequestAssignmentType {
 }
 
 /// Values documented for `TaskResponse.recurhoe`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseRecurhoe {
     /// `once`.
     #[serde(rename = "once")]
@@ -12525,10 +12708,13 @@ pub enum TaskResponseRecurhoe {
     /// `specific_days`.
     #[serde(rename = "specific_days")]
     SpecificDays,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.priority`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponsePriority {
     /// `no_priority`.
     #[serde(rename = "no_priority")]
@@ -12542,10 +12728,13 @@ pub enum TaskResponsePriority {
     /// `high_priority`.
     #[serde(rename = "high_priority")]
     HighPriority,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.deadline_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseDeadlineType {
     /// `specific_date`.
     #[serde(rename = "specific_date")]
@@ -12553,10 +12742,13 @@ pub enum TaskResponseDeadlineType {
     /// `relative_to_project_time`.
     #[serde(rename = "relative_to_project_time")]
     RelativeToProjectTime,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.deadline_relative_offset_base`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseDeadlineRelativeOffsetBase {
     /// `start_of_period`.
     #[serde(rename = "start_of_period")]
@@ -12564,10 +12756,13 @@ pub enum TaskResponseDeadlineRelativeOffsetBase {
     /// `end_of_period`.
     #[serde(rename = "end_of_period")]
     EndOfPeriod,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.deadline_relative_offset_unit`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseDeadlineRelativeOffsetUnit {
     /// `days`.
     #[serde(rename = "days")]
@@ -12575,10 +12770,13 @@ pub enum TaskResponseDeadlineRelativeOffsetUnit {
     /// `hours`.
     #[serde(rename = "hours")]
     Hours,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.deadline_relative_offset_direction`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseDeadlineRelativeOffsetDirection {
     /// `before`.
     #[serde(rename = "before")]
@@ -12586,10 +12784,13 @@ pub enum TaskResponseDeadlineRelativeOffsetDirection {
     /// `after`.
     #[serde(rename = "after")]
     After,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.itemtype`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
@@ -12648,10 +12849,13 @@ pub enum TaskResponseItemtype {
     /// `Vehicle`.
     #[serde(rename = "Vehicle")]
     Vehicle,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.public`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponsePublic {
     /// `0`.
     #[serde(rename = "0")]
@@ -12659,10 +12863,13 @@ pub enum TaskResponsePublic {
     /// `1`.
     #[serde(rename = "1")]
     One,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskResponse.assignment_type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskResponseAssignmentType {
     /// `all_crewmembers`.
     #[serde(rename = "all_crewmembers")]
@@ -12673,10 +12880,13 @@ pub enum TaskResponseAssignmentType {
     /// `creator_only`.
     #[serde(rename = "creator_only")]
     CreatorOnly,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaskStatusRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskStatusRequestType {
     /// `todo`.
     #[serde(rename = "todo")]
@@ -12690,7 +12900,7 @@ pub enum TaskStatusRequestType {
 }
 
 /// Values documented for `TaskStatusResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaskStatusResponseType {
     /// `todo`.
     #[serde(rename = "todo")]
@@ -12701,10 +12911,13 @@ pub enum TaskStatusResponseType {
     /// `custom`.
     #[serde(rename = "custom")]
     Custom,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TaxClassRequest.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaxClassRequestType {
     /// `vat`.
     #[serde(rename = "vat")]
@@ -12718,7 +12931,7 @@ pub enum TaxClassRequestType {
 }
 
 /// Values documented for `TaxClassResponse.type`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TaxClassResponseType {
     /// `vat`.
     #[serde(rename = "vat")]
@@ -12729,10 +12942,13 @@ pub enum TaxClassResponseType {
     /// `notax`.
     #[serde(rename = "notax")]
     Notax,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `TimeRegistrationResponse.status`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum TimeRegistrationResponseStatus {
     /// `pending`.
     #[serde(rename = "pending")]
@@ -12743,10 +12959,13 @@ pub enum TimeRegistrationResponseStatus {
     /// `rejected`.
     #[serde(rename = "rejected")]
     Rejected,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Values documented for `VehicleRequest.multiple`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VehicleRequestMultiple {
     /// `plannable_once`.
     #[serde(rename = "plannable_once")]
@@ -12757,7 +12976,7 @@ pub enum VehicleRequestMultiple {
 }
 
 /// Values documented for `VehicleResponse.multiple`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum VehicleResponseMultiple {
     /// `plannable_once`.
     #[serde(rename = "plannable_once")]
@@ -12765,6 +12984,9 @@ pub enum VehicleResponseMultiple {
     /// `plannable_multi`.
     #[serde(rename = "plannable_multi")]
     PlannableMulti,
+    /// A value Rentman does not document, kept exactly as sent.
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 /// Response object
