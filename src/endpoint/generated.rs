@@ -8386,6 +8386,162 @@ impl Endpoint for GetProjectItemEndpoint {
 
 impl EndpointWithId for GetProjectItemEndpoint {}
 
+const SETCLIENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
+    name: "id",
+    location: EndpointParameterLocation::Path,
+    required: true,
+    value: EndpointParameterValueSpec::Integer,
+}];
+
+const SETCLIENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `POST /projects/{id}/:setClient`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetClientEndpoint;
+
+impl Endpoint for SetClientEndpoint {
+    type Request = ProjectsSetClientRequest;
+    type Response = ItemResponse<ProjectReferenceResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "POST",
+        path: "/projects/{id}/:setClient",
+        operation_id: "setClient",
+        tag: "projects",
+        parameters: SETCLIENTENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::Json("ProjectsSetClientRequest"),
+        response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
+        errors: SETCLIENTENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for SetClientEndpoint {}
+
+const SETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
+    name: "id",
+    location: EndpointParameterLocation::Path,
+    required: true,
+    value: EndpointParameterValueSpec::Integer,
+}];
+
+const SETLOCATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `POST /projects/{id}/:setLocation`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetLocationEndpoint;
+
+impl Endpoint for SetLocationEndpoint {
+    type Request = ProjectsSetLocationRequest;
+    type Response = ItemResponse<ProjectReferenceResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "POST",
+        path: "/projects/{id}/:setLocation",
+        operation_id: "setLocation",
+        tag: "projects",
+        parameters: SETLOCATIONENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::Json("ProjectsSetLocationRequest"),
+        response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
+        errors: SETLOCATIONENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for SetLocationEndpoint {}
+
+const SETTYPEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
+    name: "id",
+    location: EndpointParameterLocation::Path,
+    required: true,
+    value: EndpointParameterValueSpec::Integer,
+}];
+
+const SETTYPEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `POST /projects/{id}/:setType`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetTypeEndpoint;
+
+impl Endpoint for SetTypeEndpoint {
+    type Request = ProjectsSetTypeRequest;
+    type Response = ItemResponse<ProjectReferenceResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "POST",
+        path: "/projects/{id}/:setType",
+        operation_id: "setType",
+        tag: "projects",
+        parameters: SETTYPEENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::Json("ProjectsSetTypeRequest"),
+        response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
+        errors: SETTYPEENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for SetTypeEndpoint {}
+
 const GETPROJECTCONTRACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
         name: "id",
@@ -12375,6 +12531,59 @@ impl Endpoint for GetSubprojectItemEndpoint {
 
 impl EndpointWithId for GetSubprojectItemEndpoint {}
 
+const POSTSUBPROJECTSIDSETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
+    &[EndpointParameterSpec {
+        name: "id",
+        location: EndpointParameterLocation::Path,
+        required: true,
+        value: EndpointParameterValueSpec::Integer,
+    }];
+
+const POSTSUBPROJECTSIDSETLOCATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
+    EndpointErrorSpec {
+        status: 400,
+        description: "Bad request",
+    },
+    EndpointErrorSpec {
+        status: 401,
+        description: "Unauthorized",
+    },
+    EndpointErrorSpec {
+        status: 404,
+        description: "Not found",
+    },
+    EndpointErrorSpec {
+        status: 500,
+        description: "Something went wrong",
+    },
+    EndpointErrorSpec {
+        status: 502,
+        description: "Bad gateway",
+    },
+];
+
+/// Typed endpoint for `POST /subprojects/{id}/:setLocation`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PostSubprojectsIdSetLocationEndpoint;
+
+impl Endpoint for PostSubprojectsIdSetLocationEndpoint {
+    type Request = SubprojectsSetLocationRequest;
+    type Response = ItemResponse<SubprojectReferenceResponse>;
+
+    const SPEC: EndpointSpec = EndpointSpec {
+        method: "POST",
+        path: "/subprojects/{id}/:setLocation",
+        operation_id: "setLocation",
+        tag: "subprojects",
+        parameters: POSTSUBPROJECTSIDSETLOCATIONENDPOINT_PARAMETERS,
+        request: EndpointRequestSpec::Json("SubprojectsSetLocationRequest"),
+        response: EndpointResponseSpec::Item("SubprojectReferenceResponse"),
+        errors: POSTSUBPROJECTSIDSETLOCATIONENDPOINT_ERRORS,
+    };
+}
+
+impl EndpointWithId for PostSubprojectsIdSetLocationEndpoint {}
+
 const GETSUBPROJECTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
         name: "id",
@@ -16259,6 +16468,9 @@ pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <CreateProjectEndpoint as Endpoint>::SPEC,
     <CreateFromTemplateEndpoint as Endpoint>::SPEC,
     <GetProjectItemEndpoint as Endpoint>::SPEC,
+    <SetClientEndpoint as Endpoint>::SPEC,
+    <SetLocationEndpoint as Endpoint>::SPEC,
+    <SetTypeEndpoint as Endpoint>::SPEC,
     <GetProjectContractCollectionEndpoint as Endpoint>::SPEC,
     <GetProjectProjectCostCollectionEndpoint as Endpoint>::SPEC,
     <CreateProjectCostEndpoint as Endpoint>::SPEC,
@@ -16337,6 +16549,7 @@ pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <UpdateStockMovementEndpoint as Endpoint>::SPEC,
     <GetSubprojectCollectionEndpoint as Endpoint>::SPEC,
     <GetSubprojectItemEndpoint as Endpoint>::SPEC,
+    <PostSubprojectsIdSetLocationEndpoint as Endpoint>::SPEC,
     <GetSubprojectFileFolderCollectionEndpoint as Endpoint>::SPEC,
     <GetSubprojectProjectCrewCollectionEndpoint as Endpoint>::SPEC,
     <GetSubprojectProjectEquipmentCollectionEndpoint as Endpoint>::SPEC,
@@ -16584,6 +16797,9 @@ where
     CreateProjectEndpoint: ExecutableEndpoint,
     CreateFromTemplateEndpoint: ExecutableEndpoint,
     GetProjectItemEndpoint: ExecutableEndpoint,
+    SetClientEndpoint: ExecutableEndpoint,
+    SetLocationEndpoint: ExecutableEndpoint,
+    SetTypeEndpoint: ExecutableEndpoint,
     GetProjectContractCollectionEndpoint: ExecutableEndpoint,
     GetProjectProjectCostCollectionEndpoint: ExecutableEndpoint,
     CreateProjectCostEndpoint: ExecutableEndpoint,
@@ -16662,6 +16878,7 @@ where
     UpdateStockMovementEndpoint: ExecutableEndpoint,
     GetSubprojectCollectionEndpoint: ExecutableEndpoint,
     GetSubprojectItemEndpoint: ExecutableEndpoint,
+    PostSubprojectsIdSetLocationEndpoint: ExecutableEndpoint,
     GetSubprojectFileFolderCollectionEndpoint: ExecutableEndpoint,
     GetSubprojectProjectCrewCollectionEndpoint: ExecutableEndpoint,
     GetSubprojectProjectEquipmentCollectionEndpoint: ExecutableEndpoint,
