@@ -3,8 +3,8 @@
   "openapi": "3.1.1",
   "info": {
     "title": "Rentman API Documentation",
-    "version": "1.18.0",
-    "description": "Rentman API is an easy-to-use **RESTful** inspired API.\n\n# Versions\n\nWe only support one version of the API. Integrations are automatically migrated when a new version comes online.\n\nYou can find the recent changes here: <a href=\"https://support.rentman.io/hc/en-us/articles/26707946497042-Rentman-API-Changelog\" target='_blank'>Rentman API Changelog</a>\n\nLast deployment is **2026-10-12 14:48**.\n\n### Receive updates\nTo receive updates and major changes to our integrations and API, and to allow us to contact you if we notice that one of your integrations is not working properly, please make sure to fill in the **technical contact details** (in *Configuration* -> *Company details* -> *Contact persons*).\n\n\n# Introduction\n\nThis API enables you to interact with Rentman programmatically. You can use this API to create automatic\nsynchronisations, connect other software applications, or develop any other type of integration. This page documents all\nthe resources available in the Rentman API. The amount of resources is limited for now but more data types will be added\nat a later stage. You can request more data types by getting in touch via\nour <a href=\"https://rentman.io/public-roadmap\">Public Roadmap</a>.\n\nTo further improve the Rentman API we would like to know what kind of integrations you are developing.  \nPlease share us your ideas or already developed connections at <a href='mailto:support@rentman.io'>support@rentman.io</a>\n\n## Authentication\n\nRentman uses **JWT** for authentication. This token is unique for every Rentman user. The **JWT** can be generated in\nthe **integrations** tab in **configuration** in the Rentman application. Only the last generated token will be a valid\ntoken. When regenerating a token the previous token will not work anymore.\n\n## Headers\n\nEach request to this API expects some request headers to be set.\n\n- `Content-Type` - This should always be set to `application/json`\n- `Authorization` - This header should be of the form `Bearer <token>`, where `token` is the JWT from the rentman\n  account.\n\n## Response Format\n\nEvery successful `GET` response from the Rentman Open API is a JSON object consisting of a `data` key and other\nmetadata. The `data` key contains an array of JSON objects representing the requested items if the request is for a\ncollection. The `data` key contains a JSON object representing the requested item if the request is for one item.\nThe `data` key responses of `POST` and `PUT` contain the created and updated items respectively. Successful `DELETE`\nrequests don't have responses. The keys other than the `data` key are:\n\n- `itemCount` - The amount of items in the response.\n- `limit` - The maximal amount of items that can be returned. This equals the limit parameter if it is set. Otherwise,\n  it is the response data limit.\n- `offset` - The amount of items skipped in the response items. This equals the offset parameter if it is set.\n  Otherwise, it is `0`. All the keys are always given when a response is present.\n\n## Expanding linked items\n\nFields that refence another resource normally return a path string pointing to the linked resource (e.g. `/crew/237`).\nUse the `expand` query parameter to inline the full linked object directly in the response instead.\n\n`expand` accepts a comma-separated list of field names. Nested expansions are expressed with dot notation.\n\n> Example: Return each serial number with its linked equipment object inlined.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment\n```\n\n```json\n{\n  \"data\": [\n    {\n      \"id\": 41,\n      \"serial\": \"Yamaha-01\",\n      \"equipment\": {\n        \"id\": 12,\n        \"name\": \"Yamaha QL5 Mixer\",\n        \"code\": \"AUD-001\",\n        \"active\": true\n      }\n    }\n  ]\n}\n```\n\nWithout `?expand`, `equipment` would be `\"/equipment/12\"`.\n\n> Example: Expand multiple fields and nest expansions.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment,equipment.creator\n```\n\nThis returns each serial number with its `equipment` expanded into an object, and within that object, `creator` also expanded. Nesting is supported up to 3 levels deep.\n\nWhen an expandable field is `null`, it remains `null` in the expanded response. Only fields of type `item` or `link` can be expanded — attempting to expand a non-linkable field returns a `400` error.\n\nYou can combine `expand` with the [`fields`](#section/Querying) parameter, using dot notation to select which fields of an expanded relation are returned. The relation must also be listed in `expand`; a nested `fields` path without a matching `expand` entry returns a `400` error.\n\n> Example: Return only the `serial` field of each serial number, and only the `name` of its expanded equipment.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment&fields=serial,equipment.name\n```\n\nAn expanded relation with no nested `fields` selection returns its default set of fields.\n\n## Querying\n\nThe Rentman API support several types of querying with query parameters:\n\n- `fields` - The value of the `fields` key is a set of all fields that are requested. For\n  example, `displayname,firstname` will only return the displayname and the firstname of every object. There are some\n  fields that will always be returned such as `id`, `created` and `modified`.\n- `sort` - The value of the `sort` key is a set of fields where the items are sorted on. For example, `+id,-firstname`\n  will return an array of items first sorted on id ascending and then sorted on firstname descending.\n\nIt is also possible to filter on values of fields when requesting a collection of items.\n> Example: To only get the contacts situated in Great Britain, a query can be added with the key `country` and the value\n`gb`.\n\n```\nGET https://api.rentman.net/contacts?country=gb\n```\n\n### Relational operators\n\nThe following relational operators can be used for filtering:\n\n- `lt` - less than (`<`)\n- `gt` - greater than (`>`)\n- `lte` - less than or equal to (`<=`)\n- `gte` - greater than or equal to (`>=`)\n- `neq` - not equal to (`!=`). This can also be used with multiple values, in which case it behaves like 'not in'\n\n> Example: The filter `distance[lte]=300` can be used to only retrieve items with a distance less than or equal to 300.\n\n```\nGET https://api.rentman.net/contacts?distance[lte]=300\n```\n\n### Filtering null values\n\nFiltering on null values is possible by putting `[isnull]` behind a field name, followed by a boolean value, which can\nbe `true`, `false`, `1` or `0`.\n\n> Example: The filter `folder[isnull]=false` can be used to only retrieve items where the value of `folder` is not null.\n\n```\nGET https://api.rentman.net/contacts?folder[isnull]=false\n```\n\n### Pagination\n\nCollection responses include a `next_page_url` field that points to the next page of results. To paginate through a\ncollection, simply follow the `next_page_url` until it is `null`.\n\n- `limit` - The number of items per page on the first request (default: 300, max: 1500, see [Limitations](#section/Introduction/Limitations)). The limit is carried over\n  automatically in subsequent pages via the cursor.\n\n> Example: Paginate through contacts in pages of 10 items.\n\n```\nGET https://api.rentman.net/contacts?limit=10\n```\n\nThe response includes:\n```json\n{\n  \"data\": [...],\n  \"itemCount\": 10,\n  \"limit\": 10,\n  \"next_page_url\": \"https://api.rentman.net/contacts?cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\"\n}\n```\n\nTo get the next page, follow the `next_page_url`:\n\n```\nGET https://api.rentman.net/contacts?cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\n```\n\nWhen the last page is reached, `next_page_url` will be `null`.\n\nPagination can be combined with filters — the `next_page_url` will include all original filter parameters:\n\n```\nGET https://api.rentman.net/contacts?limit=10&country=gb\n```\n\n```\nhttps://api.rentman.net/contacts?country=gb&cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\n```\n\n> Note: The `cursor` parameter in the URL is an opaque token. Do not construct or modify it manually — always use\n> the `next_page_url` as-is.\n\n### Limiting result sets\n\nIf you want to fetch a top 10 of items based on sorting on an arbitrary field, you can use the sorting option described\nearlier and apply a `limit` to get only that number of items.\n\n> Example: To request the first 30 items sorted by firstname:\n\n```\nGET https://api.rentman.net/contacts?limit=30&sort=+firstname\n```\n\n## Limitations\n\n### Possible sort inconsistencies\n\nEvery request sent to the Rentman API also sends a request to the Rentman backend to retrieve information. All query\nparameters that are given to a Rentman API request are also given the Rentman backend request, except for the sorting\nparameter. Due to limitations, when pagination and sorting is applied at the same time only the first field of the\nsorting parameter can be used before paginating in the Rentman backend. When the Rentman API retrieves the paginated\nitems from the Rentman backend, the items will be sorted and returned. This results in a pagination sorted only on the\nfirst sorting field and can cause some inconsistencies where items that are supposed to be on the page request by the\nsecond or third sorting parameter are on different pages since these sort parameters are not taken into account when\npaginating.\n\nThis issue can only exist when sorting on multiple fields and paginating at the same time.\n\n### Generated fields\n\nSome fields contain a `GENERATED FIELD` tag. All fields with this tag cannot be used for sorting while the `limit`\nparameter is not empty. Generated fields are fields that the Rentman backend computes and are not stored\nin the database.\n\nThis is a limitation due to the way these parameters are computed in the API. Every request sent to the Rentman API also\nsends a request to the Rentman backend to retrieve information. The `limit` parameter is added to this\nrequest to the Rentman backend. If there is a sorting parameter given to the Rentman API request, the first field of the\nsorting parameter is also sent with the Rentman backend request. The Rentman backend then sorts and returns a subset of\nthe items as defined by the query parameters of the Rentman API request. Due to limitations of the Rentman backend, the\nsort value that is sent to the Rentman backend cannot be one of the generated fields.\n\nThe fields containing `GENERATED FIELD` are also not queryable for filtering.\n\n## Omitted fields in list requests\n\nTo keep requests at a low cost, some fields of items are omitted when in a collection request when not specifying fields. \nTo get the values of these fields, request them using the `?fields` parameter.\nThe fields that are returned are specified in the documentation for the specific requests.\n\n## Custom fields\n\nCustom fields can be accessed via the `custom` key in `data`. These custom fields will have generic keys with the\nformat `custom_<number>`. They are expandable and filterable like normal fields.\n\n## Custom child collections\n\nThe Rentman API borrows the link structure from Rentman backend in most cases. However, some useful links (\ne.g. `projects` linking to `plannedequipment`) do not exist in the Rentman backend. For the Rentman API these links are\ncustom implemented and can be recognized by the `Get <linked_type> custom linked collection` title.\ne.g. `Get plannedequipment custom linked collection` for `projects`. It will never be possible to create items through\nthese linked collections since these links don't actually exist in the Rentman backend. It may also be possible that\nrelevant parent fields are missing in these custom children.\n\n## updateHash\n\nEvery item that is requested also contains a field `updateHash`. This is a field that is generated by the Rentman API\nand is a hash value computed with the `id` and `modified` field of the item. This hash can therefore be used to\nrecognize when an item is updated, since this field is unique per item and per update of that item.\n\n## Response data limitation\n\nResponses to collection requests default to 300 items when no `limit` parameter is specified. You can request up to 1500\nitems per request by setting the `limit` parameter. Additionally, there is a maximum response size of 5 MB. If you need\nmore than 1500 items, use pagination to iterate through the results. If the response exceeds 5 MB you will receive an\nerror. Use the `limit` parameter to request fewer items, or use the `fields` parameter to filter unnecessary fields\nfrom the response.\n\n## Rate limitation\n\nThe rate at which requests can be sent to the Rentman API is limited to 50.000 requests per day, and 10 requests per second. A maximum of 20 requests can be sent at once.\n",
+    "version": "1.19.0",
+    "description": "Rentman API is an easy-to-use **RESTful** inspired API.\n\n# Versions\n\nWe only support one version of the API. Integrations are automatically migrated when a new version comes online.\n\nYou can find the recent changes here: <a href=\"https://support.rentman.io/hc/en-us/articles/26707946497042-Rentman-API-Changelog\" target='_blank'>Rentman API Changelog</a>\n\nLast deployment is **2026-10-19 10:00**.\n\n### Receive updates\nTo receive updates and major changes to our integrations and API, and to allow us to contact you if we notice that one of your integrations is not working properly, please make sure to fill in the **technical contact details** (in *Configuration* -> *Company details* -> *Contact persons*).\n\n\n# Introduction\n\nThis API enables you to interact with Rentman programmatically. You can use this API to create automatic\nsynchronisations, connect other software applications, or develop any other type of integration. This page documents all\nthe resources available in the Rentman API. The amount of resources is limited for now but more data types will be added\nat a later stage. You can request more data types by getting in touch via\nour <a href=\"https://rentman.io/public-roadmap\">Public Roadmap</a>.\n\nTo further improve the Rentman API we would like to know what kind of integrations you are developing.  \nPlease share us your ideas or already developed connections at <a href='mailto:support@rentman.io'>support@rentman.io</a>\n\n## Authentication\n\nRentman uses **JWT** for authentication. This token is unique for every Rentman user. The **JWT** can be generated in\nthe **integrations** tab in **configuration** in the Rentman application. Only the last generated token will be a valid\ntoken. When regenerating a token the previous token will not work anymore.\n\n## Headers\n\nEach request to this API expects some request headers to be set.\n\n- `Content-Type` - This should always be set to `application/json`\n- `Authorization` - This header should be of the form `Bearer <token>`, where `token` is the JWT from the rentman\n  account.\n\n## Response Format\n\nEvery successful `GET` response from the Rentman Open API is a JSON object consisting of a `data` key and other\nmetadata. The `data` key contains an array of JSON objects representing the requested items if the request is for a\ncollection. The `data` key contains a JSON object representing the requested item if the request is for one item.\nThe `data` key responses of `POST` and `PUT` contain the created and updated items respectively. Successful `DELETE`\nrequests don't have responses. The keys other than the `data` key are:\n\n- `itemCount` - The amount of items in the response.\n- `limit` - The maximal amount of items that can be returned. This equals the limit parameter if it is set. Otherwise,\n  it is the response data limit.\n- `offset` - The amount of items skipped in the response items. This equals the offset parameter if it is set.\n  Otherwise, it is `0`. All the keys are always given when a response is present.\n\n## Expanding linked items\n\nFields that refence another resource normally return a path string pointing to the linked resource (e.g. `/crew/237`).\nUse the `expand` query parameter to inline the full linked object directly in the response instead.\n\n`expand` accepts a comma-separated list of field names. Nested expansions are expressed with dot notation.\n\n> Example: Return each serial number with its linked equipment object inlined.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment\n```\n\n```json\n{\n  \"data\": [\n    {\n      \"id\": 41,\n      \"serial\": \"Yamaha-01\",\n      \"equipment\": {\n        \"id\": 12,\n        \"name\": \"Yamaha QL5 Mixer\",\n        \"code\": \"AUD-001\",\n        \"active\": true\n      }\n    }\n  ]\n}\n```\n\nWithout `?expand`, `equipment` would be `\"/equipment/12\"`.\n\n> Example: Expand multiple fields and nest expansions.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment,equipment.creator\n```\n\nThis returns each serial number with its `equipment` expanded into an object, and within that object, `creator` also expanded. Nesting is supported up to 3 levels deep.\n\nWhen an expandable field is `null`, it remains `null` in the expanded response. Only fields of type `item` or `link` can be expanded — attempting to expand a non-linkable field returns a `400` error.\n\nYou can combine `expand` with the [`fields`](#section/Querying) parameter, using dot notation to select which fields of an expanded relation are returned. The relation must also be listed in `expand`; a nested `fields` path without a matching `expand` entry returns a `400` error.\n\n> Example: Return only the `serial` field of each serial number, and only the `name` of its expanded equipment.\n\n```\nGET https://api.rentman.net/serialnumbers?expand=equipment&fields=serial,equipment.name\n```\n\nAn expanded relation with no nested `fields` selection returns its default set of fields.\n\n## Querying\n\nThe Rentman API support several types of querying with query parameters:\n\n- `fields` - The value of the `fields` key is a set of all fields that are requested. For\n  example, `displayname,firstname` will only return the displayname and the firstname of every object. There are some\n  fields that will always be returned such as `id`, `created` and `modified`.\n- `sort` - The value of the `sort` key is a set of fields where the items are sorted on. For example, `+id,-firstname`\n  will return an array of items first sorted on id ascending and then sorted on firstname descending.\n\nIt is also possible to filter on values of fields when requesting a collection of items.\n> Example: To only get the contacts situated in Great Britain, a query can be added with the key `country` and the value\n`gb`.\n\n```\nGET https://api.rentman.net/contacts?country=gb\n```\n\n### Relational operators\n\nThe following relational operators can be used for filtering:\n\n- `lt` - less than (`<`)\n- `gt` - greater than (`>`)\n- `lte` - less than or equal to (`<=`)\n- `gte` - greater than or equal to (`>=`)\n- `neq` - not equal to (`!=`). This can also be used with multiple values, in which case it behaves like 'not in'\n\n> Example: The filter `distance[lte]=300` can be used to only retrieve items with a distance less than or equal to 300.\n\n```\nGET https://api.rentman.net/contacts?distance[lte]=300\n```\n\n### Filtering null values\n\nFiltering on null values is possible by putting `[isnull]` behind a field name, followed by a boolean value, which can\nbe `true`, `false`, `1` or `0`.\n\n> Example: The filter `folder[isnull]=false` can be used to only retrieve items where the value of `folder` is not null.\n\n```\nGET https://api.rentman.net/contacts?folder[isnull]=false\n```\n\n### Pagination\n\nCollection responses include a `next_page_url` field that points to the next page of results. To paginate through a\ncollection, simply follow the `next_page_url` until it is `null`.\n\n- `limit` - The number of items per page on the first request (default: 300, max: 1500, see [Limitations](#section/Introduction/Limitations)). The limit is carried over\n  automatically in subsequent pages via the cursor.\n\n> Example: Paginate through contacts in pages of 10 items.\n\n```\nGET https://api.rentman.net/contacts?limit=10\n```\n\nThe response includes:\n```json\n{\n  \"data\": [...],\n  \"itemCount\": 10,\n  \"limit\": 10,\n  \"next_page_url\": \"https://api.rentman.net/contacts?cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\"\n}\n```\n\nTo get the next page, follow the `next_page_url`:\n\n```\nGET https://api.rentman.net/contacts?cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\n```\n\nWhen the last page is reached, `next_page_url` will be `null`.\n\nPagination can be combined with filters — the `next_page_url` will include all original filter parameters:\n\n```\nGET https://api.rentman.net/contacts?limit=10&country=gb\n```\n\n```\nhttps://api.rentman.net/contacts?country=gb&cursor=eyJhZnRlciI6NDU2LCJvcmRlciI6ImRlc2MiLCJsaW1pdCI6MTB9\n```\n\n> Note: The `cursor` parameter in the URL is an opaque token. Do not construct or modify it manually — always use\n> the `next_page_url` as-is.\n\n### Limiting result sets\n\nIf you want to fetch a top 10 of items based on sorting on an arbitrary field, you can use the sorting option described\nearlier and apply a `limit` to get only that number of items.\n\n> Example: To request the first 30 items sorted by firstname:\n\n```\nGET https://api.rentman.net/contacts?limit=30&sort=+firstname\n```\n\n## Limitations\n\n### Possible sort inconsistencies\n\nEvery request sent to the Rentman API also sends a request to the Rentman backend to retrieve information. All query\nparameters that are given to a Rentman API request are also given the Rentman backend request, except for the sorting\nparameter. Due to limitations, when pagination and sorting is applied at the same time only the first field of the\nsorting parameter can be used before paginating in the Rentman backend. When the Rentman API retrieves the paginated\nitems from the Rentman backend, the items will be sorted and returned. This results in a pagination sorted only on the\nfirst sorting field and can cause some inconsistencies where items that are supposed to be on the page request by the\nsecond or third sorting parameter are on different pages since these sort parameters are not taken into account when\npaginating.\n\nThis issue can only exist when sorting on multiple fields and paginating at the same time.\n\n### Generated fields\n\nSome fields contain a `GENERATED FIELD` tag. All fields with this tag cannot be used for sorting while the `limit`\nparameter is not empty. Generated fields are fields that the Rentman backend computes and are not stored\nin the database.\n\nThis is a limitation due to the way these parameters are computed in the API. Every request sent to the Rentman API also\nsends a request to the Rentman backend to retrieve information. The `limit` parameter is added to this\nrequest to the Rentman backend. If there is a sorting parameter given to the Rentman API request, the first field of the\nsorting parameter is also sent with the Rentman backend request. The Rentman backend then sorts and returns a subset of\nthe items as defined by the query parameters of the Rentman API request. Due to limitations of the Rentman backend, the\nsort value that is sent to the Rentman backend cannot be one of the generated fields.\n\nThe fields containing `GENERATED FIELD` are also not queryable for filtering.\n\n## Omitted fields in list requests\n\nTo keep requests at a low cost, some fields of items are omitted when in a collection request when not specifying fields. \nTo get the values of these fields, request them using the `?fields` parameter.\nThe fields that are returned are specified in the documentation for the specific requests.\n\n## Custom fields\n\nCustom fields can be accessed via the `custom` key in `data`. These custom fields will have generic keys with the\nformat `custom_<number>`. They are expandable and filterable like normal fields.\n\n## Custom child collections\n\nThe Rentman API borrows the link structure from Rentman backend in most cases. However, some useful links (\ne.g. `projects` linking to `plannedequipment`) do not exist in the Rentman backend. For the Rentman API these links are\ncustom implemented and can be recognized by the `Get <linked_type> custom linked collection` title.\ne.g. `Get plannedequipment custom linked collection` for `projects`. It will never be possible to create items through\nthese linked collections since these links don't actually exist in the Rentman backend. It may also be possible that\nrelevant parent fields are missing in these custom children.\n\n## updateHash\n\nEvery item that is requested also contains a field `updateHash`. This is a field that is generated by the Rentman API\nand is a hash value computed with the `id` and `modified` field of the item. This hash can therefore be used to\nrecognize when an item is updated, since this field is unique per item and per update of that item.\n\n## Response data limitation\n\nResponses to collection requests default to 300 items when no `limit` parameter is specified. You can request up to 1500\nitems per request by setting the `limit` parameter. Additionally, there is a maximum response size of 5 MB. If you need\nmore than 1500 items, use pagination to iterate through the results. If the response exceeds 5 MB you will receive an\nerror. Use the `limit` parameter to request fewer items, or use the `fields` parameter to filter unnecessary fields\nfrom the response.\n\n## Rate limitation\n\nThe rate at which requests can be sent to the Rentman API is limited to 50.000 requests per day, and 10 requests per second. A maximum of 20 requests can be sent at once.\n",
     "x-logo": {
       "url": "https://cdn.prod.website-files.com/680b7c8bdefaec9c53251168/6877620893893ba9994b2a11_rentman-logo.svg",
       "altText": "Rentman",
@@ -19129,6 +19129,282 @@
           }
         }
       }
+    },
+    "/projects/{id}/:setClient": {
+      "post": {
+        "summary": "Set the client of a project.",
+        "operationId": "setClient",
+        "description": "Set the client of a project.",
+        "tags": [
+          "projects"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request (note that the 'data' field can be expanded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectReferenceResponse"
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Something went wrong"
+          },
+          "502": {
+            "description": "Bad gateway"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the project",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectsSetClientRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/:setLocation": {
+      "post": {
+        "summary": "Set the location of a project.",
+        "operationId": "setLocation",
+        "description": "Set the location of a project.",
+        "tags": [
+          "projects"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request (note that the 'data' field can be expanded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectReferenceResponse"
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Something went wrong"
+          },
+          "502": {
+            "description": "Bad gateway"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the project",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectsSetLocationRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/:setType": {
+      "post": {
+        "summary": "Set the project type of a project.",
+        "operationId": "setType",
+        "description": "Set the project type of a project.",
+        "tags": [
+          "projects"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request (note that the 'data' field can be expanded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectReferenceResponse"
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Something went wrong"
+          },
+          "502": {
+            "description": "Bad gateway"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the project",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectsSetTypeRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subprojects/{id}/:setLocation": {
+      "post": {
+        "summary": "Set the location of a subproject.",
+        "operationId": "setLocation",
+        "description": "Set the location of a subproject.",
+        "tags": [
+          "subprojects"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request (note that the 'data' field can be expanded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SubprojectReferenceResponse"
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Something went wrong"
+          },
+          "502": {
+            "description": "Bad gateway"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID of the subproject",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubprojectsSetLocationRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -35853,6 +36129,17 @@
         },
         "type": "object"
       },
+      "SubprojectReferenceResponse": {
+        "description": "Reference to a subproject",
+        "properties": {
+          "path": {
+            "description": "API path",
+            "type": "string",
+            "example": "/subprojects/42"
+          }
+        },
+        "type": "object"
+      },
       "ProjectsCreateFromTemplateRequest": {
         "type": "object",
         "properties": {
@@ -35869,6 +36156,82 @@
         "required": [
           "template",
           "start_date"
+        ]
+      },
+      "ProjectsSetClientRequest": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "type": "integer",
+            "description": "ID of the contact to set as client"
+          },
+          "contact_person": {
+            "type": "integer",
+            "description": "ID of the contact person, which must belong to the client"
+          },
+          "copy_data": {
+            "type": "boolean",
+            "description": "Copy the client's tax schema, invoice moment, discounts and insurance percentage onto the project"
+          }
+        },
+        "required": [
+          "client"
+        ]
+      },
+      "ProjectsSetLocationRequest": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "integer",
+            "description": "ID of the contact to set as location"
+          },
+          "contact_person": {
+            "type": "integer",
+            "description": "ID of the contact person, which must belong to the location. Defaults to the location's default contact person"
+          },
+          "copy_data": {
+            "type": "boolean",
+            "description": "Copy the location's tax schema onto the project"
+          },
+          "apply_distances": {
+            "type": "boolean",
+            "description": "Re-derive the crew travel time and distance from the location"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      },
+      "ProjectsSetTypeRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "integer",
+            "description": "ID of the project type"
+          },
+          "copy_terms_and_conditions": {
+            "type": "boolean",
+            "description": "Replace the project's terms and conditions with the type's default ones"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SubprojectsSetLocationRequest": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "integer",
+            "description": "ID of the contact to set as location"
+          },
+          "contact_person": {
+            "type": "integer",
+            "description": "ID of the contact person, which must belong to the location. Defaults to the location's default contact person"
+          }
+        },
+        "required": [
+          "location"
         ]
       }
     }
