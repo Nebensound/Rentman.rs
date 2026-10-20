@@ -1,17 +1,17 @@
 //! Live tests against the real Rentman API.
 //!
-//! These tests are ignored by default so `cargo test` never needs real
-//! credentials. Run them explicitly with a real API token, either from the
-//! environment or from a git-ignored `.env` file in the crate root (see
-//! `.env.example`):
+//! These tests are ignored by default unless `RENTMAN_API_TOKEN` is set in the
+//! environment or in a git-ignored `.env` file in the crate root (see
+//! `.env.example`). When a token is present, a normal `cargo test` runs them:
 //!
 //! ```bash
 //! cp .env.example .env   # then fill in RENTMAN_API_TOKEN
-//! cargo test --test live_api -- --ignored
+//! cargo test
 //! ```
 //!
 //! A `RENTMAN_API_TOKEN` already set in the environment takes precedence over
-//! the `.env` file.
+//! the `.env` file. Cargo watches both sources and rebuilds the test binary
+//! when token availability changes.
 //!
 //! Every documented `GET` collection endpoint has its own generated test in
 //! `live/generated_sweep.rs`, so a drifted endpoint shows up as an individual
@@ -50,7 +50,10 @@ fn live_client() -> RentmanClient {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn high_level_invoice_and_payment_listing_works_live() {
     let client = live_client();
 
@@ -72,7 +75,10 @@ async fn high_level_invoice_and_payment_listing_works_live() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn active_equipment_listing_works_and_excludes_archived_items_live() {
     let client = live_client();
 
@@ -126,7 +132,10 @@ async fn equipment_page(client: &RentmanClient, in_archive: &str) -> Vec<model::
 }
 
 #[tokio::test]
-#[ignore = "writes to the real Rentman API; requires RENTMAN_API_TOKEN and RENTMAN_LIVE_WRITE_EQUIPMENT_ID"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "writes to the real Rentman API; requires RENTMAN_API_TOKEN and RENTMAN_LIVE_WRITE_EQUIPMENT_ID"
+)]
 async fn equipment_price_write_is_a_no_op_live() {
     let client = live_client();
     // Opt-in: without a designated test item this test writes nothing. The

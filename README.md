@@ -119,18 +119,22 @@ tree:
 scripts/package_smoke_test.sh
 ```
 
-Live API tests call the real Rentman API and are ignored by default. They read
-`RENTMAN_API_TOKEN` from the environment or, locally, from a `.env` file in the
-crate root. Generate the token in Rentman under Configuration → Integrations;
-`.env` is git-ignored and must never be committed:
+Live API tests call the real Rentman API. They are ignored by default, but a
+normal `cargo test` automatically runs them when `RENTMAN_API_TOKEN` is set in
+the environment or in a `.env` file in the crate root. Generate the token in
+Rentman under Configuration → Integrations; `.env` is git-ignored and must
+never be committed:
 
 ```bash
 cp .env.example .env   # then fill in RENTMAN_API_TOKEN
-cargo test --test live_api -- --ignored
+cargo test
 ```
 
-A token already set in the environment takes precedence over `.env`, so
-`RENTMAN_API_TOKEN=... cargo test --test live_api -- --ignored` keeps working.
+A token already set in the environment takes precedence over `.env`. Cargo
+rebuilds the test binary when token availability changes. Without a token, the
+live tests remain ignored and regular `cargo test` does not call the API. The
+CI test workflow does not receive the token; live tests remain in the separate,
+non-blocking workflow below.
 
 Live tests only read, with one opt-in exception: when
 `RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
