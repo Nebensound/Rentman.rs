@@ -1,0 +1,118 @@
+name: Update OpenAPI
+
+on:
+  schedule:
+    - cron: "37 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-openapi
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      UPDATE_BRANCH: automation/update-openapi
+    steps:
+      - name: Checkout the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+          components: rustfmt
+      - name: Refresh the OpenAPI contract
+        run: scripts/update_openapi.py
+      - name: Compare with the existing update pull request
+        id: compare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          pr="$(gh pr list --state open --head "$UPDATE_BRANCH" --base "$DEFAULT_BRANCH" \
+            --json number,isCrossRepository --jq '[.[] | select(.isCrossRepository == false)][0].number // empty')"
+          if [ -n "$pr" ]; then
+            git fetch origin "refs/heads/$UPDATE_BRANCH"
+            if git diff --quiet FETCH_HEAD -- \
+              openapi/rentman-oas.json src/endpoint/generated.rs \
+              src/model/generated.rs tests/live/generated_sweep.rs; then
+              echo "The open update pull request already contains this contract."
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            else
+              status=$?
+              if [ "$status" -ne 1 ]; then
+                echo "::error::Could not compare the generated contract with the update branch."
+                exit "$status"
+              fi
+            fi
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Create or update the pull request
+        if: steps.compare.outputs.changed == 'true'
+        id: pull-request
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+        with:
+          token: ${{ github.token }}
+          branch: ${{ env.UPDATE_BRANCH }}
+          base: ${{ github.event.repository.default_branch }}
+          add-paths: |
+            openapi/rentman-oas.json
+            src/endpoint/generated.rs
+            src/model/generated.rs
+            tests/live/generated_sweep.rs
+          commit-message: |
+            Update Rentman OpenAPI contract
+
+            Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+          title: Update Rentman OpenAPI contract
+          body: |
+            ## Problem
+
+            <!-- What is wrong or missing? Link the issue: "Closes #123". -->
+            Rentman's published OpenAPI contract differs from the checked-in contract.
+
+            ## Solution
+
+            <!-- What changes, and why this way? -->
+            Run `scripts/update_openapi.py` to refresh the OpenAPI fixture, typed
+            models, endpoints, and live API sweep. Reuse the same update branch
+            until this pull request is merged.
+
+            ## Test evidence
+
+            <!-- New or changed tests, and the checks you ran locally. -->
+            - `scripts/update_openapi.py`: passed, including generation and `cargo fmt --all`.
+            - Full Rust checks were not run by the update job; the CI workflow is
+              dispatched explicitly for this branch after creating or updating the PR.
+
+            - [ ] `cargo fmt`, clippy, tests, docs, and the 100% coverage gate pass locally
+            - [ ] README and `.github/copilot-instructions.md` updated if conventions or behavior changed
+
+            ## Version and migration
+
+            <!-- Patch, (MINOR), or (MAJOR) in the title? For breaking changes: how do users migrate? -->
+            Review the contract diff for additions or breaking changes before merging.
+            Adjust the version classification and document migration steps if needed.
+
+            ## Security impact
+
+            <!-- Tokens, logged data, write operations, dependencies. "None" is a valid answer. -->
+            Downloads public API documentation without Rentman credentials.
+            Uses `GITHUB_TOKEN` to update the automation branch and PR and dispatch CI.
+      - name: Run CI for the pull request head
+        if: steps.pull-request.outputs.pull-request-operation == 'created' || steps.pull-request.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ci.yml --ref "$UPDATE_BRANCH"

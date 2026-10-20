@@ -50,8 +50,24 @@ types such as
 
 ```bash
 scripts/update_openapi.py
-cargo test
+cargo test --workspace --locked
 ```
+
+The `Update OpenAPI` workflow runs daily at 05:37 UTC and can also be started
+manually in GitHub Actions. It runs `scripts/update_openapi.py` on the default
+branch and, when the contract changes, creates or updates a pull request from
+the fixed `automation/update-openapi` branch. An open update PR is reused;
+unchanged generated files do not cause another commit or CI run. Keep this
+branch reserved for automation.
+
+The workflow uses the built-in `GITHUB_TOKEN`; no additional secret is needed.
+Under **Settings > Actions > General > Workflow permissions**, enable
+**Allow GitHub Actions to create and approve pull requests** (organization
+policy must also allow it). The workflow only creates PRs; it does not approve
+or merge them. Since token-created PRs and pushes do not trigger PR workflows,
+the updater explicitly dispatches `ci.yml` after creating or updating a PR.
+The normal CI checks must pass before merging; a failed download or generation
+fails the update workflow without publishing a partial update.
 
 When Rentman adds, removes, or renames endpoints, fields, schemas, enum values,
 request bodies, response types, or error status codes, the contract tests fail
@@ -184,6 +200,10 @@ artifacts always carry the derived version.
 On pull request branches the `version` job also commits the derived version to
 `Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
 CI run so the new head commit gets its required status checks.
+Manually dispatched CI runs on same-repository branches with an open PR to the
+default branch use the same version-commit behavior, including the automated
+OpenAPI update branch. Dispatches without such a PR still verify the committed
+version without pushing a fix.
 
 A manually raised version wins: when a commit sets a higher version in
 `Cargo.toml` than the derived one, that version is kept, is not overwritten,
