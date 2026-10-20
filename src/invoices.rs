@@ -567,6 +567,55 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn reads_still_follow_redirects() {
+        let server = spawn_server(vec![
+            "HTTP/1.1 302 Found\r\nLocation: {base}/moved\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                .to_string(),
+            json_response(
+                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":1,"number":"RE-1","is_paid":true}]}"#,
+            ),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        )
+        .unwrap();
+
+        let invoices = client.all_invoices().await.unwrap();
+
+        assert_eq!(invoices.len(), 1);
+        assert_request(&server.next_request(), "GET", "/invoices");
+        assert_request(&server.next_request(), "GET", "/moved");
+    }
+
+    #[tokio::test]
+    async fn reports_a_redirected_payment_create_as_uncertain() {
+        // The POST may have been applied before Rentman answered with 303.
+        let server = spawn_server(vec![
+            "HTTP/1.1 303 See Other\r\nLocation: {base}/result\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                .to_string(),
+            text_response("HTTP/1.1 404 Not Found", "gone"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        )
+        .unwrap();
+
+        let error = client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap_err();
+
+        // The redirect is not followed, so a failing second hop cannot turn
+        // the result into "not applied".
+        assert_eq!(error.status(), Some(StatusCode::SEE_OTHER));
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn creates_missing_payment() {
         let server = spawn_server(vec![empty_response("HTTP/1.1 200 OK")]);
         let client = RentmanClient::with_base_url(

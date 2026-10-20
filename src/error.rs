@@ -18,6 +18,7 @@ pub struct Error {
     operation: Option<&'static str>,
     resource: Option<Resource>,
     earlier_attempt_uncertain: bool,
+    acknowledged: bool,
 }
 
 /// What went wrong.
@@ -112,7 +113,8 @@ impl fmt::Display for Resource {
 pub enum RequestOutcome {
     /// Rentman did not apply the request; repeating it is safe.
     NotApplied,
-    /// Rentman applied the request; only reading its response failed.
+    /// Rentman applied the request: it answered with a success status, and only
+    /// receiving or decoding the response body failed.
     Applied,
     /// Rentman may or may not have applied the request. Reconcile by reading
     /// the affected data before repeating a request that creates data.
@@ -126,6 +128,7 @@ impl Error {
             operation: None,
             resource: None,
             earlier_attempt_uncertain: false,
+            acknowledged: false,
         }
     }
 
@@ -145,10 +148,18 @@ impl Error {
         self
     }
 
-    /// Records that an earlier, retried attempt of the same request may have
-    /// been applied, so this error alone does not prove nothing happened.
+    /// Records that an earlier attempt of the same request, or an earlier
+    /// server in a redirect chain, may have applied it, so this error alone
+    /// does not prove nothing happened. Once recorded, it stays recorded.
     pub(crate) fn after_uncertain_attempt(mut self, uncertain: bool) -> Self {
-        self.earlier_attempt_uncertain = uncertain;
+        self.earlier_attempt_uncertain |= uncertain;
+        self
+    }
+
+    /// Records that Rentman answered the request with a success status and
+    /// only receiving or reading the response failed afterwards.
+    pub(crate) fn after_success(mut self) -> Self {
+        self.acknowledged = true;
         self
     }
 
@@ -177,9 +188,18 @@ impl Error {
 
     /// Whether Rentman may have applied the failed request.
     pub fn outcome(&self) -> RequestOutcome {
+        if self.acknowledged {
+            return RequestOutcome::Applied;
+        }
         let outcome = match &self.kind {
             ErrorKind::InvalidRequest(_) => RequestOutcome::NotApplied,
-            ErrorKind::Status { status, .. } if status.is_server_error() => RequestOutcome::Unknown,
+            // Writes do not follow redirects; a redirect answer gives no
+            // proof either way whether the write was applied.
+            ErrorKind::Status { status, .. }
+                if status.is_server_error() || status.is_redirection() =>
+            {
+                RequestOutcome::Unknown
+            }
             ErrorKind::Status { .. } => RequestOutcome::NotApplied,
             ErrorKind::Transport(error) if error.is_connect() => RequestOutcome::NotApplied,
             ErrorKind::Transport(_) => RequestOutcome::Unknown,
@@ -298,6 +318,7 @@ mod tests {
         assert_eq!(status(400).outcome(), RequestOutcome::NotApplied);
         assert_eq!(status(429).outcome(), RequestOutcome::NotApplied);
         assert_eq!(status(500).outcome(), RequestOutcome::Unknown);
+        assert_eq!(status(303).outcome(), RequestOutcome::Unknown);
         assert_eq!(
             Error::invalid_request(InvalidRequest::UnexpectedBody).outcome(),
             RequestOutcome::NotApplied
@@ -324,6 +345,21 @@ mod tests {
         assert_eq!(
             status(400).after_uncertain_attempt(true).outcome(),
             RequestOutcome::Unknown
+        );
+        // Recorded uncertainty is not cleared by a later "certain" call.
+        assert_eq!(
+            status(400)
+                .after_uncertain_attempt(true)
+                .after_uncertain_attempt(false)
+                .outcome(),
+            RequestOutcome::Unknown
+        );
+        // A success status was received: a failure afterwards means applied.
+        assert_eq!(
+            Error::new(ErrorKind::Transport(builder_error()))
+                .after_success()
+                .outcome(),
+            RequestOutcome::Applied
         );
         assert_eq!(
             Error::new(ErrorKind::Decode(decode_error()))

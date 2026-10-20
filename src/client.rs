@@ -22,6 +22,10 @@ pub struct RentmanClient {
     pub(crate) base_url: Url,
     token: RentmanApiToken,
     http: HttpClient,
+    /// Client for requests that change data. It does not follow redirects:
+    /// after a redirect, a failure on a later hop would hide that the first
+    /// server may already have applied the write.
+    http_writes: HttpClient,
     limiter: Arc<CompositeRateLimiter>,
     pub(crate) retry_policy: RetryPolicy,
 }
@@ -111,6 +115,10 @@ impl RentmanClient {
             base_url,
             token,
             http: HttpClient::new(),
+            http_writes: HttpClient::builder()
+                .redirect(reqwest::redirect::Policy::none())
+                .build()
+                .expect("an HTTP client without redirects builds like the default client"),
             retry_policy: RetryPolicy::from_config(&config),
             limiter: Arc::new(CompositeRateLimiter::new(config.min_request_interval())),
         }
@@ -147,10 +155,13 @@ impl RentmanClient {
     pub(crate) fn request_url(&self, method: Method, url: Url) -> RentmanRequestBuilder {
         RentmanRequestBuilder {
             client: self.clone(),
-            request: self
-                .http
-                .request(method, url)
-                .bearer_auth(self.token.expose()),
+            request: if method.is_safe() {
+                &self.http
+            } else {
+                &self.http_writes
+            }
+            .request(method, url)
+            .bearer_auth(self.token.expose()),
         }
     }
 }

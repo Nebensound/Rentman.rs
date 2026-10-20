@@ -27,10 +27,12 @@ pub(crate) async fn send_with_retry<T: for<'de> Deserialize<'de>>(
     request: reqwest::RequestBuilder,
 ) -> Result<T> {
     let response = send_with_retries(&limiter, retry_policy, request).await?;
+    // Rentman already answered with a success status: a broken body now means
+    // the request was applied, not that its outcome is unknown.
     let body = response
         .bytes()
         .await
-        .map_err(|error| Error::new(ErrorKind::Transport(error)))?;
+        .map_err(|error| Error::new(ErrorKind::Transport(error)).after_success())?;
     decode_json_response(&body)
 }
 
@@ -580,7 +582,8 @@ mod tests {
         let error = send_with_retry::<serde_json::Value>(limiter, fast_policy(1), get(&server))
             .await
             .unwrap_err();
-        assert_eq!(error.outcome(), RequestOutcome::Unknown);
+        // The 200 status already arrived, so the request was applied.
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
         let ErrorKind::Transport(error) = error.kind() else {
             panic!("expected a transport error, got {error:?}");
         };

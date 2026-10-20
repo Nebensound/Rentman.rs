@@ -289,6 +289,9 @@ that hold by construction.
 ### Writes and retries
 
 Only idempotent requests (`GET`, `PUT`, `DELETE`) are retried automatically.
+Requests that change data do not follow redirects: a redirect answer to a
+write is reported as an error whose outcome is unknown, because the first
+server may already have applied it.
 Requests that create data (`POST`) are sent exactly once, and their
 documentation names the read method to reconcile with after an error. Every
 high-level write documents its retry behavior, and a test proves how many
