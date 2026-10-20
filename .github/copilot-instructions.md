@@ -62,8 +62,10 @@ repositories.
   strings.
 - Avoid public `serde_json::Value` as an escape hatch. For intentionally open
   OpenAPI shapes, create an explicit domain type such as `CustomFields`.
-- For collection pagination, follow Rentman's `next_page_url` when present.
-  Keep the offset fallback only for compatibility with older responses.
+- Page collections only through the shared paging core in `src/paging.rs`. It
+  follows Rentman's `next_page_url` unchanged until it is `null`, keeps the
+  offset fallback only for older responses, and rejects a repeated or
+  foreign-origin `next_page_url`. Page sizes are a validated `PageSize`.
 - Keep authentication, retry handling, and rate limiting inside the client.
 - Translate wire quirks at the boundary. For example, Rentman's invoice links
   such as `/invoices/14` should become `InvoiceId`.

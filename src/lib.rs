@@ -12,6 +12,7 @@ mod equipment;
 mod error;
 mod ids;
 mod invoices;
+mod paging;
 #[cfg(test)]
 // Test helpers are not production code and do not count toward coverage.
 #[cfg_attr(coverage_nightly, coverage(off))]
@@ -32,5 +33,6 @@ pub use invoices::{
     InvoicePaymentStatus, PaymentImportSource, RentmanInvoice, RentmanPayment,
     RentmanPaymentPayload,
 };
+pub use paging::PageSize;
 /// Re-export of the URL type used for client configuration.
 pub use reqwest::Url;

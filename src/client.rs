@@ -14,8 +14,6 @@ use std::sync::Arc;
 
 const DEFAULT_BASE_URL: &str = "https://api.rentman.net";
 
-pub(crate) const DEFAULT_PAGE_LIMIT: usize = 1500;
-
 /// HTTP client for calling the Rentman API.
 #[derive(Clone)]
 pub struct RentmanClient {
@@ -127,20 +125,6 @@ impl RentmanClient {
     /// Starts a request for any typed Rentman API endpoint.
     pub fn endpoint<E: endpoint::Endpoint>(&self) -> RentmanEndpointRequest<E> {
         RentmanEndpointRequest::new(self.clone())
-    }
-
-    pub(crate) fn paginated_request(
-        &self,
-        next_url: Option<Url>,
-        path: &str,
-        offset: usize,
-    ) -> RentmanRequestBuilder {
-        match next_url {
-            Some(url) => self.request_url(Method::GET, url),
-            None => self
-                .request(Method::GET, path)
-                .query(&[("offset", offset.to_string())]),
-        }
     }
 
     pub(crate) fn request(&self, method: Method, path: &str) -> RentmanRequestBuilder {
