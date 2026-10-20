@@ -236,8 +236,8 @@ mod tests {
         },
         model::RentmanId,
         model::{
-            EmailAddress, ItemResponse, NoContent, NoRequest, PaymentRequest,
-            PaymentRequestPaymentImportSource, ResourceReference,
+            EmailAddress, ItemResponse, NoContent, NoRequest, PaymentPayload,
+            PaymentPayloadPaymentImportSource, ResourceReference,
         },
     };
     use chrono::DateTime;
@@ -255,11 +255,11 @@ mod tests {
             RentmanApiToken::new("token"),
         )
         .unwrap();
-        let payload = PaymentRequest {
+        let payload = PaymentPayload {
             moment: DateTime::parse_from_rfc3339("2026-07-05T00:00:00+02:00").unwrap(),
             amount: Some(Decimal::new(425, 1)),
             description: Some("Manual booking".to_string()),
-            payment_import_source: Some(PaymentRequestPaymentImportSource::Publicapi),
+            payment_import_source: Some(PaymentPayloadPaymentImportSource::Publicapi),
         };
 
         let response: ItemResponse<_> = client

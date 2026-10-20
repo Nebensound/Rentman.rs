@@ -147,7 +147,7 @@ impl fmt::Display for RentmanId {
 
 /// Values documented for `AppointmentResponse.recurrence_interval_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum AppointmentResponseRecurrenceIntervalUnit {
+pub enum AppointmentRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -170,7 +170,7 @@ pub enum AppointmentResponseRecurrenceIntervalUnit {
 
 /// Values documented for `ContactPersonRequest.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactPersonRequestCountry {
+pub enum ContactPersonPayloadCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -907,7 +907,7 @@ pub enum ContactPersonRequestCountry {
 
 /// Values documented for `ContactPersonResponse.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactPersonResponseCountry {
+pub enum ContactPersonCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -1644,7 +1644,7 @@ pub enum ContactPersonResponseCountry {
 
 /// Values documented for `ContactRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactRequestType {
+pub enum ContactPayloadType {
     /// `private`.
     #[serde(rename = "private")]
     Private,
@@ -1655,7 +1655,7 @@ pub enum ContactRequestType {
 
 /// Values documented for `ContactRequest.mailing_country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactRequestMailingCountry {
+pub enum ContactPayloadMailingCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -2392,7 +2392,7 @@ pub enum ContactRequestMailingCountry {
 
 /// Values documented for `ContactRequest.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactRequestCountry {
+pub enum ContactPayloadCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -3129,7 +3129,7 @@ pub enum ContactRequestCountry {
 
 /// Values documented for `ContactRequest.invoice_country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactRequestInvoiceCountry {
+pub enum ContactPayloadInvoiceCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -3866,7 +3866,7 @@ pub enum ContactRequestInvoiceCountry {
 
 /// Values documented for `ContactResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactResponseType {
+pub enum ContactType {
     /// `private`.
     #[serde(rename = "private")]
     Private,
@@ -3877,7 +3877,7 @@ pub enum ContactResponseType {
 
 /// Values documented for `ContactResponse.mailing_country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactResponseMailingCountry {
+pub enum ContactMailingCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -4614,7 +4614,7 @@ pub enum ContactResponseMailingCountry {
 
 /// Values documented for `ContactResponse.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactResponseCountry {
+pub enum ContactCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -5351,7 +5351,7 @@ pub enum ContactResponseCountry {
 
 /// Values documented for `ContactResponse.invoice_country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ContactResponseInvoiceCountry {
+pub enum ContactInvoiceCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -6088,7 +6088,7 @@ pub enum ContactResponseInvoiceCountry {
 
 /// Values documented for `CrewRequest.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewRequestCountry {
+pub enum CrewPayloadCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -6825,7 +6825,7 @@ pub enum CrewRequestCountry {
 
 /// Values documented for `CrewResponse.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewResponseCountry {
+pub enum CrewCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -7562,7 +7562,7 @@ pub enum CrewResponseCountry {
 
 /// Values documented for `CrewAvailabilityRequest.status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewAvailabilityRequestStatus {
+pub enum CrewAvailabilityPayloadStatus {
     /// `B`.
     #[serde(rename = "B")]
     B,
@@ -7576,7 +7576,7 @@ pub enum CrewAvailabilityRequestStatus {
 
 /// Values documented for `CrewAvailabilityRequest.recurrence_interval_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewAvailabilityRequestRecurrenceIntervalUnit {
+pub enum CrewAvailabilityPayloadRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -7599,7 +7599,7 @@ pub enum CrewAvailabilityRequestRecurrenceIntervalUnit {
 
 /// Values documented for `CrewAvailabilityResponse.status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewAvailabilityResponseStatus {
+pub enum CrewAvailabilityStatus {
     /// `B`.
     #[serde(rename = "B")]
     B,
@@ -7613,7 +7613,7 @@ pub enum CrewAvailabilityResponseStatus {
 
 /// Values documented for `CrewAvailabilityResponse.recurrence_interval_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewAvailabilityResponseRecurrenceIntervalUnit {
+pub enum CrewAvailabilityRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -7636,7 +7636,7 @@ pub enum CrewAvailabilityResponseRecurrenceIntervalUnit {
 
 /// Values documented for `EquipmentRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestType {
+pub enum EquipmentPayloadType {
     /// `set`.
     #[serde(rename = "set")]
     Set,
@@ -7650,7 +7650,7 @@ pub enum EquipmentRequestType {
 
 /// Values documented for `EquipmentRequest.rental_sales`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestRentalSales {
+pub enum EquipmentPayloadRentalSales {
     /// `Sale`.
     #[serde(rename = "Sale")]
     Sale,
@@ -7661,7 +7661,7 @@ pub enum EquipmentRequestRentalSales {
 
 /// Values documented for `EquipmentRequest.stock_management`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestStockManagement {
+pub enum EquipmentPayloadStockManagement {
     /// `Exclude from stock tracking`.
     #[serde(rename = "Exclude from stock tracking")]
     ExcludeFromStockTracking,
@@ -7672,7 +7672,7 @@ pub enum EquipmentRequestStockManagement {
 
 /// Values documented for `EquipmentRequest.country_of_origin`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestCountryOfOrigin {
+pub enum EquipmentPayloadCountryOfOrigin {
     /// `oo`.
     #[serde(rename = "oo")]
     Oo,
@@ -8412,7 +8412,7 @@ pub enum EquipmentRequestCountryOfOrigin {
 
 /// Values documented for `EquipmentRequest.is_physical`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestIsPhysical {
+pub enum EquipmentPayloadIsPhysical {
     /// `Virtual package`.
     #[serde(rename = "Virtual package")]
     VirtualPackage,
@@ -8423,7 +8423,7 @@ pub enum EquipmentRequestIsPhysical {
 
 /// Values documented for `EquipmentRequest.strict_container_content`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentRequestStrictContainerContent {
+pub enum EquipmentPayloadStrictContainerContent {
     /// `Unrestricted`.
     #[serde(rename = "Unrestricted")]
     Unrestricted,
@@ -8434,7 +8434,7 @@ pub enum EquipmentRequestStrictContainerContent {
 
 /// Values documented for `EquipmentResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseType {
+pub enum EquipmentType {
     /// `set`.
     #[serde(rename = "set")]
     Set,
@@ -8448,7 +8448,7 @@ pub enum EquipmentResponseType {
 
 /// Values documented for `EquipmentResponse.rental_sales`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseRentalSales {
+pub enum EquipmentRentalSales {
     /// `Sale`.
     #[serde(rename = "Sale")]
     Sale,
@@ -8459,7 +8459,7 @@ pub enum EquipmentResponseRentalSales {
 
 /// Values documented for `EquipmentResponse.stock_management`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseStockManagement {
+pub enum EquipmentStockManagement {
     /// `Exclude from stock tracking`.
     #[serde(rename = "Exclude from stock tracking")]
     ExcludeFromStockTracking,
@@ -8470,7 +8470,7 @@ pub enum EquipmentResponseStockManagement {
 
 /// Values documented for `EquipmentResponse.country_of_origin`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseCountryOfOrigin {
+pub enum EquipmentCountryOfOrigin {
     /// `oo`.
     #[serde(rename = "oo")]
     Oo,
@@ -9210,7 +9210,7 @@ pub enum EquipmentResponseCountryOfOrigin {
 
 /// Values documented for `EquipmentResponse.is_physical`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseIsPhysical {
+pub enum EquipmentIsPhysical {
     /// `Virtual package`.
     #[serde(rename = "Virtual package")]
     VirtualPackage,
@@ -9221,7 +9221,7 @@ pub enum EquipmentResponseIsPhysical {
 
 /// Values documented for `EquipmentResponse.strict_container_content`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentResponseStrictContainerContent {
+pub enum EquipmentStrictContainerContent {
     /// `Unrestricted`.
     #[serde(rename = "Unrestricted")]
     Unrestricted,
@@ -9232,7 +9232,7 @@ pub enum EquipmentResponseStrictContainerContent {
 
 /// Values documented for `EquipmentSetContentRequest.is_fixed`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentSetContentRequestIsFixed {
+pub enum EquipmentSetContentPayloadIsFixed {
     /// `Available outside this combination`.
     #[serde(rename = "Available outside this combination")]
     AvailableOutsideThisCombination,
@@ -9243,7 +9243,7 @@ pub enum EquipmentSetContentRequestIsFixed {
 
 /// Values documented for `EquipmentSetContentRequest.is_physically_connected`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentSetContentRequestIsPhysicallyConnected {
+pub enum EquipmentSetContentPayloadIsPhysicallyConnected {
     /// `Will be removed when emptying combinations`.
     #[serde(rename = "Will be removed when emptying combinations")]
     WillBeRemovedWhenEmptyingCombinations,
@@ -9254,7 +9254,7 @@ pub enum EquipmentSetContentRequestIsPhysicallyConnected {
 
 /// Values documented for `EquipmentSetContentResponse.is_fixed`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentSetContentResponseIsFixed {
+pub enum EquipmentSetContentIsFixed {
     /// `Available outside this combination`.
     #[serde(rename = "Available outside this combination")]
     AvailableOutsideThisCombination,
@@ -9265,7 +9265,7 @@ pub enum EquipmentSetContentResponseIsFixed {
 
 /// Values documented for `EquipmentSetContentResponse.is_physically_connected`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum EquipmentSetContentResponseIsPhysicallyConnected {
+pub enum EquipmentSetContentIsPhysicallyConnected {
     /// `Will be removed when emptying combinations`.
     #[serde(rename = "Will be removed when emptying combinations")]
     WillBeRemovedWhenEmptyingCombinations,
@@ -9276,7 +9276,7 @@ pub enum EquipmentSetContentResponseIsPhysicallyConnected {
 
 /// Values documented for `ExtraInputFieldRequest.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldRequestItemtype {
+pub enum ExtraInputFieldPayloadItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9356,7 +9356,7 @@ pub enum ExtraInputFieldRequestItemtype {
 
 /// Values documented for `ExtraInputFieldRequest.linkedItemType`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldRequestLinkedItemType {
+pub enum ExtraInputFieldPayloadLinkedItemType {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9367,7 +9367,7 @@ pub enum ExtraInputFieldRequestLinkedItemType {
 
 /// Values documented for `ExtraInputFieldRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldRequestType {
+pub enum ExtraInputFieldPayloadType {
     /// `bool`.
     #[serde(rename = "bool")]
     Bool,
@@ -9414,7 +9414,7 @@ pub enum ExtraInputFieldRequestType {
 
 /// Values documented for `ExtraInputFieldResponse.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldResponseItemtype {
+pub enum ExtraInputFieldItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9494,7 +9494,7 @@ pub enum ExtraInputFieldResponseItemtype {
 
 /// Values documented for `ExtraInputFieldResponse.linkedItemType`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldResponseLinkedItemType {
+pub enum ExtraInputFieldLinkedItemType {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9505,7 +9505,7 @@ pub enum ExtraInputFieldResponseLinkedItemType {
 
 /// Values documented for `ExtraInputFieldResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ExtraInputFieldResponseType {
+pub enum ExtraInputFieldType {
     /// `bool`.
     #[serde(rename = "bool")]
     Bool,
@@ -9552,7 +9552,7 @@ pub enum ExtraInputFieldResponseType {
 
 /// Values documented for `FileFolderRequest.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileFolderRequestItemtype {
+pub enum FileFolderPayloadItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9605,7 +9605,7 @@ pub enum FileFolderRequestItemtype {
 
 /// Values documented for `FileFolderResponse.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileFolderResponseItemtype {
+pub enum FileFolderItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9658,7 +9658,7 @@ pub enum FileFolderResponseItemtype {
 
 /// Values documented for `FileRequest.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileRequestItemtype {
+pub enum FilePayloadItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9741,7 +9741,7 @@ pub enum FileRequestItemtype {
 
 /// Values documented for `FileRequest.previewstatus`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileRequestPreviewstatus {
+pub enum FilePayloadPreviewstatus {
     /// `no`.
     #[serde(rename = "no")]
     No,
@@ -9755,7 +9755,7 @@ pub enum FileRequestPreviewstatus {
 
 /// Values documented for `FileResponse.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileResponseItemtype {
+pub enum FileItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -9838,7 +9838,7 @@ pub enum FileResponseItemtype {
 
 /// Values documented for `FileResponse.previewstatus`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FileResponsePreviewstatus {
+pub enum FilePreviewstatus {
     /// `no`.
     #[serde(rename = "no")]
     No,
@@ -9852,7 +9852,7 @@ pub enum FileResponsePreviewstatus {
 
 /// Values documented for `FolderRequest.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FolderRequestItemtype {
+pub enum FolderPayloadItemtype {
     /// `equipment`.
     #[serde(rename = "equipment")]
     Equipment,
@@ -9878,7 +9878,7 @@ pub enum FolderRequestItemtype {
 
 /// Values documented for `FolderResponse.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FolderResponseItemtype {
+pub enum FolderItemtype {
     /// `equipment`.
     #[serde(rename = "equipment")]
     Equipment,
@@ -9904,7 +9904,7 @@ pub enum FolderResponseItemtype {
 
 /// Values documented for `InvitationsRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum InvitationsRequestType {
+pub enum InvitationPayloadType {
     /// `availability`.
     #[serde(rename = "availability")]
     Availability,
@@ -9921,7 +9921,7 @@ pub enum InvitationsRequestType {
 
 /// Values documented for `InvitationsRequest.emailstatus`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum InvitationsRequestEmailstatus {
+pub enum InvitationPayloadEmailstatus {
     /// `pending`.
     #[serde(rename = "pending")]
     Pending,
@@ -9941,7 +9941,7 @@ pub enum InvitationsRequestEmailstatus {
 
 /// Values documented for `InvitationsResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum InvitationsResponseType {
+pub enum InvitationType {
     /// `availability`.
     #[serde(rename = "availability")]
     Availability,
@@ -9958,7 +9958,7 @@ pub enum InvitationsResponseType {
 
 /// Values documented for `InvitationsResponse.emailstatus`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum InvitationsResponseEmailstatus {
+pub enum InvitationEmailstatus {
     /// `pending`.
     #[serde(rename = "pending")]
     Pending,
@@ -9978,7 +9978,7 @@ pub enum InvitationsResponseEmailstatus {
 
 /// Values documented for `FactuurResponse.invoicetype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum FactuurResponseInvoicetype {
+pub enum InvoiceInvoicetype {
     /// `C`.
     #[serde(rename = "C")]
     C,
@@ -9989,7 +9989,7 @@ pub enum FactuurResponseInvoicetype {
 
 /// Values documented for `LeaveRequestRequest.approval_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveRequestRequestApprovalStatus {
+pub enum LeaveRequestPayloadApprovalStatus {
     /// `pending`.
     #[serde(rename = "pending")]
     Pending,
@@ -10006,7 +10006,7 @@ pub enum LeaveRequestRequestApprovalStatus {
 
 /// Values documented for `LeaveRequestResponse.approval_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveRequestResponseApprovalStatus {
+pub enum LeaveRequestApprovalStatus {
     /// `pending`.
     #[serde(rename = "pending")]
     Pending,
@@ -10023,7 +10023,7 @@ pub enum LeaveRequestResponseApprovalStatus {
 
 /// Values documented for `LeaveTypesRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveTypesRequestType {
+pub enum LeaveTypePayloadType {
     /// `C`.
     #[serde(rename = "C")]
     C,
@@ -10043,7 +10043,7 @@ pub enum LeaveTypesRequestType {
 
 /// Values documented for `LeaveTypesRequest.is_labor`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveTypesRequestIsLabor {
+pub enum LeaveTypePayloadIsLabor {
     /// `leave`.
     #[serde(rename = "leave")]
     Leave,
@@ -10054,7 +10054,7 @@ pub enum LeaveTypesRequestIsLabor {
 
 /// Values documented for `LeaveTypesResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveTypesResponseType {
+pub enum LeaveTypeType {
     /// `C`.
     #[serde(rename = "C")]
     C,
@@ -10074,7 +10074,7 @@ pub enum LeaveTypesResponseType {
 
 /// Values documented for `LeaveTypesResponse.is_labor`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum LeaveTypesResponseIsLabor {
+pub enum LeaveTypeIsLabor {
     /// `leave`.
     #[serde(rename = "leave")]
     Leave,
@@ -10085,7 +10085,7 @@ pub enum LeaveTypesResponseIsLabor {
 
 /// Values documented for `PaymentRequest.payment_import_source`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PaymentRequestPaymentImportSource {
+pub enum PaymentPayloadPaymentImportSource {
     /// `none`.
     #[serde(rename = "none")]
     None,
@@ -10105,7 +10105,7 @@ pub enum PaymentRequestPaymentImportSource {
 
 /// Values documented for `PaymentResponse.payment_import_source`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PaymentResponsePaymentImportSource {
+pub enum PaymentPaymentImportSource {
     /// `none`.
     #[serde(rename = "none")]
     None,
@@ -10125,7 +10125,7 @@ pub enum PaymentResponsePaymentImportSource {
 
 /// Values documented for `ProjectCrewRequest.transport`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectCrewRequestTransport {
+pub enum ProjectCrewPayloadTransport {
     /// `no_transport`.
     #[serde(rename = "no_transport")]
     NoTransport,
@@ -10142,7 +10142,7 @@ pub enum ProjectCrewRequestTransport {
 
 /// Values documented for `ProjectCrewResponse.transport`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectCrewResponseTransport {
+pub enum ProjectCrewTransport {
     /// `no_transport`.
     #[serde(rename = "no_transport")]
     NoTransport,
@@ -10159,7 +10159,7 @@ pub enum ProjectCrewResponseTransport {
 
 /// Values documented for `ProjectCrewResponse.activity_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectCrewResponseActivityStatus {
+pub enum ProjectCrewActivityStatus {
     /// `no_registration`.
     #[serde(rename = "no_registration")]
     NoRegistration,
@@ -10179,7 +10179,7 @@ pub enum ProjectCrewResponseActivityStatus {
 
 /// Values documented for `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart {
+pub enum ProjectFunctionGroupPlanperiodStartScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
     IsEnd,
@@ -10190,7 +10190,7 @@ pub enum ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart {
 
 /// Values documented for `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart {
+pub enum ProjectFunctionGroupUsageperiodStartScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
     IsEnd,
@@ -10201,7 +10201,7 @@ pub enum ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart {
 
 /// Values documented for `ProjectFunctionGroupResponse.planperiod_end_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart {
+pub enum ProjectFunctionGroupPlanperiodEndScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
     IsEnd,
@@ -10212,7 +10212,7 @@ pub enum ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart {
 
 /// Values documented for `ProjectFunctionGroupResponse.usageperiod_end_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart {
+pub enum ProjectFunctionGroupUsageperiodEndScheduleIsStart {
     /// `is_end`.
     #[serde(rename = "is_end")]
     IsEnd,
@@ -10223,7 +10223,7 @@ pub enum ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart {
 
 /// Values documented for `ProjectFunctionRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionRequestType {
+pub enum ProjectFunctionPayloadType {
     /// `crew_function`.
     #[serde(rename = "crew_function")]
     CrewFunction,
@@ -10240,7 +10240,7 @@ pub enum ProjectFunctionRequestType {
 
 /// Values documented for `ProjectFunctionResponse.planperiod_start_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponsePlanperiodStartScheduleIsStart {
+pub enum ProjectFunctionPlanperiodStartScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
     EndTime,
@@ -10251,7 +10251,7 @@ pub enum ProjectFunctionResponsePlanperiodStartScheduleIsStart {
 
 /// Values documented for `ProjectFunctionResponse.usageperiod_start_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponseUsageperiodStartScheduleIsStart {
+pub enum ProjectFunctionUsageperiodStartScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
     EndTime,
@@ -10262,7 +10262,7 @@ pub enum ProjectFunctionResponseUsageperiodStartScheduleIsStart {
 
 /// Values documented for `ProjectFunctionResponse.planperiod_end_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponsePlanperiodEndScheduleIsStart {
+pub enum ProjectFunctionPlanperiodEndScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
     EndTime,
@@ -10273,7 +10273,7 @@ pub enum ProjectFunctionResponsePlanperiodEndScheduleIsStart {
 
 /// Values documented for `ProjectFunctionResponse.usageperiod_end_schedule_is_start`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponseUsageperiodEndScheduleIsStart {
+pub enum ProjectFunctionUsageperiodEndScheduleIsStart {
     /// `End time`.
     #[serde(rename = "End time")]
     EndTime,
@@ -10284,7 +10284,7 @@ pub enum ProjectFunctionResponseUsageperiodEndScheduleIsStart {
 
 /// Values documented for `ProjectFunctionResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponseType {
+pub enum ProjectFunctionType {
     /// `crew_function`.
     #[serde(rename = "crew_function")]
     CrewFunction,
@@ -10301,7 +10301,7 @@ pub enum ProjectFunctionResponseType {
 
 /// Values documented for `ProjectFunctionResponse.recurrence_interval_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectFunctionResponseRecurrenceIntervalUnit {
+pub enum ProjectFunctionRecurrenceIntervalUnit {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -10324,7 +10324,7 @@ pub enum ProjectFunctionResponseRecurrenceIntervalUnit {
 
 /// Values documented for `ProjectRequestResponse.source`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectRequestResponseSource {
+pub enum ProjectRequestSource {
     /// `rentaround`.
     #[serde(rename = "rentaround")]
     Rentaround,
@@ -10341,7 +10341,7 @@ pub enum ProjectRequestResponseSource {
 
 /// Values documented for `ProjectRequestResponse.status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectRequestResponseStatus {
+pub enum ProjectRequestStatus {
     /// `accepted`.
     #[serde(rename = "accepted")]
     Accepted,
@@ -10355,7 +10355,7 @@ pub enum ProjectRequestResponseStatus {
 
 /// Values documented for `ProjectResponse.deposit_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectResponseDepositStatus {
+pub enum ProjectDepositStatus {
     /// `no_deposit_paid`.
     #[serde(rename = "no_deposit_paid")]
     NoDepositPaid,
@@ -10369,7 +10369,7 @@ pub enum ProjectResponseDepositStatus {
 
 /// Values documented for `ProjectTypeRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectTypeRequestType {
+pub enum ProjectTypePayloadType {
     /// `regular`.
     #[serde(rename = "regular")]
     Regular,
@@ -10386,7 +10386,7 @@ pub enum ProjectTypeRequestType {
 
 /// Values documented for `ProjectTypeResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectTypeResponseType {
+pub enum ProjectTypeType {
     /// `regular`.
     #[serde(rename = "regular")]
     Regular,
@@ -10403,7 +10403,7 @@ pub enum ProjectTypeResponseType {
 
 /// Values documented for `ProjectVehicleRequest.transport`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectVehicleRequestTransport {
+pub enum ProjectVehiclePayloadTransport {
     /// `No transport`.
     #[serde(rename = "No transport")]
     NoTransport,
@@ -10420,7 +10420,7 @@ pub enum ProjectVehicleRequestTransport {
 
 /// Values documented for `ProjectVehicleResponse.transport`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ProjectVehicleResponseTransport {
+pub enum ProjectVehicleTransport {
     /// `No transport`.
     #[serde(rename = "No transport")]
     NoTransport,
@@ -10437,7 +10437,7 @@ pub enum ProjectVehicleResponseTransport {
 
 /// Values documented for `PurchaseOrderCostRequest.costitemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderCostRequestCostitemtype {
+pub enum PurchaseOrderCostPayloadCostitemtype {
     /// `Inhuur`.
     #[serde(rename = "Inhuur")]
     Inhuur,
@@ -10457,7 +10457,7 @@ pub enum PurchaseOrderCostRequestCostitemtype {
 
 /// Values documented for `PurchaseOrderCostResponse.costitemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderCostResponseCostitemtype {
+pub enum PurchaseOrderCostCostitemtype {
     /// `Inhuur`.
     #[serde(rename = "Inhuur")]
     Inhuur,
@@ -10477,7 +10477,7 @@ pub enum PurchaseOrderCostResponseCostitemtype {
 
 /// Values documented for `PurchaseOrderRequest.approval_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderRequestApprovalStatus {
+pub enum PurchaseOrderPayloadApprovalStatus {
     /// `draft`.
     #[serde(rename = "draft")]
     Draft,
@@ -10503,7 +10503,7 @@ pub enum PurchaseOrderRequestApprovalStatus {
 
 /// Values documented for `PurchaseOrderRequest.previous_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderRequestPreviousStatus {
+pub enum PurchaseOrderPayloadPreviousStatus {
     /// `draft`.
     #[serde(rename = "draft")]
     Draft,
@@ -10529,7 +10529,7 @@ pub enum PurchaseOrderRequestPreviousStatus {
 
 /// Values documented for `PurchaseOrderRequest.delivery_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderRequestDeliveryType {
+pub enum PurchaseOrderPayloadDeliveryType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
     PickUp,
@@ -10546,7 +10546,7 @@ pub enum PurchaseOrderRequestDeliveryType {
 
 /// Values documented for `PurchaseOrderRequest.export_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderRequestExportStatus {
+pub enum PurchaseOrderPayloadExportStatus {
     /// `failed`.
     #[serde(rename = "failed")]
     Failed,
@@ -10566,7 +10566,7 @@ pub enum PurchaseOrderRequestExportStatus {
 
 /// Values documented for `PurchaseOrderResponse.approval_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderResponseApprovalStatus {
+pub enum PurchaseOrderApprovalStatus {
     /// `draft`.
     #[serde(rename = "draft")]
     Draft,
@@ -10592,7 +10592,7 @@ pub enum PurchaseOrderResponseApprovalStatus {
 
 /// Values documented for `PurchaseOrderResponse.previous_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderResponsePreviousStatus {
+pub enum PurchaseOrderPreviousStatus {
     /// `draft`.
     #[serde(rename = "draft")]
     Draft,
@@ -10618,7 +10618,7 @@ pub enum PurchaseOrderResponsePreviousStatus {
 
 /// Values documented for `PurchaseOrderResponse.delivery_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderResponseDeliveryType {
+pub enum PurchaseOrderDeliveryType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
     PickUp,
@@ -10635,7 +10635,7 @@ pub enum PurchaseOrderResponseDeliveryType {
 
 /// Values documented for `PurchaseOrderResponse.export_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PurchaseOrderResponseExportStatus {
+pub enum PurchaseOrderExportStatus {
     /// `failed`.
     #[serde(rename = "failed")]
     Failed,
@@ -10655,7 +10655,7 @@ pub enum PurchaseOrderResponseExportStatus {
 
 /// Values documented for `CrewRateRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewRateRequestType {
+pub enum RatePayloadType {
     /// `price`.
     #[serde(rename = "price")]
     Price,
@@ -10666,7 +10666,7 @@ pub enum CrewRateRequestType {
 
 /// Values documented for `CrewRateRequest.subtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewRateRequestSubtype {
+pub enum RatePayloadSubtype {
     /// `global`.
     #[serde(rename = "global")]
     Global,
@@ -10680,7 +10680,7 @@ pub enum CrewRateRequestSubtype {
 
 /// Values documented for `CrewRateResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewRateResponseType {
+pub enum RateType {
     /// `price`.
     #[serde(rename = "price")]
     Price,
@@ -10691,7 +10691,7 @@ pub enum CrewRateResponseType {
 
 /// Values documented for `CrewRateResponse.subtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum CrewRateResponseSubtype {
+pub enum RateSubtype {
     /// `global`.
     #[serde(rename = "global")]
     Global,
@@ -10705,7 +10705,7 @@ pub enum CrewRateResponseSubtype {
 
 /// Values documented for `RepairRequest.is_usable`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RepairRequestIsUsable {
+pub enum RepairPayloadIsUsable {
     /// `take_from_stock`.
     #[serde(rename = "take_from_stock")]
     TakeFromStock,
@@ -10716,7 +10716,7 @@ pub enum RepairRequestIsUsable {
 
 /// Values documented for `RepairRequest.repair_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RepairRequestRepairStatus {
+pub enum RepairPayloadRepairStatus {
     /// `in-progress`.
     #[serde(rename = "in-progress")]
     InProgress,
@@ -10730,7 +10730,7 @@ pub enum RepairRequestRepairStatus {
 
 /// Values documented for `RepairResponse.is_usable`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RepairResponseIsUsable {
+pub enum RepairIsUsable {
     /// `take_from_stock`.
     #[serde(rename = "take_from_stock")]
     TakeFromStock,
@@ -10741,7 +10741,7 @@ pub enum RepairResponseIsUsable {
 
 /// Values documented for `RepairResponse.repair_status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum RepairResponseRepairStatus {
+pub enum RepairRepairStatus {
     /// `in-progress`.
     #[serde(rename = "in-progress")]
     InProgress,
@@ -10755,7 +10755,7 @@ pub enum RepairResponseRepairStatus {
 
 /// Values documented for `StockLocationRequest.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum StockLocationRequestCountry {
+pub enum StockLocationPayloadCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -11492,7 +11492,7 @@ pub enum StockLocationRequestCountry {
 
 /// Values documented for `StockLocationRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum StockLocationRequestType {
+pub enum StockLocationPayloadType {
     /// `plannable`.
     #[serde(rename = "plannable")]
     Plannable,
@@ -11503,7 +11503,7 @@ pub enum StockLocationRequestType {
 
 /// Values documented for `StockLocationResponse.country`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum StockLocationResponseCountry {
+pub enum StockLocationCountry {
     /// `af`.
     #[serde(rename = "af")]
     Af,
@@ -12240,7 +12240,7 @@ pub enum StockLocationResponseCountry {
 
 /// Values documented for `StockLocationResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum StockLocationResponseType {
+pub enum StockLocationType {
     /// `plannable`.
     #[serde(rename = "plannable")]
     Plannable,
@@ -12251,7 +12251,7 @@ pub enum StockLocationResponseType {
 
 /// Values documented for `StockMovementResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum StockMovementResponseType {
+pub enum StockMovementType {
     /// `manual`.
     #[serde(rename = "manual")]
     Manual,
@@ -12307,7 +12307,7 @@ pub enum StockMovementResponseType {
 
 /// Values documented for `SubrentalRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum SubrentalRequestType {
+pub enum SubrentalPayloadType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
     PickUp,
@@ -12321,7 +12321,7 @@ pub enum SubrentalRequestType {
 
 /// Values documented for `SubrentalResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum SubrentalResponseType {
+pub enum SubrentalType {
     /// `Pick up`.
     #[serde(rename = "Pick up")]
     PickUp,
@@ -12335,7 +12335,7 @@ pub enum SubrentalResponseType {
 
 /// Values documented for `TaskRequest.recurhoe`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestRecurhoe {
+pub enum TaskPayloadRecurhoe {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -12358,7 +12358,7 @@ pub enum TaskRequestRecurhoe {
 
 /// Values documented for `TaskRequest.priority`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestPriority {
+pub enum TaskPayloadPriority {
     /// `no_priority`.
     #[serde(rename = "no_priority")]
     NoPriority,
@@ -12375,7 +12375,7 @@ pub enum TaskRequestPriority {
 
 /// Values documented for `TaskRequest.deadline_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestDeadlineType {
+pub enum TaskPayloadDeadlineType {
     /// `specific_date`.
     #[serde(rename = "specific_date")]
     SpecificDate,
@@ -12386,7 +12386,7 @@ pub enum TaskRequestDeadlineType {
 
 /// Values documented for `TaskRequest.deadline_relative_offset_base`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestDeadlineRelativeOffsetBase {
+pub enum TaskPayloadDeadlineRelativeOffsetBase {
     /// `start_of_period`.
     #[serde(rename = "start_of_period")]
     StartOfPeriod,
@@ -12397,7 +12397,7 @@ pub enum TaskRequestDeadlineRelativeOffsetBase {
 
 /// Values documented for `TaskRequest.deadline_relative_offset_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestDeadlineRelativeOffsetUnit {
+pub enum TaskPayloadDeadlineRelativeOffsetUnit {
     /// `days`.
     #[serde(rename = "days")]
     Days,
@@ -12408,7 +12408,7 @@ pub enum TaskRequestDeadlineRelativeOffsetUnit {
 
 /// Values documented for `TaskRequest.deadline_relative_offset_direction`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestDeadlineRelativeOffsetDirection {
+pub enum TaskPayloadDeadlineRelativeOffsetDirection {
     /// `before`.
     #[serde(rename = "before")]
     Before,
@@ -12419,7 +12419,7 @@ pub enum TaskRequestDeadlineRelativeOffsetDirection {
 
 /// Values documented for `TaskRequest.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestItemtype {
+pub enum TaskPayloadItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -12481,7 +12481,7 @@ pub enum TaskRequestItemtype {
 
 /// Values documented for `TaskRequest.public`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestPublic {
+pub enum TaskPayloadPublic {
     /// `0`.
     #[serde(rename = "0")]
     Zero,
@@ -12492,7 +12492,7 @@ pub enum TaskRequestPublic {
 
 /// Values documented for `TaskRequest.assignment_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskRequestAssignmentType {
+pub enum TaskPayloadAssignmentType {
     /// `all_crewmembers`.
     #[serde(rename = "all_crewmembers")]
     AllCrewmembers,
@@ -12506,7 +12506,7 @@ pub enum TaskRequestAssignmentType {
 
 /// Values documented for `TaskResponse.recurhoe`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseRecurhoe {
+pub enum TaskRecurhoe {
     /// `once`.
     #[serde(rename = "once")]
     Once,
@@ -12529,7 +12529,7 @@ pub enum TaskResponseRecurhoe {
 
 /// Values documented for `TaskResponse.priority`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponsePriority {
+pub enum TaskPriority {
     /// `no_priority`.
     #[serde(rename = "no_priority")]
     NoPriority,
@@ -12546,7 +12546,7 @@ pub enum TaskResponsePriority {
 
 /// Values documented for `TaskResponse.deadline_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseDeadlineType {
+pub enum TaskDeadlineType {
     /// `specific_date`.
     #[serde(rename = "specific_date")]
     SpecificDate,
@@ -12557,7 +12557,7 @@ pub enum TaskResponseDeadlineType {
 
 /// Values documented for `TaskResponse.deadline_relative_offset_base`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseDeadlineRelativeOffsetBase {
+pub enum TaskDeadlineRelativeOffsetBase {
     /// `start_of_period`.
     #[serde(rename = "start_of_period")]
     StartOfPeriod,
@@ -12568,7 +12568,7 @@ pub enum TaskResponseDeadlineRelativeOffsetBase {
 
 /// Values documented for `TaskResponse.deadline_relative_offset_unit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseDeadlineRelativeOffsetUnit {
+pub enum TaskDeadlineRelativeOffsetUnit {
     /// `days`.
     #[serde(rename = "days")]
     Days,
@@ -12579,7 +12579,7 @@ pub enum TaskResponseDeadlineRelativeOffsetUnit {
 
 /// Values documented for `TaskResponse.deadline_relative_offset_direction`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseDeadlineRelativeOffsetDirection {
+pub enum TaskDeadlineRelativeOffsetDirection {
     /// `before`.
     #[serde(rename = "before")]
     Before,
@@ -12590,7 +12590,7 @@ pub enum TaskResponseDeadlineRelativeOffsetDirection {
 
 /// Values documented for `TaskResponse.itemtype`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseItemtype {
+pub enum TaskItemtype {
     /// `Contact`.
     #[serde(rename = "Contact")]
     Contact,
@@ -12652,7 +12652,7 @@ pub enum TaskResponseItemtype {
 
 /// Values documented for `TaskResponse.public`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponsePublic {
+pub enum TaskPublic {
     /// `0`.
     #[serde(rename = "0")]
     Zero,
@@ -12663,7 +12663,7 @@ pub enum TaskResponsePublic {
 
 /// Values documented for `TaskResponse.assignment_type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskResponseAssignmentType {
+pub enum TaskAssignmentType {
     /// `all_crewmembers`.
     #[serde(rename = "all_crewmembers")]
     AllCrewmembers,
@@ -12677,7 +12677,7 @@ pub enum TaskResponseAssignmentType {
 
 /// Values documented for `TaskStatusRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskStatusRequestType {
+pub enum TaskStatusPayloadType {
     /// `todo`.
     #[serde(rename = "todo")]
     Todo,
@@ -12691,7 +12691,7 @@ pub enum TaskStatusRequestType {
 
 /// Values documented for `TaskStatusResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaskStatusResponseType {
+pub enum TaskStatusType {
     /// `todo`.
     #[serde(rename = "todo")]
     Todo,
@@ -12705,7 +12705,7 @@ pub enum TaskStatusResponseType {
 
 /// Values documented for `TaxClassRequest.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaxClassRequestType {
+pub enum TaxClassPayloadType {
     /// `vat`.
     #[serde(rename = "vat")]
     Vat,
@@ -12719,7 +12719,7 @@ pub enum TaxClassRequestType {
 
 /// Values documented for `TaxClassResponse.type`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TaxClassResponseType {
+pub enum TaxClassType {
     /// `vat`.
     #[serde(rename = "vat")]
     Vat,
@@ -12733,7 +12733,7 @@ pub enum TaxClassResponseType {
 
 /// Values documented for `TimeRegistrationResponse.status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TimeRegistrationResponseStatus {
+pub enum TimeRegistrationStatus {
     /// `pending`.
     #[serde(rename = "pending")]
     Pending,
@@ -12747,7 +12747,7 @@ pub enum TimeRegistrationResponseStatus {
 
 /// Values documented for `VehicleRequest.multiple`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum VehicleRequestMultiple {
+pub enum VehiclePayloadMultiple {
     /// `plannable_once`.
     #[serde(rename = "plannable_once")]
     PlannableOnce,
@@ -12758,7 +12758,7 @@ pub enum VehicleRequestMultiple {
 
 /// Values documented for `VehicleResponse.multiple`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum VehicleResponseMultiple {
+pub enum VehicleMultiple {
     /// `plannable_once`.
     #[serde(rename = "plannable_once")]
     PlannableOnce,
@@ -12786,7 +12786,7 @@ pub struct ApiResponse {
 
 /// Rentman API schema `AccessoryRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AccessoryRequest {
+pub struct AccessoryPayload {
     /// The equipment that is represented by this accessory.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<ResourceReference>,
@@ -12812,7 +12812,7 @@ pub struct AccessoryRequest {
 
 /// Rentman API schema `AccessoryResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AccessoryResponse {
+pub struct Accessory {
     /// Rentman API field `AccessoryResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `AccessoryResponse.created`.
@@ -12843,7 +12843,7 @@ pub struct AccessoryResponse {
 
 /// Rentman API schema `ActualContentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ActualContentRequest {
+pub struct ActualContentPayload {
     /// Rentman API field `ActualContentRequest.equipment`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<ResourceReference>,
@@ -12857,7 +12857,7 @@ pub struct ActualContentRequest {
 
 /// Rentman API schema `ActualContentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ActualContentResponse {
+pub struct ActualContent {
     /// Rentman API field `ActualContentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ActualContentResponse.created`.
@@ -12880,14 +12880,14 @@ pub struct ActualContentResponse {
 
 /// Rentman API schema `AlternativeRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AlternativeRequest {
+pub struct AlternativePayload {
     /// Rentman API field `AlternativeRequest.alternative`.
     pub alternative: ResourceReference,
 }
 
 /// Rentman API schema `AlternativeResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AlternativeResponse {
+pub struct Alternative {
     /// Rentman API field `AlternativeResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `AlternativeResponse.created`.
@@ -12906,14 +12906,14 @@ pub struct AlternativeResponse {
 
 /// Rentman API schema `AppointmentCrewRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AppointmentCrewRequest {
+pub struct AppointmentCrewPayload {
     /// Rentman API field `AppointmentCrewRequest.crew`.
     pub crew: ResourceReference,
 }
 
 /// Rentman API schema `AppointmentCrewResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AppointmentCrewResponse {
+pub struct AppointmentCrew {
     /// Rentman API field `AppointmentCrewResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `AppointmentCrewResponse.created`.
@@ -12932,7 +12932,7 @@ pub struct AppointmentCrewResponse {
 
 /// Rentman API schema `AppointmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AppointmentRequest {
+pub struct AppointmentPayload {
     /// Rentman API field `AppointmentRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -12959,7 +12959,7 @@ pub struct AppointmentRequest {
 
 /// Rentman API schema `AppointmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct AppointmentResponse {
+pub struct Appointment {
     /// Rentman API field `AppointmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `AppointmentResponse.created`.
@@ -12987,7 +12987,7 @@ pub struct AppointmentResponse {
     /// If yes, employees can be scheduled during this appointment.
     pub is_plannable: bool,
     /// Period between each recurrence. E.g. every x day/week/month/year.
-    pub recurrence_interval_unit: AppointmentResponseRecurrenceIntervalUnit,
+    pub recurrence_interval_unit: AppointmentRecurrenceIntervalUnit,
     /// Date the recurrence ends.
     pub recurrence_enddate: Option<String>,
     /// Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
@@ -13004,7 +13004,7 @@ pub struct AppointmentResponse {
 
 /// Rentman API schema `ContactPersonRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContactPersonRequest {
+pub struct ContactPersonPayload {
     /// Rentman API field `ContactPersonRequest.firstname`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub firstname: Option<String>,
@@ -13037,7 +13037,7 @@ pub struct ContactPersonRequest {
     pub state: Option<String>,
     /// Rentman API field `ContactPersonRequest.country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub country: Option<ContactPersonRequestCountry>,
+    pub country: Option<ContactPersonPayloadCountry>,
     /// Rentman API field `ContactPersonRequest.mobilephone`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mobilephone: Option<String>,
@@ -13051,7 +13051,7 @@ pub struct ContactPersonRequest {
 
 /// Rentman API schema `ContactPersonResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContactPersonResponse {
+pub struct ContactPerson {
     /// Rentman API field `ContactPersonResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ContactPersonResponse.created`.
@@ -13085,7 +13085,7 @@ pub struct ContactPersonResponse {
     /// Rentman API field `ContactPersonResponse.state`.
     pub state: String,
     /// Rentman API field `ContactPersonResponse.country`.
-    pub country: ContactPersonResponseCountry,
+    pub country: ContactPersonCountry,
     /// Rentman API field `ContactPersonResponse.mobilephone`.
     pub mobilephone: String,
     /// Rentman API field `ContactPersonResponse.email`.
@@ -13098,13 +13098,13 @@ pub struct ContactPersonResponse {
 
 /// Rentman API schema `ContactRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContactRequest {
+pub struct ContactPayload {
     /// Rentman API field `ContactRequest.folder`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder: Option<ResourceReference>,
     /// Rentman API field `ContactRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<ContactRequestType>,
+    pub type_: Option<ContactPayloadType>,
     /// Rentman API field `ContactRequest.ext_name_line`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ext_name_line: Option<String>,
@@ -13170,7 +13170,7 @@ pub struct ContactRequest {
     pub mailing_state: Option<String>,
     /// Rentman API field `ContactRequest.mailing_country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub mailing_country: Option<ContactRequestMailingCountry>,
+    pub mailing_country: Option<ContactPayloadMailingCountry>,
     /// Rentman API field `ContactRequest.visit_city`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visit_city: Option<String>,
@@ -13197,7 +13197,7 @@ pub struct ContactRequest {
     pub visit_state: Option<String>,
     /// Rentman API field `ContactRequest.country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub country: Option<ContactRequestCountry>,
+    pub country: Option<ContactPayloadCountry>,
     /// Rentman API field `ContactRequest.invoice_city`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub invoice_city: Option<String>,
@@ -13224,7 +13224,7 @@ pub struct ContactRequest {
     pub invoice_state: Option<String>,
     /// Rentman API field `ContactRequest.invoice_country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub invoice_country: Option<ContactRequestInvoiceCountry>,
+    pub invoice_country: Option<ContactPayloadInvoiceCountry>,
     /// Rentman API field `ContactRequest.phone_1`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub phone_1: Option<String>,
@@ -13301,7 +13301,7 @@ pub struct ContactRequest {
 
 /// Rentman API schema `ContactResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContactResponse {
+pub struct Contact {
     /// Rentman API field `ContactResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ContactResponse.created`.
@@ -13316,7 +13316,7 @@ pub struct ContactResponse {
     pub folder: Option<ResourceReference>,
     /// Rentman API field `ContactResponse.type`.
     #[serde(rename = "type")]
-    pub type_: ContactResponseType,
+    pub type_: ContactType,
     /// Rentman API field `ContactResponse.ext_name_line`.
     pub ext_name_line: String,
     /// Rentman API field `ContactResponse.firstname`.
@@ -13360,7 +13360,7 @@ pub struct ContactResponse {
     /// Rentman API field `ContactResponse.mailing_state`.
     pub mailing_state: String,
     /// Rentman API field `ContactResponse.mailing_country`.
-    pub mailing_country: ContactResponseMailingCountry,
+    pub mailing_country: ContactMailingCountry,
     /// Rentman API field `ContactResponse.visit_city`.
     pub visit_city: String,
     /// Rentman API field `ContactResponse.visit_street`.
@@ -13378,7 +13378,7 @@ pub struct ContactResponse {
     /// Rentman API field `ContactResponse.visit_state`.
     pub visit_state: String,
     /// Rentman API field `ContactResponse.country`.
-    pub country: ContactResponseCountry,
+    pub country: ContactCountry,
     /// Rentman API field `ContactResponse.invoice_city`.
     pub invoice_city: String,
     /// Rentman API field `ContactResponse.invoice_street`.
@@ -13396,7 +13396,7 @@ pub struct ContactResponse {
     /// Rentman API field `ContactResponse.invoice_state`.
     pub invoice_state: String,
     /// Rentman API field `ContactResponse.invoice_country`.
-    pub invoice_country: ContactResponseInvoiceCountry,
+    pub invoice_country: ContactInvoiceCountry,
     /// Rentman API field `ContactResponse.phone_1`.
     pub phone_1: String,
     /// Rentman API field `ContactResponse.phone_2`.
@@ -13452,7 +13452,7 @@ pub struct ContactResponse {
 
 /// Rentman API schema `ContractRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContractRequest {
+pub struct ContractPayload {
     /// Rentman API field `ContractRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
@@ -13484,7 +13484,7 @@ pub struct ContractRequest {
 
 /// Rentman API schema `ContractResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ContractResponse {
+pub struct Contract {
     /// Rentman API field `ContractResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ContractResponse.created`.
@@ -13552,7 +13552,7 @@ pub struct ContractResponse {
 
 /// Rentman API schema `ProjectCostRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectCostRequest {
+pub struct ProjectCostPayload {
     /// Rentman API field `ProjectCostRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -13592,7 +13592,7 @@ pub struct ProjectCostRequest {
 
 /// Rentman API schema `ProjectCostResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectCostResponse {
+pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectCostResponse.created`.
@@ -13635,7 +13635,7 @@ pub struct ProjectCostResponse {
 
 /// Rentman API schema `CrewRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRequest {
+pub struct CrewPayload {
     /// Rentman API field `CrewRequest.folder`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder: Option<ResourceReference>,
@@ -13668,7 +13668,7 @@ pub struct CrewRequest {
     pub state: Option<String>,
     /// Rentman API field `CrewRequest.country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub country: Option<CrewRequestCountry>,
+    pub country: Option<CrewPayloadCountry>,
     /// Rentman API field `CrewRequest.birthdate`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub birthdate: Option<String>,
@@ -13739,7 +13739,7 @@ pub struct CrewRequest {
 
 /// Rentman API schema `CrewResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewResponse {
+pub struct Crew {
     /// Rentman API field `CrewResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `CrewResponse.created`.
@@ -13771,7 +13771,7 @@ pub struct CrewResponse {
     /// Rentman API field `CrewResponse.state`.
     pub state: String,
     /// Rentman API field `CrewResponse.country`.
-    pub country: CrewResponseCountry,
+    pub country: CrewCountry,
     /// Rentman API field `CrewResponse.birthdate`.
     pub birthdate: Option<String>,
     /// Rentman API field `CrewResponse.passport_number`.
@@ -13822,7 +13822,7 @@ pub struct CrewResponse {
 
 /// Rentman API schema `CrewAvailabilityRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewAvailabilityRequest {
+pub struct CrewAvailabilityPayload {
     /// Rentman API field `CrewAvailabilityRequest.last_updater`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_updater: Option<ResourceReference>,
@@ -13835,13 +13835,13 @@ pub struct CrewAvailabilityRequest {
     pub end: DateTime<FixedOffset>,
     /// `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<CrewAvailabilityRequestStatus>,
+    pub status: Option<CrewAvailabilityPayloadStatus>,
     /// Rentman API field `CrewAvailabilityRequest.remark`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
     /// Rentman API field `CrewAvailabilityRequest.recurrence_interval_unit`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub recurrence_interval_unit: Option<CrewAvailabilityRequestRecurrenceIntervalUnit>,
+    pub recurrence_interval_unit: Option<CrewAvailabilityPayloadRecurrenceIntervalUnit>,
     /// Rentman API field `CrewAvailabilityRequest.recurrence_enddate`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_enddate: Option<String>,
@@ -13858,7 +13858,7 @@ pub struct CrewAvailabilityRequest {
 
 /// Rentman API schema `CrewAvailabilityResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewAvailabilityResponse {
+pub struct CrewAvailability {
     /// Rentman API field `CrewAvailabilityResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `CrewAvailabilityResponse.created`.
@@ -13880,11 +13880,11 @@ pub struct CrewAvailabilityResponse {
     /// Rentman API field `CrewAvailabilityResponse.crewmember`.
     pub crewmember: ResourceReference,
     /// `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
-    pub status: CrewAvailabilityResponseStatus,
+    pub status: CrewAvailabilityStatus,
     /// Rentman API field `CrewAvailabilityResponse.remark`.
     pub remark: String,
     /// Rentman API field `CrewAvailabilityResponse.recurrence_interval_unit`.
-    pub recurrence_interval_unit: CrewAvailabilityResponseRecurrenceIntervalUnit,
+    pub recurrence_interval_unit: CrewAvailabilityRecurrenceIntervalUnit,
     /// Rentman API field `CrewAvailabilityResponse.recurrence_enddate`.
     pub recurrence_enddate: Option<String>,
     /// interval in how many days/weeks/months/years the availability should reoccur.
@@ -13897,7 +13897,7 @@ pub struct CrewAvailabilityResponse {
 
 /// Rentman API schema `CrewRatesRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRatesRequest {
+pub struct CrewRatePayload {
     /// Rentman API field `CrewRatesRequest.naam`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub naam: Option<String>,
@@ -13908,7 +13908,7 @@ pub struct CrewRatesRequest {
 
 /// Rentman API schema `CrewRatesResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRatesResponse {
+pub struct CrewRate {
     /// Rentman API field `CrewRatesResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `CrewRatesResponse.created`.
@@ -13929,7 +13929,7 @@ pub struct CrewRatesResponse {
 
 /// Rentman API schema `EquipmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentRequest {
+pub struct EquipmentPayload {
     /// Rentman API field `EquipmentRequest.folder`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder: Option<ResourceReference>,
@@ -13986,10 +13986,10 @@ pub struct EquipmentRequest {
     pub critical_stock_level: Option<i64>,
     /// Rentman API field `EquipmentRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<EquipmentRequestType>,
+    pub type_: Option<EquipmentPayloadType>,
     /// Rentman API field `EquipmentRequest.rental_sales`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rental_sales: Option<EquipmentRequestRentalSales>,
+    pub rental_sales: Option<EquipmentPayloadRentalSales>,
     /// Rentman API field `EquipmentRequest.temporary`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub temporary: Option<bool>,
@@ -14001,7 +14001,7 @@ pub struct EquipmentRequest {
     pub in_archive: Option<bool>,
     /// Rentman API field `EquipmentRequest.stock_management`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub stock_management: Option<EquipmentRequestStockManagement>,
+    pub stock_management: Option<EquipmentPayloadStockManagement>,
     /// Rentman API field `EquipmentRequest.taxclass`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub taxclass: Option<ResourceReference>,
@@ -14037,7 +14037,7 @@ pub struct EquipmentRequest {
     pub current: Option<Decimal>,
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub country_of_origin: Option<EquipmentRequestCountryOfOrigin>,
+    pub country_of_origin: Option<EquipmentPayloadCountryOfOrigin>,
     /// Rentman API field `EquipmentRequest.image`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image: Option<ResourceReference>,
@@ -14055,13 +14055,13 @@ pub struct EquipmentRequest {
     pub is_combination: Option<bool>,
     /// Rentman API field `EquipmentRequest.is_physical`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_physical: Option<EquipmentRequestIsPhysical>,
+    pub is_physical: Option<EquipmentPayloadIsPhysical>,
     /// If 'No' is selected, equipment cannot be added to or removed from this combination. Also, quantities of the content cannot be adjusted.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub can_edit_content_during_planning: Option<bool>,
     /// Determine whether the combination can contain actual content that is not part of the default content.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub strict_container_content: Option<EquipmentRequestStrictContainerContent>,
+    pub strict_container_content: Option<EquipmentPayloadStrictContainerContent>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -14069,7 +14069,7 @@ pub struct EquipmentRequest {
 
 /// Rentman API schema `EquipmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentResponse {
+pub struct Equipment {
     /// Rentman API field `EquipmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `EquipmentResponse.created`.
@@ -14118,9 +14118,9 @@ pub struct EquipmentResponse {
     pub critical_stock_level: i64,
     /// Rentman API field `EquipmentResponse.type`.
     #[serde(rename = "type")]
-    pub type_: EquipmentResponseType,
+    pub type_: EquipmentType,
     /// Rentman API field `EquipmentResponse.rental_sales`.
-    pub rental_sales: EquipmentResponseRentalSales,
+    pub rental_sales: EquipmentRentalSales,
     /// Rentman API field `EquipmentResponse.temporary`.
     pub temporary: bool,
     /// Rentman API field `EquipmentResponse.in_planner`.
@@ -14128,7 +14128,7 @@ pub struct EquipmentResponse {
     /// Rentman API field `EquipmentResponse.in_archive`.
     pub in_archive: bool,
     /// Rentman API field `EquipmentResponse.stock_management`.
-    pub stock_management: EquipmentResponseStockManagement,
+    pub stock_management: EquipmentStockManagement,
     /// Rentman API field `EquipmentResponse.taxclass`.
     pub taxclass: Option<ResourceReference>,
     /// Rentman API field `EquipmentResponse.list_price`.
@@ -14152,7 +14152,7 @@ pub struct EquipmentResponse {
     /// Rentman API field `EquipmentResponse.current`.
     pub current: Decimal,
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
-    pub country_of_origin: EquipmentResponseCountryOfOrigin,
+    pub country_of_origin: EquipmentCountryOfOrigin,
     /// Rentman API field `EquipmentResponse.image`.
     pub image: Option<ResourceReference>,
     /// Rentman API field `EquipmentResponse.ledger`.
@@ -14164,11 +14164,11 @@ pub struct EquipmentResponse {
     /// Rentman API field `EquipmentResponse.is_combination`.
     pub is_combination: bool,
     /// Rentman API field `EquipmentResponse.is_physical`.
-    pub is_physical: EquipmentResponseIsPhysical,
+    pub is_physical: EquipmentIsPhysical,
     /// If 'No' is selected, equipment cannot be added to or removed from this combination. Also, quantities of the content cannot be adjusted.
     pub can_edit_content_during_planning: bool,
     /// Determine whether the combination can contain actual content that is not part of the default content.
-    pub strict_container_content: EquipmentResponseStrictContainerContent,
+    pub strict_container_content: EquipmentStrictContainerContent,
     /// GENERATED FIELD.
     pub qrcodes: String,
     /// GENERATED FIELD.
@@ -14192,14 +14192,14 @@ pub struct EquipmentResponse {
 
 /// Rentman API schema `EquipmentAssignedSerialsRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentAssignedSerialsRequest {
+pub struct EquipmentAssignedSerialPayload {
     /// Rentman API field `EquipmentAssignedSerialsRequest.serialnumber`.
     pub serialnumber: ResourceReference,
 }
 
 /// Rentman API schema `EquipmentAssignedSerialsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentAssignedSerialsResponse {
+pub struct EquipmentAssignedSerial {
     /// Rentman API field `EquipmentAssignedSerialsResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `EquipmentAssignedSerialsResponse.created`.
@@ -14218,7 +14218,7 @@ pub struct EquipmentAssignedSerialsResponse {
 
 /// Rentman API schema `EquipmentSetContentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentSetContentRequest {
+pub struct EquipmentSetContentPayload {
     /// Quantity in this combination.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<String>,
@@ -14229,15 +14229,15 @@ pub struct EquipmentSetContentRequest {
     pub equipment: ResourceReference,
     /// Permanently reduce the stock by the amount from this combination.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_fixed: Option<EquipmentSetContentRequestIsFixed>,
+    pub is_fixed: Option<EquipmentSetContentPayloadIsFixed>,
     /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_physically_connected: Option<EquipmentSetContentRequestIsPhysicallyConnected>,
+    pub is_physically_connected: Option<EquipmentSetContentPayloadIsPhysicallyConnected>,
 }
 
 /// Rentman API schema `EquipmentSetContentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct EquipmentSetContentResponse {
+pub struct EquipmentSetContent {
     /// Rentman API field `EquipmentSetContentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `EquipmentSetContentResponse.created`.
@@ -14257,33 +14257,33 @@ pub struct EquipmentSetContentResponse {
     /// Rentman API field `EquipmentSetContentResponse.equipment`.
     pub equipment: ResourceReference,
     /// Permanently reduce the stock by the amount from this combination.
-    pub is_fixed: EquipmentSetContentResponseIsFixed,
+    pub is_fixed: EquipmentSetContentIsFixed,
     /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
-    pub is_physically_connected: EquipmentSetContentResponseIsPhysicallyConnected,
+    pub is_physically_connected: EquipmentSetContentIsPhysicallyConnected,
 }
 
 /// Rentman API schema `ExtraInputFieldRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ExtraInputFieldRequest {
+pub struct ExtraInputFieldPayload {
     /// Rentman API field `ExtraInputFieldRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// Rentman API field `ExtraInputFieldRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<ExtraInputFieldRequestItemtype>,
+    pub itemtype: Option<ExtraInputFieldPayloadItemtype>,
     /// Rentman API field `ExtraInputFieldRequest.linkedItemType`.
     #[serde(
         rename = "linkedItemType",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub linked_item_type: Option<ExtraInputFieldRequestLinkedItemType>,
+    pub linked_item_type: Option<ExtraInputFieldPayloadLinkedItemType>,
     /// Rentman API field `ExtraInputFieldRequest.parent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<ResourceReference>,
     /// Rentman API field `ExtraInputFieldRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<ExtraInputFieldRequestType>,
+    pub type_: Option<ExtraInputFieldPayloadType>,
     /// Rentman API field `ExtraInputFieldRequest.order`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order: Option<String>,
@@ -14306,7 +14306,7 @@ pub struct ExtraInputFieldRequest {
 
 /// Rentman API schema `ExtraInputFieldResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ExtraInputFieldResponse {
+pub struct ExtraInputField {
     /// Rentman API field `ExtraInputFieldResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ExtraInputFieldResponse.created`.
@@ -14320,19 +14320,19 @@ pub struct ExtraInputFieldResponse {
     /// Rentman API field `ExtraInputFieldResponse.name`.
     pub name: String,
     /// Rentman API field `ExtraInputFieldResponse.itemtype`.
-    pub itemtype: ExtraInputFieldResponseItemtype,
+    pub itemtype: ExtraInputFieldItemtype,
     /// Rentman API field `ExtraInputFieldResponse.linkedItemType`.
     #[serde(
         rename = "linkedItemType",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub linked_item_type: Option<ExtraInputFieldResponseLinkedItemType>,
+    pub linked_item_type: Option<ExtraInputFieldLinkedItemType>,
     /// Rentman API field `ExtraInputFieldResponse.parent`.
     pub parent: Option<ResourceReference>,
     /// Rentman API field `ExtraInputFieldResponse.type`.
     #[serde(rename = "type")]
-    pub type_: ExtraInputFieldResponseType,
+    pub type_: ExtraInputFieldType,
     /// Rentman API field `ExtraInputFieldResponse.order`.
     pub order: i64,
     /// Hides the field anywhere in the system.
@@ -14349,7 +14349,7 @@ pub struct ExtraInputFieldResponse {
 
 /// Rentman API schema `FactorGroupsRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactorGroupsRequest {
+pub struct FactorGroupPayload {
     /// Rentman API field `FactorGroupsRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -14357,7 +14357,7 @@ pub struct FactorGroupsRequest {
 
 /// Rentman API schema `FactorGroupsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactorGroupsResponse {
+pub struct FactorGroup {
     /// Rentman API field `FactorGroupsResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FactorGroupsResponse.created`.
@@ -14374,7 +14374,7 @@ pub struct FactorGroupsResponse {
 
 /// Rentman API schema `FactorsRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactorsRequest {
+pub struct FactorPayload {
     /// Rentman API field `FactorsRequest.from_days`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from_days: Option<i64>,
@@ -14388,7 +14388,7 @@ pub struct FactorsRequest {
 
 /// Rentman API schema `FactorsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactorsResponse {
+pub struct Factor {
     /// Rentman API field `FactorsResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FactorsResponse.created`.
@@ -14411,7 +14411,7 @@ pub struct FactorsResponse {
 
 /// Rentman API schema `FileFolderRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FileFolderRequest {
+pub struct FileFolderPayload {
     /// Rentman API field `FileFolderRequest.parent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<ResourceReference>,
@@ -14426,12 +14426,12 @@ pub struct FileFolderRequest {
     pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<FileFolderRequestItemtype>,
+    pub itemtype: Option<FileFolderPayloadItemtype>,
 }
 
 /// Rentman API schema `FileFolderResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FileFolderResponse {
+pub struct FileFolder {
     /// Rentman API field `FileFolderResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FileFolderResponse.created`.
@@ -14451,7 +14451,7 @@ pub struct FileFolderResponse {
     /// Numeric ID of the linked item (plain integer, not a path).
     pub item: Option<RentmanId>,
     /// Rentman API field `FileFolderResponse.itemtype`.
-    pub itemtype: Option<FileFolderResponseItemtype>,
+    pub itemtype: Option<FileFolderItemtype>,
     /// Rentman API field `FileFolderResponse.is_template`.
     pub is_template: bool,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -14461,7 +14461,7 @@ pub struct FileFolderResponse {
 
 /// Rentman API schema `FileRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FileRequest {
+pub struct FilePayload {
     /// Rentman API field `FileRequest.readable_name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub readable_name: Option<String>,
@@ -14479,7 +14479,7 @@ pub struct FileRequest {
     pub item: Option<RentmanId>,
     /// Rentman API field `FileRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<FileRequestItemtype>,
+    pub itemtype: Option<FilePayloadItemtype>,
     /// Rentman API field `FileRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -14503,7 +14503,7 @@ pub struct FileRequest {
     pub preview_of: Option<ResourceReference>,
     /// Rentman API field `FileRequest.previewstatus`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub previewstatus: Option<FileRequestPreviewstatus>,
+    pub previewstatus: Option<FilePayloadPreviewstatus>,
     /// Rentman API field `FileRequest.file_item`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_item: Option<i64>,
@@ -14517,7 +14517,7 @@ pub struct FileRequest {
 
 /// Rentman API schema `FileResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FileResponse {
+pub struct File {
     /// Rentman API field `FileResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FileResponse.created`.
@@ -14540,7 +14540,7 @@ pub struct FileResponse {
     pub item: Option<RentmanId>,
     /// Rentman API field `FileResponse.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<FileResponseItemtype>,
+    pub itemtype: Option<FileItemtype>,
     /// Rentman API field `FileResponse.description`.
     pub description: String,
     /// This setting relates to the block of images in document templates.
@@ -14557,7 +14557,7 @@ pub struct FileResponse {
     /// Rentman API field `FileResponse.preview_of`.
     pub preview_of: Option<ResourceReference>,
     /// Rentman API field `FileResponse.previewstatus`.
-    pub previewstatus: FileResponsePreviewstatus,
+    pub previewstatus: FilePreviewstatus,
     /// Rentman API field `FileResponse.file_item`.
     pub file_item: i64,
     /// Rentman API field `FileResponse.file_itemtype`.
@@ -14587,7 +14587,7 @@ pub struct FileResponse {
 
 /// Rentman API schema `FolderRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FolderRequest {
+pub struct FolderPayload {
     /// Rentman API field `FolderRequest.parent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<ResourceReference>,
@@ -14599,12 +14599,12 @@ pub struct FolderRequest {
     pub order: Option<String>,
     /// The type of item in this folder.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<FolderRequestItemtype>,
+    pub itemtype: Option<FolderPayloadItemtype>,
 }
 
 /// Rentman API schema `FolderResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FolderResponse {
+pub struct Folder {
     /// Rentman API field `FolderResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FolderResponse.created`.
@@ -14622,17 +14622,17 @@ pub struct FolderResponse {
     /// Rentman API field `FolderResponse.order`.
     pub order: i64,
     /// The type of item in this folder.
-    pub itemtype: FolderResponseItemtype,
+    pub itemtype: FolderItemtype,
     /// GENERATED FIELD.
     pub path: String,
 }
 
 /// Rentman API schema `InvitationsRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct InvitationsRequest {
+pub struct InvitationPayload {
     /// `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<InvitationsRequestType>,
+    pub type_: Option<InvitationPayloadType>,
     /// Rentman API field `InvitationsRequest.accepted`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub accepted: Option<bool>,
@@ -14659,7 +14659,7 @@ pub struct InvitationsRequest {
     pub remark: Option<String>,
     /// Rentman API field `InvitationsRequest.emailstatus`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub emailstatus: Option<InvitationsRequestEmailstatus>,
+    pub emailstatus: Option<InvitationPayloadEmailstatus>,
     /// Rentman API field `InvitationsRequest.last_reminder`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_reminder: Option<DateTime<FixedOffset>>,
@@ -14673,7 +14673,7 @@ pub struct InvitationsRequest {
 
 /// Rentman API schema `InvitationsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct InvitationsResponse {
+pub struct Invitation {
     /// Rentman API field `InvitationsResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `InvitationsResponse.created`.
@@ -14686,7 +14686,7 @@ pub struct InvitationsResponse {
     pub displayname: String,
     /// `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
     #[serde(rename = "type")]
-    pub type_: InvitationsResponseType,
+    pub type_: InvitationType,
     /// Rentman API field `InvitationsResponse.accepted`.
     pub accepted: bool,
     /// Rentman API field `InvitationsResponse.responded_timestamp`.
@@ -14706,7 +14706,7 @@ pub struct InvitationsResponse {
     /// Rentman API field `InvitationsResponse.remark`.
     pub remark: String,
     /// Rentman API field `InvitationsResponse.emailstatus`.
-    pub emailstatus: InvitationsResponseEmailstatus,
+    pub emailstatus: InvitationEmailstatus,
     /// Rentman API field `InvitationsResponse.last_reminder`.
     pub last_reminder: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
@@ -14719,7 +14719,7 @@ pub struct InvitationsResponse {
 
 /// Rentman API schema `InvoiceLineRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct InvoiceLineRequest {
+pub struct InvoiceLinePayload {
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<RentmanId>,
@@ -14733,7 +14733,7 @@ pub struct InvoiceLineRequest {
 
 /// Rentman API schema `InvoiceLineResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct InvoiceLineResponse {
+pub struct InvoiceLine {
     /// Rentman API field `InvoiceLineResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `InvoiceLineResponse.created`.
@@ -14765,7 +14765,7 @@ pub struct InvoiceLineResponse {
 
 /// Rentman API schema `FactuurRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactuurRequest {
+pub struct InvoicePayload {
     /// Rentman API field `FactuurRequest.customer`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub customer: Option<ResourceReference>,
@@ -14809,7 +14809,7 @@ pub struct FactuurRequest {
 
 /// Rentman API schema `FactuurResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct FactuurResponse {
+pub struct Invoice {
     /// Rentman API field `FactuurResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `FactuurResponse.created`.
@@ -14882,7 +14882,7 @@ pub struct FactuurResponse {
     /// GENERATED FIELD.
     pub vat_amount: Decimal,
     /// GENERATED FIELD.
-    pub invoicetype: FactuurResponseInvoicetype,
+    pub invoicetype: InvoiceInvoicetype,
     /// GENERATED FIELD.
     pub outstanding_balance: Decimal,
     /// GENERATED FIELD.
@@ -14905,7 +14905,7 @@ pub struct FactuurResponse {
 
 /// Rentman API schema `LeaveMutationsRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveMutationsRequest {
+pub struct LeaveMutationPayload {
     /// Rentman API field `LeaveMutationsRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -14923,7 +14923,7 @@ pub struct LeaveMutationsRequest {
 
 /// Rentman API schema `LeaveMutationsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveMutationsResponse {
+pub struct LeaveMutation {
     /// Rentman API field `LeaveMutationsResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `LeaveMutationsResponse.created`.
@@ -14948,13 +14948,13 @@ pub struct LeaveMutationsResponse {
 
 /// Rentman API schema `LeaveRequestRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveRequestRequest {
+pub struct LeaveRequestPayload {
     /// Rentman API field `LeaveRequestRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// Rentman API field `LeaveRequestRequest.approval_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approval_status: Option<LeaveRequestRequestApprovalStatus>,
+    pub approval_status: Option<LeaveRequestPayloadApprovalStatus>,
     /// Rentman API field `LeaveRequestRequest.requested_for`.
     pub requested_for: ResourceReference,
     /// Rentman API field `LeaveRequestRequest.reviewed_on`.
@@ -14967,7 +14967,7 @@ pub struct LeaveRequestRequest {
 
 /// Rentman API schema `LeaveRequestResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveRequestResponse {
+pub struct LeaveRequest {
     /// Rentman API field `LeaveRequestResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `LeaveRequestResponse.created`.
@@ -14981,7 +14981,7 @@ pub struct LeaveRequestResponse {
     /// Rentman API field `LeaveRequestResponse.description`.
     pub description: String,
     /// Rentman API field `LeaveRequestResponse.approval_status`.
-    pub approval_status: LeaveRequestResponseApprovalStatus,
+    pub approval_status: LeaveRequestApprovalStatus,
     /// Rentman API field `LeaveRequestResponse.requested_for`.
     pub requested_for: ResourceReference,
     /// Rentman API field `LeaveRequestResponse.reviewed_on`.
@@ -14992,10 +14992,10 @@ pub struct LeaveRequestResponse {
 
 /// Rentman API schema `LeaveTypesRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveTypesRequest {
+pub struct LeaveTypePayload {
     /// Rentman API field `LeaveTypesRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<LeaveTypesRequestType>,
+    pub type_: Option<LeaveTypePayloadType>,
     /// Rentman API field `LeaveTypesRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -15019,7 +15019,7 @@ pub struct LeaveTypesRequest {
     pub balance_start_date: Option<String>,
     /// Rentman API field `LeaveTypesRequest.is_labor`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_labor: Option<LeaveTypesRequestIsLabor>,
+    pub is_labor: Option<LeaveTypePayloadIsLabor>,
     /// Rentman API field `LeaveTypesRequest.has_calculated_duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub has_calculated_duration: Option<bool>,
@@ -15030,7 +15030,7 @@ pub struct LeaveTypesRequest {
 
 /// Rentman API schema `LeaveTypesResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LeaveTypesResponse {
+pub struct LeaveType {
     /// Rentman API field `LeaveTypesResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `LeaveTypesResponse.created`.
@@ -15043,7 +15043,7 @@ pub struct LeaveTypesResponse {
     pub displayname: String,
     /// Rentman API field `LeaveTypesResponse.type`.
     #[serde(rename = "type")]
-    pub type_: LeaveTypesResponseType,
+    pub type_: LeaveTypeType,
     /// Rentman API field `LeaveTypesResponse.name`.
     pub name: String,
     /// Rentman API field `LeaveTypesResponse.payroll_code`.
@@ -15059,7 +15059,7 @@ pub struct LeaveTypesResponse {
     /// Rentman API field `LeaveTypesResponse.balance_start_date`.
     pub balance_start_date: Option<String>,
     /// Rentman API field `LeaveTypesResponse.is_labor`.
-    pub is_labor: LeaveTypesResponseIsLabor,
+    pub is_labor: LeaveTypeIsLabor,
     /// Rentman API field `LeaveTypesResponse.has_calculated_duration`.
     pub has_calculated_duration: bool,
     /// Rentman API field `LeaveTypesResponse.can_have_activities`.
@@ -15070,7 +15070,7 @@ pub struct LeaveTypesResponse {
 
 /// Rentman API schema `LedgerRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LedgerRequest {
+pub struct LedgerCodePayload {
     /// Rentman API field `LedgerRequest.code`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -15084,7 +15084,7 @@ pub struct LedgerRequest {
 
 /// Rentman API schema `LedgerResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LedgerResponse {
+pub struct LedgerCode {
     /// Rentman API field `LedgerResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `LedgerResponse.created`.
@@ -15105,7 +15105,7 @@ pub struct LedgerResponse {
 
 /// Rentman API schema `PaymentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PaymentRequest {
+pub struct PaymentPayload {
     /// Rentman API field `PaymentRequest.moment`.
     pub moment: DateTime<FixedOffset>,
     /// Rentman API field `PaymentRequest.amount`.
@@ -15116,12 +15116,12 @@ pub struct PaymentRequest {
     pub description: Option<String>,
     /// Accounting software this payment was imported from.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub payment_import_source: Option<PaymentRequestPaymentImportSource>,
+    pub payment_import_source: Option<PaymentPayloadPaymentImportSource>,
 }
 
 /// Rentman API schema `PaymentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PaymentResponse {
+pub struct Payment {
     /// Rentman API field `PaymentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `PaymentResponse.created`.
@@ -15142,12 +15142,12 @@ pub struct PaymentResponse {
     pub description: String,
     /// Accounting software this payment was imported from.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub payment_import_source: Option<PaymentResponsePaymentImportSource>,
+    pub payment_import_source: Option<PaymentPaymentImportSource>,
 }
 
 /// Rentman API schema `ProjectCrewRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectCrewRequest {
+pub struct ProjectCrewPayload {
     /// Rentman API field `ProjectCrewRequest.cost_rate`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_rate: Option<ResourceReference>,
@@ -15176,7 +15176,7 @@ pub struct ProjectCrewRequest {
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectCrewRequest.transport`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transport: Option<ProjectCrewRequestTransport>,
+    pub transport: Option<ProjectCrewPayloadTransport>,
     /// Rentman API field `ProjectCrewRequest.remark`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
@@ -15199,7 +15199,7 @@ pub struct ProjectCrewRequest {
 
 /// Rentman API schema `ProjectCrewResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectCrewResponse {
+pub struct ProjectCrew {
     /// Rentman API field `ProjectCrewResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectCrewResponse.created`.
@@ -15231,7 +15231,7 @@ pub struct ProjectCrewResponse {
     /// Rentman API field `ProjectCrewResponse.planperiod_end`.
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectCrewResponse.transport`.
-    pub transport: ProjectCrewResponseTransport,
+    pub transport: ProjectCrewTransport,
     /// Rentman API field `ProjectCrewResponse.remark`.
     pub remark: String,
     /// Only visible to crew planners.
@@ -15257,14 +15257,14 @@ pub struct ProjectCrewResponse {
     /// GENERATED FIELD.
     pub diff_hours: Option<Decimal>,
     /// GENERATED FIELD.
-    pub activity_status: ProjectCrewResponseActivityStatus,
+    pub activity_status: ProjectCrewActivityStatus,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
 
 /// Rentman API schema `ProjectEquipmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectEquipmentRequest {
+pub struct ProjectEquipmentPayload {
     /// Rentman API field `ProjectEquipmentRequest.equipment`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<ResourceReference>,
@@ -15323,7 +15323,7 @@ pub struct ProjectEquipmentRequest {
 
 /// Rentman API schema `ProjectEquipmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectEquipmentResponse {
+pub struct ProjectEquipment {
     /// Rentman API field `ProjectEquipmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectEquipmentResponse.created`.
@@ -15392,7 +15392,7 @@ pub struct ProjectEquipmentResponse {
 
 /// Rentman API schema `ProjectEquipmentGroupRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectEquipmentGroupRequest {
+pub struct ProjectEquipmentGroupPayload {
     /// Rentman API field `ProjectEquipmentGroupRequest.subproject`.
     pub subproject: ResourceReference,
     /// This group was additionally scanned from the warehouse.
@@ -15432,7 +15432,7 @@ pub struct ProjectEquipmentGroupRequest {
 
 /// Rentman API schema `ProjectEquipmentGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectEquipmentGroupResponse {
+pub struct ProjectEquipmentGroup {
     /// Rentman API field `ProjectEquipmentGroupResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectEquipmentGroupResponse.created`.
@@ -15483,7 +15483,7 @@ pub struct ProjectEquipmentGroupResponse {
 
 /// Rentman API schema `ProjectFunctionGroupRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectFunctionGroupRequest {
+pub struct ProjectFunctionGroupPayload {
     /// Rentman API field `ProjectFunctionGroupRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -15508,7 +15508,7 @@ pub struct ProjectFunctionGroupRequest {
 
 /// Rentman API schema `ProjectFunctionGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectFunctionGroupResponse {
+pub struct ProjectFunctionGroup {
     /// Rentman API field `ProjectFunctionGroupResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectFunctionGroupResponse.created`.
@@ -15528,16 +15528,13 @@ pub struct ProjectFunctionGroupResponse {
     /// Rentman API field `ProjectFunctionGroupResponse.duration`.
     pub duration: Option<Decimal>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
-    pub planperiod_start_schedule_is_start:
-        ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart,
+    pub planperiod_start_schedule_is_start: ProjectFunctionGroupPlanperiodStartScheduleIsStart,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`.
-    pub usageperiod_start_schedule_is_start:
-        ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart,
+    pub usageperiod_start_schedule_is_start: ProjectFunctionGroupUsageperiodStartScheduleIsStart,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_end_schedule_is_start`.
-    pub planperiod_end_schedule_is_start: ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart,
+    pub planperiod_end_schedule_is_start: ProjectFunctionGroupPlanperiodEndScheduleIsStart,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_end_schedule_is_start`.
-    pub usageperiod_end_schedule_is_start:
-        ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart,
+    pub usageperiod_end_schedule_is_start: ProjectFunctionGroupUsageperiodEndScheduleIsStart,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_start`.
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_end`.
@@ -15552,7 +15549,7 @@ pub struct ProjectFunctionGroupResponse {
 
 /// Rentman API schema `ProjectFunctionRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectFunctionRequest {
+pub struct ProjectFunctionPayload {
     /// Rentman API field `ProjectFunctionRequest.cost_rate`.
     pub cost_rate: ResourceReference,
     /// Rentman API field `ProjectFunctionRequest.cost_accommodation`.
@@ -15606,7 +15603,7 @@ pub struct ProjectFunctionRequest {
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<ProjectFunctionRequestType>,
+    pub type_: Option<ProjectFunctionPayloadType>,
     /// Rentman API field `ProjectFunctionRequest.amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub amount: Option<i64>,
@@ -15620,7 +15617,7 @@ pub struct ProjectFunctionRequest {
 
 /// Rentman API schema `ProjectFunctionResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectFunctionResponse {
+pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectFunctionResponse.created`.
@@ -15674,13 +15671,13 @@ pub struct ProjectFunctionResponse {
     /// Rentman API field `ProjectFunctionResponse.usageperiod_start`.
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_start_schedule_is_start`.
-    pub planperiod_start_schedule_is_start: ProjectFunctionResponsePlanperiodStartScheduleIsStart,
+    pub planperiod_start_schedule_is_start: ProjectFunctionPlanperiodStartScheduleIsStart,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_start_schedule_is_start`.
-    pub usageperiod_start_schedule_is_start: ProjectFunctionResponseUsageperiodStartScheduleIsStart,
+    pub usageperiod_start_schedule_is_start: ProjectFunctionUsageperiodStartScheduleIsStart,
     /// Rentman API field `ProjectFunctionResponse.planperiod_end_schedule_is_start`.
-    pub planperiod_end_schedule_is_start: ProjectFunctionResponsePlanperiodEndScheduleIsStart,
+    pub planperiod_end_schedule_is_start: ProjectFunctionPlanperiodEndScheduleIsStart,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_end_schedule_is_start`.
-    pub usageperiod_end_schedule_is_start: ProjectFunctionResponseUsageperiodEndScheduleIsStart,
+    pub usageperiod_end_schedule_is_start: ProjectFunctionUsageperiodEndScheduleIsStart,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_end`.
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_start`.
@@ -15689,7 +15686,7 @@ pub struct ProjectFunctionResponse {
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.type`.
     #[serde(rename = "type")]
-    pub type_: ProjectFunctionResponseType,
+    pub type_: ProjectFunctionType,
     /// Rentman API field `ProjectFunctionResponse.duration`.
     pub duration: Option<Decimal>,
     /// Rentman API field `ProjectFunctionResponse.amount`.
@@ -15726,7 +15723,7 @@ pub struct ProjectFunctionResponse {
     /// Date the recurrence ends.
     pub recurrence_enddate: Option<String>,
     /// Period between each recurrence. E.g. every x day/week/month/year.
-    pub recurrence_interval_unit: ProjectFunctionResponseRecurrenceIntervalUnit,
+    pub recurrence_interval_unit: ProjectFunctionRecurrenceIntervalUnit,
     /// Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
     pub recurrence_interval: i64,
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
@@ -15751,7 +15748,7 @@ pub struct ProjectFunctionResponse {
 
 /// Rentman API schema `ProjectRequestEquipmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectRequestEquipmentRequest {
+pub struct ProjectRequestEquipmentPayload {
     /// Rentman API field `ProjectRequestEquipmentRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<i64>,
@@ -15792,7 +15789,7 @@ pub struct ProjectRequestEquipmentRequest {
 
 /// Rentman API schema `ProjectRequestEquipmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectRequestEquipmentResponse {
+pub struct ProjectRequestEquipment {
     /// Rentman API field `ProjectRequestEquipmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectRequestEquipmentResponse.created`.
@@ -15833,7 +15830,7 @@ pub struct ProjectRequestEquipmentResponse {
 
 /// Rentman API schema `ProjectRequestRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectRequestRequest {
+pub struct ProjectRequestPayload {
     /// Rentman API field `ProjectRequestRequest.linked_contact`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub linked_contact: Option<ResourceReference>,
@@ -15929,7 +15926,7 @@ pub struct ProjectRequestRequest {
 
 /// Rentman API schema `ProjectRequestResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectRequestResponse {
+pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectRequestResponse.created`.
@@ -16010,14 +16007,14 @@ pub struct ProjectRequestResponse {
     /// Rentman API field `ProjectRequestResponse.linked_project`.
     pub linked_project: Option<ResourceReference>,
     /// Rentman API field `ProjectRequestResponse.source`.
-    pub source: ProjectRequestResponseSource,
+    pub source: ProjectRequestSource,
     /// Rentman API field `ProjectRequestResponse.status`.
-    pub status: ProjectRequestResponseStatus,
+    pub status: ProjectRequestStatus,
 }
 
 /// Rentman API schema `ProjectRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectRequest {
+pub struct ProjectPayload {
     /// Rentman API field `ProjectRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16034,7 +16031,7 @@ pub struct ProjectRequest {
 
 /// Rentman API schema `ProjectResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectResponse {
+pub struct Project {
     /// Rentman API field `ProjectResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectResponse.created`.
@@ -16050,7 +16047,7 @@ pub struct ProjectResponse {
     /// Rentman API field `ProjectResponse.refundabledeposit`.
     pub refundabledeposit: Decimal,
     /// Rentman API field `ProjectResponse.deposit_status`.
-    pub deposit_status: ProjectResponseDepositStatus,
+    pub deposit_status: ProjectDepositStatus,
     /// Rentman API field `ProjectResponse.customer`.
     pub customer: Option<ResourceReference>,
     /// Rentman API field `ProjectResponse.loc_contact`.
@@ -16139,7 +16136,7 @@ pub struct ProjectResponse {
 
 /// Rentman API schema `ProjectStatusRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectStatusRequest {
+pub struct ProjectStatusPayload {
     /// Rentman API field `ProjectStatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16147,7 +16144,7 @@ pub struct ProjectStatusRequest {
 
 /// Rentman API schema `ProjectStatusResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectStatusResponse {
+pub struct ProjectStatus {
     /// Rentman API field `ProjectStatusResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectStatusResponse.created`.
@@ -16164,7 +16161,7 @@ pub struct ProjectStatusResponse {
 
 /// Rentman API schema `ProjectTemplateRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectTemplateRequest {
+pub struct ProjectTemplatePayload {
     /// Rentman API field `ProjectTemplateRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16172,7 +16169,7 @@ pub struct ProjectTemplateRequest {
 
 /// Rentman API schema `ProjectTemplateResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectTemplateResponse {
+pub struct ProjectTemplate {
     /// Rentman API field `ProjectTemplateResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectTemplateResponse.created`.
@@ -16189,7 +16186,7 @@ pub struct ProjectTemplateResponse {
 
 /// Rentman API schema `ProjectTypeRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectTypeRequest {
+pub struct ProjectTypePayload {
     /// Rentman API field `ProjectTypeRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16198,12 +16195,12 @@ pub struct ProjectTypeRequest {
     pub color: Option<String>,
     /// Rentman API field `ProjectTypeRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<ProjectTypeRequestType>,
+    pub type_: Option<ProjectTypePayloadType>,
 }
 
 /// Rentman API schema `ProjectTypeResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectTypeResponse {
+pub struct ProjectType {
     /// Rentman API field `ProjectTypeResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectTypeResponse.created`.
@@ -16220,18 +16217,18 @@ pub struct ProjectTypeResponse {
     pub color: String,
     /// Rentman API field `ProjectTypeResponse.type`.
     #[serde(rename = "type")]
-    pub type_: ProjectTypeResponseType,
+    pub type_: ProjectTypeType,
 }
 
 /// Rentman API schema `ProjectVehicleRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectVehicleRequest {
+pub struct ProjectVehiclePayload {
     /// Rentman API field `ProjectVehicleRequest.cost_rate`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_rate: Option<ResourceReference>,
     /// Rentman API field `ProjectVehicleRequest.transport`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transport: Option<ProjectVehicleRequestTransport>,
+    pub transport: Option<ProjectVehiclePayloadTransport>,
     /// Rentman API field `ProjectVehicleRequest.vehicle`.
     pub vehicle: ResourceReference,
     /// Rentman API field `ProjectVehicleRequest.planningperiod_start`.
@@ -16253,7 +16250,7 @@ pub struct ProjectVehicleRequest {
 
 /// Rentman API schema `ProjectVehicleResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectVehicleResponse {
+pub struct ProjectVehicle {
     /// Rentman API field `ProjectVehicleResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `ProjectVehicleResponse.created`.
@@ -16269,7 +16266,7 @@ pub struct ProjectVehicleResponse {
     /// Rentman API field `ProjectVehicleResponse.function`.
     pub function: ResourceReference,
     /// Rentman API field `ProjectVehicleResponse.transport`.
-    pub transport: ProjectVehicleResponseTransport,
+    pub transport: ProjectVehicleTransport,
     /// Rentman API field `ProjectVehicleResponse.vehicle`.
     pub vehicle: ResourceReference,
     /// Rentman API field `ProjectVehicleResponse.planningperiod_start`.
@@ -16288,13 +16285,13 @@ pub struct ProjectVehicleResponse {
 
 /// Rentman API schema `PurchaseOrderCostRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderCostRequest {
+pub struct PurchaseOrderCostPayload {
     /// Rentman API field `PurchaseOrderCostRequest.costitem`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub costitem: Option<i64>,
     /// Rentman API field `PurchaseOrderCostRequest.costitemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub costitemtype: Option<PurchaseOrderCostRequestCostitemtype>,
+    pub costitemtype: Option<PurchaseOrderCostPayloadCostitemtype>,
     /// Rentman API field `PurchaseOrderCostRequest.approved_amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_amount: Option<Decimal>,
@@ -16302,7 +16299,7 @@ pub struct PurchaseOrderCostRequest {
 
 /// Rentman API schema `PurchaseOrderCostResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderCostResponse {
+pub struct PurchaseOrderCost {
     /// Rentman API field `PurchaseOrderCostResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `PurchaseOrderCostResponse.created`.
@@ -16318,7 +16315,7 @@ pub struct PurchaseOrderCostResponse {
     /// Rentman API field `PurchaseOrderCostResponse.costitem`.
     pub costitem: i64,
     /// Rentman API field `PurchaseOrderCostResponse.costitemtype`.
-    pub costitemtype: PurchaseOrderCostResponseCostitemtype,
+    pub costitemtype: PurchaseOrderCostCostitemtype,
     /// Rentman API field `PurchaseOrderCostResponse.approved_amount`.
     pub approved_amount: Decimal,
     /// GENERATED FIELD.
@@ -16335,7 +16332,7 @@ pub struct PurchaseOrderCostResponse {
 
 /// Rentman API schema `PurchaseOrderGlobalCostRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderGlobalCostRequest {
+pub struct PurchaseOrderGlobalCostPayload {
     /// Rentman API field `PurchaseOrderGlobalCostRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16352,7 +16349,7 @@ pub struct PurchaseOrderGlobalCostRequest {
 
 /// Rentman API schema `PurchaseOrderGlobalCostResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderGlobalCostResponse {
+pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.created`.
@@ -16377,7 +16374,7 @@ pub struct PurchaseOrderGlobalCostResponse {
 
 /// Rentman API schema `PurchaseOrderRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderRequest {
+pub struct PurchaseOrderPayload {
     /// Rentman API field `PurchaseOrderRequest.filename`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub filename: Option<String>,
@@ -16401,9 +16398,9 @@ pub struct PurchaseOrderRequest {
     pub number: Option<String>,
     /// Rentman API field `PurchaseOrderRequest.approval_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approval_status: Option<PurchaseOrderRequestApprovalStatus>,
+    pub approval_status: Option<PurchaseOrderPayloadApprovalStatus>,
     /// Rentman API field `PurchaseOrderRequest.previous_status`.
-    pub previous_status: PurchaseOrderRequestPreviousStatus,
+    pub previous_status: PurchaseOrderPayloadPreviousStatus,
     /// Rentman API field `PurchaseOrderRequest.approved_amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_amount: Option<Decimal>,
@@ -16415,7 +16412,7 @@ pub struct PurchaseOrderRequest {
     pub contact_person: Option<ResourceReference>,
     /// Rentman API field `PurchaseOrderRequest.delivery_type`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub delivery_type: Option<PurchaseOrderRequestDeliveryType>,
+    pub delivery_type: Option<PurchaseOrderPayloadDeliveryType>,
     /// Rentman API field `PurchaseOrderRequest.delivery_location`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_location: Option<ResourceReference>,
@@ -16430,7 +16427,7 @@ pub struct PurchaseOrderRequest {
     pub accounting_code: Option<String>,
     /// Rentman API field `PurchaseOrderRequest.export_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub export_status: Option<PurchaseOrderRequestExportStatus>,
+    pub export_status: Option<PurchaseOrderPayloadExportStatus>,
     /// Rentman API field `PurchaseOrderRequest.export_date`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub export_date: Option<DateTime<FixedOffset>>,
@@ -16444,7 +16441,7 @@ pub struct PurchaseOrderRequest {
 
 /// Rentman API schema `PurchaseOrderResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct PurchaseOrderResponse {
+pub struct PurchaseOrder {
     /// Rentman API field `PurchaseOrderResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `PurchaseOrderResponse.created`.
@@ -16470,10 +16467,10 @@ pub struct PurchaseOrderResponse {
     /// Rentman API field `PurchaseOrderResponse.number`.
     pub number: String,
     /// Rentman API field `PurchaseOrderResponse.approval_status`.
-    pub approval_status: PurchaseOrderResponseApprovalStatus,
+    pub approval_status: PurchaseOrderApprovalStatus,
     /// Rentman API field `PurchaseOrderResponse.previous_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub previous_status: Option<PurchaseOrderResponsePreviousStatus>,
+    pub previous_status: Option<PurchaseOrderPreviousStatus>,
     /// Rentman API field `PurchaseOrderResponse.approved_amount`.
     pub approved_amount: Decimal,
     /// Rentman API field `PurchaseOrderResponse.supplier`.
@@ -16481,7 +16478,7 @@ pub struct PurchaseOrderResponse {
     /// Rentman API field `PurchaseOrderResponse.contact_person`.
     pub contact_person: Option<ResourceReference>,
     /// Rentman API field `PurchaseOrderResponse.delivery_type`.
-    pub delivery_type: PurchaseOrderResponseDeliveryType,
+    pub delivery_type: PurchaseOrderDeliveryType,
     /// Rentman API field `PurchaseOrderResponse.delivery_location`.
     pub delivery_location: Option<ResourceReference>,
     /// Rentman API field `PurchaseOrderResponse.delivery_location_person`.
@@ -16491,7 +16488,7 @@ pub struct PurchaseOrderResponse {
     /// External identifier used for integrations with accounting software.
     pub accounting_code: String,
     /// Rentman API field `PurchaseOrderResponse.export_status`.
-    pub export_status: PurchaseOrderResponseExportStatus,
+    pub export_status: PurchaseOrderExportStatus,
     /// Rentman API field `PurchaseOrderResponse.export_date`.
     pub export_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.export_message`.
@@ -16516,7 +16513,7 @@ pub struct PurchaseOrderResponse {
 
 /// Rentman API schema `QuotationRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct QuotationRequest {
+pub struct QuotePayload {
     /// Rentman API field `QuotationRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
@@ -16548,7 +16545,7 @@ pub struct QuotationRequest {
 
 /// Rentman API schema `QuotationResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct QuotationResponse {
+pub struct Quote {
     /// Rentman API field `QuotationResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `QuotationResponse.created`.
@@ -16618,7 +16615,7 @@ pub struct QuotationResponse {
 
 /// Rentman API schema `CrewRateFactorRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRateFactorRequest {
+pub struct RateFactorPayload {
     /// Rentman API field `CrewRateFactorRequest.from`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from: Option<Decimal>,
@@ -16635,7 +16632,7 @@ pub struct CrewRateFactorRequest {
 
 /// Rentman API schema `CrewRateFactorResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRateFactorResponse {
+pub struct RateFactor {
     /// Rentman API field `CrewRateFactorResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `CrewRateFactorResponse.created`.
@@ -16660,7 +16657,7 @@ pub struct CrewRateFactorResponse {
 
 /// Rentman API schema `CrewRateRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRateRequest {
+pub struct RatePayload {
     /// Rentman API field `CrewRateRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16669,15 +16666,15 @@ pub struct CrewRateRequest {
     pub archived: Option<bool>,
     /// Rentman API field `CrewRateRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<CrewRateRequestType>,
+    pub type_: Option<RatePayloadType>,
     /// Rentman API field `CrewRateRequest.subtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub subtype: Option<CrewRateRequestSubtype>,
+    pub subtype: Option<RatePayloadSubtype>,
 }
 
 /// Rentman API schema `CrewRateResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CrewRateResponse {
+pub struct Rate {
     /// Rentman API field `CrewRateResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `CrewRateResponse.created`.
@@ -16694,14 +16691,14 @@ pub struct CrewRateResponse {
     pub archived: bool,
     /// Rentman API field `CrewRateResponse.type`.
     #[serde(rename = "type")]
-    pub type_: CrewRateResponseType,
+    pub type_: RateType,
     /// Rentman API field `CrewRateResponse.subtype`.
-    pub subtype: CrewRateResponseSubtype,
+    pub subtype: RateSubtype,
 }
 
 /// Rentman API schema `RepairRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct RepairRequest {
+pub struct RepairPayload {
     /// Rentman API field `RepairRequest.internal_name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub internal_name: Option<String>,
@@ -16737,7 +16734,7 @@ pub struct RepairRequest {
     pub repair_costs: Option<Decimal>,
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub is_usable: Option<RepairRequestIsUsable>,
+    pub is_usable: Option<RepairPayloadIsUsable>,
     /// Rentman API field `RepairRequest.costs_charged_to_customer`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub costs_charged_to_customer: Option<ResourceReference>,
@@ -16749,7 +16746,7 @@ pub struct RepairRequest {
     pub stock_location: Option<ResourceReference>,
     /// Rentman API field `RepairRequest.repair_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub repair_status: Option<RepairRequestRepairStatus>,
+    pub repair_status: Option<RepairPayloadRepairStatus>,
     /// Rentman API field `RepairRequest.unrepairable_of`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unrepairable_of: Option<ResourceReference>,
@@ -16760,7 +16757,7 @@ pub struct RepairRequest {
 
 /// Rentman API schema `RepairResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct RepairResponse {
+pub struct Repair {
     /// Rentman API field `RepairResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `RepairResponse.created`.
@@ -16796,7 +16793,7 @@ pub struct RepairResponse {
     /// Rentman API field `RepairResponse.repair_costs`.
     pub repair_costs: Decimal,
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
-    pub is_usable: RepairResponseIsUsable,
+    pub is_usable: RepairIsUsable,
     /// Rentman API field `RepairResponse.costs_charged_to_customer`.
     pub costs_charged_to_customer: Option<ResourceReference>,
     /// Rentman API field `RepairResponse.subproject`.
@@ -16804,7 +16801,7 @@ pub struct RepairResponse {
     /// Rentman API field `RepairResponse.stock_location`.
     pub stock_location: Option<ResourceReference>,
     /// Rentman API field `RepairResponse.repair_status`.
-    pub repair_status: RepairResponseRepairStatus,
+    pub repair_status: RepairRepairStatus,
     /// Rentman API field `RepairResponse.unrepairable_of`.
     pub unrepairable_of: Option<ResourceReference>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -16815,7 +16812,7 @@ pub struct RepairResponse {
 
 /// Rentman API schema `SerialNumberRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SerialNumberRequest {
+pub struct SerialNumberPayload {
     /// The manufacturer serial number of the equipment.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub serial: Option<String>,
@@ -16856,7 +16853,7 @@ pub struct SerialNumberRequest {
 
 /// Rentman API schema `SerialNumberResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SerialNumberResponse {
+pub struct SerialNumber {
     /// Rentman API field `SerialNumberResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SerialNumberResponse.created`.
@@ -16910,7 +16907,7 @@ pub struct SerialNumberResponse {
 
 /// Rentman API schema `StatusRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StatusRequest {
+pub struct StatusPayload {
     /// Rentman API field `StatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16918,7 +16915,7 @@ pub struct StatusRequest {
 
 /// Rentman API schema `StatusResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StatusResponse {
+pub struct Status {
     /// Rentman API field `StatusResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `StatusResponse.created`.
@@ -16935,7 +16932,7 @@ pub struct StatusResponse {
 
 /// Rentman API schema `StockLocationRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StockLocationRequest {
+pub struct StockLocationPayload {
     /// Rentman API field `StockLocationRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -16956,13 +16953,13 @@ pub struct StockLocationRequest {
     pub state_province: Option<String>,
     /// Rentman API field `StockLocationRequest.country`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub country: Option<StockLocationRequestCountry>,
+    pub country: Option<StockLocationPayloadCountry>,
     /// Rentman API field `StockLocationRequest.active`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active: Option<bool>,
     /// Projects can only be planned from warehouses. Storage locations are used as (temporary) storage and deliver equipment to warehouses. You can change the number of paid warehouses in your license. Storage locations are free of charge.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<StockLocationRequestType>,
+    pub type_: Option<StockLocationPayloadType>,
     /// Rentman API field `StockLocationRequest.color`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
@@ -16973,7 +16970,7 @@ pub struct StockLocationRequest {
 
 /// Rentman API schema `StockLocationResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StockLocationResponse {
+pub struct StockLocation {
     /// Rentman API field `StockLocationResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `StockLocationResponse.created`.
@@ -16997,12 +16994,12 @@ pub struct StockLocationResponse {
     /// Rentman API field `StockLocationResponse.state_province`.
     pub state_province: String,
     /// Rentman API field `StockLocationResponse.country`.
-    pub country: StockLocationResponseCountry,
+    pub country: StockLocationCountry,
     /// Rentman API field `StockLocationResponse.active`.
     pub active: bool,
     /// Projects can only be planned from warehouses. Storage locations are used as (temporary) storage and deliver equipment to warehouses. You can change the number of paid warehouses in your license. Storage locations are free of charge.
     #[serde(rename = "type")]
-    pub type_: StockLocationResponseType,
+    pub type_: StockLocationType,
     /// Rentman API field `StockLocationResponse.color`.
     pub color: String,
     /// This stock location is archived. This means that it cannot be used in equipment planning.
@@ -17011,7 +17008,7 @@ pub struct StockLocationResponse {
 
 /// Rentman API schema `StockMovementRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StockMovementRequest {
+pub struct StockMovementPayload {
     /// Rentman API field `StockMovementRequest.amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub amount: Option<i64>,
@@ -17036,7 +17033,7 @@ pub struct StockMovementRequest {
 
 /// Rentman API schema `StockMovementResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct StockMovementResponse {
+pub struct StockMovement {
     /// Rentman API field `StockMovementResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `StockMovementResponse.created`.
@@ -17061,7 +17058,7 @@ pub struct StockMovementResponse {
     pub date: DateTime<FixedOffset>,
     /// Rentman API field `StockMovementResponse.type`.
     #[serde(rename = "type")]
-    pub type_: StockMovementResponseType,
+    pub type_: StockMovementType,
     /// Rentman API field `StockMovementResponse.stock_location`.
     pub stock_location: ResourceReference,
     /// Rentman API field `StockMovementResponse.api_client`.
@@ -17070,7 +17067,7 @@ pub struct StockMovementResponse {
 
 /// Rentman API schema `SubprojectRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubprojectRequest {
+pub struct SubprojectPayload {
     /// Rentman API field `SubprojectRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -17081,7 +17078,7 @@ pub struct SubprojectRequest {
 
 /// Rentman API schema `SubprojectResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubprojectResponse {
+pub struct Subproject {
     /// Rentman API field `SubprojectResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SubprojectResponse.created`.
@@ -17200,7 +17197,7 @@ pub struct SubprojectResponse {
 
 /// Rentman API schema `SubrentalEquipmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalEquipmentRequest {
+pub struct SubrentalEquipmentPayload {
     /// Rentman API field `SubrentalEquipmentRequest.equipment`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment: Option<ResourceReference>,
@@ -17247,7 +17244,7 @@ pub struct SubrentalEquipmentRequest {
 
 /// Rentman API schema `SubrentalEquipmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalEquipmentResponse {
+pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SubrentalEquipmentResponse.created`.
@@ -17292,7 +17289,7 @@ pub struct SubrentalEquipmentResponse {
 
 /// Rentman API schema `SubrentalEquipmentGroupRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalEquipmentGroupRequest {
+pub struct SubrentalEquipmentGroupPayload {
     /// Rentman API field `SubrentalEquipmentGroupRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -17306,7 +17303,7 @@ pub struct SubrentalEquipmentGroupRequest {
 
 /// Rentman API schema `SubrentalEquipmentGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalEquipmentGroupResponse {
+pub struct SubrentalEquipmentGroup {
     /// Rentman API field `SubrentalEquipmentGroupResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SubrentalEquipmentGroupResponse.created`.
@@ -17329,7 +17326,7 @@ pub struct SubrentalEquipmentGroupResponse {
 
 /// Rentman API schema `SubrentalRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalRequest {
+pub struct SubrentalPayload {
     /// Rentman API field `SubrentalRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -17389,7 +17386,7 @@ pub struct SubrentalRequest {
     pub remark: Option<String>,
     /// Rentman API field `SubrentalRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<SubrentalRequestType>,
+    pub type_: Option<SubrentalPayloadType>,
     /// Rentman API field `SubrentalRequest.status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub status: Option<ResourceReference>,
@@ -17415,7 +17412,7 @@ pub struct SubrentalRequest {
 
 /// Rentman API schema `SubrentalResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubrentalResponse {
+pub struct Subrental {
     /// Rentman API field `SubrentalResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SubrentalResponse.created`.
@@ -17466,7 +17463,7 @@ pub struct SubrentalResponse {
     pub remark: String,
     /// Rentman API field `SubrentalResponse.type`.
     #[serde(rename = "type")]
-    pub type_: SubrentalResponseType,
+    pub type_: SubrentalType,
     /// Rentman API field `SubrentalResponse.status`.
     pub status: ResourceReference,
     /// Rentman API field `SubrentalResponse.sent`.
@@ -17487,7 +17484,7 @@ pub struct SubrentalResponse {
 
 /// Rentman API schema `SubtaskRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubtaskRequest {
+pub struct SubtaskPayload {
     /// Rentman API field `SubtaskRequest.title`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
@@ -17498,7 +17495,7 @@ pub struct SubtaskRequest {
 
 /// Rentman API schema `SubtaskResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SubtaskResponse {
+pub struct Subtask {
     /// Rentman API field `SubtaskResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SubtaskResponse.created`.
@@ -17519,7 +17516,7 @@ pub struct SubtaskResponse {
 
 /// Rentman API schema `SupplierRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SupplierRequest {
+pub struct SupplierPayload {
     /// Rentman API field `SupplierRequest.contact`.
     pub contact: ResourceReference,
     /// Rentman API field `SupplierRequest.contactperson`.
@@ -17535,7 +17532,7 @@ pub struct SupplierRequest {
 
 /// Rentman API schema `SupplierResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SupplierResponse {
+pub struct Supplier {
     /// Rentman API field `SupplierResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `SupplierResponse.created`.
@@ -17560,14 +17557,14 @@ pub struct SupplierResponse {
 
 /// Rentman API schema `TaskAssignmentRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskAssignmentRequest {
+pub struct TaskAssignmentPayload {
     /// Rentman API field `TaskAssignmentRequest.crew`.
     pub crew: ResourceReference,
 }
 
 /// Rentman API schema `TaskAssignmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskAssignmentResponse {
+pub struct TaskAssignment {
     /// Rentman API field `TaskAssignmentResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TaskAssignmentResponse.created`.
@@ -17586,10 +17583,10 @@ pub struct TaskAssignmentResponse {
 
 /// Rentman API schema `TaskRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskRequest {
+pub struct TaskPayload {
     /// Rentman API field `TaskRequest.recurhoe`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub recurhoe: Option<TaskRequestRecurhoe>,
+    pub recurhoe: Option<TaskPayloadRecurhoe>,
     /// Rentman API field `TaskRequest.recureind`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recureind: Option<String>,
@@ -17609,7 +17606,7 @@ pub struct TaskRequest {
     pub color: String,
     /// Rentman API field `TaskRequest.priority`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub priority: Option<TaskRequestPriority>,
+    pub priority: Option<TaskPayloadPriority>,
     /// Rentman API field `TaskRequest.order`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order: Option<String>,
@@ -17618,19 +17615,19 @@ pub struct TaskRequest {
     pub deadline: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskRequest.deadline_type`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub deadline_type: Option<TaskRequestDeadlineType>,
+    pub deadline_type: Option<TaskPayloadDeadlineType>,
     /// Rentman API field `TaskRequest.deadline_relative_offset_base`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub deadline_relative_offset_base: Option<TaskRequestDeadlineRelativeOffsetBase>,
+    pub deadline_relative_offset_base: Option<TaskPayloadDeadlineRelativeOffsetBase>,
     /// Rentman API field `TaskRequest.deadline_relative_offset_amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub deadline_relative_offset_amount: Option<i64>,
     /// Rentman API field `TaskRequest.deadline_relative_offset_unit`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub deadline_relative_offset_unit: Option<TaskRequestDeadlineRelativeOffsetUnit>,
+    pub deadline_relative_offset_unit: Option<TaskPayloadDeadlineRelativeOffsetUnit>,
     /// Rentman API field `TaskRequest.deadline_relative_offset_direction`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub deadline_relative_offset_direction: Option<TaskRequestDeadlineRelativeOffsetDirection>,
+    pub deadline_relative_offset_direction: Option<TaskPayloadDeadlineRelativeOffsetDirection>,
     /// Rentman API field `TaskRequest.completed_at`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<FixedOffset>>,
@@ -17642,7 +17639,7 @@ pub struct TaskRequest {
     pub item: Option<RentmanId>,
     /// Rentman API field `TaskRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub itemtype: Option<TaskRequestItemtype>,
+    pub itemtype: Option<TaskPayloadItemtype>,
     /// Rentman API field `TaskRequest.synchronization_id`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub synchronization_id: Option<String>,
@@ -17651,10 +17648,10 @@ pub struct TaskRequest {
     pub synchronization_uri: Option<String>,
     /// Rentman API field `TaskRequest.public`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub public: Option<TaskRequestPublic>,
+    pub public: Option<TaskPayloadPublic>,
     /// Rentman API field `TaskRequest.assignment_type`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub assignment_type: Option<TaskRequestAssignmentType>,
+    pub assignment_type: Option<TaskPayloadAssignmentType>,
     /// Rentman API field `TaskRequest.completed_by`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub completed_by: Option<ResourceReference>,
@@ -17671,7 +17668,7 @@ pub struct TaskRequest {
 
 /// Rentman API schema `TaskResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskResponse {
+pub struct Task {
     /// Rentman API field `TaskResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TaskResponse.created`.
@@ -17683,7 +17680,7 @@ pub struct TaskResponse {
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TaskResponse.recurhoe`.
-    pub recurhoe: TaskResponseRecurhoe,
+    pub recurhoe: TaskRecurhoe,
     /// Rentman API field `TaskResponse.recureind`.
     pub recureind: Option<String>,
     /// Rentman API field `TaskResponse.recurperiode`.
@@ -17697,21 +17694,21 @@ pub struct TaskResponse {
     /// Rentman API field `TaskResponse.color`.
     pub color: Option<String>,
     /// Rentman API field `TaskResponse.priority`.
-    pub priority: TaskResponsePriority,
+    pub priority: TaskPriority,
     /// Rentman API field `TaskResponse.order`.
     pub order: i64,
     /// Rentman API field `TaskResponse.deadline`.
     pub deadline: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.deadline_type`.
-    pub deadline_type: TaskResponseDeadlineType,
+    pub deadline_type: TaskDeadlineType,
     /// Rentman API field `TaskResponse.deadline_relative_offset_base`.
-    pub deadline_relative_offset_base: TaskResponseDeadlineRelativeOffsetBase,
+    pub deadline_relative_offset_base: TaskDeadlineRelativeOffsetBase,
     /// Rentman API field `TaskResponse.deadline_relative_offset_amount`.
     pub deadline_relative_offset_amount: i64,
     /// Rentman API field `TaskResponse.deadline_relative_offset_unit`.
-    pub deadline_relative_offset_unit: TaskResponseDeadlineRelativeOffsetUnit,
+    pub deadline_relative_offset_unit: TaskDeadlineRelativeOffsetUnit,
     /// Rentman API field `TaskResponse.deadline_relative_offset_direction`.
-    pub deadline_relative_offset_direction: TaskResponseDeadlineRelativeOffsetDirection,
+    pub deadline_relative_offset_direction: TaskDeadlineRelativeOffsetDirection,
     /// Rentman API field `TaskResponse.completed_at`.
     pub completed_at: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.status`.
@@ -17719,7 +17716,7 @@ pub struct TaskResponse {
     /// Numeric ID of the linked item (plain integer, not a path).
     pub item: Option<RentmanId>,
     /// Rentman API field `TaskResponse.itemtype`.
-    pub itemtype: Option<TaskResponseItemtype>,
+    pub itemtype: Option<TaskItemtype>,
     /// Rentman API field `TaskResponse.synchronization_id`.
     pub synchronization_id: String,
     /// Rentman API field `TaskResponse.synchronization_uri`.
@@ -17727,7 +17724,7 @@ pub struct TaskResponse {
     /// Rentman API field `TaskResponse.public`.
     pub public: i64,
     /// Rentman API field `TaskResponse.assignment_type`.
-    pub assignment_type: TaskResponseAssignmentType,
+    pub assignment_type: TaskAssignmentType,
     /// Rentman API field `TaskResponse.completed_by`.
     pub completed_by: Option<ResourceReference>,
     /// Rentman API field `TaskResponse.expiry_notification_date`.
@@ -17745,7 +17742,7 @@ pub struct TaskResponse {
 
 /// Rentman API schema `TaskStatusRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskStatusRequest {
+pub struct TaskStatusPayload {
     /// Rentman API field `TaskStatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -17753,7 +17750,7 @@ pub struct TaskStatusRequest {
     pub color: String,
     /// Rentman API field `TaskStatusRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<TaskStatusRequestType>,
+    pub type_: Option<TaskStatusPayloadType>,
     /// Rentman API field `TaskStatusRequest.order`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order: Option<String>,
@@ -17761,7 +17758,7 @@ pub struct TaskStatusRequest {
 
 /// Rentman API schema `TaskStatusResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaskStatusResponse {
+pub struct TaskStatus {
     /// Rentman API field `TaskStatusResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TaskStatusResponse.created`.
@@ -17778,14 +17775,14 @@ pub struct TaskStatusResponse {
     pub color: String,
     /// Rentman API field `TaskStatusResponse.type`.
     #[serde(rename = "type")]
-    pub type_: TaskStatusResponseType,
+    pub type_: TaskStatusType,
     /// Rentman API field `TaskStatusResponse.order`.
     pub order: i64,
 }
 
 /// Rentman API schema `TaxClassRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaxClassRequest {
+pub struct TaxClassPayload {
     /// Rentman API field `TaxClassRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -17794,12 +17791,12 @@ pub struct TaxClassRequest {
     pub code: Option<String>,
     /// Rentman API field `TaxClassRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
-    pub type_: Option<TaxClassRequestType>,
+    pub type_: Option<TaxClassPayloadType>,
 }
 
 /// Rentman API schema `TaxClassResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TaxClassResponse {
+pub struct TaxClass {
     /// Rentman API field `TaxClassResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TaxClassResponse.created`.
@@ -17816,12 +17813,12 @@ pub struct TaxClassResponse {
     pub code: String,
     /// Rentman API field `TaxClassResponse.type`.
     #[serde(rename = "type")]
-    pub type_: TaxClassResponseType,
+    pub type_: TaxClassType,
 }
 
 /// Rentman API schema `TimeRegistrationRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TimeRegistrationRequest {
+pub struct TimeRegistrationPayload {
     /// Rentman API field `TimeRegistrationRequest.crewmember`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub crewmember: Option<ResourceReference>,
@@ -17862,7 +17859,7 @@ pub struct TimeRegistrationRequest {
 
 /// Rentman API schema `TimeRegistrationResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TimeRegistrationResponse {
+pub struct TimeRegistration {
     /// Rentman API field `TimeRegistrationResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TimeRegistrationResponse.created`.
@@ -17898,7 +17895,7 @@ pub struct TimeRegistrationResponse {
     /// Rentman API field `TimeRegistrationResponse.remark`.
     pub remark: String,
     /// Rentman API field `TimeRegistrationResponse.status`.
-    pub status: TimeRegistrationResponseStatus,
+    pub status: TimeRegistrationStatus,
     /// GENERATED FIELD. The sum of breaks that were created for this time registration with exact start and end time.
     pub break_duration_with_start_end: Option<Decimal>,
     /// The object containing all custom defined fields.
@@ -17907,7 +17904,7 @@ pub struct TimeRegistrationResponse {
 
 /// Rentman API schema `TimeRegistrationActivityRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TimeRegistrationActivityRequest {
+pub struct TimeRegistrationActivityPayload {
     /// Rentman API field `TimeRegistrationActivityRequest.project_function`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_function: Option<ResourceReference>,
@@ -17933,7 +17930,7 @@ pub struct TimeRegistrationActivityRequest {
 
 /// Rentman API schema `TimeRegistrationActivityResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct TimeRegistrationActivityResponse {
+pub struct TimeRegistrationActivity {
     /// Rentman API field `TimeRegistrationActivityResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `TimeRegistrationActivityResponse.created`.
@@ -17964,7 +17961,7 @@ pub struct TimeRegistrationActivityResponse {
 
 /// Rentman API schema `VehicleRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct VehicleRequest {
+pub struct VehiclePayload {
     /// Rentman API field `VehicleRequest.folder`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub folder: Option<ResourceReference>,
@@ -18006,7 +18003,7 @@ pub struct VehicleRequest {
     pub surface_area: Option<String>,
     /// Can be scheduled more than once at the same time. For example, for employment agencies.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub multiple: Option<VehicleRequestMultiple>,
+    pub multiple: Option<VehiclePayloadMultiple>,
     /// Rentman API field `VehicleRequest.image`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub image: Option<ResourceReference>,
@@ -18020,7 +18017,7 @@ pub struct VehicleRequest {
 
 /// Rentman API schema `VehicleResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct VehicleResponse {
+pub struct Vehicle {
     /// Rentman API field `VehicleResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `VehicleResponse.created`.
@@ -18058,7 +18055,7 @@ pub struct VehicleResponse {
     /// Rentman API field `VehicleResponse.surface_area`.
     pub surface_area: String,
     /// Can be scheduled more than once at the same time. For example, for employment agencies.
-    pub multiple: VehicleResponseMultiple,
+    pub multiple: VehicleMultiple,
     /// Rentman API field `VehicleResponse.image`.
     pub image: Option<ResourceReference>,
     /// Rentman API field `VehicleResponse.asset_location`.
@@ -18075,7 +18072,7 @@ pub struct VehicleResponse {
 
 /// Rentman API schema `WarehouseStatusRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WarehouseStatusRequest {
+pub struct WarehouseStatusPayload {
     /// Rentman API field `WarehouseStatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -18083,7 +18080,7 @@ pub struct WarehouseStatusRequest {
 
 /// Rentman API schema `WarehouseStatusResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct WarehouseStatusResponse {
+pub struct WarehouseStatus {
     /// Rentman API field `WarehouseStatusResponse.id`.
     pub id: RentmanId,
     /// Rentman API field `WarehouseStatusResponse.created`.
@@ -18100,7 +18097,7 @@ pub struct WarehouseStatusResponse {
 
 /// Reference to created project
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectReferenceResponse {
+pub struct ProjectReference {
     /// API path
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<ResourceReference>,
@@ -18108,148 +18105,175 @@ pub struct ProjectReferenceResponse {
 
 /// Rentman API schema `ProjectsCreateFromTemplateRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ProjectsCreateFromTemplateRequest {
+pub struct ProjectsCreateFromTemplatePayload {
     /// ID of the project template
     pub template: RentmanId,
     /// First date of the project
     pub start_date: NaiveDate,
 }
 
-/// All Rentman API component schemas represented by this module.
-pub const ALL_SCHEMAS: &[&str] = &[
-    "AccessoryRequest",
-    "AccessoryResponse",
-    "ActualContentRequest",
-    "ActualContentResponse",
-    "AlternativeRequest",
-    "AlternativeResponse",
-    "ApiResponse",
-    "AppointmentCrewRequest",
-    "AppointmentCrewResponse",
-    "AppointmentRequest",
-    "AppointmentResponse",
-    "ContactPersonRequest",
-    "ContactPersonResponse",
-    "ContactRequest",
-    "ContactResponse",
-    "ContractRequest",
-    "ContractResponse",
-    "CrewAvailabilityRequest",
-    "CrewAvailabilityResponse",
-    "CrewRateFactorRequest",
-    "CrewRateFactorResponse",
-    "CrewRateRequest",
-    "CrewRateResponse",
-    "CrewRatesRequest",
-    "CrewRatesResponse",
-    "CrewRequest",
-    "CrewResponse",
-    "EquipmentAssignedSerialsRequest",
-    "EquipmentAssignedSerialsResponse",
-    "EquipmentRequest",
-    "EquipmentResponse",
-    "EquipmentSetContentRequest",
-    "EquipmentSetContentResponse",
-    "ExtraInputFieldRequest",
-    "ExtraInputFieldResponse",
-    "FactorGroupsRequest",
-    "FactorGroupsResponse",
-    "FactorsRequest",
-    "FactorsResponse",
-    "FactuurRequest",
-    "FactuurResponse",
-    "FileFolderRequest",
-    "FileFolderResponse",
-    "FileRequest",
-    "FileResponse",
-    "FolderRequest",
-    "FolderResponse",
-    "InvitationsRequest",
-    "InvitationsResponse",
-    "InvoiceLineRequest",
-    "InvoiceLineResponse",
-    "LeaveMutationsRequest",
-    "LeaveMutationsResponse",
-    "LeaveRequestRequest",
-    "LeaveRequestResponse",
-    "LeaveTypesRequest",
-    "LeaveTypesResponse",
-    "LedgerRequest",
-    "LedgerResponse",
-    "PaymentRequest",
-    "PaymentResponse",
-    "ProjectCostRequest",
-    "ProjectCostResponse",
-    "ProjectCrewRequest",
-    "ProjectCrewResponse",
-    "ProjectEquipmentGroupRequest",
-    "ProjectEquipmentGroupResponse",
-    "ProjectEquipmentRequest",
-    "ProjectEquipmentResponse",
-    "ProjectFunctionGroupRequest",
-    "ProjectFunctionGroupResponse",
-    "ProjectFunctionRequest",
-    "ProjectFunctionResponse",
-    "ProjectReferenceResponse",
-    "ProjectRequest",
-    "ProjectRequestEquipmentRequest",
-    "ProjectRequestEquipmentResponse",
-    "ProjectRequestRequest",
-    "ProjectRequestResponse",
-    "ProjectResponse",
-    "ProjectStatusRequest",
-    "ProjectStatusResponse",
-    "ProjectTemplateRequest",
-    "ProjectTemplateResponse",
-    "ProjectTypeRequest",
-    "ProjectTypeResponse",
-    "ProjectVehicleRequest",
-    "ProjectVehicleResponse",
-    "ProjectsCreateFromTemplateRequest",
-    "PurchaseOrderCostRequest",
-    "PurchaseOrderCostResponse",
-    "PurchaseOrderGlobalCostRequest",
-    "PurchaseOrderGlobalCostResponse",
-    "PurchaseOrderRequest",
-    "PurchaseOrderResponse",
-    "QuotationRequest",
-    "QuotationResponse",
-    "RepairRequest",
-    "RepairResponse",
-    "SerialNumberRequest",
-    "SerialNumberResponse",
-    "StatusRequest",
-    "StatusResponse",
-    "StockLocationRequest",
-    "StockLocationResponse",
-    "StockMovementRequest",
-    "StockMovementResponse",
-    "SubprojectRequest",
-    "SubprojectResponse",
-    "SubrentalEquipmentGroupRequest",
-    "SubrentalEquipmentGroupResponse",
-    "SubrentalEquipmentRequest",
-    "SubrentalEquipmentResponse",
-    "SubrentalRequest",
-    "SubrentalResponse",
-    "SubtaskRequest",
-    "SubtaskResponse",
-    "SupplierRequest",
-    "SupplierResponse",
-    "TaskAssignmentRequest",
-    "TaskAssignmentResponse",
-    "TaskRequest",
-    "TaskResponse",
-    "TaskStatusRequest",
-    "TaskStatusResponse",
-    "TaxClassRequest",
-    "TaxClassResponse",
-    "TimeRegistrationActivityRequest",
-    "TimeRegistrationActivityResponse",
-    "TimeRegistrationRequest",
-    "TimeRegistrationResponse",
-    "VehicleRequest",
-    "VehicleResponse",
-    "WarehouseStatusRequest",
-    "WarehouseStatusResponse",
+/// Every Rentman API component schema and the Rust type that represents it.
+pub const SCHEMA_TYPES: &[(&str, &str)] = &[
+    ("AccessoryRequest", "AccessoryPayload"),
+    ("AccessoryResponse", "Accessory"),
+    ("ActualContentRequest", "ActualContentPayload"),
+    ("ActualContentResponse", "ActualContent"),
+    ("AlternativeRequest", "AlternativePayload"),
+    ("AlternativeResponse", "Alternative"),
+    ("ApiResponse", "ApiResponse"),
+    ("AppointmentCrewRequest", "AppointmentCrewPayload"),
+    ("AppointmentCrewResponse", "AppointmentCrew"),
+    ("AppointmentRequest", "AppointmentPayload"),
+    ("AppointmentResponse", "Appointment"),
+    ("ContactPersonRequest", "ContactPersonPayload"),
+    ("ContactPersonResponse", "ContactPerson"),
+    ("ContactRequest", "ContactPayload"),
+    ("ContactResponse", "Contact"),
+    ("ContractRequest", "ContractPayload"),
+    ("ContractResponse", "Contract"),
+    ("CrewAvailabilityRequest", "CrewAvailabilityPayload"),
+    ("CrewAvailabilityResponse", "CrewAvailability"),
+    ("CrewRateFactorRequest", "RateFactorPayload"),
+    ("CrewRateFactorResponse", "RateFactor"),
+    ("CrewRateRequest", "RatePayload"),
+    ("CrewRateResponse", "Rate"),
+    ("CrewRatesRequest", "CrewRatePayload"),
+    ("CrewRatesResponse", "CrewRate"),
+    ("CrewRequest", "CrewPayload"),
+    ("CrewResponse", "Crew"),
+    (
+        "EquipmentAssignedSerialsRequest",
+        "EquipmentAssignedSerialPayload",
+    ),
+    (
+        "EquipmentAssignedSerialsResponse",
+        "EquipmentAssignedSerial",
+    ),
+    ("EquipmentRequest", "EquipmentPayload"),
+    ("EquipmentResponse", "Equipment"),
+    ("EquipmentSetContentRequest", "EquipmentSetContentPayload"),
+    ("EquipmentSetContentResponse", "EquipmentSetContent"),
+    ("ExtraInputFieldRequest", "ExtraInputFieldPayload"),
+    ("ExtraInputFieldResponse", "ExtraInputField"),
+    ("FactorGroupsRequest", "FactorGroupPayload"),
+    ("FactorGroupsResponse", "FactorGroup"),
+    ("FactorsRequest", "FactorPayload"),
+    ("FactorsResponse", "Factor"),
+    ("FactuurRequest", "InvoicePayload"),
+    ("FactuurResponse", "Invoice"),
+    ("FileFolderRequest", "FileFolderPayload"),
+    ("FileFolderResponse", "FileFolder"),
+    ("FileRequest", "FilePayload"),
+    ("FileResponse", "File"),
+    ("FolderRequest", "FolderPayload"),
+    ("FolderResponse", "Folder"),
+    ("InvitationsRequest", "InvitationPayload"),
+    ("InvitationsResponse", "Invitation"),
+    ("InvoiceLineRequest", "InvoiceLinePayload"),
+    ("InvoiceLineResponse", "InvoiceLine"),
+    ("LeaveMutationsRequest", "LeaveMutationPayload"),
+    ("LeaveMutationsResponse", "LeaveMutation"),
+    ("LeaveRequestRequest", "LeaveRequestPayload"),
+    ("LeaveRequestResponse", "LeaveRequest"),
+    ("LeaveTypesRequest", "LeaveTypePayload"),
+    ("LeaveTypesResponse", "LeaveType"),
+    ("LedgerRequest", "LedgerCodePayload"),
+    ("LedgerResponse", "LedgerCode"),
+    ("PaymentRequest", "PaymentPayload"),
+    ("PaymentResponse", "Payment"),
+    ("ProjectCostRequest", "ProjectCostPayload"),
+    ("ProjectCostResponse", "ProjectCost"),
+    ("ProjectCrewRequest", "ProjectCrewPayload"),
+    ("ProjectCrewResponse", "ProjectCrew"),
+    (
+        "ProjectEquipmentGroupRequest",
+        "ProjectEquipmentGroupPayload",
+    ),
+    ("ProjectEquipmentGroupResponse", "ProjectEquipmentGroup"),
+    ("ProjectEquipmentRequest", "ProjectEquipmentPayload"),
+    ("ProjectEquipmentResponse", "ProjectEquipment"),
+    ("ProjectFunctionGroupRequest", "ProjectFunctionGroupPayload"),
+    ("ProjectFunctionGroupResponse", "ProjectFunctionGroup"),
+    ("ProjectFunctionRequest", "ProjectFunctionPayload"),
+    ("ProjectFunctionResponse", "ProjectFunction"),
+    ("ProjectReferenceResponse", "ProjectReference"),
+    ("ProjectRequest", "ProjectPayload"),
+    (
+        "ProjectRequestEquipmentRequest",
+        "ProjectRequestEquipmentPayload",
+    ),
+    ("ProjectRequestEquipmentResponse", "ProjectRequestEquipment"),
+    ("ProjectRequestRequest", "ProjectRequestPayload"),
+    ("ProjectRequestResponse", "ProjectRequest"),
+    ("ProjectResponse", "Project"),
+    ("ProjectStatusRequest", "ProjectStatusPayload"),
+    ("ProjectStatusResponse", "ProjectStatus"),
+    ("ProjectTemplateRequest", "ProjectTemplatePayload"),
+    ("ProjectTemplateResponse", "ProjectTemplate"),
+    ("ProjectTypeRequest", "ProjectTypePayload"),
+    ("ProjectTypeResponse", "ProjectType"),
+    ("ProjectVehicleRequest", "ProjectVehiclePayload"),
+    ("ProjectVehicleResponse", "ProjectVehicle"),
+    (
+        "ProjectsCreateFromTemplateRequest",
+        "ProjectsCreateFromTemplatePayload",
+    ),
+    ("PurchaseOrderCostRequest", "PurchaseOrderCostPayload"),
+    ("PurchaseOrderCostResponse", "PurchaseOrderCost"),
+    (
+        "PurchaseOrderGlobalCostRequest",
+        "PurchaseOrderGlobalCostPayload",
+    ),
+    ("PurchaseOrderGlobalCostResponse", "PurchaseOrderGlobalCost"),
+    ("PurchaseOrderRequest", "PurchaseOrderPayload"),
+    ("PurchaseOrderResponse", "PurchaseOrder"),
+    ("QuotationRequest", "QuotePayload"),
+    ("QuotationResponse", "Quote"),
+    ("RepairRequest", "RepairPayload"),
+    ("RepairResponse", "Repair"),
+    ("SerialNumberRequest", "SerialNumberPayload"),
+    ("SerialNumberResponse", "SerialNumber"),
+    ("StatusRequest", "StatusPayload"),
+    ("StatusResponse", "Status"),
+    ("StockLocationRequest", "StockLocationPayload"),
+    ("StockLocationResponse", "StockLocation"),
+    ("StockMovementRequest", "StockMovementPayload"),
+    ("StockMovementResponse", "StockMovement"),
+    ("SubprojectRequest", "SubprojectPayload"),
+    ("SubprojectResponse", "Subproject"),
+    (
+        "SubrentalEquipmentGroupRequest",
+        "SubrentalEquipmentGroupPayload",
+    ),
+    ("SubrentalEquipmentGroupResponse", "SubrentalEquipmentGroup"),
+    ("SubrentalEquipmentRequest", "SubrentalEquipmentPayload"),
+    ("SubrentalEquipmentResponse", "SubrentalEquipment"),
+    ("SubrentalRequest", "SubrentalPayload"),
+    ("SubrentalResponse", "Subrental"),
+    ("SubtaskRequest", "SubtaskPayload"),
+    ("SubtaskResponse", "Subtask"),
+    ("SupplierRequest", "SupplierPayload"),
+    ("SupplierResponse", "Supplier"),
+    ("TaskAssignmentRequest", "TaskAssignmentPayload"),
+    ("TaskAssignmentResponse", "TaskAssignment"),
+    ("TaskRequest", "TaskPayload"),
+    ("TaskResponse", "Task"),
+    ("TaskStatusRequest", "TaskStatusPayload"),
+    ("TaskStatusResponse", "TaskStatus"),
+    ("TaxClassRequest", "TaxClassPayload"),
+    ("TaxClassResponse", "TaxClass"),
+    (
+        "TimeRegistrationActivityRequest",
+        "TimeRegistrationActivityPayload",
+    ),
+    (
+        "TimeRegistrationActivityResponse",
+        "TimeRegistrationActivity",
+    ),
+    ("TimeRegistrationRequest", "TimeRegistrationPayload"),
+    ("TimeRegistrationResponse", "TimeRegistration"),
+    ("VehicleRequest", "VehiclePayload"),
+    ("VehicleResponse", "Vehicle"),
+    ("WarehouseStatusRequest", "WarehouseStatusPayload"),
+    ("WarehouseStatusResponse", "WarehouseStatus"),
 ];

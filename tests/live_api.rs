@@ -110,9 +110,9 @@ async fn active_equipment_listing_works_and_excludes_archived_items_live() {
 
 /// Loads one page of equipment with the given `in_archive` filter value.
 ///
-/// Full rows are requested: the generated `EquipmentResponse` requires its
+/// Full rows are requested: the generated `Equipment` requires its
 /// documented fields, so a `fields` selection would not decode.
-async fn equipment_page(client: &RentmanClient, in_archive: &str) -> Vec<model::EquipmentResponse> {
+async fn equipment_page(client: &RentmanClient, in_archive: &str) -> Vec<model::Equipment> {
     client
         .endpoint::<endpoint::GetEquipmentCollectionEndpoint>()
         .query_param("in_archive", in_archive)
@@ -162,9 +162,9 @@ async fn equipment_price_write_is_a_no_op_live() {
     // request goes through `serde_json::Value` and `Decimal`'s float
     // serialization, so first check that exactly the current prices would be
     // sent; otherwise this write would change the test item.
-    let request: model::EquipmentRequest =
+    let request: model::EquipmentPayload =
         serde_json::from_value(serde_json::to_value(&payload).expect("payload serializes"))
-            .expect("price payload is a valid EquipmentRequest");
+            .expect("price payload is a valid EquipmentPayload");
     assert_typed_request_is_exact(&request, &payload);
     client
         .endpoint::<endpoint::UpdateEquipmentEndpoint>()
@@ -295,7 +295,7 @@ fn no_op_payload(equipment: &RentmanEquipment) -> EquipmentPricePayload {
 /// Refuses the typed write unless the body that `.body()` would build carries
 /// exactly the payload's prices.
 fn assert_typed_request_is_exact(
-    request: &model::EquipmentRequest,
+    request: &model::EquipmentPayload,
     payload: &EquipmentPricePayload,
 ) {
     let body = serde_json::to_value(request).expect("typed request serializes");

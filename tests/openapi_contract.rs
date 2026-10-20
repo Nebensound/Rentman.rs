@@ -6,7 +6,7 @@ use rentman_client::endpoint::{
     EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
 };
 use rentman_client::model::{
-    ALL_SCHEMAS, EmailAddress, ProjectsCreateFromTemplateRequest, RentmanId, ResourceReference,
+    EmailAddress, ProjectsCreateFromTemplatePayload, RentmanId, ResourceReference, SCHEMA_TYPES,
 };
 use serde_json::Value;
 use std::{collections::BTreeSet, fs};
@@ -34,15 +34,69 @@ fn wire_models_cover_every_documented_schema() {
         .keys()
         .cloned()
         .collect::<BTreeSet<_>>();
-    let covered = ALL_SCHEMAS
+    let covered = SCHEMA_TYPES
         .iter()
-        .map(|schema| schema.to_string())
+        .map(|(schema, _)| schema.to_string())
         .collect::<BTreeSet<_>>();
 
     assert_eq!(
         documented, covered,
         "wire model manifest drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py and review the schema surface"
     );
+}
+
+#[test]
+fn every_schema_maps_to_exactly_one_resource_named_type() {
+    let schemas = SCHEMA_TYPES
+        .iter()
+        .map(|(schema, _)| *schema)
+        .collect::<BTreeSet<_>>();
+    let types = SCHEMA_TYPES
+        .iter()
+        .map(|(_, rust_type)| *rust_type)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        schemas.len(),
+        SCHEMA_TYPES.len(),
+        "a schema is listed twice"
+    );
+    assert_eq!(
+        types.len(),
+        SCHEMA_TYPES.len(),
+        "two schemas share a Rust type"
+    );
+
+    for (schema, rust_type) in SCHEMA_TYPES {
+        if *schema == "ApiResponse" {
+            // Paging metadata of the response envelope, not a resource.
+            assert_eq!(*rust_type, "ApiResponse");
+        } else if schema.ends_with("Request") {
+            assert!(rust_type.ends_with("Payload"), "{schema} -> {rust_type}");
+        } else {
+            assert!(schema.ends_with("Response"), "{schema} is neither");
+            assert!(
+                !rust_type.ends_with("Response") && !rust_type.ends_with("Payload"),
+                "{schema} -> {rust_type} is not a resource name"
+            );
+        }
+    }
+
+    let renamed = |schema: &str| {
+        SCHEMA_TYPES
+            .iter()
+            .find(|(name, _)| *name == schema)
+            .map(|(_, rust_type)| *rust_type)
+    };
+    assert_eq!(renamed("CrewResponse"), Some("Crew"));
+    assert_eq!(renamed("CrewRequest"), Some("CrewPayload"));
+    assert_eq!(renamed("FactuurResponse"), Some("Invoice"));
+    assert_eq!(renamed("FactuurRequest"), Some("InvoicePayload"));
+    assert_eq!(renamed("InvitationsResponse"), Some("Invitation"));
+    assert_eq!(renamed("CrewRateResponse"), Some("Rate"));
+    assert_eq!(renamed("CrewRatesResponse"), Some("CrewRate"));
+    assert_eq!(renamed("CrewRateFactorResponse"), Some("RateFactor"));
+    assert_eq!(renamed("QuotationResponse"), Some("Quote"));
+    assert_eq!(renamed("LedgerResponse"), Some("LedgerCode"));
 }
 
 #[test]
@@ -86,7 +140,7 @@ fn wire_date_fields_serialize_as_date_only() {
     assert_type(property(request_schema, "template"), "integer");
     assert_eq!(property(request_schema, "start_date")["format"], "date");
 
-    let request = ProjectsCreateFromTemplateRequest {
+    let request = ProjectsCreateFromTemplatePayload {
         template: RentmanId(7),
         start_date: NaiveDate::from_ymd_opt(2026, 10, 20).expect("valid date"),
     };
@@ -96,17 +150,17 @@ fn wire_date_fields_serialize_as_date_only() {
         serde_json::json!({"template": 7, "start_date": "2026-10-20"})
     );
     assert_eq!(
-        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(json).expect("request parses"),
+        serde_json::from_value::<ProjectsCreateFromTemplatePayload>(json).expect("request parses"),
         request
     );
     assert!(
-        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(
+        serde_json::from_value::<ProjectsCreateFromTemplatePayload>(
             serde_json::json!({"template": 7, "start_date": "2026-10-20T00:00:00Z"})
         )
         .is_err()
     );
     assert!(
-        serde_json::from_value::<ProjectsCreateFromTemplateRequest>(
+        serde_json::from_value::<ProjectsCreateFromTemplatePayload>(
             serde_json::json!({"template": -1, "start_date": "2026-10-20"})
         )
         .is_err()
