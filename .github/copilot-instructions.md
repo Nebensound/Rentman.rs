@@ -60,6 +60,9 @@ repositories.
   `EndpointParameterSpec`. When a parameter has clear semantics, expose a typed
   builder helper such as `id(model::RentmanId)` instead of making users pass raw
   strings.
+- Response enums are open (`Unknown(String)` keeps an undocumented value as
+  sent); request enums stay closed. Every documented value must still be a
+  named variant.
 - Avoid public `serde_json::Value` as an escape hatch. For intentionally open
   OpenAPI shapes, create an explicit domain type such as `CustomFields`.
 - Page collections only through the shared paging core in `src/paging.rs`. It

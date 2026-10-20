@@ -211,7 +211,13 @@ tests, scripts, generated helper text, and Rust identifiers.
 Types are as narrow as reasonably possible. OpenAPI is the minimum contract, not
 the upper bound of strict typing:
 
-- API fields with a finite set of values are modeled as enums.
+- API fields with a finite set of values are modeled as enums. Enums in
+  response models are open: an undocumented value deserializes to
+  `Unknown(String)` and serializes back unchanged, so a value Rentman adds
+  later does not fail a whole collection. Request enums stay closed, because
+  the client only sends documented values. A generated contract test per
+  response enum (`tests/contract/generated_response_enums.rs`) fails when a
+  documented value has no named variant.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
   `RentmanAmount` reads and writes JSON numbers from their exact text. An
