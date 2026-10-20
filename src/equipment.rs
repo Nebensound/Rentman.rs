@@ -2,10 +2,10 @@
 
 use crate::{
     RentmanAmount,
-    client::{DEFAULT_PAGE_LIMIT, RentmanClient},
+    client::RentmanClient,
     error::{Resource, Result},
     ids::EquipmentId,
-    model,
+    paging::{CollectionRequest, PageSize},
 };
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
@@ -55,35 +55,16 @@ impl EquipmentPricePayload {
 impl RentmanClient {
     /// Loads all equipment that is not archived, with its price fields.
     pub async fn all_active_equipment(&self) -> Result<Vec<RentmanEquipment>> {
-        let mut equipment = Vec::new();
-        let mut next_url = None;
-        let mut offset = 0;
-
-        loop {
-            let response: model::CollectionResponse<RentmanEquipment> = self
-                .paginated_request(next_url.take(), "equipment", offset)
-                .query(&[
-                    ("fields", "id,price,list_price,subrental_costs".to_string()),
-                    ("in_archive", "0".to_string()),
-                    ("limit", DEFAULT_PAGE_LIMIT.to_string()),
-                ])
-                .send_json()
-                .await
-                .map_err(|error| error.in_operation("getEquipmentCollection"))?;
-
-            let should_fallback_to_offset = response.next_page_url.is_none()
-                && response.item_count >= response.limit
-                && response.limit > 0;
-            offset += response.limit;
-            next_url = response.next_page_url;
-            equipment.extend(response.data);
-
-            if next_url.is_none() && !should_fallback_to_offset {
-                break;
-            }
-        }
-
-        Ok(equipment)
+        self.read_all(CollectionRequest {
+            path: "equipment",
+            query: &[
+                ("fields", "id,price,list_price,subrental_costs"),
+                ("in_archive", "0"),
+            ],
+            page_size: PageSize::MAX,
+            operation: "getEquipmentCollection",
+        })
+        .await
     }
 
     /// Updates the price fields of an equipment item.

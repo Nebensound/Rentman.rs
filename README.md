@@ -223,7 +223,13 @@ tests, scripts, generated helper text, and Rust identifiers.
 Types are as narrow as reasonably possible. OpenAPI is the minimum contract, not
 the upper bound of strict typing:
 
-- API fields with a finite set of values are modeled as enums.
+- API fields with a finite set of values are modeled as enums. Enums in
+  response models are open: an undocumented value deserializes to
+  `Unknown(String)` and serializes back unchanged, so a value Rentman adds
+  later does not fail a whole collection. Request enums stay closed, because
+  the client only sends documented values. A generated contract test per
+  response enum (`tests/contract/generated_response_enums.rs`) fails when a
+  documented value has no named variant.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
   `RentmanAmount` reads and writes JSON numbers from their exact text. An
@@ -244,6 +250,15 @@ pagination metadata, and every documented error status code must be represented
 in the generated contract or in an explicit hand-written boundary type. The
 public API must expose this as Rentman API models/endpoints, not as an
 `openapi` user-facing module.
+
+Complete collections are read through one shared paging core (`src/paging.rs`);
+no other code pages by itself. It follows Rentman's `next_page_url` unchanged
+until it is `null` (the cursor carries `fields`, filters, and the page size),
+and requests the next offset only when an older response has a full page
+without `next_page_url`. A `next_page_url` that repeats an earlier page or
+leaves the configured API origin (it would receive the API token) fails with
+an `UnexpectedResponse` error. Page sizes are a validated `PageSize` (1 to
+1500, default 300).
 
 Every generated endpoint must be executable. The build checks that each endpoint
 has a serializable request type and a deserializable response type, and unit
