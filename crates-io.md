@@ -27,25 +27,35 @@ for how to generate your token in your Rentman account.
 cargo add rentman-client
 ```
 
-Create a client with your Rentman API token and call any documented endpoint:
+Create a client with your Rentman API token and work with Rentman data
+through its resources:
 
 ```rust
-use rentman_client::{RentmanApiToken, RentmanClient, endpoint, model};
+use rentman_client::{PageSize, RentmanApiToken, RentmanClient, model};
 
 # async fn example() -> rentman_client::Result<()> {
 let client = RentmanClient::new(RentmanApiToken::new("token"));
 
-let response: model::CollectionResponse<model::Invoice> = client
-    .endpoint::<endpoint::GetFactuurCollectionEndpoint>()
-    .query(&[("limit", "1500")])?
-    .send()
+// All crew members: every page, no response envelope.
+let crew: Vec<model::Crew> = client.crew().list().all().await?;
+
+// One item and a nested collection.
+let crew_id = model::CrewId::new(12);
+let member: model::Crew = client.crew().get(crew_id).await?;
+let appointments: Vec<model::Appointment> = client
+    .crew()
+    .appointments(crew_id)
+    .list()
+    .page_size(PageSize::MAX)
+    .all()
     .await?;
 
-let response: model::ItemResponse<model::Accessory> = client
-    .endpoint::<endpoint::GetAccessoryItemEndpoint>()
-    .id(model::AccessoryId::new(42))
-    .send()
+// Writes: `create` is sent exactly once, `update` and `delete` are retried.
+let status = client
+    .task_statuses()
+    .create(&model::TaskStatusPayload::new("green".to_string()))
     .await?;
+client.task_statuses().delete(status.id).await?;
 # Ok(())
 # }
 ```
@@ -56,6 +66,12 @@ let response: model::ItemResponse<model::Accessory> = client
   async HTTP transport. Retries honor `Retry-After` and use exponential
   backoff; rate limiting keeps a minimum interval between requests and stays
   within Rentman's daily request budget.
+- Resources: every documented collection is reachable from the client
+  (`client.crew()`, nested `client.crew().appointments(id)`) and offers only
+  the operations Rentman documents for it: `list()` with `all()`, `first(n)`
+  and `page_size(n)`, `get`, `create`, `update`, `delete`, and named actions
+  such as `client.projects().set_client(id, &payload)`. IDs are typed
+  (`Id<Crew>`, alias `CrewId`), also in link fields such as `/crew/12`.
 - `endpoint` defines every documented Rentman API operation, including typed
   path and query parameter metadata and the documented error statuses.
 - `model` contains typed models for every documented schema: timestamps are
