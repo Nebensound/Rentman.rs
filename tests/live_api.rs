@@ -39,8 +39,12 @@ fn live_client() -> RentmanClient {
     static CLIENT: OnceLock<RentmanClient> = OnceLock::new();
     CLIENT
         .get_or_init(|| {
-            // A missing `.env` is fine: CI provides the token via the environment.
-            dotenvy::dotenv().ok();
+            // Use the same crate-root file as the build-time test selection.
+            match dotenvy::from_path(concat!(env!("CARGO_MANIFEST_DIR"), "/.env")) {
+                Ok(()) => {}
+                Err(error) if error.not_found() => {}
+                Err(_) => panic!("could not load crate-root .env for live API tests"),
+            }
             let token = std::env::var("RENTMAN_API_TOKEN").expect(
                 "RENTMAN_API_TOKEN must be set (environment or .env) to run live Rentman API tests",
             );
