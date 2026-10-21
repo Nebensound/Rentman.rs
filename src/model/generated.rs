@@ -6,6 +6,7 @@
 
 use crate::RentmanAmount;
 use crate::id::{Id, ItemId, Resource};
+use crate::revision::{Revision, Revisioned};
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -13032,6 +13033,9 @@ pub struct Accessory {
     pub order: i64,
     /// The accessory is always added as a new line in the project as opposed to merging with the same accessory.
     pub add_as_new_line: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Accessory>,
 }
 
 /// Rentman API schema `ActualContentRequest`.
@@ -13081,6 +13085,9 @@ pub struct ActualContent {
     /// GENERATED FIELD. The combination that contains this equipment.
     #[serde(default, with = "crate::id::optional_link")]
     pub combination_serial: Option<Id<SerialNumber>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ActualContent>,
 }
 
 /// Rentman API schema `AlternativeRequest`.
@@ -13119,6 +13126,9 @@ pub struct Alternative {
     /// Rentman API field `AlternativeResponse.alternative`.
     #[serde(with = "crate::id::link")]
     pub alternative: Id<Equipment>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Alternative>,
 }
 
 /// Rentman API schema `AppointmentCrewRequest`.
@@ -13157,6 +13167,9 @@ pub struct AppointmentCrew {
     /// Rentman API field `AppointmentCrewResponse.crew`.
     #[serde(with = "crate::id::link")]
     pub crew: Id<Crew>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<AppointmentCrew>,
 }
 
 /// Rentman API schema `AppointmentRequest`.
@@ -13247,6 +13260,9 @@ pub struct Appointment {
     pub synchronization_id: String,
     /// Rentman API field `AppointmentResponse.synchronisation_uri`.
     pub synchronisation_uri: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Appointment>,
 }
 
 /// Rentman API schema `ContactPersonRequest`.
@@ -13343,6 +13359,9 @@ pub struct ContactPerson {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ContactPerson>,
 }
 
 /// Rentman API schema `ContactRequest`.
@@ -13718,6 +13737,9 @@ pub struct Contact {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Contact>,
 }
 
 /// Rentman API schema `ContractRequest`.
@@ -13830,6 +13852,9 @@ pub struct Contract {
     pub price_invat: RentmanAmount,
     /// GENERATED FIELD.
     pub vat_amount: RentmanAmount,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Contract>,
 }
 
 /// Rentman API schema `ProjectCostRequest`.
@@ -13953,6 +13978,9 @@ pub struct ProjectCost {
     pub purchase_price: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectCost>,
 }
 
 /// Rentman API schema `CrewRequest`.
@@ -14156,6 +14184,9 @@ pub struct Crew {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Crew>,
 }
 
 /// Rentman API schema `CrewAvailabilityRequest`.
@@ -14258,6 +14289,9 @@ pub struct CrewAvailability {
     pub recurrent_group: i64,
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday. E.g.: for a recurrence on Monday and Wednesday, use [0, 2].
     pub recurrence_weekdays: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<CrewAvailability>,
 }
 
 /// Rentman API schema `CrewRatesRequest`.
@@ -14297,6 +14331,9 @@ pub struct CrewRate {
     /// Rentman API field `CrewRatesResponse.medewerker`.
     #[serde(with = "crate::id::link")]
     pub medewerker: Id<Crew>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<CrewRate>,
 }
 
 /// Rentman API schema `EquipmentRequest`.
@@ -14591,6 +14628,9 @@ pub struct Equipment {
     pub location_in_warehouse: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Equipment>,
 }
 
 /// Rentman API schema `EquipmentAssignedSerialsRequest`.
@@ -14629,6 +14669,9 @@ pub struct EquipmentAssignedSerial {
     /// Rentman API field `EquipmentAssignedSerialsResponse.serialnumber`.
     #[serde(with = "crate::id::link")]
     pub serialnumber: Id<SerialNumber>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<EquipmentAssignedSerial>,
 }
 
 /// Rentman API schema `EquipmentSetContentRequest`.
@@ -14693,6 +14736,9 @@ pub struct EquipmentSetContent {
     pub is_fixed: EquipmentSetContentIsFixed,
     /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
     pub is_physically_connected: EquipmentSetContentIsPhysicallyConnected,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<EquipmentSetContent>,
 }
 
 /// Rentman API schema `ExtraInputFieldRequest`.
@@ -14784,6 +14830,9 @@ pub struct ExtraInputField {
     pub search_minlength: i64,
     /// Required input fields must be filled in.
     pub is_customfield_mandatory: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ExtraInputField>,
 }
 
 /// Rentman API schema `FactorGroupsRequest`.
@@ -14810,6 +14859,9 @@ pub struct FactorGroup {
     pub displayname: String,
     /// Rentman API field `FactorGroupsResponse.name`.
     pub name: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<FactorGroup>,
 }
 
 /// Rentman API schema `FactorsRequest`.
@@ -14849,6 +14901,9 @@ pub struct Factor {
     /// Rentman API field `FactorsResponse.factor_group`.
     #[serde(with = "crate::id::link")]
     pub factor_group: Id<FactorGroup>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Factor>,
 }
 
 /// Rentman API schema `FileFolderRequest`.
@@ -14905,6 +14960,9 @@ pub struct FileFolder {
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<FileFolder>,
 }
 
 /// Rentman API schema `FileRequest`.
@@ -15042,6 +15100,9 @@ pub struct File {
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<File>,
 }
 
 /// Rentman API schema `FolderRequest`.
@@ -15090,6 +15151,9 @@ pub struct Folder {
     pub itemtype: FolderItemtype,
     /// GENERATED FIELD.
     pub path: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Folder>,
 }
 
 /// Rentman API schema `InvitationsRequest`.
@@ -15192,6 +15256,9 @@ pub struct Invitation {
     pub auto_reminder_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.auto_reminder_sent`.
     pub auto_reminder_sent: i64,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Invitation>,
 }
 
 /// Rentman API schema `InvoiceLineRequest`.
@@ -15244,6 +15311,9 @@ pub struct InvoiceLine {
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<InvoiceLine>,
 }
 
 /// Rentman API schema `FactuurRequest`.
@@ -15405,6 +15475,9 @@ pub struct Invoice {
     pub days_after_expiry: i64,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Invoice>,
 }
 
 /// Rentman API schema `LeaveMutationsRequest`.
@@ -15467,6 +15540,9 @@ pub struct LeaveMutation {
     pub leavetype: Id<LeaveType>,
     /// Rentman API field `LeaveMutationsResponse.mutation_date`.
     pub mutation_date: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<LeaveMutation>,
 }
 
 /// Rentman API schema `LeaveRequestRequest`.
@@ -15533,6 +15609,9 @@ pub struct LeaveRequest {
     /// Rentman API field `LeaveRequestResponse.reviewer`.
     #[serde(default, with = "crate::id::optional_link")]
     pub reviewer: Option<Id<Crew>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<LeaveRequest>,
 }
 
 /// Rentman API schema `LeaveTypesRequest`.
@@ -15612,6 +15691,9 @@ pub struct LeaveType {
     pub can_have_activities: bool,
     /// Rentman API field `LeaveTypesResponse.counts_in_totals`.
     pub counts_in_totals: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<LeaveType>,
 }
 
 /// Rentman API schema `LedgerRequest`.
@@ -15648,6 +15730,9 @@ pub struct LedgerCode {
     pub is_credit: bool,
     /// Rentman API field `LedgerResponse.is_debit`.
     pub is_debit: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<LedgerCode>,
 }
 
 /// Rentman API schema `PaymentRequest`.
@@ -15705,6 +15790,9 @@ pub struct Payment {
     /// Accounting software this payment was imported from.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub payment_import_source: Option<PaymentPaymentImportSource>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Payment>,
 }
 
 /// Rentman API schema `ProjectCrewRequest`.
@@ -15856,6 +15944,9 @@ pub struct ProjectCrew {
     pub activity_status: ProjectCrewActivityStatus,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectCrew>,
 }
 
 /// Rentman API schema `ProjectEquipmentRequest`.
@@ -16006,6 +16097,9 @@ pub struct ProjectEquipment {
     pub serial_number_ids: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectEquipment>,
 }
 
 /// Rentman API schema `ProjectEquipmentGroupRequest`.
@@ -16122,6 +16216,9 @@ pub struct ProjectEquipmentGroup {
     pub volume: RentmanAmount,
     /// GENERATED FIELD.
     pub total_new_price: RentmanAmount,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectEquipmentGroup>,
 }
 
 /// Rentman API schema `ProjectFunctionGroupRequest`.
@@ -16208,6 +16305,9 @@ pub struct ProjectFunctionGroup {
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.remark`.
     pub remark: Option<String>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectFunctionGroup>,
 }
 
 /// Rentman API schema `ProjectFunctionRequest`.
@@ -16454,6 +16554,9 @@ pub struct ProjectFunction {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectFunction>,
 }
 
 /// Rentman API schema `ProjectRequestEquipmentRequest`.
@@ -16548,6 +16651,9 @@ pub struct ProjectRequestEquipment {
     pub factor: RentmanAmount,
     /// Rentman API field `ProjectRequestEquipmentResponse.order`.
     pub order: i64,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectRequestEquipment>,
 }
 
 /// Rentman API schema `ProjectRequestRequest`.
@@ -16784,6 +16890,9 @@ pub struct ProjectRequest {
     pub source: ProjectRequestSource,
     /// Rentman API field `ProjectRequestResponse.status`.
     pub status: ProjectRequestStatus,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectRequest>,
 }
 
 /// Rentman API schema `ProjectRequest`.
@@ -16913,6 +17022,9 @@ pub struct Project {
     pub volume: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Project>,
 }
 
 /// Rentman API schema `ProjectStatusRequest`.
@@ -16939,6 +17051,9 @@ pub struct ProjectStatus {
     pub displayname: String,
     /// Rentman API field `ProjectStatusResponse.name`.
     pub name: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectStatus>,
 }
 
 /// Rentman API schema `ProjectTemplateRequest`.
@@ -16965,6 +17080,9 @@ pub struct ProjectTemplate {
     pub displayname: String,
     /// Rentman API field `ProjectTemplateResponse.name`.
     pub name: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectTemplate>,
 }
 
 /// Rentman API schema `ProjectTypeRequest`.
@@ -17002,6 +17120,9 @@ pub struct ProjectType {
     /// Rentman API field `ProjectTypeResponse.type`.
     #[serde(rename = "type")]
     pub type_: ProjectTypeType,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectType>,
 }
 
 /// Rentman API schema `ProjectVehicleRequest`.
@@ -17091,6 +17212,9 @@ pub struct ProjectVehicle {
     pub costs: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<ProjectVehicle>,
 }
 
 /// Rentman API schema `PurchaseOrderCostRequest`.
@@ -17140,6 +17264,9 @@ pub struct PurchaseOrderCost {
     pub underlying_cost_amount_with_tax: RentmanAmount,
     /// GENERATED FIELD.
     pub quantity: i64,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<PurchaseOrderCost>,
 }
 
 /// Rentman API schema `PurchaseOrderGlobalCostRequest`.
@@ -17189,6 +17316,9 @@ pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.taxclass`.
     #[serde(default, with = "crate::id::optional_link")]
     pub taxclass: Option<Id<TaxClass>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<PurchaseOrderGlobalCost>,
 }
 
 /// Rentman API schema `PurchaseOrderRequest`.
@@ -17390,6 +17520,9 @@ pub struct PurchaseOrder {
     pub projects_json: Option<String>,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<PurchaseOrder>,
 }
 
 /// Rentman API schema `QuotationRequest`.
@@ -17504,6 +17637,9 @@ pub struct Quote {
     pub vat_amount: RentmanAmount,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Quote>,
 }
 
 /// Rentman API schema `CrewRateFactorRequest`.
@@ -17548,6 +17684,9 @@ pub struct RateFactor {
     pub variable: RentmanAmount,
     /// Rentman API field `CrewRateFactorResponse.fixed`.
     pub fixed: RentmanAmount,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<RateFactor>,
 }
 
 /// Rentman API schema `CrewRateRequest`.
@@ -17590,6 +17729,9 @@ pub struct Rate {
     pub type_: RateType,
     /// Rentman API field `CrewRateResponse.subtype`.
     pub subtype: RateSubtype,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Rate>,
 }
 
 /// Rentman API schema `RepairRequest`.
@@ -17746,6 +17888,9 @@ pub struct Repair {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Repair>,
 }
 
 /// Rentman API schema `SerialNumberRequest`.
@@ -17854,6 +17999,9 @@ pub struct SerialNumber {
     pub sealed: bool,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<SerialNumber>,
 }
 
 /// Rentman API schema `StatusRequest`.
@@ -17880,6 +18028,9 @@ pub struct Status {
     pub displayname: String,
     /// Rentman API field `StatusResponse.name`.
     pub name: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Status>,
 }
 
 /// Rentman API schema `StockLocationRequest`.
@@ -17957,6 +18108,9 @@ pub struct StockLocation {
     pub color: String,
     /// This stock location is archived. This means that it cannot be used in equipment planning.
     pub in_archive: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<StockLocation>,
 }
 
 /// Rentman API schema `StockMovementRequest`.
@@ -18044,6 +18198,9 @@ pub struct StockMovement {
     pub stock_location: Id<StockLocation>,
     /// Rentman API field `StockMovementResponse.api_client`.
     pub api_client: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<StockMovement>,
 }
 
 /// Rentman API schema `SubprojectRequest`.
@@ -18180,6 +18337,9 @@ pub struct Subproject {
     pub equipment_period_to: Option<DateTime<FixedOffset>>,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Subproject>,
 }
 
 /// Rentman API schema `SubrentalEquipmentRequest`.
@@ -18289,6 +18449,9 @@ pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.supplier_planningmateriaal`.
     #[serde(default, with = "crate::id::optional_link")]
     pub supplier_planningmateriaal: Option<Id<ProjectEquipment>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<SubrentalEquipment>,
 }
 
 /// Rentman API schema `SubrentalEquipmentGroupRequest`.
@@ -18333,6 +18496,9 @@ pub struct SubrentalEquipmentGroup {
     /// Rentman API field `SubrentalEquipmentGroupResponse.supplier_category`.
     #[serde(default, with = "crate::id::optional_link")]
     pub supplier_category: Option<Id<ProjectEquipmentGroup>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<SubrentalEquipmentGroup>,
 }
 
 /// Rentman API schema `SubrentalRequest`.
@@ -18537,6 +18703,9 @@ pub struct Subrental {
     pub tags: String,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Subrental>,
 }
 
 /// Rentman API schema `SubtaskRequest`.
@@ -18571,6 +18740,9 @@ pub struct Subtask {
     pub title: String,
     /// Rentman API field `SubtaskResponse.completed`.
     pub completed: bool,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Subtask>,
 }
 
 /// Rentman API schema `SupplierRequest`.
@@ -18634,6 +18806,9 @@ pub struct Supplier {
     pub price: RentmanAmount,
     /// Rentman API field `SupplierResponse.details`.
     pub details: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Supplier>,
 }
 
 /// Rentman API schema `TaskAssignmentRequest`.
@@ -18672,6 +18847,9 @@ pub struct TaskAssignment {
     /// Rentman API field `TaskAssignmentResponse.crew`.
     #[serde(with = "crate::id::link")]
     pub crew: Id<Crew>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<TaskAssignment>,
 }
 
 /// Rentman API schema `TaskRequest`.
@@ -18878,6 +19056,9 @@ pub struct Task {
     pub parent_api_path: Option<String>,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Task>,
 }
 
 /// Rentman API schema `TaskStatusRequest`.
@@ -18932,6 +19113,9 @@ pub struct TaskStatus {
     pub type_: TaskStatusType,
     /// Rentman API field `TaskStatusResponse.order`.
     pub order: i64,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<TaskStatus>,
 }
 
 /// Rentman API schema `TaxClassRequest`.
@@ -18969,6 +19153,9 @@ pub struct TaxClass {
     /// Rentman API field `TaxClassResponse.type`.
     #[serde(rename = "type")]
     pub type_: TaxClassType,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<TaxClass>,
 }
 
 /// Rentman API schema `TimeRegistrationRequest`.
@@ -19067,6 +19254,9 @@ pub struct TimeRegistration {
     pub break_duration_with_start_end: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<TimeRegistration>,
 }
 
 /// Rentman API schema `TimeRegistrationActivityRequest`.
@@ -19136,6 +19326,9 @@ pub struct TimeRegistrationActivity {
     pub from: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.to`.
     pub to: Option<DateTime<FixedOffset>>,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<TimeRegistrationActivity>,
 }
 
 /// Rentman API schema `VehicleRequest`.
@@ -19268,6 +19461,9 @@ pub struct Vehicle {
     pub fixed_cost: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<Vehicle>,
 }
 
 /// Rentman API schema `WarehouseStatusRequest`.
@@ -19294,6 +19490,9 @@ pub struct WarehouseStatus {
     pub displayname: String,
     /// Rentman API field `WarehouseStatusResponse.name`.
     pub name: String,
+    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "updateHash")]
+    pub revision: Revision<WarehouseStatus>,
 }
 
 /// Reference to created project
@@ -19441,11 +19640,31 @@ impl Resource for Accessory {
     const COLLECTION: &'static str = "accessories";
 }
 
+impl Revisioned for Accessory {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Accessory`] item (`/accessories/{id}`).
 pub type AccessoryId = Id<Accessory>;
 
 impl Resource for ActualContent {
     const COLLECTION: &'static str = "actualcontent";
+}
+
+impl Revisioned for ActualContent {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ActualContent`] item (`/actualcontent/{id}`).
@@ -19455,11 +19674,31 @@ impl Resource for Alternative {
     const COLLECTION: &'static str = "alternatives";
 }
 
+impl Revisioned for Alternative {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Alternative`] item (`/alternatives/{id}`).
 pub type AlternativeId = Id<Alternative>;
 
 impl Resource for AppointmentCrew {
     const COLLECTION: &'static str = "appointmentcrew";
+}
+
+impl Revisioned for AppointmentCrew {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`AppointmentCrew`] item (`/appointmentcrew/{id}`).
@@ -19469,11 +19708,31 @@ impl Resource for Appointment {
     const COLLECTION: &'static str = "appointments";
 }
 
+impl Revisioned for Appointment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Appointment`] item (`/appointments/{id}`).
 pub type AppointmentId = Id<Appointment>;
 
 impl Resource for ContactPerson {
     const COLLECTION: &'static str = "contactpersons";
+}
+
+impl Revisioned for ContactPerson {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ContactPerson`] item (`/contactpersons/{id}`).
@@ -19483,11 +19742,31 @@ impl Resource for Contact {
     const COLLECTION: &'static str = "contacts";
 }
 
+impl Revisioned for Contact {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Contact`] item (`/contacts/{id}`).
 pub type ContactId = Id<Contact>;
 
 impl Resource for Contract {
     const COLLECTION: &'static str = "contracts";
+}
+
+impl Revisioned for Contract {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Contract`] item (`/contracts/{id}`).
@@ -19497,11 +19776,31 @@ impl Resource for ProjectCost {
     const COLLECTION: &'static str = "costs";
 }
 
+impl Revisioned for ProjectCost {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectCost`] item (`/costs/{id}`).
 pub type ProjectCostId = Id<ProjectCost>;
 
 impl Resource for Crew {
     const COLLECTION: &'static str = "crew";
+}
+
+impl Revisioned for Crew {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Crew`] item (`/crew/{id}`).
@@ -19511,11 +19810,31 @@ impl Resource for CrewAvailability {
     const COLLECTION: &'static str = "crewavailability";
 }
 
+impl Revisioned for CrewAvailability {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`CrewAvailability`] item (`/crewavailability/{id}`).
 pub type CrewAvailabilityId = Id<CrewAvailability>;
 
 impl Resource for CrewRate {
     const COLLECTION: &'static str = "crewrates";
+}
+
+impl Revisioned for CrewRate {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`CrewRate`] item (`/crewrates/{id}`).
@@ -19525,11 +19844,31 @@ impl Resource for Equipment {
     const COLLECTION: &'static str = "equipment";
 }
 
+impl Revisioned for Equipment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Equipment`] item (`/equipment/{id}`).
 pub type EquipmentId = Id<Equipment>;
 
 impl Resource for EquipmentAssignedSerial {
     const COLLECTION: &'static str = "equipmentassignedserials";
+}
+
+impl Revisioned for EquipmentAssignedSerial {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`EquipmentAssignedSerial`] item (`/equipmentassignedserials/{id}`).
@@ -19539,11 +19878,31 @@ impl Resource for EquipmentSetContent {
     const COLLECTION: &'static str = "equipmentsetscontent";
 }
 
+impl Revisioned for EquipmentSetContent {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`EquipmentSetContent`] item (`/equipmentsetscontent/{id}`).
 pub type EquipmentSetContentId = Id<EquipmentSetContent>;
 
 impl Resource for ExtraInputField {
     const COLLECTION: &'static str = "extrainputfields";
+}
+
+impl Revisioned for ExtraInputField {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ExtraInputField`] item (`/extrainputfields/{id}`).
@@ -19553,11 +19912,31 @@ impl Resource for FactorGroup {
     const COLLECTION: &'static str = "factorgroups";
 }
 
+impl Revisioned for FactorGroup {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`FactorGroup`] item (`/factorgroups/{id}`).
 pub type FactorGroupId = Id<FactorGroup>;
 
 impl Resource for Factor {
     const COLLECTION: &'static str = "factors";
+}
+
+impl Revisioned for Factor {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Factor`] item (`/factors/{id}`).
@@ -19567,11 +19946,31 @@ impl Resource for FileFolder {
     const COLLECTION: &'static str = "file_folders";
 }
 
+impl Revisioned for FileFolder {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`FileFolder`] item (`/file_folders/{id}`).
 pub type FileFolderId = Id<FileFolder>;
 
 impl Resource for File {
     const COLLECTION: &'static str = "files";
+}
+
+impl Revisioned for File {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`File`] item (`/files/{id}`).
@@ -19581,11 +19980,31 @@ impl Resource for Folder {
     const COLLECTION: &'static str = "folders";
 }
 
+impl Revisioned for Folder {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Folder`] item (`/folders/{id}`).
 pub type FolderId = Id<Folder>;
 
 impl Resource for Invitation {
     const COLLECTION: &'static str = "invitations";
+}
+
+impl Revisioned for Invitation {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Invitation`] item (`/invitations/{id}`).
@@ -19595,11 +20014,31 @@ impl Resource for InvoiceLine {
     const COLLECTION: &'static str = "invoicelines";
 }
 
+impl Revisioned for InvoiceLine {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`InvoiceLine`] item (`/invoicelines/{id}`).
 pub type InvoiceLineId = Id<InvoiceLine>;
 
 impl Resource for Invoice {
     const COLLECTION: &'static str = "invoices";
+}
+
+impl Revisioned for Invoice {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Invoice`] item (`/invoices/{id}`).
@@ -19609,11 +20048,31 @@ impl Resource for LeaveMutation {
     const COLLECTION: &'static str = "leavemutation";
 }
 
+impl Revisioned for LeaveMutation {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`LeaveMutation`] item (`/leavemutation/{id}`).
 pub type LeaveMutationId = Id<LeaveMutation>;
 
 impl Resource for LeaveRequest {
     const COLLECTION: &'static str = "leaverequest";
+}
+
+impl Revisioned for LeaveRequest {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`LeaveRequest`] item (`/leaverequest/{id}`).
@@ -19623,11 +20082,31 @@ impl Resource for LeaveType {
     const COLLECTION: &'static str = "leavetypes";
 }
 
+impl Revisioned for LeaveType {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`LeaveType`] item (`/leavetypes/{id}`).
 pub type LeaveTypeId = Id<LeaveType>;
 
 impl Resource for LedgerCode {
     const COLLECTION: &'static str = "ledgercodes";
+}
+
+impl Revisioned for LedgerCode {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`LedgerCode`] item (`/ledgercodes/{id}`).
@@ -19637,11 +20116,31 @@ impl Resource for Payment {
     const COLLECTION: &'static str = "payments";
 }
 
+impl Revisioned for Payment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Payment`] item (`/payments/{id}`).
 pub type PaymentId = Id<Payment>;
 
 impl Resource for ProjectCrew {
     const COLLECTION: &'static str = "projectcrew";
+}
+
+impl Revisioned for ProjectCrew {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectCrew`] item (`/projectcrew/{id}`).
@@ -19651,11 +20150,31 @@ impl Resource for ProjectEquipment {
     const COLLECTION: &'static str = "projectequipment";
 }
 
+impl Revisioned for ProjectEquipment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectEquipment`] item (`/projectequipment/{id}`).
 pub type ProjectEquipmentId = Id<ProjectEquipment>;
 
 impl Resource for ProjectEquipmentGroup {
     const COLLECTION: &'static str = "projectequipmentgroup";
+}
+
+impl Revisioned for ProjectEquipmentGroup {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectEquipmentGroup`] item (`/projectequipmentgroup/{id}`).
@@ -19665,11 +20184,31 @@ impl Resource for ProjectFunctionGroup {
     const COLLECTION: &'static str = "projectfunctiongroups";
 }
 
+impl Revisioned for ProjectFunctionGroup {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectFunctionGroup`] item (`/projectfunctiongroups/{id}`).
 pub type ProjectFunctionGroupId = Id<ProjectFunctionGroup>;
 
 impl Resource for ProjectFunction {
     const COLLECTION: &'static str = "projectfunctions";
+}
+
+impl Revisioned for ProjectFunction {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectFunction`] item (`/projectfunctions/{id}`).
@@ -19679,11 +20218,31 @@ impl Resource for ProjectRequestEquipment {
     const COLLECTION: &'static str = "projectrequestequipment";
 }
 
+impl Revisioned for ProjectRequestEquipment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectRequestEquipment`] item (`/projectrequestequipment/{id}`).
 pub type ProjectRequestEquipmentId = Id<ProjectRequestEquipment>;
 
 impl Resource for ProjectRequest {
     const COLLECTION: &'static str = "projectrequests";
+}
+
+impl Revisioned for ProjectRequest {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectRequest`] item (`/projectrequests/{id}`).
@@ -19693,11 +20252,31 @@ impl Resource for Project {
     const COLLECTION: &'static str = "projects";
 }
 
+impl Revisioned for Project {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Project`] item (`/projects/{id}`).
 pub type ProjectId = Id<Project>;
 
 impl Resource for ProjectStatus {
     const COLLECTION: &'static str = "projectstatuses";
+}
+
+impl Revisioned for ProjectStatus {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectStatus`] item (`/projectstatuses/{id}`).
@@ -19707,11 +20286,31 @@ impl Resource for ProjectTemplate {
     const COLLECTION: &'static str = "projecttemplates";
 }
 
+impl Revisioned for ProjectTemplate {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectTemplate`] item (`/projecttemplates/{id}`).
 pub type ProjectTemplateId = Id<ProjectTemplate>;
 
 impl Resource for ProjectType {
     const COLLECTION: &'static str = "projecttypes";
+}
+
+impl Revisioned for ProjectType {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`ProjectType`] item (`/projecttypes/{id}`).
@@ -19721,11 +20320,31 @@ impl Resource for ProjectVehicle {
     const COLLECTION: &'static str = "projectvehicles";
 }
 
+impl Revisioned for ProjectVehicle {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`ProjectVehicle`] item (`/projectvehicles/{id}`).
 pub type ProjectVehicleId = Id<ProjectVehicle>;
 
 impl Resource for PurchaseOrderCost {
     const COLLECTION: &'static str = "purchaseordercosts";
+}
+
+impl Revisioned for PurchaseOrderCost {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`PurchaseOrderCost`] item (`/purchaseordercosts/{id}`).
@@ -19735,11 +20354,31 @@ impl Resource for PurchaseOrderGlobalCost {
     const COLLECTION: &'static str = "purchaseorderglobalcosts";
 }
 
+impl Revisioned for PurchaseOrderGlobalCost {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`PurchaseOrderGlobalCost`] item (`/purchaseorderglobalcosts/{id}`).
 pub type PurchaseOrderGlobalCostId = Id<PurchaseOrderGlobalCost>;
 
 impl Resource for PurchaseOrder {
     const COLLECTION: &'static str = "purchaseorders";
+}
+
+impl Revisioned for PurchaseOrder {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`PurchaseOrder`] item (`/purchaseorders/{id}`).
@@ -19749,11 +20388,31 @@ impl Resource for Quote {
     const COLLECTION: &'static str = "quotes";
 }
 
+impl Revisioned for Quote {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Quote`] item (`/quotes/{id}`).
 pub type QuoteId = Id<Quote>;
 
 impl Resource for RateFactor {
     const COLLECTION: &'static str = "ratefactors";
+}
+
+impl Revisioned for RateFactor {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`RateFactor`] item (`/ratefactors/{id}`).
@@ -19763,11 +20422,31 @@ impl Resource for Rate {
     const COLLECTION: &'static str = "rates";
 }
 
+impl Revisioned for Rate {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Rate`] item (`/rates/{id}`).
 pub type RateId = Id<Rate>;
 
 impl Resource for Repair {
     const COLLECTION: &'static str = "repairs";
+}
+
+impl Revisioned for Repair {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Repair`] item (`/repairs/{id}`).
@@ -19777,11 +20456,31 @@ impl Resource for SerialNumber {
     const COLLECTION: &'static str = "serialnumbers";
 }
 
+impl Revisioned for SerialNumber {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`SerialNumber`] item (`/serialnumbers/{id}`).
 pub type SerialNumberId = Id<SerialNumber>;
 
 impl Resource for Status {
     const COLLECTION: &'static str = "statuses";
+}
+
+impl Revisioned for Status {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Status`] item (`/statuses/{id}`).
@@ -19791,11 +20490,31 @@ impl Resource for StockLocation {
     const COLLECTION: &'static str = "stocklocations";
 }
 
+impl Revisioned for StockLocation {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`StockLocation`] item (`/stocklocations/{id}`).
 pub type StockLocationId = Id<StockLocation>;
 
 impl Resource for StockMovement {
     const COLLECTION: &'static str = "stockmovements";
+}
+
+impl Revisioned for StockMovement {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`StockMovement`] item (`/stockmovements/{id}`).
@@ -19805,11 +20524,31 @@ impl Resource for Subproject {
     const COLLECTION: &'static str = "subprojects";
 }
 
+impl Revisioned for Subproject {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Subproject`] item (`/subprojects/{id}`).
 pub type SubprojectId = Id<Subproject>;
 
 impl Resource for SubrentalEquipment {
     const COLLECTION: &'static str = "subrentalequipment";
+}
+
+impl Revisioned for SubrentalEquipment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`SubrentalEquipment`] item (`/subrentalequipment/{id}`).
@@ -19819,11 +20558,31 @@ impl Resource for SubrentalEquipmentGroup {
     const COLLECTION: &'static str = "subrentalequipmentgroup";
 }
 
+impl Revisioned for SubrentalEquipmentGroup {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`SubrentalEquipmentGroup`] item (`/subrentalequipmentgroup/{id}`).
 pub type SubrentalEquipmentGroupId = Id<SubrentalEquipmentGroup>;
 
 impl Resource for Subrental {
     const COLLECTION: &'static str = "subrentals";
+}
+
+impl Revisioned for Subrental {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Subrental`] item (`/subrentals/{id}`).
@@ -19833,11 +20592,31 @@ impl Resource for Subtask {
     const COLLECTION: &'static str = "subtasks";
 }
 
+impl Revisioned for Subtask {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Subtask`] item (`/subtasks/{id}`).
 pub type SubtaskId = Id<Subtask>;
 
 impl Resource for Supplier {
     const COLLECTION: &'static str = "suppliers";
+}
+
+impl Revisioned for Supplier {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Supplier`] item (`/suppliers/{id}`).
@@ -19847,11 +20626,31 @@ impl Resource for TaskAssignment {
     const COLLECTION: &'static str = "taskassignments";
 }
 
+impl Revisioned for TaskAssignment {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`TaskAssignment`] item (`/taskassignments/{id}`).
 pub type TaskAssignmentId = Id<TaskAssignment>;
 
 impl Resource for Task {
     const COLLECTION: &'static str = "tasks";
+}
+
+impl Revisioned for Task {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`Task`] item (`/tasks/{id}`).
@@ -19861,11 +20660,31 @@ impl Resource for TaskStatus {
     const COLLECTION: &'static str = "taskstatuses";
 }
 
+impl Revisioned for TaskStatus {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`TaskStatus`] item (`/taskstatuses/{id}`).
 pub type TaskStatusId = Id<TaskStatus>;
 
 impl Resource for TaxClass {
     const COLLECTION: &'static str = "taxclasses";
+}
+
+impl Revisioned for TaxClass {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`TaxClass`] item (`/taxclasses/{id}`).
@@ -19875,11 +20694,31 @@ impl Resource for TimeRegistration {
     const COLLECTION: &'static str = "timeregistration";
 }
 
+impl Revisioned for TimeRegistration {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`TimeRegistration`] item (`/timeregistration/{id}`).
 pub type TimeRegistrationId = Id<TimeRegistration>;
 
 impl Resource for TimeRegistrationActivity {
     const COLLECTION: &'static str = "timeregistrationactivities";
+}
+
+impl Revisioned for TimeRegistrationActivity {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`TimeRegistrationActivity`] item (`/timeregistrationactivities/{id}`).
@@ -19889,11 +20728,31 @@ impl Resource for Vehicle {
     const COLLECTION: &'static str = "vehicles";
 }
 
+impl Revisioned for Vehicle {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
+}
+
 /// ID of a [`Vehicle`] item (`/vehicles/{id}`).
 pub type VehicleId = Id<Vehicle>;
 
 impl Resource for WarehouseStatus {
     const COLLECTION: &'static str = "warehousestatuses";
+}
+
+impl Revisioned for WarehouseStatus {
+    fn id(&self) -> Id<Self> {
+        self.id
+    }
+
+    fn revision(&self) -> &Revision<Self> {
+        &self.revision
+    }
 }
 
 /// ID of a [`WarehouseStatus`] item (`/warehousestatuses/{id}`).

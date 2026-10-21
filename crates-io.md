@@ -74,6 +74,37 @@ let names: Vec<CrewName> = client
 # }
 ```
 
+## Change detection
+
+Every item carries its revision (`crew.revision`, Rentman's `updateHash`),
+which changes on every update. `revisions()` reads the revision of every
+listed item without its fields, and `changes_since` compares it with the
+revisions of an earlier sync:
+
+```rust
+use rentman_client::{RentmanClient, Revisioned, Revisions, model};
+
+# async fn example(client: RentmanClient) -> rentman_client::Result<()> {
+// Revisions stored after the last sync (empty on the first one).
+let known: Revisions<model::Crew> = Revisions::new();
+
+let current = client.crew().list().revisions().await?;
+let changes = current.changes_since(&known);
+for id in changes.created.iter().chain(&changes.updated) {
+    let member = client.crew().get(*id).await?;
+    // Store `member` and `member.revision()` …
+}
+for id in &changes.deleted {
+    // … and remove what is gone.
+}
+# Ok(())
+# }
+```
+
+Revisions are typed per resource like IDs (`Revision<Crew>`), and every
+model implements `Revisioned` (`id()`, `revision()`), so one generic sync
+function serves every resource.
+
 ## What you get
 
 - `RentmanClient` owns authentication, retry handling, rate limiting, and the

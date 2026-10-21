@@ -14,6 +14,7 @@ ENDPOINT_OUTPUT = ROOT / "src" / "endpoint" / "generated.rs"
 WIRE_OUTPUT = ROOT / "src" / "model" / "generated.rs"
 LIVE_SWEEP_OUTPUT = ROOT / "tests" / "live" / "generated_sweep.rs"
 RESPONSE_ENUM_TESTS_OUTPUT = ROOT / "tests" / "contract" / "generated_response_enums.rs"
+REVISION_TESTS_OUTPUT = ROOT / "tests" / "contract" / "generated_revisions.rs"
 PAYLOAD_TESTS_OUTPUT = ROOT / "tests" / "contract" / "generated_payload_constructors.rs"
 RESOURCE_OUTPUT = ROOT / "src" / "resource" / "generated.rs"
 FIELDS_OUTPUT = ROOT / "src" / "fields.rs"
@@ -154,6 +155,17 @@ _PROJECT_PRICE_FIELDS = (
     "project_services_price",
 )
 _PROJECT_COST_FIELDS = ("estimated_cost", "planned_cost", "actual_cost")
+# Rentman sends `updateHash` on every item of a resource, a hash of `id` and
+# `modified` that changes on every update, but documents it only in the API
+# introduction, not in a schema. Every resource model (the types in
+# RESOURCE_COLLECTIONS) gets it as the required field `revision:
+# Revision<Self>` and implements `Revisioned`; every resource gets an
+# `updateHash` projection marker. A read-only sweep over all 227 documented GET
+# paths found it on every one of 13,576 items (2026-10-21). It has no filter or
+# sort constant: Rentman rejects it in a query ("Unknown property 'updateHash'
+# used in query"). Payloads never carry it.
+REVISION_FIELD = "updateHash"
+
 RESPONSE_OPTIONAL_FIELDS = {
     "ContractResponse": set(_PROJECT_PRICE_FIELDS),
     "FactuurResponse": set(_PROJECT_PRICE_FIELDS),
@@ -553,6 +565,17 @@ def collect_operations(spec: dict) -> list[dict]:
     return operations
 
 
+def has_revision(schema_name_value: str, schema: dict) -> bool:
+    """Whether this schema is a resource model, which carries `updateHash`."""
+    if not schema_name_value.endswith("Response"):
+        return False
+    if rust_type_name(schema_name_value) not in RESOURCE_COLLECTIONS.values():
+        return False
+    if REVISION_FIELD in (schema.get("properties") or {}):
+        raise ValueError(f"{schema_name_value} now documents {REVISION_FIELD}; review REVISION_FIELD")
+    return True
+
+
 def generate_wire(spec: dict) -> None:
     lines = [
         "//! Strongly typed Rentman API request and response models.",
@@ -563,6 +586,7 @@ def generate_wire(spec: dict) -> None:
         "",
         "use crate::id::{Id, ItemId, Resource};",
         "use chrono::{DateTime, FixedOffset, NaiveDate};",
+        "use crate::revision::{Revision, Revisioned};",
         "use crate::RentmanAmount;",
         "use rust_decimal::Decimal;",
         "use serde::{Deserialize, Serialize};",
@@ -746,6 +770,10 @@ def generate_wire(spec: dict) -> None:
             if serde_attributes:
                 lines.append(f"    #[serde({', '.join(serde_attributes)})]")
             lines.append(f"    pub {rust_name}: {field_type},")
+        if has_revision(schema_name_value, schema):
+            lines.append("    /// Revision of the item as read (`updateHash`): changes on every update.")
+            lines.append(f'    #[serde(rename = "{REVISION_FIELD}")]')
+            lines.append(f"    pub revision: Revision<{rust_type_name(schema_name_value)}>,")
         lines.append("}")
         lines.append("")
         if is_payload and required:
@@ -773,6 +801,16 @@ def generate_wire(spec: dict) -> None:
             [
                 f"impl Resource for {rust_type} {{",
                 f'    const COLLECTION: &\'static str = "{collection}";',
+                "}",
+                "",
+                f"impl Revisioned for {rust_type} {{",
+                "    fn id(&self) -> Id<Self> {",
+                "        self.id",
+                "    }",
+                "",
+                "    fn revision(&self) -> &Revision<Self> {",
+                "        &self.revision",
+                "    }",
                 "}",
                 "",
                 f"/// ID of a [`{rust_type}`] item (`/{collection}/{{id}}`).",
@@ -1117,7 +1155,7 @@ def generate_projection_fields(spec: dict) -> None:
         "    use crate::model::*;",
         "    use crate::projection::Link;",
         "    use ::chrono::{DateTime, FixedOffset, NaiveDate};",
-        "    use crate::RentmanAmount;",
+        "    use crate::{RentmanAmount, Revision};",
         "    use ::url::Url;",
     ]
     for name, schema in sorted(schemas.items(), key=lambda item: rust_type_name(item[0])):
@@ -1149,6 +1187,23 @@ def generate_projection_fields(spec: dict) -> None:
                     f"        type Value = {value};",
                     f"        type Wire = {wire};",
                     f'        const NAME: &\'static str = "{escape(field)}";',
+                    "    }",
+                    "",
+                ]
+            )
+        if has_revision(name, schema):
+            lines.extend(
+                [
+                    f"    /// `{REVISION_FIELD}`: revision of the item, changes on every update.",
+                    "    ///",
+                    "    /// Never sent in `fields=`: Rentman adds it to every selection by itself.",
+                    f"    pub struct {REVISION_FIELD};",
+                    "",
+                    f"    impl ProjectionField for {REVISION_FIELD} {{",
+                    f"        type Resource = {rust_type};",
+                    f"        type Value = Revision<{rust_type}>;",
+                    f"        type Wire = Revision<{rust_type}>;",
+                    f'        const NAME: &\'static str = "{REVISION_FIELD}";',
                     "    }",
                     "",
                 ]
@@ -1489,6 +1544,76 @@ def generate_response_enum_tests(spec: dict) -> None:
     RESPONSE_ENUM_TESTS_OUTPUT.write_text("\n".join(lines))
 
 
+def sample_wire(rust_type: str, schema_name_value: str, field: str, field_schema: dict) -> object:
+    """A valid JSON value of the given field type, as Rentman sends it."""
+    if rust_type.startswith("Option<"):
+        return None
+    if rust_type == enum_type_name(schema_name_value, field):
+        return str(field_schema["enum"][0])
+    if rust_type.startswith("Id<"):
+        if field == "id":
+            return 1
+        target = rust_type[3:-1]
+        return f"/{next(c for c, t in RESOURCE_COLLECTIONS.items() if t == target)}/1"
+    samples = {
+        "String": "x",
+        "DateTime<FixedOffset>": "2026-01-01T00:00:00+00:00",
+        "NaiveDate": "2026-01-01",
+        "i64": 1,
+        "bool": True,
+        "RentmanAmount": 1,
+        "ItemId": 1,
+        "EmailAddress": "crew@example.test",
+        "Url": "https://example.test/",
+        "CustomFields": {},
+    }
+    if rust_type not in samples:
+        raise ValueError(f"no sample wire value for {schema_name_value}.{field}: {rust_type}")
+    return samples[rust_type]
+
+
+def generate_revision_tests(spec: dict) -> None:
+    resources = sorted(
+        (rust_type_name(name), name, schema)
+        for name, schema in spec["components"]["schemas"].items()
+        if has_revision(name, schema)
+    )
+    lines = [
+        "//! One contract test per resource model: it reads Rentman's undocumented",
+        "//! `updateHash` as its revision, requires it, and exposes it through",
+        "//! `Revisioned` and the `updateHash` projection marker.",
+        "//!",
+        "//! This file is generated by `scripts/generate_endpoint_manifest.py`.",
+        "",
+        "use super::assert_carries_revision;",
+        "use rentman_client::{model, projection_fields};",
+        "",
+        "/// Resource types whose model carries a revision.",
+        "pub(crate) const RESOURCES_WITH_REVISION: &[&str] = &[",
+        *[f'    "{rust_type}",' for rust_type, _, _ in resources],
+        "];",
+        "",
+    ]
+    for rust_type, name, schema in resources:
+        required = effective_required(name, schema)
+        item = {
+            field: sample_wire(rust_field_type(name, field, field_schema, required), name, field, field_schema)
+            for field, field_schema in (schema.get("properties") or {}).items()
+        }
+        lines.extend(
+            [
+                "#[test]",
+                f"fn {rust_field(rust_type)}() {{",
+                f"    assert_carries_revision::<model::{rust_type}, projection_fields::{rust_type}::{REVISION_FIELD}>(",
+                f"        r#\"{json.dumps(item)}\"#,",
+                "    );",
+                "}",
+                "",
+            ]
+        )
+    REVISION_TESTS_OUTPUT.write_text("\n".join(lines))
+
+
 def main() -> None:
     spec = json.loads(OPENAPI.read_text())
     collect_resources(spec)
@@ -1498,6 +1623,7 @@ def main() -> None:
     generate_live_sweep(operations)
     generate_response_enum_tests(spec)
     generate_payload_constructor_tests(spec)
+    generate_revision_tests(spec)
     generate_resources(spec, operations)
     generate_fields(spec)
     generate_projection_fields(spec)

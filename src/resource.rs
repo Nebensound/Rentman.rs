@@ -30,6 +30,7 @@ use crate::{
     model::ItemResponse,
     paging::{CollectionRequest, PageSize},
     projection::{self, ProjectedItem, Projection},
+    revision::{ItemRevision, Revisioned, Revisions},
 };
 use reqwest::Method;
 use serde::{Serialize, de::DeserializeOwned};
@@ -377,6 +378,37 @@ impl<T: DeserializeOwned> ListRequest<T> {
             .map_err(|error| error.in_operation(self.operation))
     }
 
+    /// Reads the revision of every item, for change detection with
+    /// [`Revisions::changes_since`].
+    ///
+    /// Only the items' IDs are requested, so this is much cheaper than
+    /// [`Self::all`]; filters apply as usual. Read the created and updated
+    /// items afterwards with `get` or a filtered listing.
+    ///
+    /// ```no_run
+    /// # async fn example(
+    /// #     client: rentman_client::RentmanClient,
+    /// #     known: rentman_client::Revisions<rentman_client::model::Crew>,
+    /// # ) -> rentman_client::Result<()> {
+    /// let current = client.crew().list().revisions().await?;
+    /// let changes = current.changes_since(&known);
+    /// for id in changes.created.iter().chain(&changes.updated) {
+    ///     let crew = client.crew().get(*id).await?;
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn revisions(self) -> Result<Revisions<T>>
+    where
+        T: Revisioned,
+    {
+        let items = self.all_as::<ItemRevision<T>>().await?;
+        Ok(items
+            .into_iter()
+            .map(|item| (item.id, item.revision))
+            .collect())
+    }
+
     /// Reads at most `count` items (1 to 1500) as projection `P` with a single
     /// request.
     pub async fn first_as<P: Projection<Resource = T>>(self, count: usize) -> Result<Vec<P>> {
@@ -438,7 +470,7 @@ mod tests {
     use reqwest::StatusCode;
     use std::{num::NonZeroUsize, time::Duration};
 
-    const TASK_STATUS: &str = r#"{"id":5,"created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","color":"green","type":"done","order":2}"#;
+    const TASK_STATUS: &str = r#"{"id":5,"created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","color":"green","type":"done","order":2,"updateHash":"h5"}"#;
 
     fn client(server: &TestServer) -> RentmanClient {
         let config = RentmanClientConfig::default()
@@ -543,6 +575,54 @@ mod tests {
         assert_eq!(request.query_value("color[neq]").as_deref(), Some("red"));
         assert_eq!(request.query_value("sort").as_deref(), Some("-order"));
         assert_eq!(request.query_value("limit").as_deref(), Some("5"));
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn reads_the_revisions_of_every_page() {
+        use crate::fields::task_status;
+        use crate::revision::Revision;
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":[{"id":6,"created":null,"modified":null,"creator":null,"updateHash":"h6","custom":{}}],"itemCount":1,"limit":1,"next_page_url":"{base}/taskstatuses?fields=id&type=done&cursor=2"}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":5,"updateHash":"h5"}],"itemCount":1,"limit":2,"next_page_url":null}"#,
+            ),
+            json_response(r#"{"data":[{"id":5}],"itemCount":1,"limit":300}"#),
+        ]);
+        let client = client(&server);
+
+        let revisions = client
+            .task_statuses()
+            .list()
+            .filter(task_status::TYPE.eq(TaskStatusType::Done))
+            .page_size(PageSize::new(1).unwrap())
+            .revisions()
+            .await
+            .unwrap();
+        assert_eq!(
+            revisions.iter().collect::<Vec<_>>(),
+            [
+                (TaskStatusId::new(5), &Revision::new("h5").unwrap()),
+                (TaskStatusId::new(6), &Revision::new("h6").unwrap()),
+            ]
+        );
+        // Only the IDs are requested; Rentman adds `updateHash` by itself.
+        let first = server.next_request();
+        assert_request(&first, "GET", "/taskstatuses");
+        assert_eq!(first.query_value("fields").as_deref(), Some("id"));
+        assert_eq!(first.query_value("type").as_deref(), Some("done"));
+        assert_eq!(
+            server.next_request().query_value("cursor").as_deref(),
+            Some("2")
+        );
+
+        // An item without a revision fails with the operation.
+        let error = client.task_statuses().list().revisions().await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        server.next_request();
         server.assert_no_more_requests();
     }
 

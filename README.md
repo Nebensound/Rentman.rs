@@ -82,7 +82,10 @@ by field through the hand-written `ProjectedItem::take`, so consumers need no
 serde dependency and link fields are read through the same adapters as the
 models. Rentman always adds `id`, `created`, `modified`, `updateHash`, and
 `custom` to a selection; projections ignore fields they do not declare, and
-custom fields are selected as a whole through `custom`.
+custom fields are selected as a whole through `custom`. A projection may
+declare `updateHash` (as `Revision<R>`), but it is never sent in `fields=`:
+Rentman drops it there next to other fields, and named alone it ignores the
+whole selection, so a projection of only `updateHash` requests `id`.
 
 User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
@@ -155,6 +158,37 @@ are documented as strings but returned as integers, documented-required fields
 that collection responses omit, and documented non-nullable fields that return
 null. Request models always keep the documented types. The live API tests
 guard these overrides against future drift.
+
+One field is added without any schema listing it. Rentman sends `updateHash`
+on every item, a hash of `id` and `modified` that changes on every update, and
+documents it only in the API introduction. It is what change detection is
+built on, so it is part of every resource, not an optional extra: the
+generator (`REVISION_FIELD`) gives every resource model (each type in
+`RESOURCE_COLLECTIONS`) the required field `revision: Revision<Self>`, an
+`impl Revisioned` (`id()`, `revision()`), and an `updateHash` projection
+marker. A read-only sweep over all 227 documented GET paths found it on every
+one of 13,576 items (2026-10-21). Responses of writes could not be checked
+read-only; they use the same models, so a write response without
+`updateHash` would fail to decode after the write was applied (the error then
+reports `Applied`).
+
+`Revision<R>` is a hand-written boundary type, typed per resource like
+`Id<R>`: opaque (the algorithm is undocumented, so it is only compared), never
+empty, and without an order. `ListRequest::revisions()` reads `Revisions<R>`
+(ID to revision) through the shared paging core with only `fields=id`, so
+filters apply and it is much cheaper than full items; `Revisions::changes_since`
+returns the created, updated, and deleted IDs. An item that no longer matches
+the listing's filters counts as deleted. Revisions have no filter or sort
+constant: Rentman rejects `updateHash` in a query (`Unknown property
+'updateHash' used in query`). Payloads never carry it.
+
+A generated contract test per resource (`tests/contract/generated_revisions.rs`)
+reads a sample item, requires `updateHash`, and checks `Revisioned` and the
+projection marker; `tests/openapi_contract.rs` fails once a schema documents
+`updateHash` or the introduction stops documenting it. The generated live
+sweep decodes the first item of every collection with the required revision,
+and `revisions_identify_item_states_live` checks that `revisions()` matches
+the full items and that revisions are unique and stable.
 
 ## Checks
 
