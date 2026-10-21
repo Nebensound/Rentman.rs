@@ -39,18 +39,87 @@ fn live_client() -> RentmanClient {
     static CLIENT: OnceLock<RentmanClient> = OnceLock::new();
     CLIENT
         .get_or_init(|| {
+            let token_in_environment = std::env::var_os("RENTMAN_API_TOKEN").is_some();
             // Use the same crate-root file as the build-time test selection.
-            match dotenvy::from_path(concat!(env!("CARGO_MANIFEST_DIR"), "/.env")) {
-                Ok(()) => {}
-                Err(error) if error.not_found() => {}
-                Err(_) => panic!("could not load crate-root .env for live API tests"),
-            }
+            check_live_dotenv(
+                dotenvy::from_path(concat!(env!("CARGO_MANIFEST_DIR"), "/.env")),
+                token_in_environment,
+            )
+            .expect("could not initialize live API test settings");
             let token = std::env::var("RENTMAN_API_TOKEN").expect(
                 "RENTMAN_API_TOKEN must be set (environment or .env) to run live Rentman API tests",
             );
             RentmanClient::new(RentmanApiToken::new(token))
         })
         .clone()
+}
+
+fn check_live_dotenv(
+    result: Result<(), dotenvy::Error>,
+    token_in_environment: bool,
+) -> Result<(), &'static str> {
+    match result {
+        Ok(()) => Ok(()),
+        Err(error) if error.not_found() => Ok(()),
+        Err(_) if token_in_environment => {
+            eprintln!(
+                "could not load crate-root .env for live API tests; \
+                 continuing with the environment token; optional .env settings may be unavailable"
+            );
+            Ok(())
+        }
+        Err(_) => Err("could not load crate-root .env for live API tests"),
+    }
+}
+
+#[cfg(test)]
+mod dotenv_tests {
+    use super::check_live_dotenv;
+    use std::io::{Error, ErrorKind};
+
+    fn malformed_dotenv() -> dotenvy::Error {
+        dotenvy::from_read_iter(&b"RENTMAN_API_TOKEN=\"dummy-secret-without-closing-quote\n"[..])
+            .next()
+            .unwrap()
+            .unwrap_err()
+    }
+
+    #[test]
+    fn environment_token_allows_malformed_or_unreadable_dotenv() {
+        for error in [
+            malformed_dotenv(),
+            dotenvy::Error::Io(Error::from(ErrorKind::PermissionDenied)),
+        ] {
+            assert_eq!(check_live_dotenv(Err(error), true), Ok(()));
+        }
+    }
+
+    #[test]
+    fn dotenv_token_requires_successful_loading_with_sanitized_errors() {
+        for error in [
+            malformed_dotenv(),
+            dotenvy::Error::Io(Error::from(ErrorKind::PermissionDenied)),
+        ] {
+            assert_eq!(
+                check_live_dotenv(Err(error), false),
+                Err("could not load crate-root .env for live API tests")
+            );
+        }
+    }
+
+    #[test]
+    fn successful_or_missing_dotenv_is_accepted_with_or_without_environment_token() {
+        for token_in_environment in [true, false] {
+            assert_eq!(check_live_dotenv(Ok(()), token_in_environment), Ok(()));
+            assert_eq!(
+                check_live_dotenv(
+                    Err(dotenvy::Error::Io(Error::from(ErrorKind::NotFound))),
+                    token_in_environment,
+                ),
+                Ok(())
+            );
+        }
+    }
 }
 
 #[tokio::test]

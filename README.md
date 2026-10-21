@@ -133,6 +133,9 @@ cargo test
 A token already set in the environment takes precedence over `.env`, even
 when it is empty (an empty or whitespace-only token disables automatic live
 tests). Only the crate-root `.env` is loaded, not files in parent directories.
+Live tests still load `.env` for optional settings when an environment token is
+present. If loading fails, they issue a sanitized warning and continue with that
+token; without an environment token, a loading failure is fatal.
 Cargo rebuilds the test binary when token availability changes. Without a token, the
 live tests remain ignored and regular `cargo test` does not call the API. The
 CI test workflow does not receive the token; live tests remain in the separate,
