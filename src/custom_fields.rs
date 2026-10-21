@@ -255,6 +255,8 @@ fn field_type_name(field_type: &ExtraInputFieldType) -> &'static str {
 }
 
 #[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;

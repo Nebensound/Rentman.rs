@@ -294,6 +294,8 @@ impl<R: Resource> Projection for ItemRevision<R> {
 }
 
 #[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;

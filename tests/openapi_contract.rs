@@ -2,8 +2,9 @@
 
 use chrono::NaiveDate;
 use rentman_client::model::{
-    Crew, CrewId, EmailAddress, Equipment, Invoice, LINK_FIELDS, Payment,
-    ProjectsCreateFromTemplatePayload, RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass,
+    Crew, CrewId, EmailAddress, Equipment, EquipmentIsPhysical, EquipmentRentalSales,
+    EquipmentStockManagement, EquipmentStrictContainerContent, EquipmentType, Invoice, LINK_FIELDS,
+    Payment, ProjectsCreateFromTemplatePayload, RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass,
     TaxClassType,
 };
 use rentman_client::model::{InvoiceId, PaymentId};
@@ -36,7 +37,7 @@ fn wire_models_cover_every_documented_schema() {
 
     assert_eq!(
         documented, covered,
-        "wire model manifest drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py and review the schema surface"
+        "wire model manifest drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi` and review the schema surface"
     );
 }
 
@@ -112,7 +113,7 @@ fn every_documented_operation_is_reachable_through_a_resource() {
     reachable.sort();
     assert_eq!(
         documented, reachable,
-        "resources drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+        "resources drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi --only resources`"
     );
 }
 
@@ -147,7 +148,7 @@ fn field_constants_cover_every_queryable_field() {
         .collect::<BTreeSet<_>>();
     assert_eq!(
         documented, generated,
-        "field constants drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+        "field constants drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi --only fields`"
     );
 }
 
@@ -187,7 +188,7 @@ fn every_link_targets_its_documented_collection() {
         .collect::<BTreeSet<_>>();
     assert_eq!(
         documented, generated,
-        "link fields drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+        "link fields drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi --only models`"
     );
 
     let collections = RESOURCE_COLLECTIONS
@@ -340,6 +341,8 @@ fn wire_email_addresses_are_validated() {
             .to_string()
             .contains("Rentman email address must contain '@'")
     );
+
+    assert!(serde_json::from_str::<EmailAddress>("1").is_err());
 }
 
 #[test]
@@ -460,6 +463,52 @@ fn resource_responses_allow_unselected_fields_and_ignore_unknown_fields() {
 }
 
 #[test]
+fn equipment_decodes_the_full_live_collection_response() {
+    let response = r#"{"data":{"id":5463,"created":"2024-02-12T11:15:30+01:00","modified":"2026-10-21T18:08:26+02:00","creator":"/crew/244","displayname":"Testartikel","folder":null,"code":"string","factor_group":"/factorgroups/1","name":"Testartikel","internal_remark":"string","external_remark":"string","unit":"string","in_shop":false,"surface_article":false,"shop_description_short":"string","shop_description_long":"string","shop_seo_title":"string","shop_seo_keyword":"string","shop_seo_description":"string","shop_featured":false,"price":111303.8521365961,"subrental_costs":4889.1308024085,"critical_stock_level":5528,"type":"item","rental_sales":"Rental","temporary":false,"in_planner":false,"in_archive":false,"stock_management":"Exclude from stock tracking","taxclass":"/taxclasses/1","list_price":7709.0760923012,"volume":167.55486115617,"packed_per":5707,"height":2808.3098759169,"width":2885.372883073,"length":3910.4114034759,"weight":5198.3339072367,"empty_weight":8671.1863504942,"power":936.669092379,"current":6159.1688126785,"country_of_origin":"gh","image":null,"ledger":"/ledgercodes/1","ledger_debit":"/ledgercodes/1","defaultgroup":"string","is_combination":false,"is_physical":"Physical equipment","can_edit_content_during_planning":false,"strict_container_content":"Unrestricted","current_quantity_excl_cases":1,"updateHash":"73e663812b40a811fafeafe330b5c270","custom":{"custom_8":null,"custom_9":10,"custom_17":false,"custom_19":false,"custom_23":0,"custom_24":0,"custom_25":0,"custom_26":0,"custom_27":0,"custom_30":1,"custom_37":5,"custom_48":null,"custom_49":null}},"itemCount":1,"limit":1,"offset":0}"#;
+    let response: Value = serde_json::from_str(response).unwrap();
+    assert_eq!(response["itemCount"], json!(1));
+    assert_eq!(response["limit"], json!(1));
+    assert_eq!(response["offset"], json!(0));
+
+    let equipment: Equipment = serde_json::from_value(response["data"].clone()).unwrap();
+    assert_eq!(equipment.id, Id::new(5463));
+    assert_eq!(equipment.creator, Some(CrewId::new(244)));
+    assert_eq!(equipment.factor_group, Some(Id::new(1)));
+    assert_eq!(equipment.folder, None);
+    assert_eq!(equipment.type_, Some(EquipmentType::Item));
+    assert_eq!(equipment.rental_sales, Some(EquipmentRentalSales::Rental));
+    assert_eq!(
+        equipment.stock_management,
+        Some(EquipmentStockManagement::ExcludeFromStockTracking)
+    );
+    assert_eq!(
+        equipment.is_physical,
+        Some(EquipmentIsPhysical::PhysicalEquipment)
+    );
+    assert_eq!(
+        equipment.strict_container_content,
+        Some(EquipmentStrictContainerContent::Unrestricted)
+    );
+    assert_eq!(
+        equipment.price.unwrap().as_decimal(),
+        "111303.8521365961".parse().unwrap()
+    );
+    let custom = equipment.custom.unwrap();
+    assert_eq!(
+        custom.0.get("custom_8"),
+        Some(&rentman_client::model::CustomFieldValue::Null)
+    );
+    assert_eq!(
+        custom.0.get("custom_9"),
+        Some(&rentman_client::model::CustomFieldValue::Number(10.into()))
+    );
+    assert_eq!(
+        custom.0.get("custom_17"),
+        Some(&rentman_client::model::CustomFieldValue::Bool(false))
+    );
+}
+
+#[test]
 fn every_documented_response_enum_is_open() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]
@@ -483,7 +532,7 @@ fn every_documented_response_enum_is_open() {
 
     assert_eq!(
         documented, covered,
-        "response enums drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+        "response enums drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi --only tests`"
     );
 }
 
@@ -550,7 +599,7 @@ where
             .unwrap_or_else(|error| panic!("{schema_name}.{field} = {text:?}: {error}"));
         assert!(
             !is_unknown(&parsed),
-            "{schema_name}.{field} = {text:?} is documented but has no named variant; run scripts/generate_endpoint_manifest.py"
+            "{schema_name}.{field} = {text:?} is documented but has no named variant; run `cargo xtask generate-openapi --only models`"
         );
         assert_eq!(serde_json::to_value(&parsed).unwrap(), json!(text));
     }

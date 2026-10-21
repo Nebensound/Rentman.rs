@@ -1,117 +1,178 @@
-use std::env;
-use std::io;
-use std::path::Path;
-use std::process::{self, Command};
+#![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
-const USAGE: &str = "cargo xtask <command>\n\nCommands:\n  update-openapi  Refresh the checked-in Rentman API contract";
+mod generator;
+mod openapi;
+
+use std::env;
+use std::path::Path;
+use std::process;
+
+const USAGE: &str = "cargo xtask <command>\n\nCommands:\n  fetch-openapi                 Download the current Rentman OpenAPI spec\n  generate-openapi [--only X]   Generate all outputs or one group\n  update-openapi                Fetch the spec and generate everything\n\nGroups: models, endpoints, resources, fields, projections, tests";
+
+enum Command {
+    Help,
+    Fetch,
+    Generate(Option<generator::Group>),
+    Update,
+}
 
 fn main() {
-    let result = dispatch(env::args().skip(1).collect(), update_openapi);
-    if let Err(error) = result {
+    let root = workspace_root();
+    let settings = generator::Settings {
+        root: &root,
+        docs_url: generator::DOCS_URL,
+        format_program: "cargo",
+        format_args: &["fmt", "--all"],
+        config: openapi::config(),
+    };
+    if let Err(error) = dispatch(env::args().skip(1).collect(), &settings) {
         eprintln!("{error}");
         process::exit(1);
     }
 }
 
-fn dispatch(args: Vec<String>, update: impl FnOnce() -> Result<(), String>) -> Result<(), String> {
-    match args.as_slice() {
-        [command] if command == "--help" || command == "-h" => {
+fn dispatch(args: Vec<String>, settings: &generator::Settings<'_>) -> Result<(), String> {
+    let command = match args.as_slice() {
+        [command] if command == "--help" || command == "-h" => Command::Help,
+        [command] if command == "fetch-openapi" => Command::Fetch,
+        [command] if command == "generate-openapi" => Command::Generate(None),
+        [command, only, group] if command == "generate-openapi" && only == "--only" => {
+            Command::Generate(Some(generator::Group::parse(group)?))
+        }
+        [command] if command == "update-openapi" => Command::Update,
+        _ => return Err(format!("Usage: {USAGE}")),
+    };
+    match command {
+        Command::Help => {
             println!("{USAGE}");
             Ok(())
         }
-        [command] if command == "update-openapi" => update(),
-        _ => Err(format!("Usage: {USAGE}")),
+        Command::Fetch => generator::fetch(settings),
+        Command::Generate(group) => generator::generate(settings, group),
+        Command::Update => generator::update(settings),
     }
 }
 
-fn update_openapi() -> Result<(), String> {
-    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-    run_update_openapi(&workspace_root, |command| {
-        command.status().map(|status| status.success())
-    })
-}
-
-fn run_update_openapi(
-    workspace_root: &Path,
-    execute: impl FnOnce(&mut Command) -> io::Result<bool>,
-) -> Result<(), String> {
-    let mut command = Command::new("python3");
-    command
-        .args(["scripts/update_openapi.py"])
-        .current_dir(workspace_root);
-
-    match execute(&mut command) {
-        Ok(true) => Ok(()),
-        Ok(false) => Err("OpenAPI update script failed".to_owned()),
-        Err(error) => Err(format!("Could not run OpenAPI update script: {error}")),
-    }
+fn workspace_root() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("..")
 }
 
 #[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// generator behavior.
+#[cfg_attr(coverage_nightly, coverage(off))]
+mod test_support;
+
+#[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// generator behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
-    use super::{dispatch, run_update_openapi};
-    use std::io;
-    use std::path::Path;
+    use super::{dispatch, generator};
+    use crate::test_support::{ScratchDir, config, serve, spec};
+
+    fn args(values: &[&str]) -> Vec<String> {
+        values.iter().map(|value| (*value).to_owned()).collect()
+    }
+
+    fn settings<'a>(root: &'a std::path::Path, docs_url: &'a str) -> generator::Settings<'a> {
+        generator::Settings {
+            root,
+            docs_url,
+            format_program: "true",
+            format_args: &[],
+            config: config(),
+        }
+    }
+
+    fn spec_server() -> String {
+        let document = spec().to_string();
+        serve(move |base| {
+            vec![
+                (
+                    "/",
+                    200,
+                    format!("<script>Redoc.init('{base}/spec.json')</script>"),
+                ),
+                ("/spec.json", 200, document),
+            ]
+        })
+    }
 
     #[test]
-    fn dispatches_help() {
-        assert!(dispatch(vec!["--help".to_owned()], || Ok(())).is_ok());
+    fn dispatches_help_without_touching_the_workspace() {
+        let root = ScratchDir::new();
+        let settings = settings(root.path(), "http://127.0.0.1:9/");
+        assert_eq!(dispatch(args(&["--help"]), &settings), Ok(()));
+        assert_eq!(dispatch(args(&["-h"]), &settings), Ok(()));
+        assert_eq!(std::fs::read_dir(root.path()).unwrap().count(), 0);
     }
 
     #[test]
     fn rejects_unknown_commands_and_extra_arguments() {
-        assert!(dispatch(vec!["unknown".to_owned()], || Ok(())).is_err());
-        assert!(
-            dispatch(
-                vec!["update-openapi".to_owned(), "extra".to_owned()],
-                || Ok(())
-            )
-            .is_err()
-        );
-    }
-
-    #[test]
-    fn dispatches_update_openapi() {
-        let mut called = false;
-        let result = dispatch(vec!["update-openapi".to_owned()], || {
-            called = true;
-            Ok(())
-        });
-
-        assert!(result.is_ok());
-        assert!(called);
-    }
-
-    #[test]
-    fn reports_update_failures() {
-        let root = Path::new("workspace");
-        let failed_status = run_update_openapi(root, |_| Ok(false));
-        assert_eq!(
-            failed_status,
-            Err("OpenAPI update script failed".to_owned())
-        );
-
-        let failed_to_start = run_update_openapi(root, |_| Err(io::Error::other("missing python")));
-        assert_eq!(
-            failed_to_start,
-            Err("Could not run OpenAPI update script: missing python".to_owned())
-        );
-    }
-
-    #[test]
-    fn runs_the_refresh_script_from_the_workspace_root() {
-        let root = Path::new("workspace");
-        let result = run_update_openapi(root, |command| {
-            assert_eq!(command.get_program(), "python3");
-            assert_eq!(
-                command.get_args().collect::<Vec<_>>(),
-                ["scripts/update_openapi.py"]
+        let root = ScratchDir::new();
+        let settings = settings(root.path(), "http://127.0.0.1:9/");
+        for invalid in [
+            &["unknown"][..],
+            &["update-openapi", "extra"],
+            &["generate-openapi", "--only"],
+            &["generate-openapi", "--all", "models"],
+        ] {
+            let error = dispatch(args(invalid), &settings).unwrap_err();
+            assert!(
+                error.starts_with("Usage: cargo xtask"),
+                "{invalid:?}: {error}"
             );
-            assert_eq!(command.get_current_dir(), Some(root));
-            Ok(true)
-        });
+        }
+        assert_eq!(
+            dispatch(args(&["generate-openapi", "--only", "unknown"]), &settings),
+            Err("unknown generator group \"unknown\"; choose models, endpoints, resources, fields, projections, or tests".to_owned())
+        );
+    }
 
-        assert_eq!(result, Ok(()));
+    #[test]
+    fn fetches_the_spec_named_by_the_documentation_page() {
+        let root = ScratchDir::new();
+        let docs = spec_server();
+        dispatch(args(&["fetch-openapi"]), &settings(root.path(), &docs)).unwrap();
+        let saved = std::fs::read_to_string(root.path().join("openapi/rentman-oas.json")).unwrap();
+        assert_eq!(saved, spec().to_string());
+        assert!(!root.path().join("src").exists());
+    }
+
+    #[test]
+    fn generates_all_groups_or_one_from_the_saved_spec() {
+        let root = ScratchDir::new();
+        std::fs::create_dir_all(root.path().join("openapi")).unwrap();
+        std::fs::write(
+            root.path().join("openapi/rentman-oas.json"),
+            spec().to_string(),
+        )
+        .unwrap();
+        let settings = settings(root.path(), "http://127.0.0.1:9/");
+
+        dispatch(args(&["generate-openapi", "--only", "fields"]), &settings).unwrap();
+        assert!(root.path().join("src/fields.rs").exists());
+        assert!(!root.path().join("src/model/generated.rs").exists());
+
+        dispatch(args(&["generate-openapi"]), &settings).unwrap();
+        let models = std::fs::read_to_string(root.path().join("src/model/generated.rs")).unwrap();
+        assert!(models.contains("pub struct Widget {"));
+        assert!(
+            root.path()
+                .join("tests/contract/generated_revisions.rs")
+                .exists()
+        );
+    }
+
+    #[test]
+    fn updates_spec_and_every_output_in_one_run() {
+        let root = ScratchDir::new();
+        let docs = spec_server();
+        dispatch(args(&["update-openapi"]), &settings(root.path(), &docs)).unwrap();
+        assert!(root.path().join("openapi/rentman-oas.json").exists());
+        let resources =
+            std::fs::read_to_string(root.path().join("src/resource/generated.rs")).unwrap();
+        assert!(resources.contains("pub fn widgets(&self) -> Collection<Widget>"));
     }
 }

@@ -153,7 +153,7 @@ mod contract_tests {
 
         assert_eq!(
             documented, covered,
-            "endpoint manifest drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py and review the API surface"
+            "endpoint manifest drifted from openapi/rentman-oas.json; run `cargo xtask generate-openapi --only endpoints` and review the API surface"
         );
     }
 

@@ -1,0 +1,145 @@
+revision_field = "updateHash"
+response_core_fields = ["id", "created", "modified", "creator"]
+response_string_integer_fields = ["order"]
+
+[[response_type_overrides]]
+schema = "ActualContentResponse"
+field = "quantity"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "EquipmentSetContentResponse"
+field = "quantity"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "ProjectEquipmentResponse"
+field = "quantity"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "FactorsResponse"
+field = "factor"
+rust_type = "RentmanAmount"
+
+[[response_type_overrides]]
+schema = "ProjectEquipmentResponse"
+field = "factor"
+rust_type = "RentmanAmount"
+
+[[response_type_overrides]]
+schema = "ProjectRequestEquipmentResponse"
+field = "factor"
+rust_type = "RentmanAmount"
+
+[[response_type_overrides]]
+schema = "SubrentalEquipmentResponse"
+field = "factor"
+rust_type = "RentmanAmount"
+
+[[response_type_overrides]]
+schema = "ProjectResponse"
+field = "number"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "RepairResponse"
+field = "number"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "SubrentalResponse"
+field = "number"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "CrewResponse"
+field = "contract"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "TaskResponse"
+field = "public"
+rust_type = "i64"
+
+[[response_type_overrides]]
+schema = "PurchaseOrderCostResponse"
+field = "project"
+rust_type = "String"
+
+[[response_type_overrides]]
+schema = "ContactResponse"
+field = "website"
+rust_type = "String"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "mailing_unit_number"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "mailing_district"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "mailing_extra_address_line"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "visit_unit_number"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "visit_district"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "visit_extra_address_line"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "invoice_unit_number"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "invoice_district"
+
+[[nullable_response_fields]]
+schema = "ContactResponse"
+field = "invoice_extra_address_line"
+
+[[nullable_response_fields]]
+schema = "CrewResponse"
+field = "unit_number"
+
+[[nullable_response_fields]]
+schema = "CrewResponse"
+field = "district"
+
+[[nullable_response_fields]]
+schema = "CrewResponse"
+field = "extraaddressline"
+
+[[nullable_response_fields]]
+schema = "EquipmentResponse"
+field = "shop_description_short"
+
+[[nullable_response_fields]]
+schema = "EquipmentResponse"
+field = "shop_description_long"
+
+[[nullable_response_fields]]
+schema = "FactuurResponse"
+field = "integration_reference_id"
+
+[[nullable_response_fields]]
+schema = "ProjectFunctionGroupResponse"
+field = "remark"
+
+[[nullable_response_fields]]
+schema = "PurchaseOrderResponse"
+field = "export_message"
+
+[[nullable_response_fields]]
+schema = "TaskResponse"
+field = "color"

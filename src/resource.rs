@@ -18,6 +18,11 @@
 //! ```
 
 mod generated;
+#[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// library behavior.
+#[cfg_attr(coverage_nightly, coverage(off))]
+mod generated_tests;
 
 pub use generated::*;
 

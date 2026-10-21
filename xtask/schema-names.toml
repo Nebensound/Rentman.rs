@@ -1,0 +1,102 @@
+[resource_names]
+Factuur = "Invoice"
+Invitations = "Invitation"
+Factors = "Factor"
+FactorGroups = "FactorGroup"
+LeaveTypes = "LeaveType"
+LeaveMutations = "LeaveMutation"
+EquipmentAssignedSerials = "EquipmentAssignedSerial"
+CrewRate = "Rate"
+CrewRates = "CrewRate"
+CrewRateFactor = "RateFactor"
+Quotation = "Quote"
+Ledger = "LedgerCode"
+
+[schema_type_overrides]
+ApiResponse = "ApiResponse"
+
+[enum_variant_names]
+"0" = "Zero"
+"1" = "One"
+"+" = "Plus"
+"-" = "Minus"
+
+[[integer_id_fields]]
+schema = "ProjectsCreateFromTemplateRequest"
+field = "template"
+rust_type = "Id<ProjectTemplate>"
+
+[[integer_id_fields]]
+schema = "ProjectsSetClientRequest"
+field = "client"
+rust_type = "Id<Contact>"
+
+[[integer_id_fields]]
+schema = "ProjectsSetClientRequest"
+field = "contact_person"
+rust_type = "Id<ContactPerson>"
+
+[[integer_id_fields]]
+schema = "ProjectsSetLocationRequest"
+field = "location"
+rust_type = "Id<Contact>"
+
+[[integer_id_fields]]
+schema = "ProjectsSetLocationRequest"
+field = "contact_person"
+rust_type = "Id<ContactPerson>"
+
+[[integer_id_fields]]
+schema = "SubprojectsSetLocationRequest"
+field = "location"
+rust_type = "Id<Contact>"
+
+[[integer_id_fields]]
+schema = "SubprojectsSetLocationRequest"
+field = "contact_person"
+rust_type = "Id<ContactPerson>"
+
+[[integer_id_fields]]
+schema = "ProjectsSetTypeRequest"
+field = "type"
+rust_type = "Id<ProjectType>"
+
+[[integer_id_fields]]
+schema = "FileRequest"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "FileResponse"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "FileFolderRequest"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "FileFolderResponse"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "InvoiceLineRequest"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "InvoiceLineResponse"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "TaskRequest"
+field = "item"
+rust_type = "ItemId"
+
+[[integer_id_fields]]
+schema = "TaskResponse"
+field = "item"
+rust_type = "ItemId"

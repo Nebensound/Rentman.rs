@@ -49,6 +49,9 @@ repositories.
   documented, the library must know it through `EndpointErrorSpec`.
 - Refresh the OpenAPI fixture with `cargo xtask update-openapi`; do not edit
   `src/endpoint/generated.rs` or `src/model/generated.rs` by hand.
+- Generator-specific schema mappings and live API deviations are declared in
+  `xtask/schema-names.toml`, `xtask/response-overrides.toml`, and
+  `xtask/field-rules.toml`; keep these entries validated against the fixture.
 - The generated OpenAPI contract files are reviewable contract data. If Rentman
   changes documented endpoints, fields, schemas, enum values, request bodies,
   response types, or error codes, regenerate them and review the diff.
