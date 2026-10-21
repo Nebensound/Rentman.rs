@@ -1,17 +1,17 @@
 //! Live tests against the real Rentman API.
 //!
-//! These tests are ignored by default so `cargo test` never needs real
-//! credentials. Run them explicitly with a real API token, either from the
-//! environment or from a git-ignored `.env` file in the crate root (see
-//! `.env.example`):
+//! These tests are ignored by default unless `RENTMAN_API_TOKEN` is set in the
+//! environment or in a git-ignored `.env` file in the crate root (see
+//! `.env.example`). When a token is present, a normal `cargo test` runs them:
 //!
 //! ```bash
 //! cp .env.example .env   # then fill in RENTMAN_API_TOKEN
-//! cargo test --test live_api -- --ignored
+//! cargo test
 //! ```
 //!
 //! A `RENTMAN_API_TOKEN` already set in the environment takes precedence over
-//! the `.env` file.
+//! the `.env` file. Cargo watches both sources and rebuilds the test binary
+//! when token availability changes.
 //!
 //! Every documented `GET` collection endpoint has its own generated test in
 //! `live/generated_sweep.rs`, so a drifted endpoint shows up as an individual
@@ -35,14 +35,87 @@ fn live_client() -> RentmanClient {
     static CLIENT: OnceLock<RentmanClient> = OnceLock::new();
     CLIENT
         .get_or_init(|| {
-            // A missing `.env` is fine: CI provides the token via the environment.
-            dotenvy::dotenv().ok();
+            let token_in_environment = std::env::var_os("RENTMAN_API_TOKEN").is_some();
+            // Use the same crate-root file as the build-time test selection.
+            check_live_dotenv(
+                dotenvy::from_path(concat!(env!("CARGO_MANIFEST_DIR"), "/.env")),
+                token_in_environment,
+            )
+            .expect("could not initialize live API test settings");
             let token = std::env::var("RENTMAN_API_TOKEN").expect(
                 "RENTMAN_API_TOKEN must be set (environment or .env) to run live Rentman API tests",
             );
             RentmanClient::new(RentmanApiToken::new(token))
         })
         .clone()
+}
+
+fn check_live_dotenv(
+    result: Result<(), dotenvy::Error>,
+    token_in_environment: bool,
+) -> Result<(), &'static str> {
+    match result {
+        Ok(()) => Ok(()),
+        Err(error) if error.not_found() => Ok(()),
+        Err(_) if token_in_environment => {
+            eprintln!(
+                "could not load crate-root .env for live API tests; \
+                 continuing with the environment token; optional .env settings may be unavailable"
+            );
+            Ok(())
+        }
+        Err(_) => Err("could not load crate-root .env for live API tests"),
+    }
+}
+
+#[cfg(test)]
+mod dotenv_tests {
+    use super::check_live_dotenv;
+    use std::io::{Error, ErrorKind};
+
+    fn malformed_dotenv() -> dotenvy::Error {
+        dotenvy::from_read_iter(&b"RENTMAN_API_TOKEN=\"dummy-secret-without-closing-quote\n"[..])
+            .next()
+            .unwrap()
+            .unwrap_err()
+    }
+
+    #[test]
+    fn environment_token_allows_malformed_or_unreadable_dotenv() {
+        for error in [
+            malformed_dotenv(),
+            dotenvy::Error::Io(Error::from(ErrorKind::PermissionDenied)),
+        ] {
+            assert_eq!(check_live_dotenv(Err(error), true), Ok(()));
+        }
+    }
+
+    #[test]
+    fn dotenv_token_requires_successful_loading_with_sanitized_errors() {
+        for error in [
+            malformed_dotenv(),
+            dotenvy::Error::Io(Error::from(ErrorKind::PermissionDenied)),
+        ] {
+            assert_eq!(
+                check_live_dotenv(Err(error), false),
+                Err("could not load crate-root .env for live API tests")
+            );
+        }
+    }
+
+    #[test]
+    fn successful_or_missing_dotenv_is_accepted_with_or_without_environment_token() {
+        for token_in_environment in [true, false] {
+            assert_eq!(check_live_dotenv(Ok(()), token_in_environment), Ok(()));
+            assert_eq!(
+                check_live_dotenv(
+                    Err(dotenvy::Error::Io(Error::from(ErrorKind::NotFound))),
+                    token_in_environment,
+                ),
+                Ok(())
+            );
+        }
+    }
 }
 
 rentman_client::projection! {
@@ -56,7 +129,10 @@ rentman_client::projection! {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn invoice_and_payment_listing_works_live() {
     let client = live_client();
 
@@ -89,7 +165,10 @@ async fn invoice_and_payment_listing_works_live() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn in_archive_filter_is_applied_live() {
     let client = live_client();
     let page = |in_archive| {
@@ -124,7 +203,10 @@ rentman_client::projection! {
 }
 
 #[tokio::test]
-#[ignore = "writes to the real Rentman API; requires RENTMAN_API_TOKEN and RENTMAN_LIVE_WRITE_EQUIPMENT_ID"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "writes to the real Rentman API; requires RENTMAN_API_TOKEN and RENTMAN_LIVE_WRITE_EQUIPMENT_ID"
+)]
 async fn equipment_price_write_is_a_no_op_live() {
     let client = live_client();
     // Opt-in: without a designated test item this test writes nothing. The
@@ -240,7 +322,10 @@ async fn stored_prices(id: u64) -> StoredPrices {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn filters_survive_the_cursor_live() {
     let client = live_client();
     let archived = || {
@@ -320,7 +405,10 @@ fn equipment_projection_decodes_outside_the_crate() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn projections_keep_their_field_selection_across_the_cursor_live() {
     let client = live_client();
     let projected = client

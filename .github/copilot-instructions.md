@@ -120,8 +120,11 @@ repositories.
 
 ## Live API Tests
 
-- Live tests call the real Rentman API, are `#[ignore]`d, and run only in the
-  separate, non-blocking live workflow or locally on demand.
+- Live tests call the real Rentman API and are ignored without a non-empty
+  `RENTMAN_API_TOKEN` in the environment or crate-root `.env`. With a token,
+  ordinary `cargo test` runs them, including in the separate, non-blocking live
+  workflow. An environment value takes precedence even when empty; parent
+  directory `.env` files are not loaded.
 - Read-only live tests may run against any account. Live tests that write must
   be opt-in through a dedicated environment variable, must skip with a clear
   message when it is unset, and must either be a verifiable no-op (write back

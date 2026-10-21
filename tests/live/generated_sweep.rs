@@ -14,7 +14,10 @@ fn check<T: Debug>(operation: &str, result: rentman_client::Result<Vec<T>>) {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_accessory_collection() {
     check(
         "getAccessoryCollection",
@@ -23,7 +26,10 @@ async fn get_accessory_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_actual_content_collection() {
     check(
         "getActualContentCollection",
@@ -32,7 +38,10 @@ async fn get_actual_content_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_alternative_collection() {
     check(
         "getAlternativeCollection",
@@ -41,7 +50,10 @@ async fn get_alternative_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_appointment_crew_collection() {
     check(
         "getAppointmentCrewCollection",
@@ -50,7 +62,10 @@ async fn get_appointment_crew_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_appointment_collection() {
     check(
         "getAppointmentCollection",
@@ -59,7 +74,10 @@ async fn get_appointment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_contact_person_collection() {
     check(
         "getContactPersonCollection",
@@ -68,7 +86,10 @@ async fn get_contact_person_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_contact_collection() {
     check(
         "getContactCollection",
@@ -77,7 +98,10 @@ async fn get_contact_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_contract_collection() {
     check(
         "getContractCollection",
@@ -86,7 +110,10 @@ async fn get_contract_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_cost_collection() {
     check(
         "getProjectCostCollection",
@@ -95,7 +122,10 @@ async fn get_project_cost_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_crew_collection() {
     check(
         "getCrewCollection",
@@ -104,7 +134,10 @@ async fn get_crew_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_crew_availability_collection() {
     check(
         "getCrewAvailabilityCollection",
@@ -113,7 +146,10 @@ async fn get_crew_availability_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_crew_rates_collection() {
     check(
         "getCrewRatesCollection",
@@ -122,7 +158,10 @@ async fn get_crew_rates_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_equipment_collection() {
     check(
         "getEquipmentCollection",
@@ -131,7 +170,10 @@ async fn get_equipment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_equipment_assigned_serials_collection() {
     check(
         "getEquipmentAssignedSerialsCollection",
@@ -144,7 +186,10 @@ async fn get_equipment_assigned_serials_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_equipment_set_content_collection() {
     check(
         "getEquipmentSetContentCollection",
@@ -153,7 +198,10 @@ async fn get_equipment_set_content_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_extra_input_field_collection() {
     check(
         "getExtraInputFieldCollection",
@@ -162,7 +210,10 @@ async fn get_extra_input_field_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_factor_groups_collection() {
     check(
         "getFactorGroupsCollection",
@@ -171,7 +222,10 @@ async fn get_factor_groups_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_factors_collection() {
     check(
         "getFactorsCollection",
@@ -180,7 +234,10 @@ async fn get_factors_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_file_folder_collection() {
     check(
         "getFileFolderCollection",
@@ -189,7 +246,10 @@ async fn get_file_folder_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_file_collection() {
     check(
         "getFileCollection",
@@ -198,7 +258,10 @@ async fn get_file_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_folder_collection() {
     check(
         "getFolderCollection",
@@ -207,7 +270,10 @@ async fn get_folder_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_invitations_collection() {
     check(
         "getInvitationsCollection",
@@ -216,7 +282,10 @@ async fn get_invitations_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_invoice_line_collection() {
     check(
         "getInvoiceLineCollection",
@@ -225,7 +294,10 @@ async fn get_invoice_line_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_factuur_collection() {
     check(
         "getFactuurCollection",
@@ -234,7 +306,10 @@ async fn get_factuur_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_leave_mutations_collection() {
     check(
         "getLeaveMutationsCollection",
@@ -243,7 +318,10 @@ async fn get_leave_mutations_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_leave_request_collection() {
     check(
         "getLeaveRequestCollection",
@@ -252,7 +330,10 @@ async fn get_leave_request_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_leave_types_collection() {
     check(
         "getLeaveTypesCollection",
@@ -261,7 +342,10 @@ async fn get_leave_types_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_ledger_collection() {
     check(
         "getLedgerCollection",
@@ -270,7 +354,10 @@ async fn get_ledger_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_payment_collection() {
     check(
         "getPaymentCollection",
@@ -279,7 +366,10 @@ async fn get_payment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_crew_collection() {
     check(
         "getProjectCrewCollection",
@@ -288,7 +378,10 @@ async fn get_project_crew_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_equipment_collection() {
     check(
         "getProjectEquipmentCollection",
@@ -297,7 +390,10 @@ async fn get_project_equipment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_equipment_group_collection() {
     check(
         "getProjectEquipmentGroupCollection",
@@ -310,7 +406,10 @@ async fn get_project_equipment_group_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_function_group_collection() {
     check(
         "getProjectFunctionGroupCollection",
@@ -323,7 +422,10 @@ async fn get_project_function_group_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_function_collection() {
     check(
         "getProjectFunctionCollection",
@@ -332,7 +434,10 @@ async fn get_project_function_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_request_equipment_collection() {
     check(
         "getProjectRequestEquipmentCollection",
@@ -345,7 +450,10 @@ async fn get_project_request_equipment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_request_collection() {
     check(
         "getProjectRequestCollection",
@@ -354,7 +462,10 @@ async fn get_project_request_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_collection() {
     check(
         "getProjectCollection",
@@ -363,7 +474,10 @@ async fn get_project_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_status_collection() {
     check(
         "getProjectStatusCollection",
@@ -372,7 +486,10 @@ async fn get_project_status_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_template_collection() {
     check(
         "getProjectTemplateCollection",
@@ -381,7 +498,10 @@ async fn get_project_template_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_type_collection() {
     check(
         "getProjectTypeCollection",
@@ -390,7 +510,10 @@ async fn get_project_type_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_project_vehicle_collection() {
     check(
         "getProjectVehicleCollection",
@@ -399,7 +522,10 @@ async fn get_project_vehicle_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_purchase_order_cost_collection() {
     check(
         "getPurchaseOrderCostCollection",
@@ -408,7 +534,10 @@ async fn get_purchase_order_cost_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_purchase_order_global_cost_collection() {
     check(
         "getPurchaseOrderGlobalCostCollection",
@@ -421,7 +550,10 @@ async fn get_purchase_order_global_cost_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_purchase_order_collection() {
     check(
         "getPurchaseOrderCollection",
@@ -430,7 +562,10 @@ async fn get_purchase_order_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_quotation_collection() {
     check(
         "getQuotationCollection",
@@ -439,7 +574,10 @@ async fn get_quotation_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_crew_rate_factor_collection() {
     check(
         "getCrewRateFactorCollection",
@@ -448,7 +586,10 @@ async fn get_crew_rate_factor_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_crew_rate_collection() {
     check(
         "getCrewRateCollection",
@@ -457,7 +598,10 @@ async fn get_crew_rate_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_repair_collection() {
     check(
         "getRepairCollection",
@@ -466,7 +610,10 @@ async fn get_repair_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_serial_number_collection() {
     check(
         "getSerialNumberCollection",
@@ -475,7 +622,10 @@ async fn get_serial_number_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_status_collection() {
     check(
         "getStatusCollection",
@@ -484,7 +634,10 @@ async fn get_status_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_stock_location_collection() {
     check(
         "getStockLocationCollection",
@@ -493,7 +646,10 @@ async fn get_stock_location_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_stock_movement_collection() {
     check(
         "getStockMovementCollection",
@@ -502,7 +658,10 @@ async fn get_stock_movement_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_subproject_collection() {
     check(
         "getSubprojectCollection",
@@ -511,7 +670,10 @@ async fn get_subproject_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_subrental_equipment_collection() {
     check(
         "getSubrentalEquipmentCollection",
@@ -520,7 +682,10 @@ async fn get_subrental_equipment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_subrental_equipment_group_collection() {
     check(
         "getSubrentalEquipmentGroupCollection",
@@ -533,7 +698,10 @@ async fn get_subrental_equipment_group_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_subrental_collection() {
     check(
         "getSubrentalCollection",
@@ -542,7 +710,10 @@ async fn get_subrental_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_subtask_collection() {
     check(
         "getSubtaskCollection",
@@ -551,7 +722,10 @@ async fn get_subtask_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_supplier_collection() {
     check(
         "getSupplierCollection",
@@ -560,7 +734,10 @@ async fn get_supplier_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_task_assignment_collection() {
     check(
         "getTaskAssignmentCollection",
@@ -569,7 +746,10 @@ async fn get_task_assignment_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_task_collection() {
     check(
         "getTaskCollection",
@@ -578,7 +758,10 @@ async fn get_task_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_task_status_collection() {
     check(
         "getTaskStatusCollection",
@@ -587,7 +770,10 @@ async fn get_task_status_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_tax_class_collection() {
     check(
         "getTaxClassCollection",
@@ -596,7 +782,10 @@ async fn get_tax_class_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_time_registration_collection() {
     check(
         "getTimeRegistrationCollection",
@@ -605,7 +794,10 @@ async fn get_time_registration_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_time_registration_activity_collection() {
     check(
         "getTimeRegistrationActivityCollection",
@@ -618,7 +810,10 @@ async fn get_time_registration_activity_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_vehicle_collection() {
     check(
         "getVehicleCollection",
@@ -627,7 +822,10 @@ async fn get_vehicle_collection() {
 }
 
 #[tokio::test]
-#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
 async fn get_warehouse_status_collection() {
     check(
         "getWarehouseStatusCollection",
