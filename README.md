@@ -29,7 +29,7 @@ The public crate surface is Rentman-focused:
   enums, and ID aliases (`CrewId`).
 - `fields` contains the filter and sort constants, `projection!` and
   `projection_fields` the field selection.
-- `Id<R>`, `RentmanAmount`, `PageSize`, and the typed `Error`.
+- `Id<R>`, `Decimal`, `PageSize`, and the typed `Error`.
 
 The resource layer is the only public API for Rentman data. The endpoint layer
 (`src/endpoint.rs` and `src/endpoint/generated.rs`: one typed endpoint per
@@ -91,11 +91,13 @@ example is compile-checked by `cargo test --doc`. This README is the
 contributor documentation and stays out of the published package.
 
 Hand-written boundary types translate API formats into narrower types such as
-`RentmanApiToken`, `Id<R>`, and `RentmanAmount`. Every JSON number in the
-generated models and payloads is a `RentmanAmount`, read and written exactly
-from its JSON text (also inside projections), never through `f64`. Values in
-the open `custom` fields object stay `Decimal`. For response models, only the
-core fields `id`, `updateHash`, `created`, `modified`, and `creator` are
+`RentmanApiToken` and `Id<R>`. Every OpenAPI number in generated models,
+payloads, and projections uses `Decimal`; its arbitrary-precision JSON Serde
+integration reads and writes the exact number text without an `f64` conversion.
+Values in the open `custom` fields object also use `Decimal`. A number with
+more than 28 decimal places is rounded to 28 without a warning; a number whose
+digits do not fit `Decimal`'s 96-bit mantissa, or an exponent beyond its scale,
+is rejected. For response models, only the core fields `id`, `updateHash`, `created`, `modified`, and `creator` are
 required. The first two are non-null; the last three may be null but their
 keys must be present. Other declared response fields are optional because
 Rentman omits them from field selections and some responses. Unknown response
@@ -228,6 +230,14 @@ cargo fmt --all -- --check
 cargo clippy --workspace --locked --all-targets -- -D warnings
 ```
 
+Generated files must match the checked-in OpenAPI document. CI regenerates them
+without downloading anything and fails when the working tree then differs:
+
+```bash
+cargo xtask generate-openapi
+git status --porcelain
+```
+
 Minimum supported Rust version (MSRV): the `rust-version` in `Cargo.toml`
 (currently 1.88). CI builds and tests with exactly that toolchain:
 
@@ -306,31 +316,6 @@ cargo +nightly llvm-cov --workspace --locked \
   --fail-under-functions 100
 ```
 
-Fuzzing of amount parsing (nightly, [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)):
-
-```bash
-cargo install cargo-fuzz --version 0.13.2 --locked
-mkdir -p fuzz/corpus/amount
-cargo +nightly fuzz run amount fuzz/corpus/amount fuzz/seeds/amount -- \
-  -max_total_time=60 -dict=fuzz/amount.dict
-```
-
-The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
-deserialization. It checks that parsing never panics, that every JSON number
-with an exponent up to ±1000 gives the same value as an independent
-arbitrary-precision reference (`bigdecimal`), and that every accepted amount
-survives a JSON round trip with value and scale. Pull requests with changes beyond documentation and crate-version-only edits
-run it for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
-for 30 minutes every week and on manual dispatch. CI adds
-`--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
-the triple its own binary was built for, and a musl build has no address
-sanitizer. A crashing input is
-uploaded as a workflow artifact and reproduced with
-`cargo +nightly fuzz run amount <file>`; every finding becomes a regression
-test in the library. `fuzz/` is a separate crate with its own lockfile, kept
-in line with the library's `Cargo.lock`, and is not part of the published
-package.
-
 ## Migrating to the resource layer
 
 The resource layer replaces the endpoint API (`client.endpoint::<E>()`,
@@ -401,8 +386,7 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 then resolved on a pull request branch.
 
 Every merge into `main` triggers the `release` job after tests, coverage, the
-MSRV build, and the package smoke test pass, and the short fuzz run either
-passes or is explicitly skipped for documentation/version-only changes. It
+MSRV build, and the package smoke test pass. It
 verifies the package again from the merged commit, publishes it to crates.io without `--allow-dirty` (using the
 `CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
 tag and GitHub release, which in turn seeds the next version calculation.
@@ -425,12 +409,10 @@ the upper bound of strict typing:
   documented value has no named variant.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
-  `RentmanAmount` reads and writes JSON numbers from their exact text. An
-  amount with more precision than `Decimal` holds (more than 28 decimal places
-  or a mantissa beyond 96 bits) is rounded half away from zero to the nearest
-  value that fits, with a `tracing` warning naming the original and the
-  rounded value, so one such value cannot make a whole listing unreadable. An
-  integer part that does not fit is rejected.
+  Numeric fields use `Decimal` directly and read/write JSON numbers exactly
+  through `serde-arbitrary-precision`, never through `f64`. More than 28
+  decimal places are rounded silently; digits beyond the 96-bit mantissa are
+  rejected.
 - Identifiers, domain keys, URLs, and API tokens are dedicated types.
 - `bool` is only acceptable for real on/off switches; domain states are modeled
   as enums.
@@ -478,11 +460,11 @@ Tests cover the happy path, error paths, boundary values, and every enum variant
 and branch of hand-written code. Coverage exclusions are allowed only where the
 instrumentation cannot measure the code structurally; "async IO", "timers", or
 "hard to test" are not valid reasons. Retries, backoff, rate limiting, and
-transport failures are tested against the local test server. Parsers and
-conversions such as exact amount parsing additionally get property-based tests.
-Amount parsing is also checked differentially: for generated number texts, an
-independent arbitrary-precision computation (`bigdecimal`) decides the expected
-value and whether it is exact or rounded, and the parser must agree.
+transport failures are tested against the local test server. Handwritten
+parsers and conversions get property-based tests. Numeric JSON parsing and
+serialization use `rust_decimal`'s
+arbitrary-precision Serde implementation; a model-payload test verifies exact
+digits survive a JSON round trip.
 Unit tests live next to the module they test; integration and contract tests
 live in `tests/`. Error behavior is asserted on typed error variants, not on
 message substrings.
@@ -525,25 +507,16 @@ forbidden by a crate-level lint. Every cargo command in CI that resolves
 dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
 `cargo fmt` does not resolve dependencies and takes no `--locked`.
 
-Required pull request checks are formatting, clippy with `-D warnings`, tests
-and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
-the MSRV build, a package build with a smoke test outside the source tree, and
-the 60-second fuzz run.
+Required pull request checks are formatting, up-to-date generated files,
+clippy with `-D warnings`, tests and documentation tests, `cargo doc` with
+warnings as errors, the coverage gate, the MSRV build, and a package build with
+a smoke test outside the source tree.
 
 The branch rules require the status contexts `test` and `coverage`. The `test`
-job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
-and clippy), `coverage`, `msrv`, `package`, `changes`, and `fuzz`. It always
-runs and requires explicit success from all unconditional jobs. The `changes`
-job skips fuzzing only when all changes are documentation (`.md`, `.rst`, `.txt`,
-or license files outside `fuzz/`) or the crate's own version in `Cargo.toml`,
-`Cargo.lock`, and `fuzz/Cargo.lock`. Files under `fuzz/` always require fuzzing,
-regardless of extension, except for that lockfile's crate-version-only changes. Rust code, dependencies, build settings, CI, and other file
-changes require fuzzing. Version-job dispatches compare the entire branch
-against the default branch; manual default-branch runs always fuzz.
-The gate accepts a skipped fuzz job only after a successful, explicit
-`fuzz_required=false` decision. Failure or cancellation always blocks merging.
-The scheduled live API and 30-minute fuzz workflows
-remain separate, non-blocking checks. Releases also wait for this gate.
+job is an aggregate gate over `version`, `checks` (formatting, generated files,
+tests, rustdoc, and clippy), `coverage`, `msrv`, and `package`. It always runs and requires
+explicit success from each job. The scheduled live API workflow remains a
+separate, non-blocking check. Releases also wait for this gate.
 
 Every check command in this README matches what CI runs. Third-party actions
 are pinned to a commit SHA or an immutable version tag, jobs get explicit
@@ -554,11 +527,3 @@ minimal `permissions`, and the release publishes exactly the verified package.
 A deliberate deviation from these rules is documented here with its rationale,
 risk, and a linked follow-up issue. Open deviations are tracked in
 [#14](https://github.com/Nebensound/Rentman.rs/issues/14).
-
-- `RentmanAmount` has no currency. Rentman's API sends amounts as bare numbers
-  and the currency is an account setting, so the type is a wire-boundary type,
-  not a money type for domain logic. Consumers convert it into their own
-  currency-carrying type. Risk: mixing amounts of different currencies or
-  meanings (net/gross) if it is used beyond the boundary. Decided in
-  [#23](https://github.com/Nebensound/Rentman.rs/issues/23); `RentmanAmount`'s
-  documentation states the same.

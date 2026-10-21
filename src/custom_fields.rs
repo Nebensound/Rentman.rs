@@ -261,6 +261,7 @@ fn field_type_name(field_type: &ExtraInputFieldType) -> &'static str {
 mod tests {
     use super::*;
     use crate::model::Equipment;
+    use proptest::prelude::*;
     use serde::{Deserialize, Serialize};
     use std::collections::BTreeMap;
 
@@ -467,6 +468,49 @@ mod tests {
             fields.get::<bool>(41),
             Err(CustomFieldValueError::Json(_))
         ));
+    }
+
+    #[test]
+    fn custom_value_deserialization_preserves_decimal_json_numbers() {
+        let value: CustomFieldValue = serde_json::from_str("0.1234567890123456789").unwrap();
+        assert_eq!(
+            value,
+            CustomFieldValue::Number("0.1234567890123456789".parse().unwrap())
+        );
+
+        let nested: CustomFieldValue =
+            serde_json::from_str(r#"{"values":[1.25,"text",true,null]}"#).unwrap();
+        assert_eq!(
+            nested,
+            CustomFieldValue::Object(BTreeMap::from([(
+                "values".to_owned(),
+                CustomFieldValue::List(vec![
+                    CustomFieldValue::Number(Decimal::new(125, 2)),
+                    CustomFieldValue::Text("text".to_owned()),
+                    CustomFieldValue::Bool(true),
+                    CustomFieldValue::Null,
+                ]),
+            )]))
+        );
+        // Out-of-range numbers fail at every depth instead of surfacing as
+        // serde_json's private arbitrary-precision marker object.
+        for text in ["1e9999", "[1e9999]", r#"{"value":1e9999}"#, "{"] {
+            assert!(
+                serde_json::from_str::<CustomFieldValue>(text).is_err(),
+                "{text}"
+            );
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn custom_value_json_never_panics(text in any::<String>()) {
+            if let Ok(value) = serde_json::from_str::<CustomFieldValue>(&text) {
+                let encoded = serde_json::to_string(&value).unwrap();
+                let decoded: CustomFieldValue = serde_json::from_str(&encoded).unwrap();
+                prop_assert_eq!(decoded, value);
+            }
+        }
     }
 
     #[test]

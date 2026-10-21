@@ -20,22 +20,22 @@ rust_type = "i64"
 [[response_type_overrides]]
 schema = "FactorsResponse"
 field = "factor"
-rust_type = "RentmanAmount"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "ProjectEquipmentResponse"
 field = "factor"
-rust_type = "RentmanAmount"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "ProjectRequestEquipmentResponse"
 field = "factor"
-rust_type = "RentmanAmount"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "SubrentalEquipmentResponse"
 field = "factor"
-rust_type = "RentmanAmount"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "ProjectResponse"

@@ -370,10 +370,7 @@ mod tests {
         let mut item: ProjectedItem =
             serde_json::from_str(r#"{"id":1,"distance":123.45678901234567890123}"#).unwrap();
         let contact = ContactDistance::decode(&mut item).unwrap();
-        assert_eq!(
-            contact.distance.as_decimal().to_string(),
-            "123.45678901234567890123"
-        );
+        assert_eq!(contact.distance.to_string(), "123.45678901234567890123");
     }
 
     #[test]

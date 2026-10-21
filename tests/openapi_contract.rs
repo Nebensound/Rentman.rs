@@ -490,7 +490,7 @@ fn equipment_decodes_the_full_live_collection_response() {
         Some(EquipmentStrictContainerContent::Unrestricted)
     );
     assert_eq!(
-        equipment.price.unwrap().as_decimal(),
+        equipment.price.unwrap(),
         "111303.8521365961".parse().unwrap()
     );
     let custom = equipment.custom.unwrap();

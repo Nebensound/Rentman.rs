@@ -122,9 +122,9 @@ function serves every resource.
   value type, and `projection!` declares an own struct whose fields are the
   `fields=` selection.
 - `model` contains typed models for every documented schema: timestamps are
-  `DateTime<FixedOffset>`, numbers are exact `RentmanAmount` decimals read
-  from the JSON text (values beyond `Decimal`'s precision are rounded with a
-  `tracing` warning), enums accept values Rentman adds later as `Unknown`,
+  `DateTime<FixedOffset>`, numbers are exact `Decimal` values read
+  from the JSON text (more than 28 decimal places are rounded, larger numbers
+  are rejected), enums accept values Rentman adds later as `Unknown`,
   and identifiers and tokens are dedicated types — never bare strings or
   floats. Response models require the core `id`, `updateHash`, `created`,
   `modified`, and `creator` fields. `id` and `updateHash` are non-null;

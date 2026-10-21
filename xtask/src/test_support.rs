@@ -79,7 +79,7 @@ pub fn config_with(edit: impl FnOnce(&mut GeneratorConfig)) -> &'static Generato
             "String",
             "i64",
             "bool",
-            "RentmanAmount",
+            "Decimal",
             "DateTime<FixedOffset>",
             "NaiveDate",
             "EmailAddress",

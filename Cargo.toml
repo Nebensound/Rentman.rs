@@ -9,18 +9,18 @@ description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
 repository = "https://github.com/Nebensound/Rentman.rs"
 readme = "crates-io.md"
-exclude = ["/.github", "/README.md", "/fuzz"]
+exclude = ["/.github", "/README.md"]
 
 [dependencies]
 backon = "1.6.0"
 chrono = { version = "0.4.45", features = ["serde"] }
 governor = "0.10.4"
 reqwest = { version = "0.13.5", default-features = false, features = ["json", "query", "rustls"] }
-rust_decimal = { version = "1.43.0", default-features = false, features = ["serde-float", "std"] }
+rust_decimal = { version = "1.43.0", default-features = false, features = ["serde-float", "serde-arbitrary-precision", "std"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["raw_value"] }
 thiserror = "2.0.21"
-tokio = { version = "1.54.0", features = ["macros", "rt-multi-thread", "time"] }
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.44"
 url = { version = "2.5.8", features = ["serde"] }
 

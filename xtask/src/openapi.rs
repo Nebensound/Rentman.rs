@@ -592,7 +592,7 @@ impl<'a> Context<'a> {
                 }
                 Ok("i64".to_owned())
             }
-            Some("number") => Ok("RentmanAmount".to_owned()),
+            Some("number") => Ok("Decimal".to_owned()),
             Some("boolean") => Ok("bool".to_owned()),
             Some("object") => Ok("CustomFields".to_owned()),
             Some("string") => {
@@ -1204,11 +1204,9 @@ mod tests {
             config
                 .integer_id_fields
                 .push(override_("WidgetResponse", "quantity", "ItemId"));
-            config.response_type_overrides.push(override_(
-                "WidgetResponse",
-                "factor",
-                "RentmanAmount",
-            ));
+            config
+                .response_type_overrides
+                .push(override_("WidgetResponse", "factor", "Decimal"));
             config.url_fields.push("website".to_owned());
             config.date_time_fields.push("modified".to_owned());
             config.reference_fields.push("owner".to_owned());
@@ -1227,7 +1225,7 @@ mod tests {
             ("part", "Option<Id<Part>>"),
             ("owner", "Option<Id<Part>>"),
             ("status", "Option<WidgetStatus>"),
-            ("price", "Option<RentmanAmount>"),
+            ("price", "Option<Decimal>"),
             ("active", "Option<bool>"),
             ("day", "Option<NaiveDate>"),
             ("email", "Option<EmailAddress>"),
@@ -1237,7 +1235,7 @@ mod tests {
             ("custom", "Option<CustomFields>"),
             ("order", "Option<i64>"),
             ("quantity", "Option<ItemId>"),
-            ("factor", "Option<RentmanAmount>"),
+            ("factor", "Option<Decimal>"),
             ("maybe", "Option<String>"),
         ] {
             assert_eq!(

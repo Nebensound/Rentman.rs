@@ -42,7 +42,7 @@
 //! ```
 
 use crate::{
-    RentmanAmount,
+    Decimal,
     id::{Id, ItemId},
     model::EmailAddress,
 };
@@ -199,10 +199,10 @@ impl FilterValue for i64 {
     }
 }
 
-/// Amounts filter by their exact decimal text.
-impl FilterValue for RentmanAmount {
+/// Decimal fields filter by their exact decimal text.
+impl FilterValue for Decimal {
     fn filter_value(&self) -> String {
-        self.as_decimal().to_string()
+        self.to_string()
     }
 }
 
@@ -244,8 +244,8 @@ impl FilterValue for ItemId {
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use crate::fields::{accessory, contact, contact_person, file};
-    use crate::model::{ContactCountry, CrewId};
-    use crate::{ItemId, RentmanAmount, model::EmailAddress};
+    use crate::model::{ContactCountry, CrewId, EquipmentPayload};
+    use crate::{ItemId, model::EmailAddress};
     use chrono::DateTime;
     use rust_decimal::Decimal;
 
@@ -259,7 +259,7 @@ mod tests {
 
     #[test]
     fn renders_every_operator_in_the_documented_syntax() {
-        let distance = RentmanAmount::new(Decimal::new(300, 0));
+        let distance = Decimal::new(300, 0);
         assert_eq!(
             pair(contact::DISTANCE.eq(distance)),
             owned("distance", "300")
@@ -298,6 +298,41 @@ mod tests {
     }
 
     #[test]
+    fn serializes_decimal_model_fields_without_losing_digits() {
+        let decimal: Decimal = serde_json::from_str("0.1234567890123456789").unwrap();
+        let payload = EquipmentPayload {
+            list_price: Some(decimal),
+            ..EquipmentPayload::default()
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert_eq!(json, r#"{"list_price":0.1234567890123456789}"#);
+
+        let parsed: EquipmentPayload = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.list_price, Some(decimal));
+    }
+
+    #[test]
+    fn decimal_model_fields_round_excess_places_and_reject_overflow() {
+        // Pins the documented precision limits of `Decimal`'s Serde support.
+        let rounded: EquipmentPayload =
+            serde_json::from_str(r#"{"list_price":0.12345678901234567890123456789012345}"#)
+                .unwrap();
+        assert_eq!(
+            rounded.list_price.unwrap().to_string(),
+            "0.1234567890123456789012345679"
+        );
+        for text in [
+            r#"{"list_price":79228162514264337593543950336}"#,
+            r#"{"list_price":1e30}"#,
+        ] {
+            assert!(
+                serde_json::from_str::<EquipmentPayload>(text).is_err(),
+                "{text}"
+            );
+        }
+    }
+
+    #[test]
     fn renders_values_as_rentman_expects_them() {
         assert_eq!(
             pair(contact::COUNTRY.eq(ContactCountry::Gb)),
@@ -317,7 +352,7 @@ mod tests {
             owned("quantity[gte]", "-2")
         );
         assert_eq!(
-            pair(contact::DISTANCE.lte(RentmanAmount::new(Decimal::new(12505, 2)))),
+            pair(contact::DISTANCE.lte(Decimal::new(12505, 2))),
             owned("distance[lte]", "125.05")
         );
         assert_eq!(
@@ -348,10 +383,7 @@ mod tests {
         assert_eq!(format!("{:?}", field.clone()), "Field(name)");
         assert_eq!(format!("{copy:?}"), "Field(name)");
         assert_eq!(
-            format!(
-                "{:?}",
-                contact::DISTANCE.lte(RentmanAmount::new(Decimal::new(300, 0)))
-            ),
+            format!("{:?}", contact::DISTANCE.lte(Decimal::new(300, 0))),
             "Filter(distance[lte]=300)"
         );
         assert_eq!(format!("{:?}", contact::NAME.desc()), "Sort(-name)");

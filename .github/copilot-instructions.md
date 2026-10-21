@@ -25,7 +25,7 @@ repositories.
   clients, blocking sleeps, or thread-based production request execution.
 - Prefer small domain types over raw primitives at API boundaries. Examples:
   `RentmanApiToken`, `Id<R>` (e.g. `InvoiceId = Id<Invoice>`), `InvoiceNumber`,
-  and `RentmanAmount`. IDs and links to the same resource share one `Id<R>`
+  and `Decimal`. IDs and links to the same resource share one `Id<R>`
   type; never add untyped ID or link types.
 - Do not leak secrets. Token wrappers must keep `Debug` redacted.
 - Use exact decimal values for payment amounts. Do not use `f32` or `f64` for
@@ -108,9 +108,9 @@ repositories.
 - Do not add broad file-level exclusions for production code.
 - Cover the happy path, error paths, boundary values, and every enum variant and
   branch of hand-written code.
-- Parsers and conversions, for example exact amount parsing, additionally get
-  property-based tests (`proptest`) for round trips, equivalent notations, and
-  "never panics" on arbitrary input.
+- Handwritten parsers and conversions additionally get property-based tests
+  (`proptest`) for round trips, equivalent notations, and "never panics" on
+  arbitrary input.
 - Unit tests live in a `#[cfg(test)] mod tests` next to the module they test.
   Integration and contract tests live in `tests/`. Do not grow one test module
   for the whole crate.
@@ -184,6 +184,3 @@ repositories.
 
 - A deliberate deviation from these rules is documented in the README with its
   rationale, risk, and a linked follow-up issue.
-- `RentmanAmount` is a wire-boundary type without a currency, because the
-  Rentman API sends bare numbers. It must not be used as a general money type in
-  domain logic; consumers convert it into their own currency-carrying type.

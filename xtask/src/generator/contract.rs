@@ -156,7 +156,7 @@ pub fn sample_value(
         "NaiveDate" => "chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap()".to_owned(),
         "i64" => "1".to_owned(),
         "bool" => "true".to_owned(),
-        "RentmanAmount" => format!("{prefix}RentmanAmount::new(rust_decimal::Decimal::ONE)"),
+        "Decimal" => format!("{prefix}Decimal::ONE"),
         "ItemId" => format!("{prefix}ItemId::new(1)"),
         _ => {
             return Err(format!(
@@ -208,7 +208,7 @@ fn sample_wire(
         "String" => Ok(json!("x")),
         "DateTime<FixedOffset>" => Ok(json!("2026-01-01T00:00:00+00:00")),
         "NaiveDate" => Ok(json!("2026-01-01")),
-        "i64" | "ItemId" | "RentmanAmount" => Ok(json!(1)),
+        "i64" | "ItemId" | "Decimal" => Ok(json!(1)),
         "bool" => Ok(json!(true)),
         "EmailAddress" => Ok(json!("crew@example.test")),
         "Url" => Ok(json!("https://example.test/")),
@@ -251,7 +251,7 @@ mod tests {
         let spec = spec();
         let context = context_for(&spec, |_| {});
         let payloads = payload_constructor_tests(&context).unwrap();
-        assert!(payloads.contains("fn widget_payload() {\n    let payload = model::WidgetPayload::new(String::from(\"x\"), rentman_client::model::WidgetPayloadStatus::Active, rentman_client::RentmanAmount::new(rust_decimal::Decimal::ONE), true, chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap(), chrono::DateTime::parse_from_rfc3339(\"2026-01-01T00:00:00+00:00\").unwrap(), rentman_client::Id::new(1), 1);"));
+        assert!(payloads.contains("fn widget_payload() {\n    let payload = model::WidgetPayload::new(String::from(\"x\"), rentman_client::model::WidgetPayloadStatus::Active, rentman_client::Decimal::ONE, true, chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap(), chrono::DateTime::parse_from_rfc3339(\"2026-01-01T00:00:00+00:00\").unwrap(), rentman_client::Id::new(1), 1);"));
         assert!(!payloads.contains("WidgetUpdatePayload"));
         let enums = response_enum_tests(&context);
         assert!(enums.contains("(\"WidgetResponse\", \"status\"),"));
@@ -263,12 +263,20 @@ mod tests {
     }
 
     #[test]
-    fn revision_tests_need_a_wire_sample_for_every_core_field() {
+    fn revision_tests_support_decimal_core_fields() {
         let spec = spec();
         let context = context_for(&spec, core_field_override("Decimal"));
+        let revisions = revision_tests(&context).unwrap();
+        assert!(revisions.contains("r#\"{\"id\":1,\"name\":1}\"#"));
+    }
+
+    #[test]
+    fn revision_tests_need_a_wire_sample_for_every_core_field() {
+        let spec = spec();
+        let context = context_for(&spec, core_field_override("Uuid"));
         assert_eq!(
             revision_tests(&context),
-            Err("no sample wire value for PartResponse.name: Decimal".to_owned())
+            Err("no sample wire value for PartResponse.name: Uuid".to_owned())
         );
     }
 
@@ -292,8 +300,8 @@ mod tests {
         assert_eq!(sample("i64", "crate::"), Ok("1".to_owned()));
         assert_eq!(sample("bool", "crate::"), Ok("true".to_owned()));
         assert_eq!(
-            sample("RentmanAmount", "crate::"),
-            Ok("crate::RentmanAmount::new(rust_decimal::Decimal::ONE)".to_owned())
+            sample("Decimal", "crate::"),
+            Ok("crate::Decimal::ONE".to_owned())
         );
         assert_eq!(
             sample("ItemId", "crate::"),
@@ -390,7 +398,7 @@ mod tests {
             ("NaiveDate", serde_json::json!("2026-01-01")),
             ("i64", serde_json::json!(1)),
             ("ItemId", serde_json::json!(1)),
-            ("RentmanAmount", serde_json::json!(1)),
+            ("Decimal", serde_json::json!(1)),
             ("bool", serde_json::json!(true)),
             ("EmailAddress", serde_json::json!("crew@example.test")),
             ("Url", serde_json::json!("https://example.test/")),

@@ -6,7 +6,6 @@ pub mod model;
 pub mod projection_fields;
 pub mod resource;
 
-mod amount;
 mod client;
 mod config;
 mod custom_fields;
@@ -24,7 +23,6 @@ mod revision;
 mod test_support;
 mod transport;
 
-pub use amount::RentmanAmount;
 pub use client::RentmanClient;
 pub use config::{
     ConfigError, MAX_ATTEMPTS_VAR, MIN_REQUEST_INTERVAL_VAR, RETRY_BASE_DELAY_VAR,
@@ -44,6 +42,8 @@ pub use projection::{Projection, ProjectionField};
 /// Re-export of the URL type used for client configuration.
 pub use reqwest::Url;
 pub use revision::{Changes, InvalidRevision, Revision, Revisioned, Revisions};
+/// Exact decimal type used for Rentman numeric fields.
+pub use rust_decimal::Decimal;
 
 /// Items used by the code `projection!` expands to; not a public API.
 #[doc(hidden)]

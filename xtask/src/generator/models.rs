@@ -14,7 +14,6 @@ pub fn generate(context: &Context<'_>) -> Result<String, String> {
         String::new(),
         "use crate::id::{Id, ItemId, Resource};".to_owned(),
         "use chrono::{DateTime, FixedOffset, NaiveDate};".to_owned(),
-        "use crate::RentmanAmount;".to_owned(),
         "use crate::revision::{Revision, Revisioned};".to_owned(),
         "use rust_decimal::Decimal;".to_owned(),
         "use serde::{Deserialize, Serialize};".to_owned(),
@@ -234,7 +233,7 @@ impl CustomFields {
 }
 
 /// Value inside Rentman's custom fields object.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum CustomFieldValue {
     /// Null custom field value.
@@ -249,6 +248,43 @@ pub enum CustomFieldValue {
     List(Vec<CustomFieldValue>),
     /// Object custom field value.
     Object(BTreeMap<String, CustomFieldValue>),
+}
+
+impl<'de> Deserialize<'de> for CustomFieldValue {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        fn convert<E>(value: serde_json::Value) -> Result<CustomFieldValue, E>
+        where
+            E: serde::de::Error,
+        {
+            Ok(match value {
+                serde_json::Value::Null => CustomFieldValue::Null,
+                serde_json::Value::Bool(value) => CustomFieldValue::Bool(value),
+                serde_json::Value::Number(value) => {
+                    let text = value.to_string();
+                    let decimal = text
+                        .parse::<Decimal>()
+                        .or_else(|_| Decimal::from_scientific(&text))
+                        .map_err(E::custom)?;
+                    CustomFieldValue::Number(decimal)
+                }
+                serde_json::Value::String(value) => CustomFieldValue::Text(value),
+                serde_json::Value::Array(values) => CustomFieldValue::List(
+                    values.into_iter().map(convert).collect::<Result<_, E>>()?,
+                ),
+                serde_json::Value::Object(values) => CustomFieldValue::Object(
+                    values
+                        .into_iter()
+                        .map(|(key, value)| Ok((key, convert(value)?)))
+                        .collect::<Result<_, E>>()?,
+                ),
+            })
+        }
+
+        serde_json::Value::deserialize(deserializer).and_then(convert)
+    }
 }"#.lines().map(str::to_owned).collect()
 }
 

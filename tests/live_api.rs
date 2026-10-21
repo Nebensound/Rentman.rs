@@ -353,7 +353,6 @@ async fn equipment_price_write_is_a_no_op_live() {
     let stored = stored_prices(id).await;
     let sent: BigDecimal = before
         .price
-        .as_decimal()
         .to_string()
         .parse()
         .expect("a decimal is a BigDecimal");
