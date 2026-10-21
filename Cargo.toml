@@ -1,6 +1,6 @@
 [package]
 name = "rentman-client"
-version = "0.6.0"
+version = "0.6.2"
 edition = "2024"
 # Minimum supported Rust version. CI builds and tests with exactly this
 # toolchain; raising it is a minor version bump.

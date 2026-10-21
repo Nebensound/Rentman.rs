@@ -18325,6 +18325,14 @@ pub struct ProjectReference {
     pub path: Option<ResourceReference>,
 }
 
+/// Reference to a subproject
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SubprojectReference {
+    /// API path
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<ResourceReference>,
+}
+
 /// Rentman API schema `ProjectsCreateFromTemplateRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsCreateFromTemplatePayload {
@@ -18332,6 +18340,56 @@ pub struct ProjectsCreateFromTemplatePayload {
     pub template: RentmanId,
     /// First date of the project
     pub start_date: NaiveDate,
+}
+
+/// Rentman API schema `ProjectsSetClientRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectsSetClientPayload {
+    /// ID of the contact to set as client
+    pub client: i64,
+    /// ID of the contact person, which must belong to the client
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person: Option<i64>,
+    /// Copy the client's tax schema, invoice moment, discounts and insurance percentage onto the project
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copy_data: Option<bool>,
+}
+
+/// Rentman API schema `ProjectsSetLocationRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectsSetLocationPayload {
+    /// ID of the contact to set as location
+    pub location: i64,
+    /// ID of the contact person, which must belong to the location. Defaults to the location's default contact person
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person: Option<i64>,
+    /// Copy the location's tax schema onto the project
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copy_data: Option<bool>,
+    /// Re-derive the crew travel time and distance from the location
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apply_distances: Option<bool>,
+}
+
+/// Rentman API schema `ProjectsSetTypeRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProjectsSetTypePayload {
+    /// ID of the project type
+    #[serde(rename = "type")]
+    pub type_: i64,
+    /// Replace the project's terms and conditions with the type's default ones
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub copy_terms_and_conditions: Option<bool>,
+}
+
+/// Rentman API schema `SubprojectsSetLocationRequest`.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SubprojectsSetLocationPayload {
+    /// ID of the contact to set as location
+    pub location: i64,
+    /// ID of the contact person, which must belong to the location. Defaults to the location's default contact person
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person: Option<i64>,
 }
 
 /// Every Rentman API component schema and the Rust type that represents it.
@@ -18440,6 +18498,9 @@ pub const SCHEMA_TYPES: &[(&str, &str)] = &[
         "ProjectsCreateFromTemplateRequest",
         "ProjectsCreateFromTemplatePayload",
     ),
+    ("ProjectsSetClientRequest", "ProjectsSetClientPayload"),
+    ("ProjectsSetLocationRequest", "ProjectsSetLocationPayload"),
+    ("ProjectsSetTypeRequest", "ProjectsSetTypePayload"),
     ("PurchaseOrderCostRequest", "PurchaseOrderCostPayload"),
     ("PurchaseOrderCostResponse", "PurchaseOrderCost"),
     (
@@ -18461,8 +18522,13 @@ pub const SCHEMA_TYPES: &[(&str, &str)] = &[
     ("StockLocationResponse", "StockLocation"),
     ("StockMovementRequest", "StockMovementPayload"),
     ("StockMovementResponse", "StockMovement"),
+    ("SubprojectReferenceResponse", "SubprojectReference"),
     ("SubprojectRequest", "SubprojectPayload"),
     ("SubprojectResponse", "Subproject"),
+    (
+        "SubprojectsSetLocationRequest",
+        "SubprojectsSetLocationPayload",
+    ),
     (
         "SubrentalEquipmentGroupRequest",
         "SubrentalEquipmentGroupPayload",

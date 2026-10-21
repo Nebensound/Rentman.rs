@@ -163,6 +163,11 @@ repositories.
   never to a moving branch. Jobs get explicit, minimal `permissions`.
 - The release publishes exactly the package that was verified, never with
   `--allow-dirty`.
+- The daily OpenAPI update workflow uses `GITHUB_TOKEN` and the reserved
+  `automation/update-openapi` branch to create or update one PR. It explicitly
+  dispatches CI after PR changes; dispatched CI on a same-repository branch
+  with an open PR to the default branch may commit the derived version just
+  like a normal PR run. Unchanged generated files leave an open update PR alone.
 
 ## Deviations
 
