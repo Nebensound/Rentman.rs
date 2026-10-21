@@ -1,5 +1,6 @@
 //! Typed errors of the client.
 
+use crate::custom_fields::CustomFieldError;
 use crate::id::{Id, Resource};
 use reqwest::StatusCode;
 use std::fmt;
@@ -45,6 +46,9 @@ pub enum ErrorKind {
     /// cannot interpret.
     #[error("unexpected Rentman API response: {0}")]
     UnexpectedResponse(String),
+    /// A registered custom field was missing or had a value of the wrong JSON type.
+    #[error("invalid Rentman custom field: {0}")]
+    CustomField(#[from] CustomFieldError),
     /// The request could not be built; nothing was sent.
     #[error("invalid Rentman API request: {0}")]
     InvalidRequest(#[source] InvalidRequest),
@@ -195,7 +199,9 @@ impl Error {
             ErrorKind::Status { .. } => RequestOutcome::NotApplied,
             ErrorKind::Transport(error) if error.is_connect() => RequestOutcome::NotApplied,
             ErrorKind::Transport(_) => RequestOutcome::Unknown,
-            ErrorKind::Decode(_) | ErrorKind::UnexpectedResponse(_) => RequestOutcome::Applied,
+            ErrorKind::Decode(_) | ErrorKind::UnexpectedResponse(_) | ErrorKind::CustomField(_) => {
+                RequestOutcome::Applied
+            }
         };
         if self.earlier_attempt_uncertain && outcome == RequestOutcome::NotApplied {
             RequestOutcome::Unknown

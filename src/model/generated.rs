@@ -88,9 +88,37 @@ impl<'de> Deserialize<'de> for EmailAddress {
 }
 
 /// Explicitly open custom fields object.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(transparent)]
 pub struct CustomFields(pub BTreeMap<String, CustomFieldValue>);
+
+impl CustomFields {
+    /// Reads `custom_<id>` into an application-defined Rust type.
+    pub fn get<T: serde::de::DeserializeOwned>(
+        &self,
+        id: u64,
+    ) -> Result<T, crate::CustomFieldValueError> {
+        let value = self
+            .0
+            .get(&format!("custom_{id}"))
+            .ok_or(crate::CustomFieldValueError::Missing { id })?;
+        let encoded = serde_json::to_string(value)
+            .expect("CustomFieldValue contains only JSON-compatible values");
+        Ok(serde_json::from_str(&encoded)?)
+    }
+
+    /// Serializes an application-defined value into `custom_<id>`.
+    pub fn set<T: Serialize>(
+        &mut self,
+        id: u64,
+        value: &T,
+    ) -> Result<(), crate::CustomFieldValueError> {
+        let encoded = serde_json::to_string(value)?;
+        self.0
+            .insert(format!("custom_{id}"), serde_json::from_str(&encoded)?);
+        Ok(())
+    }
+}
 
 /// Value inside Rentman's custom fields object.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -13007,33 +13035,50 @@ pub struct Accessory {
     /// Rentman API field `AccessoryResponse.id`.
     pub id: Id<Accessory>,
     /// Rentman API field `AccessoryResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AccessoryResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AccessoryResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// The equipment that this item is an accessory of.
-    #[serde(with = "crate::id::link")]
-    pub parent_equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent_equipment: Option<Id<Equipment>>,
     /// The equipment that is represented by this accessory.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `AccessoryResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Automatically add the accessory as soon as the equipment is added to the project.
-    pub automatic: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub automatic: Option<bool>,
     /// Do not add again if this accessory is already present in the project.
-    pub skip: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skip: Option<bool>,
     /// Adding the accessory to the project with zero as price.
-    pub is_free: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_free: Option<bool>,
     /// Rentman API field `AccessoryResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// The accessory is always added as a new line in the project as opposed to merging with the same accessory.
-    pub add_as_new_line: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub add_as_new_line: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Accessory>,
 }
@@ -13066,26 +13111,42 @@ pub struct ActualContent {
     /// Rentman API field `ActualContentResponse.id`.
     pub id: Id<ActualContent>,
     /// Rentman API field `ActualContentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ActualContentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ActualContentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ActualContentResponse.equipment`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `ActualContentResponse.serial`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub serial: Option<Id<SerialNumber>>,
     /// Rentman API field `ActualContentResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// GENERATED FIELD. The combination that contains this equipment.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub combination_serial: Option<Id<SerialNumber>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ActualContent>,
 }
@@ -13112,21 +13173,32 @@ pub struct Alternative {
     /// Rentman API field `AlternativeResponse.id`.
     pub id: Id<Alternative>,
     /// Rentman API field `AlternativeResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AlternativeResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AlternativeResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `AlternativeResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `AlternativeResponse.alternative`.
-    #[serde(with = "crate::id::link")]
-    pub alternative: Id<Equipment>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub alternative: Option<Id<Equipment>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Alternative>,
 }
@@ -13153,21 +13225,32 @@ pub struct AppointmentCrew {
     /// Rentman API field `AppointmentCrewResponse.id`.
     pub id: Id<AppointmentCrew>,
     /// Rentman API field `AppointmentCrewResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentCrewResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentCrewResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `AppointmentCrewResponse.appointment`.
-    #[serde(with = "crate::id::link")]
-    pub appointment: Id<Appointment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub appointment: Option<Id<Appointment>>,
     /// Rentman API field `AppointmentCrewResponse.crew`.
-    #[serde(with = "crate::id::link")]
-    pub crew: Id<Crew>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crew: Option<Id<Crew>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<AppointmentCrew>,
 }
@@ -13226,41 +13309,57 @@ pub struct Appointment {
     /// Rentman API field `AppointmentResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `AppointmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `AppointmentResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `AppointmentResponse.start`.
-    pub start: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentResponse.end`.
-    pub end: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// Rentman API field `AppointmentResponse.location`.
-    pub location: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
     /// Rentman API field `AppointmentResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `AppointmentResponse.is_public`.
-    pub is_public: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_public: Option<bool>,
     /// If yes, employees can be scheduled during this appointment.
-    pub is_plannable: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_plannable: Option<bool>,
     /// Period between each recurrence. E.g. every x day/week/month/year.
-    pub recurrence_interval_unit: AppointmentRecurrenceIntervalUnit,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval_unit: Option<AppointmentRecurrenceIntervalUnit>,
     /// Date the recurrence ends.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_enddate: Option<String>,
     /// Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
-    pub recurrence_interval: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval: Option<i64>,
     /// Identification which recurrences belong together.
-    pub recurrence_group: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_group: Option<i64>,
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_weekdays: Option<String>,
     /// Rentman API field `AppointmentResponse.synchronization_id`.
-    pub synchronization_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub synchronization_id: Option<String>,
     /// Rentman API field `AppointmentResponse.synchronisation_uri`.
-    pub synchronisation_uri: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub synchronisation_uri: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Appointment>,
 }
@@ -13318,48 +13417,70 @@ pub struct ContactPerson {
     /// Rentman API field `ContactPersonResponse.id`.
     pub id: Id<ContactPerson>,
     /// Rentman API field `ContactPersonResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactPersonResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactPersonResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ContactPersonResponse.contact`.
-    #[serde(with = "crate::id::link")]
-    pub contact: Id<Contact>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact: Option<Id<Contact>>,
     /// Rentman API field `ContactPersonResponse.firstname`.
-    pub firstname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub firstname: Option<String>,
     /// Rentman API field `ContactPersonResponse.middle_name`.
-    pub middle_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub middle_name: Option<String>,
     /// Rentman API field `ContactPersonResponse.lastname`.
-    pub lastname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lastname: Option<String>,
     /// Rentman API field `ContactPersonResponse.function`.
-    pub function: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub function: Option<String>,
     /// Rentman API field `ContactPersonResponse.phone`.
-    pub phone: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
     /// Rentman API field `ContactPersonResponse.street`.
-    pub street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub street: Option<String>,
     /// Rentman API field `ContactPersonResponse.number`.
-    pub number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
     /// Rentman API field `ContactPersonResponse.postalcode`.
-    pub postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub postalcode: Option<String>,
     /// Rentman API field `ContactPersonResponse.city`.
-    pub city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
     /// Rentman API field `ContactPersonResponse.state`.
-    pub state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<String>,
     /// Rentman API field `ContactPersonResponse.country`.
-    pub country: ContactPersonCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<ContactPersonCountry>,
     /// Rentman API field `ContactPersonResponse.mobilephone`.
-    pub mobilephone: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mobilephone: Option<String>,
     /// Rentman API field `ContactPersonResponse.email`.
-    pub email: EmailAddress,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<EmailAddress>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ContactPerson>,
 }
@@ -13589,155 +13710,235 @@ pub struct Contact {
     /// Rentman API field `ContactResponse.id`.
     pub id: Id<Contact>,
     /// Rentman API field `ContactResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ContactResponse.folder`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub folder: Option<Id<Folder>>,
     /// Rentman API field `ContactResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: ContactType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<ContactType>,
     /// Rentman API field `ContactResponse.ext_name_line`.
-    pub ext_name_line: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ext_name_line: Option<String>,
     /// Rentman API field `ContactResponse.firstname`.
-    pub firstname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub firstname: Option<String>,
     /// Distance from warehouse to visiting address.
-    pub distance: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distance: Option<RentmanAmount>,
     /// Travel time (in minutes) from warehouse to visiting address.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `ContactResponse.surfix`.
-    pub surfix: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub surfix: Option<String>,
     /// Rentman API field `ContactResponse.surname`.
-    pub surname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub surname: Option<String>,
     /// Rentman API field `ContactResponse.longitude`.
-    pub longitude: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub longitude: Option<RentmanAmount>,
     /// Rentman API field `ContactResponse.latitude`.
-    pub latitude: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub latitude: Option<RentmanAmount>,
     /// Automatically generated if left empty.
-    pub code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
     /// External identifier used for integrations with accounting software.
-    pub accounting_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accounting_code: Option<String>,
     /// External identifier used for integrations with accounting software.
-    pub vendor_accounting_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vendor_accounting_code: Option<String>,
     /// Rentman API field `ContactResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ContactResponse.gender`.
-    pub gender: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gender: Option<String>,
     /// Rentman API field `ContactResponse.mailing_city`.
-    pub mailing_city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_city: Option<String>,
     /// Rentman API field `ContactResponse.mailing_street`.
-    pub mailing_street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_street: Option<String>,
     /// Rentman API field `ContactResponse.mailing_number`.
-    pub mailing_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_number: Option<String>,
     /// Rentman API field `ContactResponse.mailing_unit_number`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailing_unit_number: Option<String>,
     /// Rentman API field `ContactResponse.mailing_district`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailing_district: Option<String>,
     /// Rentman API field `ContactResponse.mailing_extra_address_line`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mailing_extra_address_line: Option<String>,
     /// Rentman API field `ContactResponse.mailing_postalcode`.
-    pub mailing_postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_postalcode: Option<String>,
     /// Rentman API field `ContactResponse.mailing_state`.
-    pub mailing_state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_state: Option<String>,
     /// Rentman API field `ContactResponse.mailing_country`.
-    pub mailing_country: ContactMailingCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mailing_country: Option<ContactMailingCountry>,
     /// Rentman API field `ContactResponse.visit_city`.
-    pub visit_city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visit_city: Option<String>,
     /// Rentman API field `ContactResponse.visit_street`.
-    pub visit_street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visit_street: Option<String>,
     /// Rentman API field `ContactResponse.visit_number`.
-    pub visit_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visit_number: Option<String>,
     /// Rentman API field `ContactResponse.visit_unit_number`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visit_unit_number: Option<String>,
     /// Rentman API field `ContactResponse.visit_district`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visit_district: Option<String>,
     /// Rentman API field `ContactResponse.visit_extra_address_line`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visit_extra_address_line: Option<String>,
     /// Rentman API field `ContactResponse.visit_postalcode`.
-    pub visit_postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visit_postalcode: Option<String>,
     /// Rentman API field `ContactResponse.visit_state`.
-    pub visit_state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visit_state: Option<String>,
     /// Rentman API field `ContactResponse.country`.
-    pub country: ContactCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<ContactCountry>,
     /// Rentman API field `ContactResponse.invoice_city`.
-    pub invoice_city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_city: Option<String>,
     /// Rentman API field `ContactResponse.invoice_street`.
-    pub invoice_street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_street: Option<String>,
     /// Rentman API field `ContactResponse.invoice_number`.
-    pub invoice_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_number: Option<String>,
     /// Rentman API field `ContactResponse.invoice_unit_number`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub invoice_unit_number: Option<String>,
     /// Rentman API field `ContactResponse.invoice_district`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub invoice_district: Option<String>,
     /// Rentman API field `ContactResponse.invoice_extra_address_line`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub invoice_extra_address_line: Option<String>,
     /// Rentman API field `ContactResponse.invoice_postalcode`.
-    pub invoice_postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_postalcode: Option<String>,
     /// Rentman API field `ContactResponse.invoice_state`.
-    pub invoice_state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_state: Option<String>,
     /// Rentman API field `ContactResponse.invoice_country`.
-    pub invoice_country: ContactInvoiceCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_country: Option<ContactInvoiceCountry>,
     /// Rentman API field `ContactResponse.phone_1`.
-    pub phone_1: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_1: Option<String>,
     /// Rentman API field `ContactResponse.phone_2`.
-    pub phone_2: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone_2: Option<String>,
     /// Rentman API field `ContactResponse.email_1`.
-    pub email_1: EmailAddress,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_1: Option<EmailAddress>,
     /// Rentman API field `ContactResponse.email_2`.
-    pub email_2: EmailAddress,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email_2: Option<EmailAddress>,
     /// Rentman API field `ContactResponse.website`.
-    pub website: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
     /// Rentman API field `ContactResponse.VAT_code`.
-    #[serde(rename = "VAT_code")]
-    pub vat_code: String,
+    #[serde(rename = "VAT_code", default, skip_serializing_if = "Option::is_none")]
+    pub vat_code: Option<String>,
     /// This number is used in file exports of invoices.
-    pub fiscal_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fiscal_code: Option<String>,
     /// Rentman API field `ContactResponse.commerce_code`.
-    pub commerce_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub commerce_code: Option<String>,
     /// Rentman API field `ContactResponse.purchase_number`.
-    pub purchase_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchase_number: Option<String>,
     /// Rentman API field `ContactResponse.bic`.
-    pub bic: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bic: Option<String>,
     /// Rentman API field `ContactResponse.bank_account`.
-    pub bank_account: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank_account: Option<String>,
     /// This contact person is automatically selected if you choose this contact in a project or subrental.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub default_person: Option<Id<ContactPerson>>,
     /// This contact person is automatically selected when creating invoices.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub admin_contactperson: Option<Id<ContactPerson>>,
     /// Discount applied to the 'crew' category upon selecting this contact as a client in a project.
-    pub discount_crew: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_crew: Option<RentmanAmount>,
     /// Discount applied to the 'transport' category upon selecting this contact as a client in a project.
-    pub discount_transport: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_transport: Option<RentmanAmount>,
     /// Discount applied to the 'rental' category upon selecting this contact as a client in a project.
-    pub discount_rental: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_rental: Option<RentmanAmount>,
     /// Discount applied to the 'sales' category upon selecting this contact as a client in a project.
-    pub discount_sale: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_sale: Option<RentmanAmount>,
     /// Discount applied to the total (sub)project upon selecting this contact as a client in a project.
-    pub discount_total: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_total: Option<RentmanAmount>,
     /// This remark is automatically added to projects upon selecting this contact as client or location.
-    pub projectnote: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub projectnote: Option<String>,
     /// This remark is automatically added to projects upon selecting this contact as client or location.
-    pub projectnote_title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub projectnote_title: Option<String>,
     /// This warning is shown when this contact is selected as a client in a project.
-    pub contact_warning: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_warning: Option<String>,
     /// Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
-    pub discount_subrent: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_subrent: Option<RentmanAmount>,
     /// Rentman API field `ContactResponse.image`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub image: Option<Id<File>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Contact>,
 }
@@ -13792,33 +13993,53 @@ pub struct Contract {
     /// Rentman API field `ContractResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ContractResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ContractResponse.number`.
-    pub number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
     /// Rentman API field `ContractResponse.customer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub customer: Option<Id<Contact>>,
     /// Rentman API field `ContractResponse.contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ContractResponse.date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
     /// The date on which this quotation expires.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration_date: Option<String>,
     /// Rentman API field `ContractResponse.version`.
-    pub version: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<i64>,
     /// Rentman API field `ContractResponse.subject`.
-    pub subject: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
     /// Rentman API field `ContractResponse.show_tax`.
-    pub show_tax: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_tax: Option<bool>,
     /// Rentman API field `ContractResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `ContractResponse.filename`.
-    pub filename: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_total_price: Option<RentmanAmount>,
@@ -13847,12 +14068,15 @@ pub struct Contract {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price_invat: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_invat: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub vat_amount: RentmanAmount,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vat_amount: Option<RentmanAmount>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Contract>,
 }
@@ -13941,44 +14165,74 @@ pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCostResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectCostResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectCostResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `ProjectCostResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `ProjectCostResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `ProjectCostResponse.discount`.
-    pub discount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectCostResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `ProjectCostResponse.subproject`.
-    #[serde(with = "crate::id::link")]
-    pub subproject: Id<Subproject>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `ProjectCostResponse.is_template`.
-    pub is_template: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_template: Option<bool>,
     /// This class, in combination with the chosen VAT scheme at project level, determines the final VAT rate.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `ProjectCostResponse.ledger`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostResponse.ledger_debit`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostResponse.sale_price`.
-    pub sale_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sale_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectCostResponse.purchase_price`.
-    pub purchase_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchase_price: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectCost>,
 }
@@ -14105,86 +14359,132 @@ pub struct Crew {
     /// Rentman API field `CrewResponse.id`.
     pub id: Id<Crew>,
     /// Rentman API field `CrewResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `CrewResponse.folder`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub folder: Option<Id<Folder>>,
     /// Rentman API field `CrewResponse.street`.
-    pub street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub street: Option<String>,
     /// Rentman API field `CrewResponse.housenumber`.
-    pub housenumber: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub housenumber: Option<String>,
     /// Rentman API field `CrewResponse.unit_number`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_number: Option<String>,
     /// Rentman API field `CrewResponse.district`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub district: Option<String>,
     /// Rentman API field `CrewResponse.city`.
-    pub city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
     /// Rentman API field `CrewResponse.postal_code`.
-    pub postal_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub postal_code: Option<String>,
     /// Rentman API field `CrewResponse.addressline2`.
-    pub addressline2: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub addressline2: Option<String>,
     /// Rentman API field `CrewResponse.extraaddressline`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub extraaddressline: Option<String>,
     /// Rentman API field `CrewResponse.state`.
-    pub state: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<String>,
     /// Rentman API field `CrewResponse.country`.
-    pub country: CrewCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<CrewCountry>,
     /// Rentman API field `CrewResponse.birthdate`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub birthdate: Option<String>,
     /// Rentman API field `CrewResponse.passport_number`.
-    pub passport_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub passport_number: Option<String>,
     /// Rentman API field `CrewResponse.emergency_contact`.
-    pub emergency_contact: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub emergency_contact: Option<String>,
     /// Rentman API field `CrewResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `CrewResponse.driving_license`.
-    pub driving_license: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub driving_license: Option<String>,
     /// Rentman API field `CrewResponse.contract`.
-    pub contract: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contract: Option<i64>,
     /// Rentman API field `CrewResponse.bank`.
-    pub bank: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bank: Option<String>,
     /// Rentman API field `CrewResponse.contract_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contract_date: Option<String>,
     /// Rentman API field `CrewResponse.company_name`.
-    pub company_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub company_name: Option<String>,
     /// Rentman API field `CrewResponse.vat_code`.
-    pub vat_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vat_code: Option<String>,
     /// Rentman API field `CrewResponse.coc_code`.
-    pub coc_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub coc_code: Option<String>,
     /// Rentman API field `CrewResponse.firstname`.
-    pub firstname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub firstname: Option<String>,
     /// Rentman API field `CrewResponse.middle_name`.
-    pub middle_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub middle_name: Option<String>,
     /// Rentman API field `CrewResponse.lastname`.
-    pub lastname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lastname: Option<String>,
     /// Rentman API field `CrewResponse.email`.
-    pub email: EmailAddress,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub email: Option<EmailAddress>,
     /// Rentman API field `CrewResponse.phone`.
-    pub phone: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
     /// Rentman API field `CrewResponse.active`.
-    pub active: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
     /// Rentman API field `CrewResponse.avatar`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub avatar: Option<Id<File>>,
     /// Rentman API field `CrewResponse.vt_fullname`.
-    pub vt_fullname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vt_fullname: Option<String>,
     /// Rentman API field `CrewResponse.default_warehouse`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub default_warehouse: Option<Id<StockLocation>>,
     /// Can be used for the employee ID from your accounting software.
-    pub external_reference: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_reference: Option<String>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Crew>,
 }
@@ -14259,37 +14559,56 @@ pub struct CrewAvailability {
     /// Rentman API field `CrewAvailabilityResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `CrewAvailabilityResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `CrewAvailabilityResponse.last_updater`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub last_updater: Option<Id<Crew>>,
     /// Rentman API field `CrewAvailabilityResponse.last_updated`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewAvailabilityResponse.start`.
-    pub start: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewAvailabilityResponse.end`.
-    pub end: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewAvailabilityResponse.crewmember`.
-    #[serde(with = "crate::id::link")]
-    pub crewmember: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crewmember: Option<Id<Crew>>,
     /// `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
-    pub status: CrewAvailabilityStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<CrewAvailabilityStatus>,
     /// Rentman API field `CrewAvailabilityResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `CrewAvailabilityResponse.recurrence_interval_unit`.
-    pub recurrence_interval_unit: CrewAvailabilityRecurrenceIntervalUnit,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval_unit: Option<CrewAvailabilityRecurrenceIntervalUnit>,
     /// Rentman API field `CrewAvailabilityResponse.recurrence_enddate`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_enddate: Option<String>,
     /// interval in how many days/weeks/months/years the availability should reoccur.
-    pub recurrence_interval: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval: Option<i64>,
     /// Rentman API field `CrewAvailabilityResponse.recurrent_group`.
-    pub recurrent_group: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrent_group: Option<i64>,
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday. E.g.: for a recurrence on Monday and Wednesday, use [0, 2].
-    pub recurrence_weekdays: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_weekdays: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<CrewAvailability>,
 }
@@ -14315,23 +14634,35 @@ pub struct CrewRate {
     /// Rentman API field `CrewRatesResponse.id`.
     pub id: Id<CrewRate>,
     /// Rentman API field `CrewRatesResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRatesResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRatesResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `CrewRatesResponse.naam`.
-    pub naam: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub naam: Option<String>,
     /// Rentman API field `CrewRatesResponse.cost_rate`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `CrewRatesResponse.medewerker`.
-    #[serde(with = "crate::id::link")]
-    pub medewerker: Id<Crew>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub medewerker: Option<Id<Crew>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<CrewRate>,
 }
@@ -14506,115 +14837,182 @@ pub struct Equipment {
     /// Rentman API field `EquipmentResponse.id`.
     pub id: Id<Equipment>,
     /// Rentman API field `EquipmentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `EquipmentResponse.folder`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub folder: Option<Id<Folder>>,
     /// Rentman API field `EquipmentResponse.code`.
-    pub code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
     /// Rentman API field `EquipmentResponse.factor_group`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub factor_group: Option<Id<FactorGroup>>,
     /// Rentman API field `EquipmentResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Note on packing lists.
-    pub internal_remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub internal_remark: Option<String>,
     /// Note on financial documents.
-    pub external_remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_remark: Option<String>,
     /// Rentman API field `EquipmentResponse.unit`.
-    pub unit: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
     /// Rentman API field `EquipmentResponse.in_shop`.
-    pub in_shop: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_shop: Option<bool>,
     /// Item with price calculation per square meter (width x height). Dimensions can be entered for each project.
-    pub surface_article: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub surface_article: Option<bool>,
     /// Rentman API field `EquipmentResponse.shop_description_short`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shop_description_short: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_description_long`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub shop_description_long: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_seo_title`.
-    pub shop_seo_title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_seo_title: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_seo_keyword`.
-    pub shop_seo_keyword: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_seo_keyword: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_seo_description`.
-    pub shop_seo_description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_seo_description: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_featured`.
-    pub shop_featured: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shop_featured: Option<bool>,
     /// Rentman API field `EquipmentResponse.price`.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.subrental_costs`.
-    pub subrental_costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subrental_costs: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.critical_stock_level`.
-    pub critical_stock_level: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub critical_stock_level: Option<i64>,
     /// Rentman API field `EquipmentResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: EquipmentType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<EquipmentType>,
     /// Rentman API field `EquipmentResponse.rental_sales`.
-    pub rental_sales: EquipmentRentalSales,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rental_sales: Option<EquipmentRentalSales>,
     /// Rentman API field `EquipmentResponse.temporary`.
-    pub temporary: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub temporary: Option<bool>,
     /// Rentman API field `EquipmentResponse.in_planner`.
-    pub in_planner: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_planner: Option<bool>,
     /// Rentman API field `EquipmentResponse.in_archive`.
-    pub in_archive: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_archive: Option<bool>,
     /// Rentman API field `EquipmentResponse.stock_management`.
-    pub stock_management: EquipmentStockManagement,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stock_management: Option<EquipmentStockManagement>,
     /// Rentman API field `EquipmentResponse.taxclass`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `EquipmentResponse.list_price`.
-    pub list_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub list_price: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.volume`.
-    pub volume: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volume: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.packed_per`.
-    pub packed_per: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub packed_per: Option<i64>,
     /// Rentman API field `EquipmentResponse.height`.
-    pub height: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.width`.
-    pub width: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.length`.
-    pub length: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub length: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.weight`.
-    pub weight: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.empty_weight`.
-    pub empty_weight: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub empty_weight: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.power`.
-    pub power: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub power: Option<RentmanAmount>,
     /// Rentman API field `EquipmentResponse.current`.
-    pub current: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<RentmanAmount>,
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
-    pub country_of_origin: EquipmentCountryOfOrigin,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country_of_origin: Option<EquipmentCountryOfOrigin>,
     /// Rentman API field `EquipmentResponse.image`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub image: Option<Id<File>>,
     /// Rentman API field `EquipmentResponse.ledger`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `EquipmentResponse.ledger_debit`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Enter an equipment group to automatically place the item in when planning.
-    pub defaultgroup: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub defaultgroup: Option<String>,
     /// Rentman API field `EquipmentResponse.is_combination`.
-    pub is_combination: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_combination: Option<bool>,
     /// Rentman API field `EquipmentResponse.is_physical`.
-    pub is_physical: EquipmentIsPhysical,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_physical: Option<EquipmentIsPhysical>,
     /// If 'No' is selected, equipment cannot be added to or removed from this combination. Also, quantities of the content cannot be adjusted.
-    pub can_edit_content_during_planning: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_edit_content_during_planning: Option<bool>,
     /// Determine whether the combination can contain actual content that is not part of the default content.
-    pub strict_container_content: EquipmentStrictContainerContent,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub strict_container_content: Option<EquipmentStrictContainerContent>,
     /// GENERATED FIELD.
-    pub qrcodes: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub qrcodes: Option<String>,
     /// GENERATED FIELD.
-    pub qrcodes_of_serial_numbers: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub qrcodes_of_serial_numbers: Option<String>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub current_quantity_excl_cases: Option<i64>,
@@ -14625,10 +15023,12 @@ pub struct Equipment {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity_in_cases: Option<i64>,
     /// GENERATED FIELD.
-    pub location_in_warehouse: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_in_warehouse: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Equipment>,
 }
@@ -14655,21 +15055,32 @@ pub struct EquipmentAssignedSerial {
     /// Rentman API field `EquipmentAssignedSerialsResponse.id`.
     pub id: Id<EquipmentAssignedSerial>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.combination`.
-    #[serde(with = "crate::id::link")]
-    pub combination: Id<SerialNumber>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub combination: Option<Id<SerialNumber>>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.serialnumber`.
-    #[serde(with = "crate::id::link")]
-    pub serialnumber: Id<SerialNumber>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub serialnumber: Option<Id<SerialNumber>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<EquipmentAssignedSerial>,
 }
@@ -14714,29 +15125,44 @@ pub struct EquipmentSetContent {
     /// Rentman API field `EquipmentSetContentResponse.id`.
     pub id: Id<EquipmentSetContent>,
     /// Rentman API field `EquipmentSetContentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentSetContentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentSetContentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Quantity in this combination.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `EquipmentSetContentResponse.parent_equipment`.
-    #[serde(with = "crate::id::link")]
-    pub parent_equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent_equipment: Option<Id<Equipment>>,
     /// Rentman API field `EquipmentSetContentResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `EquipmentSetContentResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Permanently reduce the stock by the amount from this combination.
-    pub is_fixed: EquipmentSetContentIsFixed,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_fixed: Option<EquipmentSetContentIsFixed>,
     /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
-    pub is_physically_connected: EquipmentSetContentIsPhysicallyConnected,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_physically_connected: Option<EquipmentSetContentIsPhysicallyConnected>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<EquipmentSetContent>,
 }
@@ -14793,18 +15219,23 @@ pub struct ExtraInputField {
     /// Rentman API field `ExtraInputFieldResponse.id`.
     pub id: Id<ExtraInputField>,
     /// Rentman API field `ExtraInputFieldResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ExtraInputFieldResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ExtraInputFieldResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ExtraInputFieldResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ExtraInputFieldResponse.itemtype`.
-    pub itemtype: ExtraInputFieldItemtype,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub itemtype: Option<ExtraInputFieldItemtype>,
     /// Rentman API field `ExtraInputFieldResponse.linkedItemType`.
     #[serde(
         rename = "linkedItemType",
@@ -14813,24 +15244,34 @@ pub struct ExtraInputField {
     )]
     pub linked_item_type: Option<ExtraInputFieldLinkedItemType>,
     /// Rentman API field `ExtraInputFieldResponse.parent`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<ExtraInputField>>,
     /// Rentman API field `ExtraInputFieldResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: ExtraInputFieldType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<ExtraInputFieldType>,
     /// Rentman API field `ExtraInputFieldResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Hides the field anywhere in the system.
-    pub hidden: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hidden: Option<bool>,
     /// Confidential fields are only visible to people with permission to see confidential fields.
-    pub classified: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub classified: Option<bool>,
     /// Enable this option to make this field for searchable in the overviews.
-    pub search_include: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_include: Option<bool>,
     /// The minimum length that a search term must have before this field is searchable.
-    pub search_minlength: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub search_minlength: Option<i64>,
     /// Required input fields must be filled in.
-    pub is_customfield_mandatory: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_customfield_mandatory: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ExtraInputField>,
 }
@@ -14849,17 +15290,21 @@ pub struct FactorGroup {
     /// Rentman API field `FactorGroupsResponse.id`.
     pub id: Id<FactorGroup>,
     /// Rentman API field `FactorGroupsResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorGroupsResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorGroupsResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FactorGroupsResponse.name`.
-    pub name: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<FactorGroup>,
 }
@@ -14884,24 +15329,34 @@ pub struct Factor {
     /// Rentman API field `FactorsResponse.id`.
     pub id: Id<Factor>,
     /// Rentman API field `FactorsResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorsResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorsResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FactorsResponse.from_days`.
-    pub from_days: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_days: Option<i64>,
     /// Rentman API field `FactorsResponse.to_days`.
-    pub to_days: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub to_days: Option<i64>,
     /// Rentman API field `FactorsResponse.factor`.
-    pub factor: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub factor: Option<RentmanAmount>,
     /// Rentman API field `FactorsResponse.factor_group`.
-    #[serde(with = "crate::id::link")]
-    pub factor_group: Id<FactorGroup>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub factor_group: Option<Id<FactorGroup>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Factor>,
 }
@@ -14936,31 +15391,43 @@ pub struct FileFolder {
     /// Rentman API field `FileFolderResponse.id`.
     pub id: Id<FileFolder>,
     /// Rentman API field `FileFolderResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FileFolderResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FileFolderResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FileFolderResponse.parent`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<FileFolder>>,
     /// Rentman API field `FileFolderResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Confidential folders are only visible with the user right to download all files.
-    pub classified: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub classified: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<ItemId>,
     /// Rentman API field `FileFolderResponse.itemtype`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileFolderItemtype>,
     /// Rentman API field `FileFolderResponse.is_template`.
-    pub is_template: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_template: Option<bool>,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<FileFolder>,
 }
@@ -15039,68 +15506,98 @@ pub struct File {
     /// Rentman API field `FileResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `FileResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FileResponse.readable_name`.
-    pub readable_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub readable_name: Option<String>,
     /// Rentman API field `FileResponse.expiration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration: Option<String>,
     /// Rentman API field `FileResponse.size`.
-    pub size: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub size: Option<i64>,
     /// Rentman API field `FileResponse.image`.
-    pub image: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub image: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<ItemId>,
     /// Rentman API field `FileResponse.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileItemtype>,
     /// Rentman API field `FileResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// This setting relates to the block of images in document templates.
-    pub in_documents: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_documents: Option<bool>,
     /// Rentman API field `FileResponse.in_webshop`.
-    pub in_webshop: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_webshop: Option<bool>,
     /// Confidential files are only visible with the user right to download all files.
-    pub classified: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub classified: Option<bool>,
     /// Rentman API field `FileResponse.public`.
-    pub public: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public: Option<bool>,
     /// Rentman API field `FileResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: String,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<String>,
     /// Rentman API field `FileResponse.preview_of`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub preview_of: Option<Id<File>>,
     /// Rentman API field `FileResponse.previewstatus`.
-    pub previewstatus: FilePreviewstatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub previewstatus: Option<FilePreviewstatus>,
     /// Rentman API field `FileResponse.file_item`.
-    pub file_item: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_item: Option<i64>,
     /// Rentman API field `FileResponse.file_itemtype`.
-    pub file_itemtype: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_itemtype: Option<String>,
     /// Rentman API field `FileResponse.folder`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub folder: Option<Id<FileFolder>>,
     /// GENERATED FIELD.
-    pub path: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
     /// GENERATED FIELD.
-    pub path_without_file_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path_without_file_name: Option<String>,
     /// GENERATED FIELD.
-    pub path_with_file_folders: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path_with_file_folders: Option<String>,
     /// GENERATED FIELD.
-    pub name_without_extension: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name_without_extension: Option<String>,
     /// GENERATED FIELD.
-    pub friendly_name_without_extension: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub friendly_name_without_extension: Option<String>,
     /// GENERATED FIELD.
-    pub extension: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extension: Option<String>,
     /// GENERATED FIELD.
-    pub url: Url,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<Url>,
     /// GENERATED FIELD.
-    pub proxy_url: Url,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub proxy_url: Option<Url>,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<File>,
 }
@@ -15132,26 +15629,37 @@ pub struct Folder {
     /// Rentman API field `FolderResponse.id`.
     pub id: Id<Folder>,
     /// Rentman API field `FolderResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FolderResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FolderResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FolderResponse.parent`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<Folder>>,
     /// Rentman API field `FolderResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `FolderResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// The type of item in this folder.
-    pub itemtype: FolderItemtype,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub itemtype: Option<FolderItemtype>,
     /// GENERATED FIELD.
-    pub path: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Folder>,
 }
@@ -15214,49 +15722,75 @@ pub struct Invitation {
     /// Rentman API field `InvitationsResponse.id`.
     pub id: Id<Invitation>,
     /// Rentman API field `InvitationsResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
-    #[serde(rename = "type")]
-    pub type_: InvitationType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<InvitationType>,
     /// Rentman API field `InvitationsResponse.accepted`.
-    pub accepted: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accepted: Option<bool>,
     /// Rentman API field `InvitationsResponse.responded_timestamp`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub responded_timestamp: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.expiration_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.function`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub function: Option<Id<ProjectFunction>>,
     /// Rentman API field `InvitationsResponse.projectcrew`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub projectcrew: Option<Id<ProjectCrew>>,
     /// Rentman API field `InvitationsResponse.crewmember`.
-    #[serde(with = "crate::id::link")]
-    pub crewmember: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `InvitationsResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `InvitationsResponse.emailstatus`.
-    pub emailstatus: InvitationEmailstatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub emailstatus: Option<InvitationEmailstatus>,
     /// Rentman API field `InvitationsResponse.last_reminder`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_reminder: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub location_details: Option<String>,
     /// Rentman API field `InvitationsResponse.auto_reminder_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auto_reminder_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.auto_reminder_sent`.
-    pub auto_reminder_sent: i64,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub auto_reminder_sent: Option<i64>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Invitation>,
 }
@@ -15285,33 +15819,46 @@ pub struct InvoiceLine {
     /// Rentman API field `InvoiceLineResponse.id`.
     pub id: Id<InvoiceLine>,
     /// Rentman API field `InvoiceLineResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvoiceLineResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvoiceLineResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Numeric ID of the linked item (plain integer, not a path).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<ItemId>,
     /// Rentman API field `InvoiceLineResponse.base`.
-    pub base: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub base: Option<RentmanAmount>,
     /// Rentman API field `InvoiceLineResponse.ledger`.
-    #[serde(with = "crate::id::link")]
-    pub ledger: Id<LedgerCode>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger: Option<Id<LedgerCode>>,
     /// GENERATED FIELD.
-    pub vatrate: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vatrate: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub vatamount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vatamount: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub priceincl: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub priceincl: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub ledgercode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ledgercode: Option<String>,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<InvoiceLine>,
 }
@@ -15386,40 +15933,66 @@ pub struct Invoice {
     /// Rentman API field `FactuurResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `FactuurResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `FactuurResponse.customer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub customer: Option<Id<Contact>>,
     /// Rentman API field `FactuurResponse.account_manager`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub account_manager: Option<Id<Crew>>,
     /// Rentman API field `FactuurResponse.contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contact: Option<Id<ContactPerson>>,
     /// The latest payment date for this invoice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration: Option<String>,
     /// Rentman API field `FactuurResponse.date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
     /// Rentman API field `FactuurResponse.number`.
-    pub number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
     /// Rentman API field `FactuurResponse.procent`.
-    pub procent: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub procent: Option<RentmanAmount>,
     /// Rentman API field `FactuurResponse.from_project`.
-    pub from_project: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from_project: Option<bool>,
     /// Rentman API field `FactuurResponse.subject`.
-    pub subject: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
     /// Rentman API field `FactuurResponse.finalized`.
-    pub finalized: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub finalized: Option<bool>,
     /// Rentman API field `FactuurResponse.integration_reference_id`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub integration_reference_id: Option<String>,
     /// Rentman API field `FactuurResponse.project`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub project: Option<Id<Project>>,
     /// Rentman API field `FactuurResponse.filename`.
-    pub filename: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_total_price: Option<RentmanAmount>,
@@ -15448,34 +16021,48 @@ pub struct Invoice {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub sum_factuurregels: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sum_factuurregels: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price_invat: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_invat: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub vat_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vat_amount: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub invoicetype: InvoiceInvoicetype,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoicetype: Option<InvoiceInvoicetype>,
     /// GENERATED FIELD.
-    pub outstanding_balance: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub outstanding_balance: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub total_paid: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_paid: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub is_paid: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_paid: Option<bool>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date_sent: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub payment_reminder_sent: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub payment_reminder_sent: Option<i64>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub final_payment_reminder_sent: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub payment_date: Option<String>,
     /// GENERATED FIELD.
-    pub days_after_expiry: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub days_after_expiry: Option<i64>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Invoice>,
 }
@@ -15520,27 +16107,41 @@ pub struct LeaveMutation {
     /// Rentman API field `LeaveMutationsResponse.id`.
     pub id: Id<LeaveMutation>,
     /// Rentman API field `LeaveMutationsResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveMutationsResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveMutationsResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `LeaveMutationsResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Rentman API field `LeaveMutationsResponse.duration`.
-    pub duration: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `LeaveMutationsResponse.crewmember`.
-    #[serde(with = "crate::id::link")]
-    pub crewmember: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `LeaveMutationsResponse.leavetype`.
-    #[serde(with = "crate::id::link")]
-    pub leavetype: Id<LeaveType>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub leavetype: Option<Id<LeaveType>>,
     /// Rentman API field `LeaveMutationsResponse.mutation_date`.
-    pub mutation_date: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mutation_date: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<LeaveMutation>,
 }
@@ -15589,27 +16190,41 @@ pub struct LeaveRequest {
     /// Rentman API field `LeaveRequestResponse.id`.
     pub id: Id<LeaveRequest>,
     /// Rentman API field `LeaveRequestResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `LeaveRequestResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Rentman API field `LeaveRequestResponse.approval_status`.
-    pub approval_status: LeaveRequestApprovalStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_status: Option<LeaveRequestApprovalStatus>,
     /// Rentman API field `LeaveRequestResponse.requested_for`.
-    #[serde(with = "crate::id::link")]
-    pub requested_for: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub requested_for: Option<Id<Crew>>,
     /// Rentman API field `LeaveRequestResponse.reviewed_on`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewed_on: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.reviewer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub reviewer: Option<Id<Crew>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<LeaveRequest>,
 }
@@ -15658,40 +16273,54 @@ pub struct LeaveType {
     /// Rentman API field `LeaveTypesResponse.id`.
     pub id: Id<LeaveType>,
     /// Rentman API field `LeaveTypesResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveTypesResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveTypesResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `LeaveTypesResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: LeaveTypeType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<LeaveTypeType>,
     /// Rentman API field `LeaveTypesResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `LeaveTypesResponse.payroll_code`.
-    pub payroll_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub payroll_code: Option<String>,
     /// Rentman API field `LeaveTypesResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// Rentman API field `LeaveTypesResponse.requires_approval`.
-    pub requires_approval: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requires_approval: Option<bool>,
     /// Rentman API field `LeaveTypesResponse.affects_availability`.
-    pub affects_availability: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affects_availability: Option<bool>,
     /// Rentman API field `LeaveTypesResponse.has_balance`.
-    pub has_balance: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_balance: Option<bool>,
     /// Rentman API field `LeaveTypesResponse.balance_start_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub balance_start_date: Option<String>,
     /// Rentman API field `LeaveTypesResponse.is_labor`.
-    pub is_labor: LeaveTypeIsLabor,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_labor: Option<LeaveTypeIsLabor>,
     /// Rentman API field `LeaveTypesResponse.has_calculated_duration`.
-    pub has_calculated_duration: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_calculated_duration: Option<bool>,
     /// Rentman API field `LeaveTypesResponse.can_have_activities`.
-    pub can_have_activities: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub can_have_activities: Option<bool>,
     /// Rentman API field `LeaveTypesResponse.counts_in_totals`.
-    pub counts_in_totals: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub counts_in_totals: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<LeaveType>,
 }
@@ -15716,21 +16345,27 @@ pub struct LedgerCode {
     /// Rentman API field `LedgerResponse.id`.
     pub id: Id<LedgerCode>,
     /// Rentman API field `LedgerResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LedgerResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LedgerResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `LedgerResponse.code`.
-    pub code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
     /// Rentman API field `LedgerResponse.is_credit`.
-    pub is_credit: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_credit: Option<bool>,
     /// Rentman API field `LedgerResponse.is_debit`.
-    pub is_debit: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_debit: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<LedgerCode>,
 }
@@ -15770,27 +16405,37 @@ pub struct Payment {
     /// Rentman API field `PaymentResponse.id`.
     pub id: Id<Payment>,
     /// Rentman API field `PaymentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PaymentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PaymentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `PaymentResponse.invoice`.
-    #[serde(with = "crate::id::link")]
-    pub invoice: Id<Invoice>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub invoice: Option<Id<Invoice>>,
     /// Rentman API field `PaymentResponse.moment`.
-    pub moment: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub moment: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PaymentResponse.amount`.
-    pub amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<RentmanAmount>,
     /// Rentman API field `PaymentResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Accounting software this payment was imported from.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub payment_import_source: Option<PaymentPaymentImportSource>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Payment>,
 }
@@ -15887,64 +16532,99 @@ pub struct ProjectCrew {
     /// Rentman API field `ProjectCrewResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCrewResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectCrewResponse.cost_rate`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectCrewResponse.cost_accommodation`.
-    pub cost_accommodation: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewResponse.cost_catering`.
-    pub cost_catering: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewResponse.cost_travel`.
-    pub cost_travel: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewResponse.cost_other`.
-    pub cost_other: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewResponse.function`.
-    #[serde(with = "crate::id::link")]
-    pub function: Id<ProjectFunction>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub function: Option<Id<ProjectFunction>>,
     /// Rentman API field `ProjectCrewResponse.crewmember`.
-    #[serde(with = "crate::id::link")]
-    pub crewmember: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `ProjectCrewResponse.visible`.
-    pub visible: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible: Option<bool>,
     /// Rentman API field `ProjectCrewResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectCrewResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectCrewResponse.transport`.
-    pub transport: ProjectCrewTransport,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transport: Option<ProjectCrewTransport>,
     /// Rentman API field `ProjectCrewResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Only visible to crew planners.
-    pub remark_planner: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark_planner: Option<String>,
     /// Rentman API field `ProjectCrewResponse.invoice_reference`.
-    pub invoice_reference: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invoice_reference: Option<String>,
     /// Rentman API field `ProjectCrewResponse.project_leader`.
-    pub project_leader: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project_leader: Option<bool>,
     /// Rentman API field `ProjectCrewResponse.is_visible_on_dashboard`.
-    pub is_visible_on_dashboard: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_visible_on_dashboard: Option<bool>,
     /// GENERATED FIELD.
-    pub costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costs: Option<RentmanAmount>,
     /// GENERATED FIELD. Costs for this activity based on the chosen rate and the registered hours of the scheduled crew member.
-    pub cost_actual: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_actual: Option<RentmanAmount>,
     /// GENERATED FIELD. Sum of the number of registered hours linked to this activity.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hours_registered: Option<RentmanAmount>,
     /// GENERATED FIELD. Duration of the activity minus the break defined in the function.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hours_planned: Option<RentmanAmount>,
     /// GENERATED FIELD. Costs for this activity are based on the chosen rate and the duration of the scheduled crew member.
-    pub cost_planned: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_planned: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub diff_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub diff_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub diff_hours: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub activity_status: ProjectCrewActivityStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_status: Option<ProjectCrewActivityStatus>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectCrew>,
 }
@@ -16034,70 +16714,113 @@ pub struct ProjectEquipment {
     /// Rentman API field `ProjectEquipmentResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectEquipmentResponse.equipment`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub equipment: Option<Id<Equipment>>,
     /// The combination it is part of.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<ProjectEquipment>>,
     /// Rentman API field `ProjectEquipmentResponse.ledger`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentResponse.ledger_debit`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `ProjectEquipmentResponse.quantity_total`.
-    pub quantity_total: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity_total: Option<i64>,
     /// Rentman API field `ProjectEquipmentResponse.equipment_group`.
-    #[serde(with = "crate::id::link")]
-    pub equipment_group: Id<ProjectEquipmentGroup>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment_group: Option<Id<ProjectEquipmentGroup>>,
     /// Rentman API field `ProjectEquipmentResponse.discount`.
-    pub discount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentResponse.is_option`.
-    pub is_option: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_option: Option<bool>,
     /// Rentman API field `ProjectEquipmentResponse.factor`.
-    pub factor: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub factor: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `ProjectEquipmentResponse.unit_price`.
-    pub unit_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Note on financial documents.
-    pub external_remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_remark: Option<String>,
     /// Note on packing lists.
-    pub internal_remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub internal_remark: Option<String>,
     /// Rentman API field `ProjectEquipmentResponse.delay_notified`.
-    pub delay_notified: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delay_notified: Option<bool>,
     /// Rentman API field `ProjectEquipmentResponse.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentResponse.is_delayed`.
-    pub is_delayed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_delayed: Option<bool>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub has_missings: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub has_missings: Option<bool>,
     /// GENERATED FIELD.
-    pub warehouse_reservations: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub warehouse_reservations: Option<i64>,
     /// GENERATED FIELD.
-    pub subrent_reservations: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subrent_reservations: Option<i64>,
     /// GENERATED FIELD.
-    pub serial_number_ids: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub serial_number_ids: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectEquipment>,
 }
@@ -16174,49 +16897,74 @@ pub struct ProjectEquipmentGroup {
     /// Rentman API field `ProjectEquipmentGroupResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentGroupResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectEquipmentGroupResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.subproject`.
-    #[serde(with = "crate::id::link")]
-    pub subproject: Id<Subproject>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject: Option<Id<Subproject>>,
     /// This group was additionally scanned from the warehouse.
-    pub additional_scanned: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub additional_scanned: Option<bool>,
     /// Rentman API field `ProjectEquipmentGroupResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectEquipmentGroupResponse.usageperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.usageperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentGroupResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.is_delayed`.
-    pub is_delayed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_delayed: Option<bool>,
     /// Rentman API field `ProjectEquipmentGroupResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `ProjectEquipmentGroupResponse.in_price_calculation`.
-    pub in_price_calculation: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_price_calculation: Option<bool>,
     /// Rentman API field `ProjectEquipmentGroupResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// GENERATED FIELD.
-    pub weight: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub power: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub power: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub current: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub volume: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volume: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub total_new_price: RentmanAmount,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_new_price: Option<RentmanAmount>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectEquipmentGroup>,
 }
@@ -16273,39 +17021,62 @@ pub struct ProjectFunctionGroup {
     /// Rentman API field `ProjectFunctionGroupResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionGroupResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectFunctionGroupResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectFunctionGroupResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `ProjectFunctionGroupResponse.subproject`.
-    #[serde(with = "crate::id::link")]
-    pub subproject: Id<Subproject>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `ProjectFunctionGroupResponse.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
-    pub planperiod_start_schedule_is_start: ProjectFunctionGroupPlanperiodStartScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_start_schedule_is_start:
+        Option<ProjectFunctionGroupPlanperiodStartScheduleIsStart>,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`.
-    pub usageperiod_start_schedule_is_start: ProjectFunctionGroupUsageperiodStartScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usageperiod_start_schedule_is_start:
+        Option<ProjectFunctionGroupUsageperiodStartScheduleIsStart>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_end_schedule_is_start`.
-    pub planperiod_end_schedule_is_start: ProjectFunctionGroupPlanperiodEndScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_end_schedule_is_start: Option<ProjectFunctionGroupPlanperiodEndScheduleIsStart>,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_end_schedule_is_start`.
-    pub usageperiod_end_schedule_is_start: ProjectFunctionGroupUsageperiodEndScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usageperiod_end_schedule_is_start:
+        Option<ProjectFunctionGroupUsageperiodEndScheduleIsStart>,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionGroupResponse.remark`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectFunctionGroup>,
 }
@@ -16426,135 +17197,215 @@ pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD. Name on packing slips.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectFunctionResponse.cost_rate`.
-    #[serde(with = "crate::id::link")]
-    pub cost_rate: Id<Rate>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectFunctionResponse.cost_accommodation`.
-    pub cost_accommodation: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.cost_catering`.
-    pub cost_catering: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.cost_travel`.
-    pub cost_travel: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.cost_other`.
-    pub cost_other: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.price_rate`.
-    #[serde(with = "crate::id::link")]
-    pub price_rate: Id<Rate>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub price_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectFunctionResponse.price_accommodation`.
-    pub price_accommodation: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.price_catering`.
-    pub price_catering: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.price_travel`.
-    pub price_travel: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.price_other`.
-    pub price_other: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `ProjectFunctionResponse.subproject`.
-    #[serde(with = "crate::id::link")]
-    pub subproject: Id<Subproject>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `ProjectFunctionResponse.is_template`.
-    pub is_template: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_template: Option<bool>,
     /// Rentman API field `ProjectFunctionResponse.group`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub group: Option<Id<ProjectFunctionGroup>>,
     /// Name on financial documents.
-    pub name_external: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name_external: Option<String>,
     /// Name on packing lists.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectFunctionResponse.travel_time_before`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub travel_time_before: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.travel_time_after`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub travel_time_after: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.use_travel_time_from_location`.
-    pub use_travel_time_from_location: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_travel_time_from_location: Option<bool>,
     /// Rentman API field `ProjectFunctionResponse.use_distance_from_location`.
-    pub use_distance_from_location: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub use_distance_from_location: Option<bool>,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_start_schedule_is_start`.
-    pub planperiod_start_schedule_is_start: ProjectFunctionPlanperiodStartScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_start_schedule_is_start: Option<ProjectFunctionPlanperiodStartScheduleIsStart>,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_start_schedule_is_start`.
-    pub usageperiod_start_schedule_is_start: ProjectFunctionUsageperiodStartScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usageperiod_start_schedule_is_start: Option<ProjectFunctionUsageperiodStartScheduleIsStart>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_end_schedule_is_start`.
-    pub planperiod_end_schedule_is_start: ProjectFunctionPlanperiodEndScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_end_schedule_is_start: Option<ProjectFunctionPlanperiodEndScheduleIsStart>,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_end_schedule_is_start`.
-    pub usageperiod_end_schedule_is_start: ProjectFunctionUsageperiodEndScheduleIsStart,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usageperiod_end_schedule_is_start: Option<ProjectFunctionUsageperiodEndScheduleIsStart>,
     /// Rentman API field `ProjectFunctionResponse.usageperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectFunctionResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: ProjectFunctionType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<ProjectFunctionType>,
     /// Rentman API field `ProjectFunctionResponse.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.amount`.
-    pub amount: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<i64>,
     /// Rentman API field `ProjectFunctionResponse.break`.
-    #[serde(rename = "break")]
+    #[serde(rename = "break", default, skip_serializing_if = "Option::is_none")]
     pub break_: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.distance`.
-    pub distance: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distance: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.twoway`.
-    pub twoway: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub twoway: Option<bool>,
     /// Rentman API field `ProjectFunctionResponse.taxclass`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `ProjectFunctionResponse.ledger`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectFunctionResponse.ledger_debit`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectFunctionResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `ProjectFunctionResponse.remark_client`.
-    pub remark_client: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark_client: Option<String>,
     /// Rentman API field `ProjectFunctionResponse.remark_planner`.
-    pub remark_planner: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark_planner: Option<String>,
     /// Rentman API field `ProjectFunctionResponse.remark_crew`.
-    pub remark_crew: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark_crew: Option<String>,
     /// Rentman API field `ProjectFunctionResponse.in_financial`.
-    pub in_financial: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_financial: Option<bool>,
     /// Rentman API field `ProjectFunctionResponse.in_planning`.
-    pub in_planning: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_planning: Option<bool>,
     /// If yes, crew members scheduled on this shift will be shown as available for other functions.
-    pub is_plannable: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_plannable: Option<bool>,
     /// Identification which recurrences belong together.
-    pub recurrence_group: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_group: Option<i64>,
     /// Date the recurrence ends.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_enddate: Option<String>,
     /// Period between each recurrence. E.g. every x day/week/month/year.
-    pub recurrence_interval_unit: ProjectFunctionRecurrenceIntervalUnit,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval_unit: Option<ProjectFunctionRecurrenceIntervalUnit>,
     /// Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
-    pub recurrence_interval: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurrence_interval: Option<i64>,
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recurrence_weekdays: Option<String>,
     /// GENERATED FIELD.
-    pub price_fixed: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_fixed: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price_variable: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_variable: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub costs_fixed: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costs_fixed: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub costs_variable: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costs_variable: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price based on duration and selected price rate.
-    pub price_total: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_total: Option<RentmanAmount>,
     /// GENERATED FIELD. Total costs based on duration and chosen cost rate.
-    pub costs_total: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costs_total: Option<RentmanAmount>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectFunction>,
 }
@@ -16614,44 +17465,69 @@ pub struct ProjectRequestEquipment {
     /// Rentman API field `ProjectRequestEquipmentResponse.id`.
     pub id: Id<ProjectRequestEquipment>,
     /// Rentman API field `ProjectRequestEquipmentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectRequestEquipmentResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `ProjectRequestEquipmentResponse.quantity_total`.
-    pub quantity_total: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity_total: Option<i64>,
     /// Rentman API field `ProjectRequestEquipmentResponse.is_comment`.
-    pub is_comment: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_comment: Option<bool>,
     /// Rentman API field `ProjectRequestEquipmentResponse.is_kit`.
-    pub is_kit: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_kit: Option<bool>,
     /// Rentman API field `ProjectRequestEquipmentResponse.discount`.
-    pub discount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestEquipmentResponse.linked_equipment`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub linked_equipment: Option<Id<Equipment>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectRequestEquipmentResponse.external_remark`.
-    pub external_remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_remark: Option<String>,
     /// The combination it is part of.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<ProjectRequestEquipment>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.unit_price`.
-    pub unit_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestEquipmentResponse.project_request`.
-    #[serde(with = "crate::id::link")]
-    pub project_request: Id<ProjectRequest>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project_request: Option<Id<ProjectRequest>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.factor`.
-    pub factor: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub factor: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestEquipmentResponse.order`.
-    pub order: i64,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectRequestEquipment>,
 }
@@ -16805,92 +17681,142 @@ pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.id`.
     pub id: Id<ProjectRequest>,
     /// Rentman API field `ProjectRequestResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectRequestResponse.linked_contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub linked_contact: Option<Id<Contact>>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_number`.
-    pub contact_mailing_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mailing_number: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_country`.
-    pub contact_mailing_country: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mailing_country: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_name`.
-    pub contact_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_name: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_postalcode`.
-    pub contact_mailing_postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mailing_postalcode: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_phone`.
-    pub contact_phone: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_phone: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_city`.
-    pub contact_mailing_city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mailing_city: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_street`.
-    pub contact_mailing_street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_mailing_street: Option<String>,
     /// Rentman API field `ProjectRequestResponse.linked_contact_person`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub linked_contact_person: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectRequestResponse.contact_person_lastname`.
-    pub contact_person_lastname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person_lastname: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_person_email`.
-    pub contact_person_email: EmailAddress,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person_email: Option<EmailAddress>,
     /// Rentman API field `ProjectRequestResponse.contact_person_middle_name`.
-    pub contact_person_middle_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person_middle_name: Option<String>,
     /// Rentman API field `ProjectRequestResponse.contact_person_first_name`.
-    pub contact_person_first_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contact_person_first_name: Option<String>,
     /// Rentman API field `ProjectRequestResponse.usageperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.usageperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.is_paid`.
-    pub is_paid: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_paid: Option<bool>,
     /// Rentman API field `ProjectRequestResponse.language`.
-    pub language: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub language: Option<String>,
     /// Rentman API field `ProjectRequestResponse.in`.
-    #[serde(rename = "in")]
+    #[serde(rename = "in", default, skip_serializing_if = "Option::is_none")]
     pub in_: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.out`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub out: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.linked_location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub linked_location: Option<Id<Contact>>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_number`.
-    pub location_mailing_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_mailing_number: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_country`.
-    pub location_mailing_country: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_mailing_country: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_name`.
-    pub location_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_name: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_postalcode`.
-    pub location_mailing_postalcode: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_mailing_postalcode: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_city`.
-    pub location_mailing_city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_mailing_city: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_street`.
-    pub location_mailing_street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_mailing_street: Option<String>,
     /// Rentman API field `ProjectRequestResponse.location_phone`.
-    pub location_phone: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location_phone: Option<String>,
     /// Rentman API field `ProjectRequestResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectRequestResponse.external_reference`.
-    pub external_reference: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub external_reference: Option<i64>,
     /// Rentman API field `ProjectRequestResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `ProjectRequestResponse.planperiod_end`.
-    pub planperiod_end: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.planperiod_start`.
-    pub planperiod_start: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.price`.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestResponse.linked_project`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub linked_project: Option<Id<Project>>,
     /// Rentman API field `ProjectRequestResponse.source`.
-    pub source: ProjectRequestSource,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<ProjectRequestSource>,
     /// Rentman API field `ProjectRequestResponse.status`.
-    pub status: ProjectRequestStatus,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<ProjectRequestStatus>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectRequest>,
 }
@@ -16918,46 +17844,80 @@ pub struct Project {
     /// Rentman API field `ProjectResponse.id`.
     pub id: Id<Project>,
     /// Rentman API field `ProjectResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectResponse.location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub location: Option<Id<Contact>>,
     /// Rentman API field `ProjectResponse.refundabledeposit`.
-    pub refundabledeposit: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub refundabledeposit: Option<RentmanAmount>,
     /// Rentman API field `ProjectResponse.deposit_status`.
-    pub deposit_status: ProjectDepositStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deposit_status: Option<ProjectDepositStatus>,
     /// Rentman API field `ProjectResponse.customer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub customer: Option<Id<Contact>>,
     /// Rentman API field `ProjectResponse.loc_contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub loc_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectResponse.cust_contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub cust_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectResponse.project_type`.
-    #[serde(with = "crate::id::link")]
-    pub project_type: Id<ProjectType>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project_type: Option<Id<ProjectType>>,
     /// Rentman API field `ProjectResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectResponse.reference`.
-    pub reference: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference: Option<String>,
     /// Rentman API field `ProjectResponse.number`.
-    pub number: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<i64>,
     /// Rentman API field `ProjectResponse.account_manager`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub account_manager: Option<Id<Crew>>,
     /// Rentman API field `ProjectResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// Rentman API field `ProjectResponse.conditions`.
-    pub conditions: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<String>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_total_price: Option<RentmanAmount>,
@@ -16995,34 +17955,48 @@ pub struct Project {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub actual_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub already_invoiced: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub already_invoiced: Option<RentmanAmount>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub weight: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub power: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub power: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub current: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<RentmanAmount>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment_period_from: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment_period_to: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub purchasecosts: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchasecosts: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub volume: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volume: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Project>,
 }
@@ -17041,17 +18015,21 @@ pub struct ProjectStatus {
     /// Rentman API field `ProjectStatusResponse.id`.
     pub id: Id<ProjectStatus>,
     /// Rentman API field `ProjectStatusResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectStatusResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectStatusResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectStatusResponse.name`.
-    pub name: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectStatus>,
 }
@@ -17070,17 +18048,21 @@ pub struct ProjectTemplate {
     /// Rentman API field `ProjectTemplateResponse.id`.
     pub id: Id<ProjectTemplate>,
     /// Rentman API field `ProjectTemplateResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTemplateResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTemplateResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectTemplateResponse.name`.
-    pub name: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectTemplate>,
 }
@@ -17105,22 +18087,27 @@ pub struct ProjectType {
     /// Rentman API field `ProjectTypeResponse.id`.
     pub id: Id<ProjectType>,
     /// Rentman API field `ProjectTypeResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTypeResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTypeResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectTypeResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `ProjectTypeResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// Rentman API field `ProjectTypeResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: ProjectTypeType,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<ProjectTypeType>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectType>,
 }
@@ -17185,34 +18172,54 @@ pub struct ProjectVehicle {
     /// Rentman API field `ProjectVehicleResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectVehicleResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `ProjectVehicleResponse.cost_rate`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectVehicleResponse.function`.
-    #[serde(with = "crate::id::link")]
-    pub function: Id<ProjectFunction>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub function: Option<Id<ProjectFunction>>,
     /// Rentman API field `ProjectVehicleResponse.transport`.
-    pub transport: ProjectVehicleTransport,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transport: Option<ProjectVehicleTransport>,
     /// Rentman API field `ProjectVehicleResponse.vehicle`.
-    #[serde(with = "crate::id::link")]
-    pub vehicle: Id<Vehicle>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub vehicle: Option<Id<Vehicle>>,
     /// Rentman API field `ProjectVehicleResponse.planningperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planningperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectVehicleResponse.planningperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planningperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectVehicleResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `ProjectVehicleResponse.remark_planner`.
-    pub remark_planner: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark_planner: Option<String>,
     /// GENERATED FIELD.
-    pub costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costs: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<ProjectVehicle>,
 }
@@ -17237,34 +18244,49 @@ pub struct PurchaseOrderCost {
     /// Rentman API field `PurchaseOrderCostResponse.id`.
     pub id: Id<PurchaseOrderCost>,
     /// Rentman API field `PurchaseOrderCostResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderCostResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderCostResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `PurchaseOrderCostResponse.purchase_order`.
-    #[serde(with = "crate::id::link")]
-    pub purchase_order: Id<PurchaseOrder>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub purchase_order: Option<Id<PurchaseOrder>>,
     /// Rentman API field `PurchaseOrderCostResponse.costitem`.
-    pub costitem: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costitem: Option<i64>,
     /// Rentman API field `PurchaseOrderCostResponse.costitemtype`.
-    pub costitemtype: PurchaseOrderCostCostitemtype,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub costitemtype: Option<PurchaseOrderCostCostitemtype>,
     /// Rentman API field `PurchaseOrderCostResponse.approved_amount`.
-    pub approved_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_amount: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub project: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub project: Option<String>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_tax: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount_tax: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_with_tax: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount_with_tax: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub quantity: i64,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<PurchaseOrderCost>,
 }
@@ -17296,27 +18318,41 @@ pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.id`.
     pub id: Id<PurchaseOrderGlobalCost>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.purchase_order`.
-    #[serde(with = "crate::id::link")]
-    pub purchase_order: Id<PurchaseOrder>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub purchase_order: Option<Id<PurchaseOrder>>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.unit_purchase_cost`.
-    pub unit_purchase_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_purchase_cost: Option<RentmanAmount>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.taxclass`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub taxclass: Option<Id<TaxClass>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<PurchaseOrderGlobalCost>,
 }
@@ -17448,79 +18484,130 @@ pub struct PurchaseOrder {
     /// Rentman API field `PurchaseOrderResponse.id`.
     pub id: Id<PurchaseOrder>,
     /// Rentman API field `PurchaseOrderResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.filename`.
-    pub filename: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.subject`.
-    pub subject: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.owner`.
-    #[serde(with = "crate::id::link")]
-    pub owner: Id<Crew>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub owner: Option<Id<Crew>>,
     /// Rentman API field `PurchaseOrderResponse.date_of_issue`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date_of_issue: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.delivery_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.number`.
-    pub number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.approval_status`.
-    pub approval_status: PurchaseOrderApprovalStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approval_status: Option<PurchaseOrderApprovalStatus>,
     /// Rentman API field `PurchaseOrderResponse.previous_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub previous_status: Option<PurchaseOrderPreviousStatus>,
     /// Rentman API field `PurchaseOrderResponse.approved_amount`.
-    pub approved_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_amount: Option<RentmanAmount>,
     /// Rentman API field `PurchaseOrderResponse.supplier`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub supplier: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderResponse.contact_person`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contact_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_type`.
-    pub delivery_type: PurchaseOrderDeliveryType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub delivery_type: Option<PurchaseOrderDeliveryType>,
     /// Rentman API field `PurchaseOrderResponse.delivery_location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub delivery_location: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_location_person`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub delivery_location_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_warehouse`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub delivery_warehouse: Option<Id<StockLocation>>,
     /// External identifier used for integrations with accounting software.
-    pub accounting_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accounting_code: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.export_status`.
-    pub export_status: PurchaseOrderExportStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub export_status: Option<PurchaseOrderExportStatus>,
     /// Rentman API field `PurchaseOrderResponse.export_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub export_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.export_message`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub export_message: Option<String>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_tax: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount_tax: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_with_tax: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub underlying_cost_amount_with_tax: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub approved_by: Option<Id<Crew>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_at: Option<String>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub projects_json: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<PurchaseOrder>,
 }
@@ -17575,33 +18662,53 @@ pub struct Quote {
     /// Rentman API field `QuotationResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `QuotationResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `QuotationResponse.number`.
-    pub number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<String>,
     /// Rentman API field `QuotationResponse.customer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub customer: Option<Id<Contact>>,
     /// Rentman API field `QuotationResponse.contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `QuotationResponse.date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
     /// The date on which this quotation expires.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration_date: Option<String>,
     /// Rentman API field `QuotationResponse.version`.
-    pub version: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<i64>,
     /// Rentman API field `QuotationResponse.subject`.
-    pub subject: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subject: Option<String>,
     /// Rentman API field `QuotationResponse.show_tax`.
-    pub show_tax: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_tax: Option<bool>,
     /// Rentman API field `QuotationResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `QuotationResponse.filename`.
-    pub filename: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_total_price: Option<RentmanAmount>,
@@ -17630,14 +18737,18 @@ pub struct Quote {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price_invat: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_invat: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub vat_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vat_amount: Option<RentmanAmount>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Quote>,
 }
@@ -17665,26 +18776,37 @@ pub struct RateFactor {
     /// Rentman API field `CrewRateFactorResponse.id`.
     pub id: Id<RateFactor>,
     /// Rentman API field `CrewRateFactorResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateFactorResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateFactorResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `CrewRateFactorResponse.rate_id`.
-    #[serde(with = "crate::id::link")]
-    pub rate_id: Id<Rate>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub rate_id: Option<Id<Rate>>,
     /// Rentman API field `CrewRateFactorResponse.from`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorResponse.to`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub to: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorResponse.variable`.
-    pub variable: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorResponse.fixed`.
-    pub fixed: RentmanAmount,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fixed: Option<RentmanAmount>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<RateFactor>,
 }
@@ -17712,24 +18834,30 @@ pub struct Rate {
     /// Rentman API field `CrewRateResponse.id`.
     pub id: Id<Rate>,
     /// Rentman API field `CrewRateResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `CrewRateResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `CrewRateResponse.archived`.
-    pub archived: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub archived: Option<bool>,
     /// Rentman API field `CrewRateResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: RateType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<RateType>,
     /// Rentman API field `CrewRateResponse.subtype`.
-    pub subtype: RateSubtype,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subtype: Option<RateSubtype>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Rate>,
 }
@@ -17831,64 +18959,114 @@ pub struct Repair {
     /// Rentman API field `RepairResponse.id`.
     pub id: Id<Repair>,
     /// Rentman API field `RepairResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `RepairResponse.internal_name`.
-    pub internal_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub internal_name: Option<String>,
     /// Rentman API field `RepairResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `RepairResponse.serialnumber`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub serialnumber: Option<Id<SerialNumber>>,
     /// Rentman API field `RepairResponse.reporter`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub reporter: Option<Id<Crew>>,
     /// Rentman API field `RepairResponse.assignee`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub assignee: Option<Id<Crew>>,
     /// Rentman API field `RepairResponse.external_repairer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub external_repairer: Option<Id<Contact>>,
     /// Rentman API field `RepairResponse.number`.
-    pub number: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<i64>,
     /// Rentman API field `RepairResponse.repairperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repairperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.repairperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repairperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.amount`.
-    pub amount: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<i64>,
     /// Rentman API field `RepairResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `RepairResponse.repair_costs`.
-    pub repair_costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub repair_costs: Option<RentmanAmount>,
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
-    pub is_usable: RepairIsUsable,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_usable: Option<RepairIsUsable>,
     /// Rentman API field `RepairResponse.costs_charged_to_customer`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub costs_charged_to_customer: Option<Id<ProjectCost>>,
     /// Rentman API field `RepairResponse.subproject`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `RepairResponse.stock_location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub stock_location: Option<Id<StockLocation>>,
     /// Rentman API field `RepairResponse.repair_status`.
-    pub repair_status: RepairRepairStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub repair_status: Option<RepairRepairStatus>,
     /// Rentman API field `RepairResponse.unrepairable_of`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub unrepairable_of: Option<Id<Repair>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Repair>,
 }
@@ -17948,58 +19126,91 @@ pub struct SerialNumber {
     /// Rentman API field `SerialNumberResponse.id`.
     pub id: Id<SerialNumber>,
     /// Rentman API field `SerialNumberResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SerialNumberResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SerialNumberResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SerialNumberResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// The manufacturer serial number of the equipment.
-    pub serial: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub serial: Option<String>,
     /// Rentman API field `SerialNumberResponse.purchasedate`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub purchasedate: Option<String>,
     /// Rentman API field `SerialNumberResponse.depreciation_monthly`.
-    pub depreciation_monthly: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub depreciation_monthly: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberResponse.book_value`.
-    pub book_value: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub book_value: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberResponse.residual_value`.
-    pub residual_value: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub residual_value: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberResponse.purchase_costs`.
-    pub purchase_costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchase_costs: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberResponse.active`.
-    pub active: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
     /// Rentman API field `SerialNumberResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Internal reference of a specific serial number.
-    #[serde(rename = "ref")]
-    pub ref_: String,
+    #[serde(rename = "ref", default, skip_serializing_if = "Option::is_none")]
+    pub ref_: Option<String>,
     /// Rentman API field `SerialNumberResponse.asset_location`.
-    #[serde(with = "crate::id::link")]
-    pub asset_location: Id<StockLocation>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub asset_location: Option<Id<StockLocation>>,
     /// Rentman API field `SerialNumberResponse.image`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub image: Option<Id<File>>,
     /// GENERATED FIELD.
-    pub current_book_value: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_book_value: Option<RentmanAmount>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub next_inspection: Option<String>,
     /// GENERATED FIELD.
-    pub qrcodes: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub qrcodes: Option<String>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub last_subproject: Option<Id<Subproject>>,
     /// GENERATED FIELD.
-    pub sealed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sealed: Option<bool>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<SerialNumber>,
 }
@@ -18018,17 +19229,21 @@ pub struct Status {
     /// Rentman API field `StatusResponse.id`.
     pub id: Id<Status>,
     /// Rentman API field `StatusResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StatusResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StatusResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `StatusResponse.name`.
-    pub name: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Status>,
 }
@@ -18077,38 +19292,51 @@ pub struct StockLocation {
     /// Rentman API field `StockLocationResponse.id`.
     pub id: Id<StockLocation>,
     /// Rentman API field `StockLocationResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockLocationResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockLocationResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `StockLocationResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `StockLocationResponse.city`.
-    pub city: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
     /// Rentman API field `StockLocationResponse.street`.
-    pub street: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub street: Option<String>,
     /// Rentman API field `StockLocationResponse.house_number`.
-    pub house_number: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub house_number: Option<String>,
     /// Rentman API field `StockLocationResponse.postal_code`.
-    pub postal_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub postal_code: Option<String>,
     /// Rentman API field `StockLocationResponse.state_province`.
-    pub state_province: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state_province: Option<String>,
     /// Rentman API field `StockLocationResponse.country`.
-    pub country: StockLocationCountry,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub country: Option<StockLocationCountry>,
     /// Rentman API field `StockLocationResponse.active`.
-    pub active: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
     /// Projects can only be planned from warehouses. Storage locations are used as (temporary) storage and deliver equipment to warehouses. You can change the number of paid warehouses in your license. Storage locations are free of charge.
-    #[serde(rename = "type")]
-    pub type_: StockLocationType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<StockLocationType>,
     /// Rentman API field `StockLocationResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// This stock location is archived. This means that it cannot be used in equipment planning.
-    pub in_archive: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_archive: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<StockLocation>,
 }
@@ -18168,37 +19396,57 @@ pub struct StockMovement {
     /// Rentman API field `StockMovementResponse.id`.
     pub id: Id<StockMovement>,
     /// Rentman API field `StockMovementResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockMovementResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockMovementResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `StockMovementResponse.amount`.
-    pub amount: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub amount: Option<i64>,
     /// Rentman API field `StockMovementResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `StockMovementResponse.projectequipment`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub projectequipment: Option<Id<ProjectEquipment>>,
     /// Rentman API field `StockMovementResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Rentman API field `StockMovementResponse.details`.
-    pub details: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub details: Option<String>,
     /// Rentman API field `StockMovementResponse.date`.
-    pub date: DateTime<FixedOffset>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockMovementResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: StockMovementType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<StockMovementType>,
     /// Rentman API field `StockMovementResponse.stock_location`.
-    #[serde(with = "crate::id::link")]
-    pub stock_location: Id<StockLocation>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub stock_location: Option<Id<StockLocation>>,
     /// Rentman API field `StockMovementResponse.api_client`.
-    pub api_client: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub api_client: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<StockMovement>,
 }
@@ -18224,56 +19472,93 @@ pub struct Subproject {
     /// Rentman API field `SubprojectResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `SubprojectResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SubprojectResponse.project`.
-    #[serde(with = "crate::id::link")]
-    pub project: Id<Project>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `SubprojectResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `SubprojectResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `SubprojectResponse.status`.
-    #[serde(with = "crate::id::link")]
-    pub status: Id<Status>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub status: Option<Id<Status>>,
     /// Rentman API field `SubprojectResponse.is_template`.
-    pub is_template: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_template: Option<bool>,
     /// Rentman API field `SubprojectResponse.location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub location: Option<Id<Contact>>,
     /// Rentman API field `SubprojectResponse.loc_contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub loc_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubprojectResponse.insurance_rate`.
-    pub insurance_rate: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub insurance_rate: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_rental`.
-    pub discount_rental: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_rental: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_sale`.
-    pub discount_sale: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_sale: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_crew`.
-    pub discount_crew: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_crew: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_transport`.
-    pub discount_transport: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_transport: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_additional_costs`.
-    pub discount_additional_costs: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_additional_costs: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_services`.
-    pub discount_services: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_services: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_subproject`.
-    pub discount_subproject: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_subproject: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.discount_fixed`.
-    pub discount_fixed: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_fixed: Option<bool>,
     /// Rentman API field `SubprojectResponse.discount_fixed_amount`.
-    pub discount_fixed_amount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount_fixed_amount: Option<RentmanAmount>,
     /// Rentman API field `SubprojectResponse.fixed_price`.
-    pub fixed_price: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fixed_price: Option<bool>,
     /// Rentman API field `SubprojectResponse.in_planning`.
-    pub in_planning: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_planning: Option<bool>,
     /// Rentman API field `SubprojectResponse.in_financial`.
-    pub in_financial: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_financial: Option<bool>,
     /// Rentman API field `SubprojectResponse.asset_location_from`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub asset_location_from: Option<Id<StockLocation>>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -18312,32 +19597,45 @@ pub struct Subproject {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub actual_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub already_invoiced: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub already_invoiced: Option<RentmanAmount>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub weight: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weight: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub power: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub power: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub current: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub purchasecosts: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchasecosts: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub volume: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub volume: Option<RentmanAmount>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment_period_from: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equipment_period_to: Option<DateTime<FixedOffset>>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Subproject>,
 }
@@ -18407,49 +19705,79 @@ pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.id`.
     pub id: Id<SubrentalEquipment>,
     /// Rentman API field `SubrentalEquipmentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SubrentalEquipmentResponse.subrental_group`.
-    #[serde(with = "crate::id::link")]
-    pub subrental_group: Id<SubrentalEquipmentGroup>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subrental_group: Option<Id<SubrentalEquipmentGroup>>,
     /// Rentman API field `SubrentalEquipmentResponse.equipment`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `SubrentalEquipmentResponse.parent`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub parent: Option<Id<SubrentalEquipment>>,
     /// Rentman API field `SubrentalEquipmentResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `SubrentalEquipmentResponse.quantity`.
-    pub quantity: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<i64>,
     /// Rentman API field `SubrentalEquipmentResponse.quantity_total`.
-    pub quantity_total: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quantity_total: Option<i64>,
     /// Rentman API field `SubrentalEquipmentResponse.unit_price`.
-    pub unit_price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentResponse.discount`.
-    pub discount: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentResponse.factor`.
-    pub factor: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub factor: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `SubrentalEquipmentResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `SubrentalEquipmentResponse.lineprice`.
-    pub lineprice: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lineprice: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentResponse.supplier_planningmateriaal`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub supplier_planningmateriaal: Option<Id<ProjectEquipment>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<SubrentalEquipment>,
 }
@@ -18478,25 +19806,38 @@ pub struct SubrentalEquipmentGroup {
     /// Rentman API field `SubrentalEquipmentGroupResponse.id`.
     pub id: Id<SubrentalEquipmentGroup>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.subrental`.
-    #[serde(with = "crate::id::link")]
-    pub subrental: Id<Subrental>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subrental: Option<Id<Subrental>>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.supplier_category`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub supplier_category: Option<Id<ProjectEquipmentGroup>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<SubrentalEquipmentGroup>,
 }
@@ -18629,81 +19970,138 @@ pub struct Subrental {
     /// Rentman API field `SubrentalResponse.id`.
     pub id: Id<Subrental>,
     /// Rentman API field `SubrentalResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SubrentalResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `SubrentalResponse.accountmanager`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub accountmanager: Option<Id<Crew>>,
     /// Rentman API field `SubrentalResponse.reference`.
-    pub reference: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference: Option<String>,
     /// Rentman API field `SubrentalResponse.supplier`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub supplier: Option<Id<Contact>>,
     /// Rentman API field `SubrentalResponse.number`.
-    pub number: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub number: Option<i64>,
     /// Rentman API field `SubrentalResponse.contactperson`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalResponse.location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub location: Option<Id<Contact>>,
     /// Rentman API field `SubrentalResponse.location_contact`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub location_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalResponse.usageperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.usageperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.planperiod_start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.planperiod_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.delivery_in`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_in: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.delivery_out`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_out: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.equipment_cost`.
-    pub equipment_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub equipment_cost: Option<RentmanAmount>,
     /// Rentman API field `SubrentalResponse.price`.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// For possible transport costs, administration costs etc.
-    pub extra_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub extra_cost: Option<RentmanAmount>,
     /// Rentman API field `SubrentalResponse.auto_update_costs`.
-    pub auto_update_costs: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub auto_update_costs: Option<bool>,
     /// Rentman API field `SubrentalResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `SubrentalResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: SubrentalType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<SubrentalType>,
     /// Rentman API field `SubrentalResponse.status`.
-    #[serde(with = "crate::id::link")]
-    pub status: Id<Status>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub status: Option<Id<Status>>,
     /// Rentman API field `SubrentalResponse.sent`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sent: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.asset_location_to`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub asset_location_to: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalResponse.asset_location_from`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub asset_location_from: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalResponse.is_internal`.
-    pub is_internal: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_internal: Option<bool>,
     /// Rentman API field `SubrentalResponse.supplier_project`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub supplier_project: Option<Id<Project>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Subrental>,
 }
@@ -18725,22 +20123,31 @@ pub struct Subtask {
     /// Rentman API field `SubtaskResponse.id`.
     pub id: Id<Subtask>,
     /// Rentman API field `SubtaskResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubtaskResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubtaskResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SubtaskResponse.task`.
-    #[serde(with = "crate::id::link")]
-    pub task: Id<Task>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub task: Option<Id<Task>>,
     /// Rentman API field `SubtaskResponse.title`.
-    pub title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
     /// Rentman API field `SubtaskResponse.completed`.
-    pub completed: bool,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completed: Option<bool>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Subtask>,
 }
@@ -18785,28 +20192,45 @@ pub struct Supplier {
     /// Rentman API field `SupplierResponse.id`.
     pub id: Id<Supplier>,
     /// Rentman API field `SupplierResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SupplierResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SupplierResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `SupplierResponse.equipment`.
-    #[serde(with = "crate::id::link")]
-    pub equipment: Id<Equipment>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `SupplierResponse.contact`.
-    #[serde(with = "crate::id::link")]
-    pub contact: Id<Contact>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact: Option<Id<Contact>>,
     /// Rentman API field `SupplierResponse.contactperson`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SupplierResponse.price`.
-    pub price: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price: Option<RentmanAmount>,
     /// Rentman API field `SupplierResponse.details`.
-    pub details: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub details: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Supplier>,
 }
@@ -18833,21 +20257,32 @@ pub struct TaskAssignment {
     /// Rentman API field `TaskAssignmentResponse.id`.
     pub id: Id<TaskAssignment>,
     /// Rentman API field `TaskAssignmentResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskAssignmentResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskAssignmentResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TaskAssignmentResponse.task`.
-    #[serde(with = "crate::id::link")]
-    pub task: Id<Task>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub task: Option<Id<Task>>,
     /// Rentman API field `TaskAssignmentResponse.crew`.
-    #[serde(with = "crate::id::link")]
-    pub crew: Id<Crew>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crew: Option<Id<Crew>>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<TaskAssignment>,
 }
@@ -18991,72 +20426,107 @@ pub struct Task {
     /// Rentman API field `TaskResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `TaskResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TaskResponse.recurhoe`.
-    pub recurhoe: TaskRecurhoe,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurhoe: Option<TaskRecurhoe>,
     /// Rentman API field `TaskResponse.recureind`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub recureind: Option<String>,
     /// Rentman API field `TaskResponse.recurperiode`.
-    pub recurperiode: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recurperiode: Option<i64>,
     /// Rentman API field `TaskResponse.is_template`.
-    pub is_template: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_template: Option<bool>,
     /// Rentman API field `TaskResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `TaskResponse.details`.
-    pub details: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub details: Option<String>,
     /// Rentman API field `TaskResponse.color`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
     /// Rentman API field `TaskResponse.priority`.
-    pub priority: TaskPriority,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub priority: Option<TaskPriority>,
     /// Rentman API field `TaskResponse.order`.
-    pub order: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
     /// Rentman API field `TaskResponse.deadline`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub deadline: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.deadline_type`.
-    pub deadline_type: TaskDeadlineType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline_type: Option<TaskDeadlineType>,
     /// Rentman API field `TaskResponse.deadline_relative_offset_base`.
-    pub deadline_relative_offset_base: TaskDeadlineRelativeOffsetBase,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline_relative_offset_base: Option<TaskDeadlineRelativeOffsetBase>,
     /// Rentman API field `TaskResponse.deadline_relative_offset_amount`.
-    pub deadline_relative_offset_amount: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline_relative_offset_amount: Option<i64>,
     /// Rentman API field `TaskResponse.deadline_relative_offset_unit`.
-    pub deadline_relative_offset_unit: TaskDeadlineRelativeOffsetUnit,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline_relative_offset_unit: Option<TaskDeadlineRelativeOffsetUnit>,
     /// Rentman API field `TaskResponse.deadline_relative_offset_direction`.
-    pub deadline_relative_offset_direction: TaskDeadlineRelativeOffsetDirection,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub deadline_relative_offset_direction: Option<TaskDeadlineRelativeOffsetDirection>,
     /// Rentman API field `TaskResponse.completed_at`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.status`.
-    #[serde(with = "crate::id::link")]
-    pub status: Id<TaskStatus>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub status: Option<Id<TaskStatus>>,
     /// Numeric ID of the linked item (plain integer, not a path).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item: Option<ItemId>,
     /// Rentman API field `TaskResponse.itemtype`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<TaskItemtype>,
     /// Rentman API field `TaskResponse.synchronization_id`.
-    pub synchronization_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub synchronization_id: Option<String>,
     /// Rentman API field `TaskResponse.synchronization_uri`.
-    pub synchronization_uri: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub synchronization_uri: Option<String>,
     /// Rentman API field `TaskResponse.public`.
-    pub public: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub public: Option<i64>,
     /// Rentman API field `TaskResponse.assignment_type`.
-    pub assignment_type: TaskAssignmentType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assignment_type: Option<TaskAssignmentType>,
     /// Rentman API field `TaskResponse.completed_by`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub completed_by: Option<Id<Crew>>,
     /// Rentman API field `TaskResponse.expiry_notification_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiry_notification_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.time_budget`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time_budget: Option<RentmanAmount>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent_api_path: Option<String>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Task>,
 }
@@ -19096,24 +20566,30 @@ pub struct TaskStatus {
     /// Rentman API field `TaskStatusResponse.id`.
     pub id: Id<TaskStatus>,
     /// Rentman API field `TaskStatusResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskStatusResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskStatusResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TaskStatusResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `TaskStatusResponse.color`.
-    pub color: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
     /// Rentman API field `TaskStatusResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: TaskStatusType,
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<TaskStatusType>,
     /// Rentman API field `TaskStatusResponse.order`.
-    pub order: i64,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub order: Option<i64>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<TaskStatus>,
 }
@@ -19138,22 +20614,27 @@ pub struct TaxClass {
     /// Rentman API field `TaxClassResponse.id`.
     pub id: Id<TaxClass>,
     /// Rentman API field `TaxClassResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaxClassResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaxClassResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TaxClassResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `TaxClassResponse.code`.
-    pub code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
     /// Rentman API field `TaxClassResponse.type`.
-    #[serde(rename = "type")]
-    pub type_: TaxClassType,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
+    pub type_: Option<TaxClassType>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<TaxClass>,
 }
@@ -19213,48 +20694,75 @@ pub struct TimeRegistration {
     /// Rentman API field `TimeRegistrationResponse.id`.
     pub id: Id<TimeRegistration>,
     /// Rentman API field `TimeRegistrationResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TimeRegistrationResponse.crewmember`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `TimeRegistrationResponse.start`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.distance`.
-    pub distance: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distance: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.is_lunch_included`.
-    pub is_lunch_included: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_lunch_included: Option<bool>,
     /// Rentman API field `TimeRegistrationResponse.leavetype`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub leavetype: Option<Id<LeaveType>>,
     /// Rentman API field `TimeRegistrationResponse.leaverequest`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub leaverequest: Option<Id<LeaveRequest>>,
     /// For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
-    pub duration: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.break_duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub break_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.travel_time`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.correction_duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub correction_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `TimeRegistrationResponse.status`.
-    pub status: TimeRegistrationStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub status: Option<TimeRegistrationStatus>,
     /// GENERATED FIELD. The sum of breaks that were created for this time registration with exact start and end time.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub break_duration_with_start_end: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<TimeRegistration>,
 }
@@ -19299,34 +20807,54 @@ pub struct TimeRegistrationActivity {
     /// Rentman API field `TimeRegistrationActivityResponse.id`.
     pub id: Id<TimeRegistrationActivity>,
     /// Rentman API field `TimeRegistrationActivityResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `TimeRegistrationActivityResponse.time_registration`.
-    #[serde(with = "crate::id::link")]
-    pub time_registration: Id<TimeRegistration>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub time_registration: Option<Id<TimeRegistration>>,
     /// Rentman API field `TimeRegistrationActivityResponse.project_function`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub project_function: Option<Id<ProjectFunction>>,
     /// Rentman API field `TimeRegistrationActivityResponse.subproject_function`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub subproject_function: Option<Id<Subproject>>,
     /// Rentman API field `TimeRegistrationActivityResponse.description`.
-    pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Rentman API field `TimeRegistrationActivityResponse.duration`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationActivityResponse.is_activity`.
-    pub is_activity: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub is_activity: Option<bool>,
     /// Rentman API field `TimeRegistrationActivityResponse.from`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.to`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub to: Option<DateTime<FixedOffset>>,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<TimeRegistrationActivity>,
 }
@@ -19409,59 +20937,94 @@ pub struct Vehicle {
     /// Rentman API field `VehicleResponse.id`.
     pub id: Id<Vehicle>,
     /// Rentman API field `VehicleResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `VehicleResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `VehicleResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `VehicleResponse.folder`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub folder: Option<Id<Folder>>,
     /// Rentman API field `VehicleResponse.name`.
-    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     /// Rentman API field `VehicleResponse.cost_rate`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `VehicleResponse.in_planner`.
-    pub in_planner: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub in_planner: Option<bool>,
     /// Rentman API field `VehicleResponse.height`.
-    pub height: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub height: Option<RentmanAmount>,
     /// Rentman API field `VehicleResponse.length`.
-    pub length: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub length: Option<RentmanAmount>,
     /// Rentman API field `VehicleResponse.width`.
-    pub width: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<RentmanAmount>,
     /// Rentman API field `VehicleResponse.seats`.
-    pub seats: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seats: Option<i64>,
     /// Rentman API field `VehicleResponse.inspection_date`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub inspection_date: Option<String>,
     /// Rentman API field `VehicleResponse.licenseplate`.
-    pub licenseplate: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub licenseplate: Option<String>,
     /// Rentman API field `VehicleResponse.remark`.
-    pub remark: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
     /// Rentman API field `VehicleResponse.payload_capacity`.
-    pub payload_capacity: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub payload_capacity: Option<RentmanAmount>,
     /// Rentman API field `VehicleResponse.surface_area`.
-    pub surface_area: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub surface_area: Option<String>,
     /// Can be scheduled more than once at the same time. For example, for employment agencies.
-    pub multiple: VehicleMultiple,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub multiple: Option<VehicleMultiple>,
     /// Rentman API field `VehicleResponse.image`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub image: Option<Id<File>>,
     /// Rentman API field `VehicleResponse.asset_location`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
     pub asset_location: Option<Id<StockLocation>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
-    pub tags: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tags: Option<String>,
     /// GENERATED FIELD. Costs per kilometer.
-    pub distance_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub distance_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub fixed_cost: RentmanAmount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fixed_cost: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
-    pub custom: CustomFields,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custom: Option<CustomFields>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<Vehicle>,
 }
@@ -19480,17 +21043,21 @@ pub struct WarehouseStatus {
     /// Rentman API field `WarehouseStatusResponse.id`.
     pub id: Id<WarehouseStatus>,
     /// Rentman API field `WarehouseStatusResponse.created`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `WarehouseStatusResponse.modified`.
+    #[serde(deserialize_with = "std::option::Option::deserialize")]
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `WarehouseStatusResponse.creator`.
-    #[serde(default, with = "crate::id::optional_link")]
+    #[serde(with = "crate::id::optional_link")]
     pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
-    pub displayname: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub displayname: Option<String>,
     /// Rentman API field `WarehouseStatusResponse.name`.
-    pub name: String,
-    /// Revision of the item as read (`updateHash`): changes on every update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// Revision of the item as read; changes on every update.
     #[serde(rename = "updateHash")]
     pub revision: Revision<WarehouseStatus>,
 }
@@ -19636,1127 +21203,1457 @@ impl SubprojectsSetLocationPayload {
     }
 }
 
-impl Resource for Accessory {
-    const COLLECTION: &'static str = "accessories";
-}
-
 impl Revisioned for Accessory {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Accessory {
+    const COLLECTION: &'static str = "accessories";
 }
 
 /// ID of a [`Accessory`] item (`/accessories/{id}`).
 pub type AccessoryId = Id<Accessory>;
 
-impl Resource for ActualContent {
-    const COLLECTION: &'static str = "actualcontent";
-}
-
 impl Revisioned for ActualContent {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ActualContent {
+    const COLLECTION: &'static str = "actualcontent";
 }
 
 /// ID of a [`ActualContent`] item (`/actualcontent/{id}`).
 pub type ActualContentId = Id<ActualContent>;
 
-impl Resource for Alternative {
-    const COLLECTION: &'static str = "alternatives";
-}
-
 impl Revisioned for Alternative {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Alternative {
+    const COLLECTION: &'static str = "alternatives";
 }
 
 /// ID of a [`Alternative`] item (`/alternatives/{id}`).
 pub type AlternativeId = Id<Alternative>;
 
-impl Resource for AppointmentCrew {
-    const COLLECTION: &'static str = "appointmentcrew";
-}
-
 impl Revisioned for AppointmentCrew {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for AppointmentCrew {
+    const COLLECTION: &'static str = "appointmentcrew";
 }
 
 /// ID of a [`AppointmentCrew`] item (`/appointmentcrew/{id}`).
 pub type AppointmentCrewId = Id<AppointmentCrew>;
 
-impl Resource for Appointment {
-    const COLLECTION: &'static str = "appointments";
-}
-
 impl Revisioned for Appointment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Appointment {
+    const COLLECTION: &'static str = "appointments";
 }
 
 /// ID of a [`Appointment`] item (`/appointments/{id}`).
 pub type AppointmentId = Id<Appointment>;
 
-impl Resource for ContactPerson {
-    const COLLECTION: &'static str = "contactpersons";
-}
-
 impl Revisioned for ContactPerson {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ContactPerson {
+    const COLLECTION: &'static str = "contactpersons";
 }
 
 /// ID of a [`ContactPerson`] item (`/contactpersons/{id}`).
 pub type ContactPersonId = Id<ContactPerson>;
 
-impl Resource for Contact {
-    const COLLECTION: &'static str = "contacts";
-}
-
 impl Revisioned for Contact {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Contact {
+    const COLLECTION: &'static str = "contacts";
 }
 
 /// ID of a [`Contact`] item (`/contacts/{id}`).
 pub type ContactId = Id<Contact>;
 
-impl Resource for Contract {
-    const COLLECTION: &'static str = "contracts";
-}
-
 impl Revisioned for Contract {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Contract {
+    const COLLECTION: &'static str = "contracts";
 }
 
 /// ID of a [`Contract`] item (`/contracts/{id}`).
 pub type ContractId = Id<Contract>;
 
-impl Resource for ProjectCost {
-    const COLLECTION: &'static str = "costs";
-}
-
 impl Revisioned for ProjectCost {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectCost {
+    const COLLECTION: &'static str = "costs";
 }
 
 /// ID of a [`ProjectCost`] item (`/costs/{id}`).
 pub type ProjectCostId = Id<ProjectCost>;
 
-impl Resource for Crew {
-    const COLLECTION: &'static str = "crew";
-}
-
 impl Revisioned for Crew {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Crew {
+    const COLLECTION: &'static str = "crew";
 }
 
 /// ID of a [`Crew`] item (`/crew/{id}`).
 pub type CrewId = Id<Crew>;
 
-impl Resource for CrewAvailability {
-    const COLLECTION: &'static str = "crewavailability";
-}
-
 impl Revisioned for CrewAvailability {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for CrewAvailability {
+    const COLLECTION: &'static str = "crewavailability";
 }
 
 /// ID of a [`CrewAvailability`] item (`/crewavailability/{id}`).
 pub type CrewAvailabilityId = Id<CrewAvailability>;
 
-impl Resource for CrewRate {
-    const COLLECTION: &'static str = "crewrates";
-}
-
 impl Revisioned for CrewRate {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for CrewRate {
+    const COLLECTION: &'static str = "crewrates";
 }
 
 /// ID of a [`CrewRate`] item (`/crewrates/{id}`).
 pub type CrewRateId = Id<CrewRate>;
 
-impl Resource for Equipment {
-    const COLLECTION: &'static str = "equipment";
-}
-
 impl Revisioned for Equipment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Equipment {
+    const COLLECTION: &'static str = "equipment";
 }
 
 /// ID of a [`Equipment`] item (`/equipment/{id}`).
 pub type EquipmentId = Id<Equipment>;
 
-impl Resource for EquipmentAssignedSerial {
-    const COLLECTION: &'static str = "equipmentassignedserials";
-}
-
 impl Revisioned for EquipmentAssignedSerial {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for EquipmentAssignedSerial {
+    const COLLECTION: &'static str = "equipmentassignedserials";
 }
 
 /// ID of a [`EquipmentAssignedSerial`] item (`/equipmentassignedserials/{id}`).
 pub type EquipmentAssignedSerialId = Id<EquipmentAssignedSerial>;
 
-impl Resource for EquipmentSetContent {
-    const COLLECTION: &'static str = "equipmentsetscontent";
-}
-
 impl Revisioned for EquipmentSetContent {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for EquipmentSetContent {
+    const COLLECTION: &'static str = "equipmentsetscontent";
 }
 
 /// ID of a [`EquipmentSetContent`] item (`/equipmentsetscontent/{id}`).
 pub type EquipmentSetContentId = Id<EquipmentSetContent>;
 
-impl Resource for ExtraInputField {
-    const COLLECTION: &'static str = "extrainputfields";
-}
-
 impl Revisioned for ExtraInputField {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ExtraInputField {
+    const COLLECTION: &'static str = "extrainputfields";
 }
 
 /// ID of a [`ExtraInputField`] item (`/extrainputfields/{id}`).
 pub type ExtraInputFieldId = Id<ExtraInputField>;
 
-impl Resource for FactorGroup {
-    const COLLECTION: &'static str = "factorgroups";
-}
-
 impl Revisioned for FactorGroup {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for FactorGroup {
+    const COLLECTION: &'static str = "factorgroups";
 }
 
 /// ID of a [`FactorGroup`] item (`/factorgroups/{id}`).
 pub type FactorGroupId = Id<FactorGroup>;
 
-impl Resource for Factor {
-    const COLLECTION: &'static str = "factors";
-}
-
 impl Revisioned for Factor {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Factor {
+    const COLLECTION: &'static str = "factors";
 }
 
 /// ID of a [`Factor`] item (`/factors/{id}`).
 pub type FactorId = Id<Factor>;
 
-impl Resource for FileFolder {
-    const COLLECTION: &'static str = "file_folders";
-}
-
 impl Revisioned for FileFolder {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for FileFolder {
+    const COLLECTION: &'static str = "file_folders";
 }
 
 /// ID of a [`FileFolder`] item (`/file_folders/{id}`).
 pub type FileFolderId = Id<FileFolder>;
 
-impl Resource for File {
-    const COLLECTION: &'static str = "files";
-}
-
 impl Revisioned for File {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for File {
+    const COLLECTION: &'static str = "files";
 }
 
 /// ID of a [`File`] item (`/files/{id}`).
 pub type FileId = Id<File>;
 
-impl Resource for Folder {
-    const COLLECTION: &'static str = "folders";
-}
-
 impl Revisioned for Folder {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Folder {
+    const COLLECTION: &'static str = "folders";
 }
 
 /// ID of a [`Folder`] item (`/folders/{id}`).
 pub type FolderId = Id<Folder>;
 
-impl Resource for Invitation {
-    const COLLECTION: &'static str = "invitations";
-}
-
 impl Revisioned for Invitation {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Invitation {
+    const COLLECTION: &'static str = "invitations";
 }
 
 /// ID of a [`Invitation`] item (`/invitations/{id}`).
 pub type InvitationId = Id<Invitation>;
 
-impl Resource for InvoiceLine {
-    const COLLECTION: &'static str = "invoicelines";
-}
-
 impl Revisioned for InvoiceLine {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for InvoiceLine {
+    const COLLECTION: &'static str = "invoicelines";
 }
 
 /// ID of a [`InvoiceLine`] item (`/invoicelines/{id}`).
 pub type InvoiceLineId = Id<InvoiceLine>;
 
-impl Resource for Invoice {
-    const COLLECTION: &'static str = "invoices";
-}
-
 impl Revisioned for Invoice {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Invoice {
+    const COLLECTION: &'static str = "invoices";
 }
 
 /// ID of a [`Invoice`] item (`/invoices/{id}`).
 pub type InvoiceId = Id<Invoice>;
 
-impl Resource for LeaveMutation {
-    const COLLECTION: &'static str = "leavemutation";
-}
-
 impl Revisioned for LeaveMutation {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for LeaveMutation {
+    const COLLECTION: &'static str = "leavemutation";
 }
 
 /// ID of a [`LeaveMutation`] item (`/leavemutation/{id}`).
 pub type LeaveMutationId = Id<LeaveMutation>;
 
-impl Resource for LeaveRequest {
-    const COLLECTION: &'static str = "leaverequest";
-}
-
 impl Revisioned for LeaveRequest {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for LeaveRequest {
+    const COLLECTION: &'static str = "leaverequest";
 }
 
 /// ID of a [`LeaveRequest`] item (`/leaverequest/{id}`).
 pub type LeaveRequestId = Id<LeaveRequest>;
 
-impl Resource for LeaveType {
-    const COLLECTION: &'static str = "leavetypes";
-}
-
 impl Revisioned for LeaveType {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for LeaveType {
+    const COLLECTION: &'static str = "leavetypes";
 }
 
 /// ID of a [`LeaveType`] item (`/leavetypes/{id}`).
 pub type LeaveTypeId = Id<LeaveType>;
 
-impl Resource for LedgerCode {
-    const COLLECTION: &'static str = "ledgercodes";
-}
-
 impl Revisioned for LedgerCode {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for LedgerCode {
+    const COLLECTION: &'static str = "ledgercodes";
 }
 
 /// ID of a [`LedgerCode`] item (`/ledgercodes/{id}`).
 pub type LedgerCodeId = Id<LedgerCode>;
 
-impl Resource for Payment {
-    const COLLECTION: &'static str = "payments";
-}
-
 impl Revisioned for Payment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Payment {
+    const COLLECTION: &'static str = "payments";
 }
 
 /// ID of a [`Payment`] item (`/payments/{id}`).
 pub type PaymentId = Id<Payment>;
 
-impl Resource for ProjectCrew {
-    const COLLECTION: &'static str = "projectcrew";
-}
-
 impl Revisioned for ProjectCrew {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectCrew {
+    const COLLECTION: &'static str = "projectcrew";
 }
 
 /// ID of a [`ProjectCrew`] item (`/projectcrew/{id}`).
 pub type ProjectCrewId = Id<ProjectCrew>;
 
-impl Resource for ProjectEquipment {
-    const COLLECTION: &'static str = "projectequipment";
-}
-
 impl Revisioned for ProjectEquipment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectEquipment {
+    const COLLECTION: &'static str = "projectequipment";
 }
 
 /// ID of a [`ProjectEquipment`] item (`/projectequipment/{id}`).
 pub type ProjectEquipmentId = Id<ProjectEquipment>;
 
-impl Resource for ProjectEquipmentGroup {
-    const COLLECTION: &'static str = "projectequipmentgroup";
-}
-
 impl Revisioned for ProjectEquipmentGroup {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectEquipmentGroup {
+    const COLLECTION: &'static str = "projectequipmentgroup";
 }
 
 /// ID of a [`ProjectEquipmentGroup`] item (`/projectequipmentgroup/{id}`).
 pub type ProjectEquipmentGroupId = Id<ProjectEquipmentGroup>;
 
-impl Resource for ProjectFunctionGroup {
-    const COLLECTION: &'static str = "projectfunctiongroups";
-}
-
 impl Revisioned for ProjectFunctionGroup {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectFunctionGroup {
+    const COLLECTION: &'static str = "projectfunctiongroups";
 }
 
 /// ID of a [`ProjectFunctionGroup`] item (`/projectfunctiongroups/{id}`).
 pub type ProjectFunctionGroupId = Id<ProjectFunctionGroup>;
 
-impl Resource for ProjectFunction {
-    const COLLECTION: &'static str = "projectfunctions";
-}
-
 impl Revisioned for ProjectFunction {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectFunction {
+    const COLLECTION: &'static str = "projectfunctions";
 }
 
 /// ID of a [`ProjectFunction`] item (`/projectfunctions/{id}`).
 pub type ProjectFunctionId = Id<ProjectFunction>;
 
-impl Resource for ProjectRequestEquipment {
-    const COLLECTION: &'static str = "projectrequestequipment";
-}
-
 impl Revisioned for ProjectRequestEquipment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectRequestEquipment {
+    const COLLECTION: &'static str = "projectrequestequipment";
 }
 
 /// ID of a [`ProjectRequestEquipment`] item (`/projectrequestequipment/{id}`).
 pub type ProjectRequestEquipmentId = Id<ProjectRequestEquipment>;
 
-impl Resource for ProjectRequest {
-    const COLLECTION: &'static str = "projectrequests";
-}
-
 impl Revisioned for ProjectRequest {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectRequest {
+    const COLLECTION: &'static str = "projectrequests";
 }
 
 /// ID of a [`ProjectRequest`] item (`/projectrequests/{id}`).
 pub type ProjectRequestId = Id<ProjectRequest>;
 
-impl Resource for Project {
-    const COLLECTION: &'static str = "projects";
-}
-
 impl Revisioned for Project {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Project {
+    const COLLECTION: &'static str = "projects";
 }
 
 /// ID of a [`Project`] item (`/projects/{id}`).
 pub type ProjectId = Id<Project>;
 
-impl Resource for ProjectStatus {
-    const COLLECTION: &'static str = "projectstatuses";
-}
-
 impl Revisioned for ProjectStatus {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectStatus {
+    const COLLECTION: &'static str = "projectstatuses";
 }
 
 /// ID of a [`ProjectStatus`] item (`/projectstatuses/{id}`).
 pub type ProjectStatusId = Id<ProjectStatus>;
 
-impl Resource for ProjectTemplate {
-    const COLLECTION: &'static str = "projecttemplates";
-}
-
 impl Revisioned for ProjectTemplate {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectTemplate {
+    const COLLECTION: &'static str = "projecttemplates";
 }
 
 /// ID of a [`ProjectTemplate`] item (`/projecttemplates/{id}`).
 pub type ProjectTemplateId = Id<ProjectTemplate>;
 
-impl Resource for ProjectType {
-    const COLLECTION: &'static str = "projecttypes";
-}
-
 impl Revisioned for ProjectType {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectType {
+    const COLLECTION: &'static str = "projecttypes";
 }
 
 /// ID of a [`ProjectType`] item (`/projecttypes/{id}`).
 pub type ProjectTypeId = Id<ProjectType>;
 
-impl Resource for ProjectVehicle {
-    const COLLECTION: &'static str = "projectvehicles";
-}
-
 impl Revisioned for ProjectVehicle {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for ProjectVehicle {
+    const COLLECTION: &'static str = "projectvehicles";
 }
 
 /// ID of a [`ProjectVehicle`] item (`/projectvehicles/{id}`).
 pub type ProjectVehicleId = Id<ProjectVehicle>;
 
-impl Resource for PurchaseOrderCost {
-    const COLLECTION: &'static str = "purchaseordercosts";
-}
-
 impl Revisioned for PurchaseOrderCost {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for PurchaseOrderCost {
+    const COLLECTION: &'static str = "purchaseordercosts";
 }
 
 /// ID of a [`PurchaseOrderCost`] item (`/purchaseordercosts/{id}`).
 pub type PurchaseOrderCostId = Id<PurchaseOrderCost>;
 
-impl Resource for PurchaseOrderGlobalCost {
-    const COLLECTION: &'static str = "purchaseorderglobalcosts";
-}
-
 impl Revisioned for PurchaseOrderGlobalCost {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for PurchaseOrderGlobalCost {
+    const COLLECTION: &'static str = "purchaseorderglobalcosts";
 }
 
 /// ID of a [`PurchaseOrderGlobalCost`] item (`/purchaseorderglobalcosts/{id}`).
 pub type PurchaseOrderGlobalCostId = Id<PurchaseOrderGlobalCost>;
 
-impl Resource for PurchaseOrder {
-    const COLLECTION: &'static str = "purchaseorders";
-}
-
 impl Revisioned for PurchaseOrder {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for PurchaseOrder {
+    const COLLECTION: &'static str = "purchaseorders";
 }
 
 /// ID of a [`PurchaseOrder`] item (`/purchaseorders/{id}`).
 pub type PurchaseOrderId = Id<PurchaseOrder>;
 
-impl Resource for Quote {
-    const COLLECTION: &'static str = "quotes";
-}
-
 impl Revisioned for Quote {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Quote {
+    const COLLECTION: &'static str = "quotes";
 }
 
 /// ID of a [`Quote`] item (`/quotes/{id}`).
 pub type QuoteId = Id<Quote>;
 
-impl Resource for RateFactor {
-    const COLLECTION: &'static str = "ratefactors";
-}
-
 impl Revisioned for RateFactor {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for RateFactor {
+    const COLLECTION: &'static str = "ratefactors";
 }
 
 /// ID of a [`RateFactor`] item (`/ratefactors/{id}`).
 pub type RateFactorId = Id<RateFactor>;
 
-impl Resource for Rate {
-    const COLLECTION: &'static str = "rates";
-}
-
 impl Revisioned for Rate {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Rate {
+    const COLLECTION: &'static str = "rates";
 }
 
 /// ID of a [`Rate`] item (`/rates/{id}`).
 pub type RateId = Id<Rate>;
 
-impl Resource for Repair {
-    const COLLECTION: &'static str = "repairs";
-}
-
 impl Revisioned for Repair {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Repair {
+    const COLLECTION: &'static str = "repairs";
 }
 
 /// ID of a [`Repair`] item (`/repairs/{id}`).
 pub type RepairId = Id<Repair>;
 
-impl Resource for SerialNumber {
-    const COLLECTION: &'static str = "serialnumbers";
-}
-
 impl Revisioned for SerialNumber {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for SerialNumber {
+    const COLLECTION: &'static str = "serialnumbers";
 }
 
 /// ID of a [`SerialNumber`] item (`/serialnumbers/{id}`).
 pub type SerialNumberId = Id<SerialNumber>;
 
-impl Resource for Status {
-    const COLLECTION: &'static str = "statuses";
-}
-
 impl Revisioned for Status {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Status {
+    const COLLECTION: &'static str = "statuses";
 }
 
 /// ID of a [`Status`] item (`/statuses/{id}`).
 pub type StatusId = Id<Status>;
 
-impl Resource for StockLocation {
-    const COLLECTION: &'static str = "stocklocations";
-}
-
 impl Revisioned for StockLocation {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for StockLocation {
+    const COLLECTION: &'static str = "stocklocations";
 }
 
 /// ID of a [`StockLocation`] item (`/stocklocations/{id}`).
 pub type StockLocationId = Id<StockLocation>;
 
-impl Resource for StockMovement {
-    const COLLECTION: &'static str = "stockmovements";
-}
-
 impl Revisioned for StockMovement {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for StockMovement {
+    const COLLECTION: &'static str = "stockmovements";
 }
 
 /// ID of a [`StockMovement`] item (`/stockmovements/{id}`).
 pub type StockMovementId = Id<StockMovement>;
 
-impl Resource for Subproject {
-    const COLLECTION: &'static str = "subprojects";
-}
-
 impl Revisioned for Subproject {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Subproject {
+    const COLLECTION: &'static str = "subprojects";
 }
 
 /// ID of a [`Subproject`] item (`/subprojects/{id}`).
 pub type SubprojectId = Id<Subproject>;
 
-impl Resource for SubrentalEquipment {
-    const COLLECTION: &'static str = "subrentalequipment";
-}
-
 impl Revisioned for SubrentalEquipment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for SubrentalEquipment {
+    const COLLECTION: &'static str = "subrentalequipment";
 }
 
 /// ID of a [`SubrentalEquipment`] item (`/subrentalequipment/{id}`).
 pub type SubrentalEquipmentId = Id<SubrentalEquipment>;
 
-impl Resource for SubrentalEquipmentGroup {
-    const COLLECTION: &'static str = "subrentalequipmentgroup";
-}
-
 impl Revisioned for SubrentalEquipmentGroup {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for SubrentalEquipmentGroup {
+    const COLLECTION: &'static str = "subrentalequipmentgroup";
 }
 
 /// ID of a [`SubrentalEquipmentGroup`] item (`/subrentalequipmentgroup/{id}`).
 pub type SubrentalEquipmentGroupId = Id<SubrentalEquipmentGroup>;
 
-impl Resource for Subrental {
-    const COLLECTION: &'static str = "subrentals";
-}
-
 impl Revisioned for Subrental {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Subrental {
+    const COLLECTION: &'static str = "subrentals";
 }
 
 /// ID of a [`Subrental`] item (`/subrentals/{id}`).
 pub type SubrentalId = Id<Subrental>;
 
-impl Resource for Subtask {
-    const COLLECTION: &'static str = "subtasks";
-}
-
 impl Revisioned for Subtask {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Subtask {
+    const COLLECTION: &'static str = "subtasks";
 }
 
 /// ID of a [`Subtask`] item (`/subtasks/{id}`).
 pub type SubtaskId = Id<Subtask>;
 
-impl Resource for Supplier {
-    const COLLECTION: &'static str = "suppliers";
-}
-
 impl Revisioned for Supplier {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Supplier {
+    const COLLECTION: &'static str = "suppliers";
 }
 
 /// ID of a [`Supplier`] item (`/suppliers/{id}`).
 pub type SupplierId = Id<Supplier>;
 
-impl Resource for TaskAssignment {
-    const COLLECTION: &'static str = "taskassignments";
-}
-
 impl Revisioned for TaskAssignment {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for TaskAssignment {
+    const COLLECTION: &'static str = "taskassignments";
 }
 
 /// ID of a [`TaskAssignment`] item (`/taskassignments/{id}`).
 pub type TaskAssignmentId = Id<TaskAssignment>;
 
-impl Resource for Task {
-    const COLLECTION: &'static str = "tasks";
-}
-
 impl Revisioned for Task {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Task {
+    const COLLECTION: &'static str = "tasks";
 }
 
 /// ID of a [`Task`] item (`/tasks/{id}`).
 pub type TaskId = Id<Task>;
 
-impl Resource for TaskStatus {
-    const COLLECTION: &'static str = "taskstatuses";
-}
-
 impl Revisioned for TaskStatus {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for TaskStatus {
+    const COLLECTION: &'static str = "taskstatuses";
 }
 
 /// ID of a [`TaskStatus`] item (`/taskstatuses/{id}`).
 pub type TaskStatusId = Id<TaskStatus>;
 
-impl Resource for TaxClass {
-    const COLLECTION: &'static str = "taxclasses";
-}
-
 impl Revisioned for TaxClass {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for TaxClass {
+    const COLLECTION: &'static str = "taxclasses";
 }
 
 /// ID of a [`TaxClass`] item (`/taxclasses/{id}`).
 pub type TaxClassId = Id<TaxClass>;
 
-impl Resource for TimeRegistration {
-    const COLLECTION: &'static str = "timeregistration";
-}
-
 impl Revisioned for TimeRegistration {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for TimeRegistration {
+    const COLLECTION: &'static str = "timeregistration";
 }
 
 /// ID of a [`TimeRegistration`] item (`/timeregistration/{id}`).
 pub type TimeRegistrationId = Id<TimeRegistration>;
 
-impl Resource for TimeRegistrationActivity {
-    const COLLECTION: &'static str = "timeregistrationactivities";
-}
-
 impl Revisioned for TimeRegistrationActivity {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for TimeRegistrationActivity {
+    const COLLECTION: &'static str = "timeregistrationactivities";
 }
 
 /// ID of a [`TimeRegistrationActivity`] item (`/timeregistrationactivities/{id}`).
 pub type TimeRegistrationActivityId = Id<TimeRegistrationActivity>;
 
-impl Resource for Vehicle {
-    const COLLECTION: &'static str = "vehicles";
-}
-
 impl Revisioned for Vehicle {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
+}
+
+impl Resource for Vehicle {
+    const COLLECTION: &'static str = "vehicles";
 }
 
 /// ID of a [`Vehicle`] item (`/vehicles/{id}`).
 pub type VehicleId = Id<Vehicle>;
 
-impl Resource for WarehouseStatus {
-    const COLLECTION: &'static str = "warehousestatuses";
-}
-
 impl Revisioned for WarehouseStatus {
     fn id(&self) -> Id<Self> {
         self.id
     }
-
     fn revision(&self) -> &Revision<Self> {
         &self.revision
     }
 }
 
+impl Resource for WarehouseStatus {
+    const COLLECTION: &'static str = "warehousestatuses";
+}
+
 /// ID of a [`WarehouseStatus`] item (`/warehousestatuses/{id}`).
 pub type WarehouseStatusId = Id<WarehouseStatus>;
+
+impl crate::CustomFieldsResource for Accessory {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ActualContent {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Alternative {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for AppointmentCrew {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Appointment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ContactPerson {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Contact {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Contract {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectCost {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Crew {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for CrewAvailability {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for CrewRate {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Equipment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for EquipmentAssignedSerial {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for EquipmentSetContent {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ExtraInputField {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for FactorGroup {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Factor {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for FileFolder {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for File {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Folder {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Invitation {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for InvoiceLine {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Invoice {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for LeaveMutation {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for LeaveRequest {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for LeaveType {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for LedgerCode {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Payment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectCrew {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectEquipment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectEquipmentGroup {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectFunctionGroup {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectFunction {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectRequestEquipment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectRequest {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Project {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectStatus {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectTemplate {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectType {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for ProjectVehicle {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for PurchaseOrderCost {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for PurchaseOrderGlobalCost {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for PurchaseOrder {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Quote {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for RateFactor {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Rate {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Repair {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for SerialNumber {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Status {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for StockLocation {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for StockMovement {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Subproject {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for SubrentalEquipment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for SubrentalEquipmentGroup {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Subrental {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for Subtask {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Supplier {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for TaskAssignment {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Task {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for TaskStatus {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for TaxClass {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for TimeRegistration {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for TimeRegistrationActivity {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
+
+impl crate::CustomFieldsResource for Vehicle {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        self.custom.as_mut()
+    }
+}
+
+impl crate::CustomFieldsResource for WarehouseStatus {
+    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {
+        None
+    }
+}
 
 /// Every resource type and its collection path segment.
 pub const RESOURCE_COLLECTIONS: &[(&str, &str)] = &[

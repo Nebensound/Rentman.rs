@@ -22,9 +22,9 @@ mod generated;
 pub use generated::*;
 
 use crate::{
-    RentmanClient,
+    CustomFieldsResource, RentmanClient,
     endpoint::EndpointSpec,
-    error::Result,
+    error::{Error, Result},
     filter::{Filter, Sort},
     id::{Id, Resource},
     model::ItemResponse,
@@ -56,7 +56,7 @@ impl Operation {
 /// A collection whose items can be listed.
 pub trait List: sealed::Sealed {
     /// Item type of the collection.
-    type Item: DeserializeOwned;
+    type Item: Resource + CustomFieldsResource + DeserializeOwned;
     #[doc(hidden)]
     const LIST: Operation;
 }
@@ -64,9 +64,18 @@ pub trait List: sealed::Sealed {
 /// A collection whose items can be read one by one.
 pub trait Get: sealed::Sealed {
     /// Item type of the collection.
-    type Item: Resource + DeserializeOwned;
+    type Item: Resource + CustomFieldsResource + DeserializeOwned;
     #[doc(hidden)]
     const GET: Operation;
+}
+
+/// Internal GET operation for an item, including items created in nested collections.
+#[doc(hidden)]
+pub trait GetItem: Resource + CustomFieldsResource + DeserializeOwned + sealed::Sealed {
+    #[doc(hidden)]
+    const GET_ITEM: Operation;
+    #[doc(hidden)]
+    const ITEM_FIELDS: &'static [&'static str];
 }
 
 /// A collection that items can be created in.
@@ -74,7 +83,7 @@ pub trait Create: sealed::Sealed {
     /// Write payload of a new item.
     type Payload: Serialize;
     /// Item type Rentman returns for the created item.
-    type Item: DeserializeOwned;
+    type Item: Resource + CustomFieldsResource + DeserializeOwned;
     #[doc(hidden)]
     const CREATE: Operation;
 }
@@ -84,7 +93,7 @@ pub trait Update: sealed::Sealed {
     /// Write payload with the fields to change.
     type Payload: Serialize;
     /// Item type of the collection.
-    type Item: Resource + DeserializeOwned;
+    type Item: Resource + CustomFieldsResource + DeserializeOwned;
     #[doc(hidden)]
     const UPDATE: Operation;
 }
@@ -149,12 +158,17 @@ impl<M: Get> Collection<M> {
     /// Reads one item. Transient failures are retried.
     pub async fn get(&self, id: Id<M::Item>) -> Result<M::Item> {
         let spec = M::GET.0;
-        self.client
+        let mut item = self
+            .client
             .request(Method::GET, &render_path(spec, Some(id.get())))
             .send_json::<ItemResponse<M::Item>>()
             .await
             .map(|response| response.data)
-            .map_err(|error| error.in_operation(spec.operation_id).about(id))
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        self.client
+            .apply_custom_fields(&mut item)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        Ok(item)
     }
 }
 
@@ -163,18 +177,26 @@ impl<M: Get> Collection<M> {
     /// requested. Transient failures are retried.
     pub async fn get_as<P: Projection<Resource = M::Item>>(&self, id: Id<M::Item>) -> Result<P> {
         let spec = M::GET.0;
-        let fields = projection::fields::<P>();
-        self.client
+        let selected_fields = selected_fields::<M::Item, P>(&self.client);
+        let mut item = self
+            .client
             .request(Method::GET, &render_path(spec, Some(id.get())))
-            .query(&[("fields", fields)])
+            .query(&[("fields", selected_fields)])
             .send_json::<ItemResponse<ProjectedItem>>()
             .await
-            .and_then(|response| projection::decode(response.data))
-            .map_err(|error| error.in_operation(spec.operation_id).about(id))
+            .map(|response| response.data)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        item.apply_custom_fields(&self.client.custom_fields, M::Item::COLLECTION)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        projection::decode(item).map_err(|error| error.in_operation(spec.operation_id).about(id))
     }
 }
 
-impl<M: Create> Collection<M> {
+impl<M> Collection<M>
+where
+    M: Create,
+    M::Item: GetItem,
+{
     /// Creates an item and returns it as Rentman stored it.
     ///
     /// The request is sent exactly once, without retrying: when only the
@@ -184,33 +206,194 @@ impl<M: Create> Collection<M> {
     /// collection with [`Self::list`] before creating the item again.
     pub async fn create(&self, payload: &M::Payload) -> Result<M::Item> {
         let spec = M::CREATE.0;
-        let request = self
+        let response = self
             .client
             .request(Method::POST, &render_path(spec, self.parent))
             .json(payload);
         let retry_policy = self.client.retry_policy.single_attempt();
-        request
-            .send_json_with::<ItemResponse<M::Item>>(retry_policy)
+        let response = response
+            .send_json_with::<ItemResponse<ProjectedItem>>(retry_policy)
             .await
-            .map(|response| response.data)
-            .map_err(|error| error.in_operation(spec.operation_id))
+            .map_err(|error| error.in_operation(spec.operation_id))?;
+        let mut item = response.data;
+        let custom_complete = item
+            .custom_fields_complete(&self.client.custom_fields, M::Item::COLLECTION)
+            .map_err(|error| {
+                Error::new(crate::ErrorKind::Decode(error))
+                    .in_operation(spec.operation_id)
+                    .after_success()
+            })?;
+        if item.has_field_names(M::Item::ITEM_FIELDS) && custom_complete {
+            item.apply_custom_fields(&self.client.custom_fields, M::Item::COLLECTION)
+                .map_err(|error| error.in_operation(spec.operation_id).after_success())?;
+            return item
+                .deserialize()
+                .map_err(|error| error.in_operation(spec.operation_id));
+        }
+        let id = item
+            .resource_id::<M::Item>()
+            .map_err(|error| error.in_operation(spec.operation_id).after_success())?;
+        self.get_item(id).await.map_err(|error| {
+            error
+                .in_operation(spec.operation_id)
+                .about(id)
+                .after_success()
+        })
     }
 }
 
-impl<M: Update> Collection<M> {
+impl<M> Collection<M>
+where
+    M: Create,
+    <M as Create>::Item: GetItem,
+{
+    /// Creates an item and returns projection `P`.
+    ///
+    /// The create request is sent exactly once. If Rentman's response omits
+    /// selected fields, the item is fetched once by ID to complete the projection.
+    pub async fn create_as<P>(&self, payload: &M::Payload) -> Result<P>
+    where
+        P: Projection<Resource = <M as Create>::Item>,
+    {
+        let operation = M::CREATE.0;
+        let response = self
+            .client
+            .request(Method::POST, &render_path(operation, self.parent))
+            .json(payload)
+            .send_json_with::<ItemResponse<ProjectedItem>>(
+                self.client.retry_policy.single_attempt(),
+            )
+            .await
+            .map_err(|error| error.in_operation(operation.operation_id))?;
+
+        let mut item = response.data;
+        let custom_complete = item
+            .custom_fields_complete(&self.client.custom_fields, <M as Create>::Item::COLLECTION)
+            .map_err(|error| {
+                Error::new(crate::ErrorKind::Decode(error))
+                    .in_operation(operation.operation_id)
+                    .after_success()
+            })?;
+        if item.has_fields::<P>() && custom_complete {
+            item.apply_custom_fields(&self.client.custom_fields, <M as Create>::Item::COLLECTION)
+                .map_err(|error| error.in_operation(operation.operation_id).after_success())?;
+            return projection::decode(item)
+                .map_err(|error| error.in_operation(operation.operation_id));
+        }
+
+        let id = item
+            .resource_id::<<M as Create>::Item>()
+            .map_err(|error| error.in_operation(operation.operation_id).after_success())?;
+        self.get_projection::<<M as Create>::Item, P>(id)
+            .await
+            .map_err(|error| {
+                error
+                    .in_operation(operation.operation_id)
+                    .about(id)
+                    .after_success()
+            })
+    }
+}
+
+impl<M> Collection<M>
+where
+    M: Update,
+    M::Item: GetItem,
+{
     /// Updates an item and returns it as Rentman stored it.
     ///
     /// Rentman leaves fields the payload does not send unchanged. `PUT` is
     /// idempotent, so transient failures are retried.
     pub async fn update(&self, id: Id<M::Item>, payload: &M::Payload) -> Result<M::Item> {
         let spec = M::UPDATE.0;
-        self.client
+        let response = self
+            .client
             .request(Method::PUT, &render_path(spec, Some(id.get())))
             .json(payload)
-            .send_json::<ItemResponse<M::Item>>()
+            .send_json::<ItemResponse<ProjectedItem>>()
             .await
-            .map(|response| response.data)
-            .map_err(|error| error.in_operation(spec.operation_id).about(id))
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        let mut item = response.data;
+        let custom_complete = item
+            .custom_fields_complete(&self.client.custom_fields, M::Item::COLLECTION)
+            .map_err(|error| {
+                Error::new(crate::ErrorKind::Decode(error))
+                    .in_operation(spec.operation_id)
+                    .about(id)
+                    .after_success()
+            })?;
+        if item.has_field_names(M::Item::ITEM_FIELDS) && custom_complete {
+            item.apply_custom_fields(&self.client.custom_fields, M::Item::COLLECTION)
+                .map_err(|error| {
+                    error
+                        .in_operation(spec.operation_id)
+                        .about(id)
+                        .after_success()
+                })?;
+            return item
+                .deserialize()
+                .map_err(|error| error.in_operation(spec.operation_id).about(id));
+        }
+        self.get_item(id).await.map_err(|error| {
+            error
+                .in_operation(spec.operation_id)
+                .about(id)
+                .after_success()
+        })
+    }
+}
+
+impl<M> Collection<M>
+where
+    M: Update,
+    M::Item: GetItem,
+{
+    /// Updates an item and returns projection `P`.
+    ///
+    /// If Rentman's update response omits selected fields, the item is fetched
+    /// once by ID to complete the projection. The PUT is safe to retry.
+    pub async fn update_as<P>(&self, id: Id<M::Item>, payload: &M::Payload) -> Result<P>
+    where
+        P: Projection<Resource = M::Item>,
+    {
+        let operation = M::UPDATE.0;
+        let response = self
+            .client
+            .request(Method::PUT, &render_path(operation, Some(id.get())))
+            .json(payload)
+            .send_json::<ItemResponse<ProjectedItem>>()
+            .await
+            .map_err(|error| error.in_operation(operation.operation_id).about(id))?;
+
+        let mut item = response.data;
+        let custom_complete = item
+            .custom_fields_complete(&self.client.custom_fields, M::Item::COLLECTION)
+            .map_err(|error| {
+                Error::new(crate::ErrorKind::Decode(error))
+                    .in_operation(operation.operation_id)
+                    .about(id)
+                    .after_success()
+            })?;
+        if item.has_fields::<P>() && custom_complete {
+            item.apply_custom_fields(&self.client.custom_fields, M::Item::COLLECTION)
+                .map_err(|error| {
+                    error
+                        .in_operation(operation.operation_id)
+                        .about(id)
+                        .after_success()
+                })?;
+            return projection::decode(item)
+                .map_err(|error| error.in_operation(operation.operation_id).about(id));
+        }
+
+        self.get_projection::<M::Item, P>(id)
+            .await
+            .map_err(|error| {
+                error
+                    .in_operation(operation.operation_id)
+                    .about(id)
+                    .after_success()
+            })
     }
 }
 
@@ -228,6 +411,41 @@ impl<M: Delete> Collection<M> {
 }
 
 impl<M> Collection<M> {
+    async fn get_item<R: GetItem>(&self, id: Id<R>) -> Result<R> {
+        let spec = R::GET_ITEM.0;
+        let mut item = self
+            .client
+            .request(Method::GET, &render_path(spec, Some(id.get())))
+            .send_json::<ItemResponse<R>>()
+            .await
+            .map(|response| response.data)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        self.client
+            .apply_custom_fields(&mut item)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        Ok(item)
+    }
+
+    async fn get_projection<R, P>(&self, id: Id<R>) -> Result<P>
+    where
+        R: GetItem,
+        P: Projection<Resource = R>,
+    {
+        let spec = R::GET_ITEM.0;
+        let fields = selected_fields::<R, P>(&self.client);
+        let mut item = self
+            .client
+            .request(Method::GET, &render_path(spec, Some(id.get())))
+            .query(&[("fields", fields)])
+            .send_json::<ItemResponse<ProjectedItem>>()
+            .await
+            .map(|response| response.data)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        item.apply_custom_fields(&self.client.custom_fields, R::COLLECTION)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))?;
+        projection::decode(item).map_err(|error| error.in_operation(spec.operation_id).about(id))
+    }
+
     /// Runs an action on one item, e.g. `POST /projects/{id}/:setClient`.
     /// Like [`Collection::create`], it is sent exactly once.
     pub(crate) async fn item_action<P: Serialize, T: DeserializeOwned, R: Resource>(
@@ -290,7 +508,7 @@ impl<T> fmt::Debug for ListRequest<T> {
     }
 }
 
-impl<T: DeserializeOwned> ListRequest<T> {
+impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     /// Keeps only items matching the filter; several filters all apply.
     ///
     /// Filters are built from the field constants in [`crate::fields`], e.g.
@@ -325,14 +543,57 @@ impl<T: DeserializeOwned> ListRequest<T> {
     pub async fn all(self) -> Result<Vec<T>> {
         let sort = self.sort.join(",");
         let query = self.query_pairs(&sort);
-        self.client
+        let mut items = self
+            .client
             .read_all(CollectionRequest {
                 path: &self.path,
                 query: &query,
                 page_size: self.page_size,
                 operation: self.operation,
             })
-            .await
+            .await?;
+        for item in &mut items {
+            self.client
+                .apply_custom_fields(item)
+                .map_err(|error| error.in_operation(self.operation))?;
+        }
+        Ok(items)
+    }
+
+    /// Reads only item IDs and revisions for change detection.
+    ///
+    /// Filters and sorting are preserved. Items that stop matching the filters
+    /// appear in `deleted` when compared with a prior snapshot.
+    pub async fn revisions(self) -> Result<Revisions<T>>
+    where
+        T: Revisioned,
+    {
+        let sort = self.sort.join(",");
+        let mut fields = projection::fields::<ItemRevision<T>>();
+        if self.client.custom_fields_registered::<T>() {
+            fields.push_str(",custom");
+        }
+        let mut query = self.query_pairs(&sort);
+        query.push(("fields", &fields));
+        let items: Vec<ProjectedItem> = self
+            .client
+            .read_all(CollectionRequest {
+                path: &self.path,
+                query: &query,
+                page_size: self.page_size,
+                operation: self.operation,
+            })
+            .await?;
+        let mut revisions = Revisions::new();
+        for mut item in items {
+            item.apply_custom_fields(&self.client.custom_fields, T::COLLECTION)
+                .map_err(|error| error.in_operation(self.operation))?;
+            let item = ItemRevision::<T>::decode(&mut item)
+                .map_err(|error| Error::new(crate::ErrorKind::Decode(error)))
+                .map_err(|error| error.in_operation(self.operation))?;
+            revisions.insert(item.id, item.revision);
+        }
+        Ok(revisions)
     }
 
     /// Reads at most `count` items (1 to 1500) with a single request, in
@@ -345,20 +606,27 @@ impl<T: DeserializeOwned> ListRequest<T> {
         let sort = self.sort.join(",");
         let mut query = self.query_pairs(&sort);
         query.push(("limit", &limit));
-        self.client
+        let mut items = self
+            .client
             .request(Method::GET, &self.path)
             .query(&query)
             .send_json::<crate::model::CollectionResponse<T>>()
             .await
             .map(|page| page.data)
-            .map_err(|error| error.in_operation(self.operation))
+            .map_err(|error| error.in_operation(self.operation))?;
+        for item in &mut items {
+            self.client
+                .apply_custom_fields(item)
+                .map_err(|error| error.in_operation(self.operation))?;
+        }
+        Ok(items)
     }
 
     /// Reads every page as projection `P`: only the fields `P` declares are
     /// requested (`fields=`), and Rentman carries the selection through every
     /// page.
     pub async fn all_as<P: Projection<Resource = T>>(self) -> Result<Vec<P>> {
-        let fields = projection::fields::<P>();
+        let fields = selected_fields::<T, P>(&self.client);
         let sort = self.sort.join(",");
         let mut query = self.query_pairs(&sort);
         query.push(("fields", &fields));
@@ -373,40 +641,12 @@ impl<T: DeserializeOwned> ListRequest<T> {
             .await?;
         items
             .into_iter()
-            .map(projection::decode)
+            .map(|mut item| {
+                item.apply_custom_fields(&self.client.custom_fields, T::COLLECTION)?;
+                projection::decode(item)
+            })
             .collect::<Result<_>>()
             .map_err(|error| error.in_operation(self.operation))
-    }
-
-    /// Reads the revision of every item, for change detection with
-    /// [`Revisions::changes_since`].
-    ///
-    /// Only the items' IDs are requested, so this is much cheaper than
-    /// [`Self::all`]; filters apply as usual. Read the created and updated
-    /// items afterwards with `get` or a filtered listing.
-    ///
-    /// ```no_run
-    /// # async fn example(
-    /// #     client: rentman_client::RentmanClient,
-    /// #     known: rentman_client::Revisions<rentman_client::model::Crew>,
-    /// # ) -> rentman_client::Result<()> {
-    /// let current = client.crew().list().revisions().await?;
-    /// let changes = current.changes_since(&known);
-    /// for id in changes.created.iter().chain(&changes.updated) {
-    ///     let crew = client.crew().get(*id).await?;
-    /// }
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub async fn revisions(self) -> Result<Revisions<T>>
-    where
-        T: Revisioned,
-    {
-        let items = self.all_as::<ItemRevision<T>>().await?;
-        Ok(items
-            .into_iter()
-            .map(|item| (item.id, item.revision))
-            .collect())
     }
 
     /// Reads at most `count` items (1 to 1500) as projection `P` with a single
@@ -416,17 +656,26 @@ impl<T: DeserializeOwned> ListRequest<T> {
             .map_err(|error| error.in_operation(self.operation))?
             .get()
             .to_string();
-        let fields = projection::fields::<P>();
+        let fields = selected_fields::<T, P>(&self.client);
         let sort = self.sort.join(",");
         let mut query = self.query_pairs(&sort);
         query.push(("limit", &limit));
         query.push(("fields", &fields));
-        self.client
+        let mut items = self
+            .client
             .request(Method::GET, &self.path)
             .query(&query)
             .send_json::<crate::model::CollectionResponse<ProjectedItem>>()
             .await
-            .and_then(|page| page.data.into_iter().map(projection::decode).collect())
+            .map(|page| page.data)
+            .map_err(|error| error.in_operation(self.operation))?;
+        items
+            .drain(..)
+            .map(|mut item| {
+                item.apply_custom_fields(&self.client.custom_fields, T::COLLECTION)?;
+                projection::decode(item)
+            })
+            .collect::<Result<_>>()
             .map_err(|error| error.in_operation(self.operation))
     }
 
@@ -452,25 +701,71 @@ fn render_path(spec: EndpointSpec, id: Option<u64>) -> String {
     }
 }
 
+fn selected_fields<R, P>(client: &RentmanClient) -> String
+where
+    R: Resource,
+    P: Projection<Resource = R>,
+{
+    let mut fields = projection::fields::<P>();
+    if client.custom_fields_registered::<R>() && !P::FIELDS.contains(&"custom") {
+        fields.push_str(",custom");
+    }
+    fields
+}
+
+#[cfg(test)]
+mod projection_test_types {
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct StatusColor from TaskStatus { id, color, r#type }
+    }
+
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct EquipmentName from Equipment { id, name }
+    }
+
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct EquipmentCustom from Equipment { id, custom }
+    }
+
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct InvoiceRefTest from Invoice { id }
+    }
+
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct PaymentRefTest from Payment { id, invoice }
+    }
+
+    crate::projection! {
+        #[allow(missing_docs)]
+        pub(super) struct EquipmentPricesTest from Equipment { id, price, list_price, subrental_costs }
+    }
+}
+
 #[cfg(test)]
 // Coverage is disabled for test code so the production 100% gate measures only
 // library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
+    use super::projection_test_types::{EquipmentCustom, EquipmentName, StatusColor};
     use super::*;
     use crate::test_support::*;
     use crate::{
         ErrorKind, InvalidRequest, RentmanApiToken, RentmanClientConfig, RequestOutcome,
         ResourceRef, Url,
         model::{
-            ProjectId, ProjectsSetTypePayload, TaskStatus, TaskStatusId, TaskStatusPayload,
-            TaskStatusType,
+            Equipment, EquipmentId, ProjectId, ProjectsSetTypePayload, TaskStatus, TaskStatusId,
+            TaskStatusPayload, TaskStatusType,
         },
     };
     use reqwest::StatusCode;
     use std::{num::NonZeroUsize, time::Duration};
 
-    const TASK_STATUS: &str = r#"{"id":5,"created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","color":"green","type":"done","order":2,"updateHash":"h5"}"#;
+    const TASK_STATUS: &str = r#"{"id":5,"updateHash":"hash-5","created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","color":"green","type":"done","order":2}"#;
 
     fn client(server: &TestServer) -> RentmanClient {
         let config = RentmanClientConfig::default()
@@ -486,6 +781,24 @@ mod tests {
 
     fn item(body: &str) -> String {
         json_response(&format!(r#"{{"data":{body}}}"#))
+    }
+
+    fn complete_equipment_response(id: u64, custom: serde_json::Value) -> serde_json::Value {
+        let mut item = serde_json::json!({});
+        for field in <Equipment as GetItem>::ITEM_FIELDS {
+            item[*field] = serde_json::Value::Null;
+        }
+        item["id"] = serde_json::json!(id);
+        item["updateHash"] = serde_json::json!(format!("equipment-{id}"));
+        item["created"] = serde_json::Value::Null;
+        item["modified"] = serde_json::Value::Null;
+        item["creator"] = serde_json::Value::Null;
+        item["custom"] = custom;
+        item
+    }
+
+    fn item_value(value: serde_json::Value) -> String {
+        item(&value.to_string())
     }
 
     #[tokio::test]
@@ -511,7 +824,7 @@ mod tests {
 
         assert_eq!(statuses.len(), 2);
         assert_eq!(statuses[0].id, TaskStatusId::new(5));
-        assert_eq!(statuses[0].type_, TaskStatusType::Done);
+        assert_eq!(statuses[0].type_, Some(TaskStatusType::Done));
         assert_eq!(statuses[1].id, TaskStatusId::new(6));
         let first = server.next_request();
         assert_request(&first, "GET", "/taskstatuses");
@@ -520,6 +833,117 @@ mod tests {
             server.next_request().query_value("cursor").as_deref(),
             Some("2")
         );
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn reads_revision_snapshots_through_every_page() {
+        use crate::fields::task_status;
+        use crate::revision::Revision;
+
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":[{"id":6,"updateHash":"h6"}],"itemCount":2,"limit":1,"next_page_url":"{base}/taskstatuses?fields=id&type=done&cursor=2"}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":5,"updateHash":"h5"}],"itemCount":1,"limit":2,"next_page_url":null}"#,
+            ),
+            json_response(r#"{"data":[{"id":7}],"itemCount":1,"limit":300}"#),
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+        ]);
+        let client = client(&server);
+
+        let revisions = client
+            .task_statuses()
+            .list()
+            .filter(task_status::TYPE.eq(TaskStatusType::Done))
+            .page_size(PageSize::new(1).unwrap())
+            .revisions()
+            .await
+            .unwrap();
+        assert_eq!(
+            revisions.iter().collect::<Vec<_>>(),
+            [
+                (TaskStatusId::new(5), &Revision::new("h5").unwrap()),
+                (TaskStatusId::new(6), &Revision::new("h6").unwrap()),
+            ]
+        );
+        let first = server.next_request();
+        assert_request(&first, "GET", "/taskstatuses");
+        assert_eq!(first.query_value("fields").as_deref(), Some("id"));
+        assert_eq!(first.query_value("type").as_deref(), Some("done"));
+        assert_eq!(
+            server.next_request().query_value("cursor").as_deref(),
+            Some("2")
+        );
+
+        let error = client.task_statuses().list().revisions().await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+
+        let error = client.task_statuses().list().revisions().await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn all_returns_paging_failures_with_the_collection_operation() {
+        let server = spawn_server(vec![text_response("HTTP/1.1 400 Bad Request", "broken")]);
+        let error = client(&server)
+            .task_statuses()
+            .list()
+            .all()
+            .await
+            .unwrap_err();
+
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn revisions_validate_registered_custom_fields_and_ids() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":[{"id":1,"updateHash":"h1","custom":{"custom_8":true}}],"itemCount":1,"limit":300}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":"not-an-id","updateHash":"h2"}],"itemCount":1,"limit":300}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<TaskStatus>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let configured_client = client(&server).with_custom_fields(registry);
+
+        let error = configured_client
+            .task_statuses()
+            .list()
+            .revisions()
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::CustomField(_)));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+
+        let error = client(&server)
+            .task_statuses()
+            .list()
+            .revisions()
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        let request = server.next_request();
+        assert_request(&request, "GET", "/taskstatuses");
+        assert_eq!(request.query_value("fields").as_deref(), Some("id"));
         server.assert_no_more_requests();
     }
 
@@ -579,55 +1003,157 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn reads_the_revisions_of_every_page() {
-        use crate::fields::task_status;
-        use crate::revision::Revision;
-        let server = spawn_server(vec![
-            json_response(
-                r#"{"data":[{"id":6,"created":null,"modified":null,"creator":null,"updateHash":"h6","custom":{}}],"itemCount":1,"limit":1,"next_page_url":"{base}/taskstatuses?fields=id&type=done&cursor=2"}"#,
-            ),
-            json_response(
-                r#"{"data":[{"id":5,"updateHash":"h5"}],"itemCount":1,"limit":2,"next_page_url":null}"#,
-            ),
-            json_response(r#"{"data":[{"id":5}],"itemCount":1,"limit":300}"#),
-        ]);
-        let client = client(&server);
+    async fn projection_requests_registered_custom_fields_but_not_update_hash() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
 
-        let revisions = client
-            .task_statuses()
-            .list()
-            .filter(task_status::TYPE.eq(TaskStatusType::Done))
-            .page_size(PageSize::new(1).unwrap())
-            .revisions()
+        let server = spawn_server(vec![json_response(
+            r#"{"data":{"id":5,"updateHash":"hash-5","name":"Mixer","custom":{"custom_8":"blue","custom_9":false}}}"#,
+        )]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let equipment = client
+            .equipment()
+            .get_as::<EquipmentName>(crate::model::EquipmentId::new(5))
             .await
             .unwrap();
-        assert_eq!(
-            revisions.iter().collect::<Vec<_>>(),
-            [
-                (TaskStatusId::new(5), &Revision::new("h5").unwrap()),
-                (TaskStatusId::new(6), &Revision::new("h6").unwrap()),
-            ]
-        );
-        // Only the IDs are requested; Rentman adds `updateHash` by itself.
-        let first = server.next_request();
-        assert_request(&first, "GET", "/taskstatuses");
-        assert_eq!(first.query_value("fields").as_deref(), Some("id"));
-        assert_eq!(first.query_value("type").as_deref(), Some("done"));
-        assert_eq!(
-            server.next_request().query_value("cursor").as_deref(),
-            Some("2")
-        );
 
-        // An item without a revision fails with the operation.
-        let error = client.task_statuses().list().revisions().await.unwrap_err();
-        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
-        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
-        server.next_request();
+        assert_eq!(equipment.name, "Mixer");
+        let request = server.next_request();
+        assert_eq!(
+            request.query_value("fields").as_deref(),
+            Some("id,name,custom")
+        );
+        assert!(
+            !request
+                .query_value("fields")
+                .as_deref()
+                .unwrap()
+                .contains("updateHash")
+        );
         server.assert_no_more_requests();
     }
 
-    crate::projection! {
-        struct StatusColor from TaskStatus { id, color, r#type }
+    #[tokio::test]
+    async fn projection_with_custom_field_does_not_duplicate_the_selection() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![json_response(
+            r#"{"data":{"id":5,"custom":{"custom_8":"blue"}}}"#,
+        )]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let equipment = client
+            .equipment()
+            .get_as::<EquipmentCustom>(crate::model::EquipmentId::new(5))
+            .await
+            .unwrap();
+        assert_eq!(equipment.id, crate::model::EquipmentId::new(5));
+        assert_eq!(equipment.custom.unwrap().get::<String>(8).unwrap(), "blue");
+        let request = server.next_request();
+        assert_eq!(request.query_value("fields").as_deref(), Some("id,custom"));
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn live_projection_types_cover_collection_and_item_error_paths() {
+        use super::projection_test_types::{
+            EquipmentName, EquipmentPricesTest, InvoiceRefTest, PaymentRefTest,
+        };
+
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+        ]);
+        let client = client(&server);
+
+        for error in [
+            client
+                .invoices()
+                .list()
+                .all_as::<InvoiceRefTest>()
+                .await
+                .unwrap_err(),
+            client
+                .payments()
+                .list()
+                .all_as::<PaymentRefTest>()
+                .await
+                .unwrap_err(),
+            client
+                .equipment()
+                .list()
+                .all_as::<EquipmentName>()
+                .await
+                .unwrap_err(),
+            client
+                .equipment()
+                .get_as::<EquipmentPricesTest>(EquipmentId::new(7))
+                .await
+                .unwrap_err(),
+        ] {
+            assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        }
+
+        let invoice = server.next_request();
+        assert_request(&invoice, "GET", "/invoices");
+        assert_eq!(invoice.query_value("fields").as_deref(), Some("id"));
+        let payment = server.next_request();
+        assert_request(&payment, "GET", "/payments");
+        assert_eq!(payment.query_value("fields").as_deref(), Some("id,invoice"));
+        let equipment = server.next_request();
+        assert_request(&equipment, "GET", "/equipment");
+        assert_eq!(equipment.query_value("fields").as_deref(), Some("id,name"));
+        let prices = server.next_request();
+        assert_request(&prices, "GET", "/equipment/7");
+        assert_eq!(
+            prices.query_value("fields").as_deref(),
+            Some("id,price,list_price,subrental_costs")
+        );
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn first_items_cover_read_and_custom_validation_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+            json_response(
+                r#"{"data":[{"id":1,"updateHash":"h1","created":null,"modified":null,"creator":null}],"itemCount":1,"limit":1}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let error = client.task_statuses().list().first(1).await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+
+        let error = client.equipment().list().first(1).await.unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_eq!(error.operation(), Some("getEquipmentCollection"));
+        assert_request(&server.next_request(), "GET", "/equipment");
+        server.assert_no_more_requests();
     }
 
     #[tokio::test]
@@ -756,6 +1282,61 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn first_projection_covers_http_custom_and_projection_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+            json_response(
+                r#"{"data":[{"id":1,"color":"green","type":"done"}],"itemCount":1,"limit":1}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":2,"custom":{"custom_8":"blue"}}],"itemCount":1,"limit":1}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let configured_client = client(&server).with_custom_fields(registry);
+
+        let error = configured_client
+            .task_statuses()
+            .list()
+            .first_as::<StatusColor>(1)
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        assert_request(&server.next_request(), "GET", "/taskstatuses");
+
+        let error = configured_client
+            .equipment()
+            .list()
+            .first_as::<EquipmentName>(1)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_request(&server.next_request(), "GET", "/equipment");
+
+        let client = client(&server);
+        let error = client
+            .equipment()
+            .list()
+            .first_as::<EquipmentName>(1)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.operation(), Some("getEquipmentCollection"));
+        assert_request(&server.next_request(), "GET", "/equipment");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn reads_the_first_items_with_one_request() {
         let server = spawn_server(vec![
             json_response(&format!(
@@ -807,7 +1388,7 @@ mod tests {
             .get(TaskStatusId::new(5))
             .await
             .unwrap();
-        assert_eq!(status.name, "Done");
+        assert_eq!(status.name.as_deref(), Some("Done"));
         assert_request(&server.next_request(), "GET", "/taskstatuses/5");
 
         let error = client
@@ -822,6 +1403,96 @@ mod tests {
             Some(ResourceRef::from(TaskStatusId::new(6)))
         );
         assert_request(&server.next_request(), "GET", "/taskstatuses/6");
+    }
+
+    #[tokio::test]
+    async fn get_as_attaches_request_and_custom_field_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 404 Not Found", "gone"),
+            item(
+                r#"{"id":5,"updateHash":"h5","created":null,"modified":null,"creator":null,"name":"Mixer"}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let error = client
+            .equipment()
+            .get_as::<EquipmentName>(crate::model::EquipmentId::new(5))
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::NOT_FOUND));
+        assert_eq!(error.operation(), Some("getEquipmentItem"));
+        assert_eq!(
+            error.resource(),
+            Some(ResourceRef::from(crate::model::EquipmentId::new(5)))
+        );
+        server.next_request();
+
+        let error = client
+            .equipment()
+            .get_as::<EquipmentName>(crate::model::EquipmentId::new(5))
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_eq!(error.operation(), Some("getEquipmentItem"));
+        assert_request(&server.next_request(), "GET", "/equipment/5");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn validates_and_filters_registered_custom_fields_on_item_reads() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":{"id":5,"updateHash":"hash-5","created":null,"modified":null,"creator":null,"custom":{"custom_8":"ok","custom_9":false}}}"#,
+            ),
+            json_response(
+                r#"{"data":{"id":6,"updateHash":"hash-6","created":null,"modified":null,"creator":null,"custom":{"custom_9":false}}}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<
+            crate::model::Equipment,
+        >(8, ExtraInputFieldType::Text)])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let equipment = client
+            .equipment()
+            .get(crate::model::EquipmentId::new(5))
+            .await
+            .unwrap();
+        let custom = equipment.custom.as_ref().unwrap();
+        assert_eq!(custom.0.len(), 1);
+        assert_eq!(
+            custom.0.get("custom_8"),
+            Some(&crate::model::CustomFieldValue::Text("ok".to_string()))
+        );
+        assert_request(&server.next_request(), "GET", "/equipment/5");
+
+        let error = client
+            .equipment()
+            .get(crate::model::EquipmentId::new(6))
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("getEquipmentItem"));
+        assert_request(&server.next_request(), "GET", "/equipment/6");
+        server.assert_no_more_requests();
     }
 
     #[tokio::test]
@@ -851,6 +1522,561 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn create_marks_all_success_response_decode_failures_applied() {
+        let invalid_value = TASK_STATUS.replace(r#""color":"green""#, r#""color":1"#);
+        let server = spawn_server(vec![
+            item(&invalid_value),
+            item(r#"{"id":7,"updateHash":"h7","created":null,"modified":null,"creator":null}"#),
+            item(
+                r#"{"id":7,"updateHash":"h7","created":null,"modified":null,"creator":null,"custom":"invalid"}"#,
+            ),
+            item(r#"{"id":8,"updateHash":"h8","created":null,"modified":null,"creator":null}"#),
+            item(r#"{"id":8,"updateHash":"h8","created":null,"modified":null,"creator":null}"#),
+        ]);
+        let client = client(&server);
+        let status_payload = TaskStatusPayload::new("green".to_string());
+
+        let decode = client
+            .task_statuses()
+            .create(&status_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(decode.kind(), ErrorKind::Decode(_)));
+        assert_eq!(decode.outcome(), RequestOutcome::Applied);
+        server.next_request();
+
+        let registry =
+            crate::CustomFieldRegistry::new([crate::CustomFieldDefinition::new::<Equipment>(
+                8,
+                crate::model::ExtraInputFieldType::Text,
+            )])
+            .unwrap();
+        let client = client.with_custom_fields(registry);
+        let payload = crate::model::EquipmentPayload::default();
+        let malformed = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(malformed.kind(), ErrorKind::Decode(_)));
+        assert_eq!(malformed.outcome(), RequestOutcome::Applied);
+        server.next_request();
+        server.next_request();
+
+        let invalid_registry_target = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(
+            invalid_registry_target.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_eq!(invalid_registry_target.outcome(), RequestOutcome::Applied);
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn create_complete_response_covers_deserialization_and_registry_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let mut invalid_price = complete_equipment_response(1, serde_json::json!(null));
+        invalid_price["price"] = serde_json::json!("not a number");
+        let wrong_custom_type =
+            complete_equipment_response(2, serde_json::json!({"custom_8": true}));
+        let malformed_custom = complete_equipment_response(3, serde_json::json!("invalid"));
+        let server = spawn_server(vec![
+            item_value(invalid_price),
+            item_value(wrong_custom_type),
+            item_value(malformed_custom),
+        ]);
+        let payload = crate::model::EquipmentPayload::default();
+        let client = client(&server);
+
+        let error = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client.with_custom_fields(registry);
+        let error = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::TypeMismatch { .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let error = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn create_and_update_fetch_the_complete_item_after_partial_responses() {
+        let partial = TASK_STATUS.replace(r#""color":"green","#, "");
+        let server = spawn_server(vec![
+            json_response(&format!(r#"{{"data":{partial}}}"#)),
+            item(TASK_STATUS),
+            json_response(&format!(r#"{{"data":{partial}}}"#)),
+            item(TASK_STATUS),
+        ]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let created = client.task_statuses().create(&payload).await.unwrap();
+        assert_eq!(created.name.as_deref(), Some("Done"));
+        assert_eq!(created.color.as_deref(), Some("green"));
+        assert_request(&server.next_request(), "POST", "/taskstatuses");
+        assert_request(&server.next_request(), "GET", "/taskstatuses/5");
+
+        let updated = client
+            .task_statuses()
+            .update(TaskStatusId::new(6), &payload)
+            .await
+            .unwrap();
+        assert_eq!(updated.name.as_deref(), Some("Done"));
+        assert_eq!(updated.color.as_deref(), Some("green"));
+        assert_request(&server.next_request(), "PUT", "/taskstatuses/6");
+        assert_request(&server.next_request(), "GET", "/taskstatuses/6");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn create_reports_applied_decode_and_fallback_failures() {
+        let malformed = TASK_STATUS.replace(r#""color":"green""#, r#""color":1"#);
+        let server = spawn_server(vec![
+            item(&malformed),
+            item(r#"{"updateHash":"hash","created":null,"modified":null,"creator":null}"#),
+            item(r#"{"id":7,"updateHash":"hash","created":null,"modified":null,"creator":null}"#),
+            text_response("HTTP/1.1 404 Not Found", "gone"),
+        ]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let decode = client.task_statuses().create(&payload).await.unwrap_err();
+        assert!(matches!(decode.kind(), ErrorKind::Decode(_)));
+        assert_eq!(decode.outcome(), RequestOutcome::Applied);
+        assert_eq!(decode.operation(), Some("createTaskStatus"));
+        server.next_request();
+
+        let missing_id = client.task_statuses().create(&payload).await.unwrap_err();
+        assert!(matches!(missing_id.kind(), ErrorKind::Decode(_)));
+        assert_eq!(missing_id.outcome(), RequestOutcome::Applied);
+        server.next_request();
+
+        let fallback = client.task_statuses().create(&payload).await.unwrap_err();
+        assert_eq!(fallback.status(), Some(StatusCode::NOT_FOUND));
+        assert_eq!(fallback.outcome(), RequestOutcome::Applied);
+        assert_eq!(fallback.operation(), Some("createTaskStatus"));
+        assert_eq!(
+            fallback.resource(),
+            Some(ResourceRef::from(TaskStatusId::new(7)))
+        );
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn create_as_validates_custom_types_and_fetches_registered_values() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            item(r#"{"id":5,"updateHash":"h5","name":"Mixer","custom":{"custom_8":true}}"#),
+            item(r#"{"id":6,"updateHash":"h6"}"#),
+            item(
+                r#"{"id":6,"updateHash":"h6","created":null,"modified":null,"creator":null,"name":"Mixer","custom":{"custom_8":"blue","custom_9":false}}"#,
+            ),
+            item(r#"{"updateHash":"h7","name":"Mixer"}"#),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+        let payload = crate::model::EquipmentPayload::default();
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::TypeMismatch { .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        server.next_request();
+
+        let created = client
+            .equipment()
+            .create_as::<EquipmentName>(&payload)
+            .await
+            .unwrap();
+        assert_eq!(created.id, crate::model::EquipmentId::new(6));
+        assert_eq!(created.name, "Mixer");
+        let post = server.next_request();
+        assert_request(&post, "POST", "/equipment");
+        let get = server.next_request();
+        assert_request(&get, "GET", "/equipment/6");
+        assert_eq!(get.query_value("fields").as_deref(), Some("id,name,custom"));
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("createEquipment"));
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn update_as_validates_custom_types_and_marks_fallback_failures_applied() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            item(r#"{"id":5,"updateHash":"h5","name":"Mixer","custom":{"custom_8":true}}"#),
+            item(r#"{"id":6,"updateHash":"h6","name":"Mixer"}"#),
+            item(
+                r#"{"id":6,"updateHash":"h6","created":null,"modified":null,"creator":null,"name":"Mixer","custom":{"custom_8":"blue","custom_9":false}}"#,
+            ),
+            item(r#"{"id":7,"updateHash":"h7"}"#),
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+        let payload = crate::model::EquipmentPayload::default();
+
+        let error = client
+            .equipment()
+            .update_as::<EquipmentName>(crate::model::EquipmentId::new(5), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::TypeMismatch { .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        server.next_request();
+
+        let updated = client
+            .equipment()
+            .update_as::<EquipmentName>(crate::model::EquipmentId::new(6), &payload)
+            .await
+            .unwrap();
+        assert_eq!(updated.name, "Mixer");
+        assert_request(&server.next_request(), "PUT", "/equipment/6");
+        let get = server.next_request();
+        assert_request(&get, "GET", "/equipment/6");
+        assert_eq!(get.query_value("fields").as_deref(), Some("id,name,custom"));
+
+        let error = client
+            .equipment()
+            .update_as::<EquipmentName>(crate::model::EquipmentId::new(7), &payload)
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::SERVICE_UNAVAILABLE));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("updateEquipment"));
+        assert_eq!(
+            error.resource(),
+            Some(ResourceRef::from(crate::model::EquipmentId::new(7)))
+        );
+        server.next_request();
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn projection_writes_cover_request_decode_and_fallback_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let invalid_status = TASK_STATUS.replace(r#""color":"green""#, r#""color":1"#);
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            item(r#"{"id":6,"updateHash":"h6","name":"Mixer","custom":"invalid"}"#),
+            item(r#"{"id":7,"updateHash":"h7","name":"Mixer"}"#),
+            item(r#"{"id":7,"updateHash":"h7","name":"Mixer","custom":{"custom_8":true}}"#),
+            item(r#"{"id":9,"updateHash":"h9","name":"Mixer"}"#),
+            item(r#"{"id":9,"updateHash":"h9","custom":{"custom_8":"blue"}}"#),
+            item(&invalid_status),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            item(r#"{"id":8,"updateHash":"h8","name":"Mixer","custom":"invalid"}"#),
+            item(&invalid_status),
+            item(TASK_STATUS),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+        let equipment_payload = crate::model::EquipmentPayload::default();
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&equipment_payload)
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("createEquipment"));
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&equipment_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&equipment_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::TypeMismatch { .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+        assert_request(&server.next_request(), "GET", "/equipment/7");
+
+        let error = client
+            .equipment()
+            .create_as::<EquipmentName>(&equipment_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/equipment");
+        assert_request(&server.next_request(), "GET", "/equipment/9");
+
+        let status_payload = TaskStatusPayload::new("green".to_string());
+        let error = client
+            .task_statuses()
+            .create_as::<StatusColor>(&status_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "POST", "/taskstatuses");
+
+        let error = client
+            .equipment()
+            .update_as::<EquipmentName>(crate::model::EquipmentId::new(8), &equipment_payload)
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("updateEquipment"));
+        assert_request(&server.next_request(), "PUT", "/equipment/8");
+
+        let error = client
+            .equipment()
+            .update_as::<EquipmentName>(crate::model::EquipmentId::new(8), &equipment_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "PUT", "/equipment/8");
+
+        let error = client
+            .task_statuses()
+            .update_as::<StatusColor>(TaskStatusId::new(5), &status_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "PUT", "/taskstatuses/5");
+
+        let updated = client
+            .task_statuses()
+            .update_as::<StatusColor>(TaskStatusId::new(5), &status_payload)
+            .await
+            .unwrap();
+        assert_eq!(updated.color, "green");
+        assert_request(&server.next_request(), "PUT", "/taskstatuses/5");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn list_methods_reject_missing_registered_custom_fields() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":[{"id":1,"updateHash":"h1","created":null,"modified":null,"creator":null,"name":"Mixer"}],"itemCount":1,"limit":300}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":1,"updateHash":"h1","created":null,"modified":null,"creator":null,"name":"Mixer"}],"itemCount":1,"limit":1}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":1,"updateHash":"h1","name":"Mixer"}],"itemCount":1,"limit":300}"#,
+            ),
+        ]);
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client(&server).with_custom_fields(registry);
+
+        let error = client.equipment().list().all().await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::CustomField(_)));
+        server.next_request();
+        let error = client.equipment().list().first(1).await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::CustomField(_)));
+        server.next_request();
+        let error = client
+            .equipment()
+            .list()
+            .all_as::<EquipmentName>()
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::CustomField(_)));
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn creates_as_uses_the_write_response_when_projection_is_complete() {
+        let server = spawn_server(vec![item(TASK_STATUS)]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let status = client
+            .task_statuses()
+            .create_as::<StatusColor>(&payload)
+            .await
+            .unwrap();
+
+        assert_eq!(status.id, TaskStatusId::new(5));
+        assert_eq!(status.color, "green");
+        assert_request(&server.next_request(), "POST", "/taskstatuses");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn creates_as_fetches_missing_projection_fields_once() {
+        let partial = json_response(
+            r#"{"data":{"id":5,"updateHash":"hash-5","created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","type":"done","order":2}}"#,
+        );
+        let server = spawn_server(vec![
+            partial.clone(),
+            item(TASK_STATUS),
+            partial,
+            text_response("HTTP/1.1 404 Not Found", "gone"),
+        ]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let status = client
+            .task_statuses()
+            .create_as::<StatusColor>(&payload)
+            .await
+            .unwrap();
+
+        assert_eq!(status.id, TaskStatusId::new(5));
+        assert_eq!(status.color, "green");
+        let create = server.next_request();
+        assert_request(&create, "POST", "/taskstatuses");
+        let fetch = server.next_request();
+        assert_request(&fetch, "GET", "/taskstatuses/5");
+        assert_eq!(
+            fetch.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+
+        let error = client
+            .task_statuses()
+            .create_as::<StatusColor>(&payload)
+            .await
+            .unwrap_err();
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("createTaskStatus"));
+        assert_eq!(
+            error.resource(),
+            Some(ResourceRef::from(TaskStatusId::new(5)))
+        );
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn updates_as_fetches_missing_projection_fields_once() {
+        let partial = json_response(
+            r#"{"data":{"id":5,"updateHash":"hash-5","created":null,"modified":null,"creator":"/crew/1","displayname":"Done","name":"Done","type":"done","order":2}}"#,
+        );
+        let server = spawn_server(vec![partial, item(TASK_STATUS)]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let status = client
+            .task_statuses()
+            .update_as::<StatusColor>(TaskStatusId::new(5), &payload)
+            .await
+            .unwrap();
+
+        assert_eq!(status.id, TaskStatusId::new(5));
+        assert_eq!(status.color, "green");
+        assert_request(&server.next_request(), "PUT", "/taskstatuses/5");
+        let fetch = server.next_request();
+        assert_request(&fetch, "GET", "/taskstatuses/5");
+        assert_eq!(
+            fetch.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn update_reports_applied_when_the_fallback_get_fails() {
+        let partial = item(
+            r#"{"id":5,"updateHash":"hash-5","created":null,"modified":null,"creator":"/crew/1"}"#,
+        );
+        let server = spawn_server(vec![
+            partial,
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+            text_response("HTTP/1.1 503 Service Unavailable", "later"),
+        ]);
+        let client = client(&server);
+        let payload = TaskStatusPayload::new("green".to_string());
+
+        let error = client
+            .task_statuses()
+            .update(TaskStatusId::new(5), &payload)
+            .await
+            .unwrap_err();
+
+        assert_eq!(error.status(), Some(StatusCode::SERVICE_UNAVAILABLE));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("updateTaskStatus"));
+        assert_eq!(
+            error.resource(),
+            Some(ResourceRef::from(TaskStatusId::new(5)))
+        );
+        assert_request(&server.next_request(), "PUT", "/taskstatuses/5");
+        assert_request(&server.next_request(), "GET", "/taskstatuses/5");
+        assert_request(&server.next_request(), "GET", "/taskstatuses/5");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn retries_updates_and_deletes() {
         let server = spawn_server(vec![
             text_response("HTTP/1.1 503 Service Unavailable", "later"),
@@ -871,7 +2097,7 @@ mod tests {
             .update(TaskStatusId::new(5), &payload)
             .await
             .unwrap();
-        assert_eq!(updated.color, "green");
+        assert_eq!(updated.color.as_deref(), Some("green"));
         for _ in 0..2 {
             let request = server.next_request();
             assert_request(&request, "PUT", "/taskstatuses/5");
@@ -913,6 +2139,118 @@ mod tests {
             Some(ResourceRef::from(TaskStatusId::new(5)))
         );
         server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn update_marks_all_success_response_decode_failures_applied() {
+        let invalid_value = TASK_STATUS.replace(r#""color":"green""#, r#""color":1"#);
+        let server = spawn_server(vec![
+            item(&invalid_value),
+            item(r#"{"id":7,"updateHash":"h7","created":null,"modified":null,"creator":null}"#),
+            item(
+                r#"{"id":7,"updateHash":"h7","created":null,"modified":null,"creator":null,"custom":"invalid"}"#,
+            ),
+            item(r#"{"id":8,"updateHash":"h8","created":null,"modified":null,"creator":null}"#),
+            item(r#"{"id":8,"updateHash":"h8","created":null,"modified":null,"creator":null}"#),
+        ]);
+        let client = client(&server);
+        let status_payload = TaskStatusPayload::new("green".to_string());
+
+        let decode = client
+            .task_statuses()
+            .update(TaskStatusId::new(5), &status_payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(decode.kind(), ErrorKind::Decode(_)));
+        assert_eq!(decode.outcome(), RequestOutcome::Applied);
+        server.next_request();
+
+        let registry =
+            crate::CustomFieldRegistry::new([crate::CustomFieldDefinition::new::<Equipment>(
+                8,
+                crate::model::ExtraInputFieldType::Text,
+            )])
+            .unwrap();
+        let client = client.with_custom_fields(registry);
+        let payload = crate::model::EquipmentPayload::default();
+        let malformed = client
+            .equipment()
+            .update(crate::model::EquipmentId::new(7), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(malformed.kind(), ErrorKind::Decode(_)));
+        assert_eq!(malformed.outcome(), RequestOutcome::Applied);
+        server.next_request();
+        server.next_request();
+
+        let invalid_registry_target = client
+            .equipment()
+            .update(crate::model::EquipmentId::new(8), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            invalid_registry_target.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        assert_eq!(invalid_registry_target.outcome(), RequestOutcome::Applied);
+        server.next_request();
+        server.next_request();
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn update_complete_response_covers_deserialization_and_registry_errors() {
+        use crate::{CustomFieldDefinition, CustomFieldRegistry, model::ExtraInputFieldType};
+
+        let mut invalid_price = complete_equipment_response(1, serde_json::json!(null));
+        invalid_price["price"] = serde_json::json!("not a number");
+        let wrong_custom_type =
+            complete_equipment_response(2, serde_json::json!({"custom_8": true}));
+        let malformed_custom = complete_equipment_response(3, serde_json::json!("invalid"));
+        let server = spawn_server(vec![
+            item_value(invalid_price),
+            item_value(wrong_custom_type),
+            item_value(malformed_custom),
+        ]);
+        let payload = crate::model::EquipmentPayload::default();
+        let client = client(&server);
+
+        let error = client
+            .equipment()
+            .update(EquipmentId::new(1), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "PUT", "/equipment/1");
+
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<Equipment>(
+            8,
+            ExtraInputFieldType::Text,
+        )])
+        .unwrap();
+        let client = client.with_custom_fields(registry);
+        let error = client
+            .equipment()
+            .update(EquipmentId::new(2), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::CustomField(crate::CustomFieldError::TypeMismatch { .. })
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "PUT", "/equipment/2");
+
+        let error = client
+            .equipment()
+            .update(EquipmentId::new(3), &payload)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_request(&server.next_request(), "PUT", "/equipment/3");
         server.assert_no_more_requests();
     }
 

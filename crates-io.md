@@ -126,10 +126,63 @@ function serves every resource.
   from the JSON text (values beyond `Decimal`'s precision are rounded with a
   `tracing` warning), enums accept values Rentman adds later as `Unknown`,
   and identifiers and tokens are dedicated types — never bare strings or
-  floats.
+  floats. Response models require the core `id`, `updateHash`, `created`,
+  `modified`, and `creator` fields. `id` and `updateHash` are non-null;
+  nullable core fields must still be present as keys. Other declared response
+  fields are optional, and unknown response keys are ignored. Request payloads
+  continue to enforce their documented required fields.
+- Every item has a typed, opaque revision (`Revision<R>`) that changes when
+  Rentman updates it. `list().revisions()` reads paginated ID/revision pairs
+  without fetching complete items; compare snapshots with `changes_since`.
+- Custom fields remain open JSON values. The `extra_input_fields()` resource
+  exposes account-specific field IDs, types, and resource types for runtime
+  interpretation; enum custom-field definitions do not expose their allowed
+  values through that API. Register only fields the application uses; their
+  keys are required and their JSON values are checked against the declared
+  Rentman types. Unregistered custom keys are ignored.
+
+Register only the custom fields the application uses when constructing the
+client. Their keys must be present in responses and are checked against the
+Rentman types; unregistered custom keys are ignored.
+
+```rust
+use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model};
+
+# fn example() -> Result<(), Box<dyn std::error::Error>> {
+let fields = CustomFieldRegistry::new([
+    CustomFieldDefinition::new::<model::Equipment>(8, model::ExtraInputFieldType::Text),
+])?;
+let client = RentmanClient::new(RentmanApiToken::new("token"))
+    .with_custom_fields(fields);
+# Ok(())
+# }
+```
+
+Register the custom fields used by the application when building the client:
+
+```rust
+use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model};
+
+# fn example() -> Result<(), Box<dyn std::error::Error>> {
+let custom_fields = CustomFieldRegistry::new([
+  CustomFieldDefinition::new::<model::Equipment>(8, model::ExtraInputFieldType::Text),
+])?;
+let client = RentmanClient::new(RentmanApiToken::new("token"))
+  .with_custom_fields(custom_fields);
+# Ok(())
+# }
+```
+
+`CustomFields::get::<T>(id)` and `set(id, &value)` allow application-defined
+Serde types, including enums, while the wire model remains dynamic.
 - `create` and actions are sent exactly once, because a retry after a lost
   response would write twice; `get`, `update`, `delete`, and list pages are
   retried.
+- `create` and `update` return a full resource. If the write response omits
+  fields, the client follows it with the item's GET endpoint. If that GET fails
+  after a successful write, the error outcome is `Applied`. `create_as` and
+  `update_as` return a projection and fetch only when its selected fields are
+  missing from the write response.
 - Errors are a typed `rentman_client::Error`: match on `kind()` (HTTP status,
   transport, decode, unexpected response, invalid request), read the failed
   `operation()` and `resource()`, and use `outcome()` to learn whether a

@@ -80,12 +80,10 @@ generated model through one marker per field in `projection_fields`
 `src/projection.rs`). It is a `macro_rules!` macro: the expansion decodes field
 by field through the hand-written `ProjectedItem::take`, so consumers need no
 serde dependency and link fields are read through the same adapters as the
-models. Rentman always adds `id`, `created`, `modified`, `updateHash`, and
-`custom` to a selection; projections ignore fields they do not declare, and
-custom fields are selected as a whole through `custom`. A projection may
-declare `updateHash` (as `Revision<R>`), but it is never sent in `fields=`:
-Rentman drops it there next to other fields, and named alone it ignores the
-whole selection, so a projection of only `updateHash` requests `id`.
+models. Rentman always adds `id`, `created`, `modified`, and `updateHash` to a
+selection; `custom` appears when the account defines custom fields. Projections
+ignore fields they do not declare. When the client has a custom-field
+registry, the resource layer requests `custom` and validates registered keys.
 
 User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
@@ -96,7 +94,42 @@ Hand-written boundary types translate API formats into narrower types such as
 `RentmanApiToken`, `Id<R>`, and `RentmanAmount`. Every JSON number in the
 generated models and payloads is a `RentmanAmount`, read and written exactly
 from its JSON text (also inside projections), never through `f64`. Values in
-the open `custom` fields object stay `Decimal`.
+the open `custom` fields object stay `Decimal`. For response models, only the
+core fields `id`, `updateHash`, `created`, `modified`, and `creator` are
+required. The first two are non-null; the last three may be null but their
+keys must be present. Other declared response fields are optional because
+Rentman omits them from field selections and some responses. Unknown response
+fields are ignored and are not re-emitted when a model is serialized. Request
+payloads still follow the OpenAPI request schema's required fields.
+
+Custom-field definitions are account-specific. The `ExtraInputField` resource
+exposes each field's ID, `type`, and `itemtype`, so callers can interpret
+`custom_<id>` values at runtime. Enum definitions do not include their allowed
+values; `CustomFields` therefore keeps values as open JSON-compatible data.
+Register the fields used by the application when building the client; only
+those keys are retained and validated, and each must be present in returned
+`custom` data:
+
+```rust
+use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model};
+
+let custom_fields = CustomFieldRegistry::new([
+  CustomFieldDefinition::new::<model::Equipment>(8, model::ExtraInputFieldType::Text),
+])?;
+let client = RentmanClient::new(RentmanApiToken::new("token"))
+  .with_custom_fields(custom_fields);
+```
+
+Every Resource model carries `revision: Revision<R>` (`updateHash` on the
+wire). `client.equipment().list().revisions().await?` reads a paginated
+ID-to-revision snapshot without loading full item bodies; compare snapshots
+with `changes_since`.
+
+`create` and `update` return a full resource. If a write response omits fields,
+the client follows it with the resource's GET endpoint. If that GET fails after
+a successful write, the error outcome is `Applied`. `create_as` and `update_as`
+return only the requested projection and fetch only when selected fields are
+missing from the write response.
 
 IDs are typed by their resource: `Id<R>` (`src/id.rs`) is used for an item's
 own `id` and for every link to it, with a generated alias per resource
@@ -158,37 +191,6 @@ are documented as strings but returned as integers, documented-required fields
 that collection responses omit, and documented non-nullable fields that return
 null. Request models always keep the documented types. The live API tests
 guard these overrides against future drift.
-
-One field is added without any schema listing it. Rentman sends `updateHash`
-on every item, a hash of `id` and `modified` that changes on every update, and
-documents it only in the API introduction. It is what change detection is
-built on, so it is part of every resource, not an optional extra: the
-generator (`REVISION_FIELD`) gives every resource model (each type in
-`RESOURCE_COLLECTIONS`) the required field `revision: Revision<Self>`, an
-`impl Revisioned` (`id()`, `revision()`), and an `updateHash` projection
-marker. A read-only sweep over all 227 documented GET paths found it on every
-one of 13,576 items (2026-10-21). Responses of writes could not be checked
-read-only; they use the same models, so a write response without
-`updateHash` would fail to decode after the write was applied (the error then
-reports `Applied`).
-
-`Revision<R>` is a hand-written boundary type, typed per resource like
-`Id<R>`: opaque (the algorithm is undocumented, so it is only compared), never
-empty, and without an order. `ListRequest::revisions()` reads `Revisions<R>`
-(ID to revision) through the shared paging core with only `fields=id`, so
-filters apply and it is much cheaper than full items; `Revisions::changes_since`
-returns the created, updated, and deleted IDs. An item that no longer matches
-the listing's filters counts as deleted. Revisions have no filter or sort
-constant: Rentman rejects `updateHash` in a query (`Unknown property
-'updateHash' used in query`). Payloads never carry it.
-
-A generated contract test per resource (`tests/contract/generated_revisions.rs`)
-reads a sample item, requires `updateHash`, and checks `Revisioned` and the
-projection marker; `tests/openapi_contract.rs` fails once a schema documents
-`updateHash` or the introduction stops documenting it. The generated live
-sweep decodes the first item of every collection with the required revision,
-and `revisions_identify_item_states_live` checks that `revisions()` matches
-the full items and that revisions are unique and stable.
 
 ## Checks
 

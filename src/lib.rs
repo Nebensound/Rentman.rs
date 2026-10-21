@@ -9,6 +9,7 @@ pub mod resource;
 mod amount;
 mod client;
 mod config;
+mod custom_fields;
 mod endpoint;
 mod error;
 mod filter;
@@ -28,6 +29,11 @@ pub use client::RentmanClient;
 pub use config::{
     ConfigError, MAX_ATTEMPTS_VAR, MIN_REQUEST_INTERVAL_VAR, RETRY_BASE_DELAY_VAR,
     RentmanClientConfig,
+};
+#[doc(hidden)]
+pub use custom_fields::CustomFieldsResource;
+pub use custom_fields::{
+    CustomFieldDefinition, CustomFieldError, CustomFieldRegistry, CustomFieldValueError,
 };
 pub use error::{Error, ErrorKind, InvalidRequest, RequestOutcome, ResourceRef, Result};
 pub use filter::{Field, Filter, FilterValue, Sort};

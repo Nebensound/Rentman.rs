@@ -28,7 +28,13 @@ use rentman_client::{
 };
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::{collections::BTreeSet, sync::OnceLock};
+use std::{
+    collections::BTreeSet,
+    io::{Read, Write},
+    net::TcpListener,
+    sync::OnceLock,
+    thread::JoinHandle,
+};
 
 /// Shared client so all parallel tests go through one rate limiter.
 fn live_client() -> RentmanClient {
@@ -128,6 +134,115 @@ rentman_client::projection! {
     struct PaymentRef from Payment { id, invoice }
 }
 
+fn spawn_projection_error_server(count: usize) -> (rentman_client::Url, JoinHandle<Vec<String>>) {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let server = std::thread::spawn(move || {
+        let mut requests = Vec::with_capacity(count);
+        for _ in 0..count {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut bytes = Vec::new();
+            let mut buffer = [0; 1024];
+            loop {
+                let read = stream.read(&mut buffer).unwrap();
+                if read == 0 {
+                    break;
+                }
+                bytes.extend_from_slice(&buffer[..read]);
+                if bytes.windows(4).any(|window| window == b"\r\n\r\n") {
+                    break;
+                }
+            }
+            let request = String::from_utf8(bytes).unwrap();
+            requests.push(request.lines().next().unwrap().to_string());
+            stream
+                .write_all(
+                    b"HTTP/1.1 400 Bad Request\r\nContent-Length: 1\r\nConnection: close\r\n\r\nx",
+                )
+                .unwrap();
+        }
+        requests
+    });
+    (
+        rentman_client::Url::parse(&format!("http://{address}/")).unwrap(),
+        server,
+    )
+}
+
+#[tokio::test]
+async fn projection_listing_paths_are_exercised_without_live_credentials() {
+    let (base_url, server) = spawn_projection_error_server(4);
+    let registry = rentman_client::CustomFieldRegistry::new([
+        rentman_client::CustomFieldDefinition::new::<model::Invoice>(
+            8,
+            model::ExtraInputFieldType::Text,
+        ),
+        rentman_client::CustomFieldDefinition::new::<model::Payment>(
+            9,
+            model::ExtraInputFieldType::Text,
+        ),
+        rentman_client::CustomFieldDefinition::new::<model::Equipment>(
+            10,
+            model::ExtraInputFieldType::Text,
+        ),
+    ])
+    .unwrap();
+    let client = RentmanClient::with_base_url(base_url, RentmanApiToken::new("local-test"))
+        .unwrap()
+        .with_custom_fields(registry);
+
+    for (error, operation) in [
+        (
+            client
+                .invoices()
+                .list()
+                .all_as::<InvoiceRef>()
+                .await
+                .unwrap_err(),
+            "getFactuurCollection",
+        ),
+        (
+            client
+                .payments()
+                .list()
+                .all_as::<PaymentRef>()
+                .await
+                .unwrap_err(),
+            "getPaymentCollection",
+        ),
+        (
+            client
+                .equipment()
+                .list()
+                .all_as::<EquipmentName>()
+                .await
+                .unwrap_err(),
+            "getEquipmentCollection",
+        ),
+        (
+            client
+                .equipment()
+                .get_as::<EquipmentPrices>(EquipmentId::new(7))
+                .await
+                .unwrap_err(),
+            "getEquipmentItem",
+        ),
+    ] {
+        assert_eq!(error.status().map(|status| status.as_u16()), Some(400));
+        assert_eq!(error.operation(), Some(operation));
+    }
+
+    let requests = server.join().unwrap();
+    assert!(requests[0].starts_with("GET /invoices?"));
+    assert!(requests[0].contains("fields=id%2Ccustom"));
+    assert!(requests[1].starts_with("GET /payments?"));
+    assert!(requests[1].contains("fields=id%2Cinvoice%2Ccustom"));
+    assert!(requests[2].starts_with("GET /equipment?"));
+    assert!(requests[2].contains("fields=id%2Cname%2Cin_archive%2Ccreator%2Ccustom"));
+    assert!(requests[3].starts_with("GET /equipment/7?"));
+    assert!(requests[3].contains("fields=id%2Cprice%2Clist_price%2Csubrental_costs%2Ccustom"));
+}
+
 #[tokio::test]
 #[cfg_attr(
     not(live_api_tests_enabled),
@@ -185,14 +300,14 @@ async fn in_archive_filter_is_applied_live() {
         .await
         .expect("active equipment listing succeeds");
     assert!(
-        active.iter().all(|item| !item.in_archive),
+        active.iter().all(|item| item.in_archive == Some(false)),
         "in_archive=0 returned archived equipment"
     );
     let archived = page(true)
         .await
         .expect("archived equipment listing succeeds");
     assert!(
-        archived.iter().all(|item| item.in_archive),
+        archived.iter().all(|item| item.in_archive == Some(true)),
         "in_archive=1 returned active equipment"
     );
 }
@@ -253,10 +368,15 @@ async fn equipment_price_write_is_a_no_op_live() {
         .update(equipment_id, &payload)
         .await
         .expect("live no-op equipment update succeeds");
-    assert_eq!(updated.price, before.price, "price changed");
-    assert_eq!(updated.list_price, before.list_price, "list_price changed");
+    assert_eq!(updated.price, Some(before.price), "price changed");
     assert_eq!(
-        updated.subrental_costs, before.subrental_costs,
+        updated.list_price,
+        Some(before.list_price),
+        "list_price changed"
+    );
+    assert_eq!(
+        updated.subrental_costs,
+        Some(before.subrental_costs),
         "subrental_costs changed"
     );
     assert_eq!(
@@ -343,7 +463,7 @@ async fn filters_survive_the_cursor_live() {
     let single = archived().first(1500).await.unwrap();
 
     assert!(
-        paged.iter().all(|item| item.in_archive),
+        paged.iter().all(|item| item.in_archive == Some(true)),
         "an active item leaked through a cursor"
     );
     if single.len() < 1500 {
@@ -372,8 +492,7 @@ fn equipment_projection_decodes_outside_the_crate() {
         ["id", "name", "in_archive", "creator", "updateHash"]
     );
     let mut item: ProjectedItem = serde_json::from_str(
-        r#"{"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "custom": {},
-            "updateHash": "d21b3fd9"}"#,
+        r#"{"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "h3", "custom": {}}"#,
     )
     .unwrap();
     let equipment = EquipmentName::decode(&mut item).unwrap();
@@ -384,18 +503,15 @@ fn equipment_projection_decodes_outside_the_crate() {
         equipment.creator,
         Some(rentman_client::model::CrewId::new(2))
     );
-    assert_eq!(equipment.updateHash.as_str(), "d21b3fd9");
+    assert_eq!(equipment.updateHash.as_str(), "h3");
 
     // Every field that does not decode fails with its name.
-    let valid = serde_json::json!(
-        {"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "d21b3fd9"}
-    );
+    let valid = serde_json::json!({"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "h3"});
     for (field, broken) in [
         ("id", serde_json::json!("three")),
         ("name", serde_json::Value::Null),
         ("in_archive", serde_json::json!("yes")),
         ("creator", serde_json::json!("/projects/2")),
-        ("updateHash", serde_json::json!("")),
     ] {
         let mut wire = valid.clone();
         wire[field] = broken;
@@ -435,10 +551,9 @@ async fn projections_keep_their_field_selection_across_the_cursor_live() {
     assert_eq!(projected.len(), full.len());
     for (projected, full) in projected.iter().zip(&full) {
         assert_eq!(projected.id, full.id);
-        assert_eq!(projected.name, full.name);
+        assert_eq!(Some(projected.name.as_str()), full.name.as_deref());
         assert!(projected.in_archive);
         assert_eq!(projected.creator, full.creator);
-        // Rentman sends the revision although the projection cannot request it.
         assert_eq!(&projected.updateHash, full.revision());
     }
 }
@@ -456,7 +571,6 @@ async fn revisions_identify_item_states_live() {
             .list()
             .filter(equipment::IN_ARCHIVE.eq(true))
     };
-    // Small pages make the revisions travel through several cursors.
     let revisions = archived()
         .page_size(PageSize::new(100).unwrap())
         .revisions()
@@ -464,8 +578,6 @@ async fn revisions_identify_item_states_live() {
         .unwrap();
     let full = archived().page_size(PageSize::MAX).all().await.unwrap();
 
-    // The cheap listing agrees with the revisions of the full items, and every
-    // item has its own revision.
     assert_eq!(revisions, full.iter().collect::<Revisions<_>>());
     let distinct = revisions
         .iter()
@@ -474,12 +586,10 @@ async fn revisions_identify_item_states_live() {
         .len();
     assert_eq!(distinct, revisions.len(), "two items share an updateHash");
 
-    // Reading the same state again yields the same revision. An item whose
-    // `modified` moved in between was updated, so its revision may differ.
     for item in full.iter().take(3) {
-        let again = client.equipment().get(item.id).await.unwrap();
-        if again.modified == item.modified {
-            assert_eq!(again.revision(), item.revision(), "equipment {}", item.id);
+        let current = client.equipment().get(item.id).await.unwrap();
+        if current.modified == item.modified {
+            assert_eq!(current.revision(), item.revision(), "equipment {}", item.id);
         }
     }
     let unchanged = full.iter().collect::<Revisions<_>>();

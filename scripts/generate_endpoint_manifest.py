@@ -141,50 +141,8 @@ RESPONSE_NULLABLE_FIELDS = {
     ("TaskResponse", "color"),
 }
 
-# Documented-required fields that live collection responses omit (most are
-# financial aggregates that only appear when explicitly requested).
-_PROJECT_PRICE_FIELDS = (
-    "project_total_price",
-    "project_total_price_cancelled",
-    "project_rental_price",
-    "project_sale_price",
-    "project_crew_price",
-    "project_transport_price",
-    "project_other_price",
-    "project_insurance_price",
-    "project_services_price",
-)
-_PROJECT_COST_FIELDS = ("estimated_cost", "planned_cost", "actual_cost")
-# Rentman sends `updateHash` on every item of a resource, a hash of `id` and
-# `modified` that changes on every update, but documents it only in the API
-# introduction, not in a schema. Every resource model (the types in
-# RESOURCE_COLLECTIONS) gets it as the required field `revision:
-# Revision<Self>` and implements `Revisioned`; every resource gets an
-# `updateHash` projection marker. A read-only sweep over all 227 documented GET
-# paths found it on every one of 13,576 items (2026-10-21). It has no filter or
-# sort constant: Rentman rejects it in a query ("Unknown property 'updateHash'
-# used in query"). Payloads never carry it.
+RESPONSE_CORE_FIELDS = {"id", "created", "modified", "creator"}
 REVISION_FIELD = "updateHash"
-
-RESPONSE_OPTIONAL_FIELDS = {
-    "ContractResponse": set(_PROJECT_PRICE_FIELDS),
-    "FactuurResponse": set(_PROJECT_PRICE_FIELDS),
-    "QuotationResponse": set(_PROJECT_PRICE_FIELDS),
-    "ProjectResponse": set(_PROJECT_PRICE_FIELDS + _PROJECT_COST_FIELDS),
-    "SubprojectResponse": set(_PROJECT_PRICE_FIELDS + _PROJECT_COST_FIELDS),
-    "EquipmentResponse": {
-        "current_quantity",
-        "current_quantity_excl_cases",
-        "quantity_in_cases",
-    },
-    "FileFolderResponse": {"parent_api_path"},
-    "FileResponse": {"parent_api_path", "itemtype"},
-    "InvoiceLineResponse": {"parent_api_path"},
-    "TaskResponse": {"parent_api_path"},
-    "PaymentResponse": {"payment_import_source"},
-    "ExtraInputFieldResponse": {"linkedItemType"},
-    "PurchaseOrderResponse": {"previous_status"},
-}
 
 
 # Rust type names for schemas whose name is not "resource + Response/Request".
@@ -415,9 +373,32 @@ def rust_field_type(schema_name_value: str, field: str, schema: dict, required: 
     return base
 
 
+def response_properties(schema_name_value: str, schema: dict) -> dict[str, dict]:
+    return dict(schema.get("properties") or {})
+
+
+def has_revision(schema_name_value: str, schema: dict) -> bool:
+    is_resource_response = (
+        schema_name_value.endswith("Response")
+        and rust_type_name(schema_name_value) in RESOURCE_COLLECTIONS.values()
+    )
+    if is_resource_response and REVISION_FIELD in (schema.get("properties") or {}):
+        raise ValueError(f"{schema_name_value} now documents {REVISION_FIELD}; review revision support")
+    return is_resource_response
+
+
 def effective_required(schema_name_value: str, schema: dict) -> set[str]:
+    if schema_name_value.endswith("Response") and rust_type_name(schema_name_value) in RESOURCE_COLLECTIONS.values():
+        return (RESPONSE_CORE_FIELDS - {REVISION_FIELD}).intersection(response_properties(schema_name_value, schema))
+    return set(schema.get("required") or [])
+
+
+def projection_required(schema_name_value: str, schema: dict) -> set[str]:
     required = set(schema.get("required") or [])
-    return required - RESPONSE_OPTIONAL_FIELDS.get(schema_name_value, set())
+    if schema_name_value.endswith("Response") and rust_type_name(schema_name_value) in RESOURCE_COLLECTIONS.values():
+        required.update(RESPONSE_CORE_FIELDS.intersection(response_properties(schema_name_value, schema)))
+        required.discard("custom")
+    return required
 
 
 def endpoint_type_name(method: str, path: str, operation_id: str, seen: set[str]) -> str:
@@ -565,17 +546,6 @@ def collect_operations(spec: dict) -> list[dict]:
     return operations
 
 
-def has_revision(schema_name_value: str, schema: dict) -> bool:
-    """Whether this schema is a resource model, which carries `updateHash`."""
-    if not schema_name_value.endswith("Response"):
-        return False
-    if rust_type_name(schema_name_value) not in RESOURCE_COLLECTIONS.values():
-        return False
-    if REVISION_FIELD in (schema.get("properties") or {}):
-        raise ValueError(f"{schema_name_value} now documents {REVISION_FIELD}; review REVISION_FIELD")
-    return True
-
-
 def generate_wire(spec: dict) -> None:
     lines = [
         "//! Strongly typed Rentman API request and response models.",
@@ -586,8 +556,8 @@ def generate_wire(spec: dict) -> None:
         "",
         "use crate::id::{Id, ItemId, Resource};",
         "use chrono::{DateTime, FixedOffset, NaiveDate};",
-        "use crate::revision::{Revision, Revisioned};",
         "use crate::RentmanAmount;",
+        "use crate::revision::{Revision, Revisioned};",
         "use rust_decimal::Decimal;",
         "use serde::{Deserialize, Serialize};",
         "use std::collections::BTreeMap;",
@@ -666,9 +636,25 @@ def generate_wire(spec: dict) -> None:
         "}",
         "",
         "/// Explicitly open custom fields object.",
-        "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
+        "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]",
         "#[serde(transparent)]",
         "pub struct CustomFields(pub BTreeMap<String, CustomFieldValue>);",
+        "",
+        "impl CustomFields {",
+        "    /// Reads `custom_<id>` into an application-defined Rust type.",
+        "    pub fn get<T: serde::de::DeserializeOwned>(&self, id: u64) -> Result<T, crate::CustomFieldValueError> {",
+        "        let value = self.0.get(&format!(\"custom_{id}\")).ok_or(crate::CustomFieldValueError::Missing { id })?;",
+        '        let encoded = serde_json::to_string(value).expect("CustomFieldValue contains only JSON-compatible values");',
+        "        Ok(serde_json::from_str(&encoded)?)",
+        "    }",
+        "",
+        "    /// Serializes an application-defined value into `custom_<id>`.",
+        "    pub fn set<T: Serialize>(&mut self, id: u64, value: &T) -> Result<(), crate::CustomFieldValueError> {",
+        "        let encoded = serde_json::to_string(value)?;",
+        "        self.0.insert(format!(\"custom_{id}\"), serde_json::from_str(&encoded)?);",
+        "        Ok(())",
+        "    }",
+        "}",
         "",
         "/// Value inside Rentman's custom fields object.",
         "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
@@ -695,7 +681,7 @@ def generate_wire(spec: dict) -> None:
     schemas = spec["components"]["schemas"]
     for schema_name_value, schema in schemas.items():
         required = set(schema.get("required") or [])
-        for field, field_schema in (schema.get("properties") or {}).items():
+        for field, field_schema in response_properties(schema_name_value, schema).items():
             if "enum" not in field_schema:
                 continue
             enum_name = enum_type_name(schema_name_value, field)
@@ -746,7 +732,7 @@ def generate_wire(spec: dict) -> None:
         lines.append(f"/// {description}")
         lines.append(f"#[derive({derives})]")
         lines.append(f"pub struct {rust_type_name(schema_name_value)} {{")
-        for field, field_schema in (schema.get("properties") or {}).items():
+        for field, field_schema in response_properties(schema_name_value, schema).items():
             rust_name = rust_field(field)
             field_type = rust_field_type(schema_name_value, field, field_schema, required)
             description = rust_doc(
@@ -761,9 +747,10 @@ def generate_wire(spec: dict) -> None:
             if field not in required:
                 serde_attributes.append("default")
                 serde_attributes.append("skip_serializing_if = \"Option::is_none\"")
-            elif is_link and field_type.startswith("Option<"):
-                # Like a plain `Option`, a nullable link may also be missing.
-                serde_attributes.append("default")
+            elif field_type.startswith("Option<") and not is_link:
+                serde_attributes.append(
+                    'deserialize_with = "std::option::Option::deserialize"'
+                )
             if is_link:
                 adapter = "optional_link" if field_type.startswith("Option<") else "link"
                 serde_attributes.append(f'with = "crate::id::{adapter}"')
@@ -771,9 +758,13 @@ def generate_wire(spec: dict) -> None:
                 lines.append(f"    #[serde({', '.join(serde_attributes)})]")
             lines.append(f"    pub {rust_name}: {field_type},")
         if has_revision(schema_name_value, schema):
-            lines.append("    /// Revision of the item as read (`updateHash`): changes on every update.")
-            lines.append(f'    #[serde(rename = "{REVISION_FIELD}")]')
-            lines.append(f"    pub revision: Revision<{rust_type_name(schema_name_value)}>,")
+            lines.extend(
+                [
+                    "    /// Revision of the item as read; changes on every update.",
+                    f'    #[serde(rename = "{REVISION_FIELD}")] ',
+                    f"    pub revision: Revision<{rust_type_name(schema_name_value)}>,",
+                ]
+            )
         lines.append("}")
         lines.append("")
         if is_payload and required:
@@ -799,22 +790,39 @@ def generate_wire(spec: dict) -> None:
     for collection, rust_type in sorted(RESOURCE_COLLECTIONS.items()):
         lines.extend(
             [
+                f"impl Revisioned for {rust_type} {{",
+                "    fn id(&self) -> Id<Self> { self.id }",
+                "    fn revision(&self) -> &Revision<Self> { &self.revision }",
+                "}",
+                "",
+            ]
+        )
+        lines.extend(
+            [
                 f"impl Resource for {rust_type} {{",
                 f'    const COLLECTION: &\'static str = "{collection}";',
                 "}",
                 "",
-                f"impl Revisioned for {rust_type} {{",
-                "    fn id(&self) -> Id<Self> {",
-                "        self.id",
-                "    }",
-                "",
-                "    fn revision(&self) -> &Revision<Self> {",
-                "        &self.revision",
-                "    }",
-                "}",
-                "",
                 f"/// ID of a [`{rust_type}`] item (`/{collection}/{{id}}`).",
                 f"pub type {rust_type}Id = Id<{rust_type}>;",
+                "",
+            ]
+        )
+
+    for collection, rust_type in sorted(RESOURCE_COLLECTIONS.items()):
+        response_schema = next(
+            schema
+            for schema_name_value, schema in schemas.items()
+            if schema_name_value.endswith("Response")
+            and rust_type_name(schema_name_value) == rust_type
+        )
+        has_custom = "custom" in (response_schema.get("properties") or {})
+        custom_expression_mut = "self.custom.as_mut()" if has_custom else "None"
+        lines.extend(
+            [
+                f"impl crate::CustomFieldsResource for {rust_type} {{",
+            f"    fn custom_fields_mut(&mut self) -> Option<&mut CustomFields> {{ {custom_expression_mut} }}",
+                "}",
                 "",
             ]
         )
@@ -1083,7 +1091,7 @@ def generate_fields(spec: dict) -> None:
     for name, schema in schemas.items():
         if not name.endswith("Response"):
             continue
-        for field, field_schema in (schema.get("properties") or {}).items():
+        for field, field_schema in response_properties(name, schema).items():
             if "enum" in field_schema:
                 lines.append(f"impl EnumFilterValue for {enum_type_name(name, field)} {{}}")
     lines.append("")
@@ -1162,7 +1170,7 @@ def generate_projection_fields(spec: dict) -> None:
         rust_type = rust_type_name(name)
         if not name.endswith("Response") or rust_type not in resources:
             continue
-        required = effective_required(name, schema)
+        required = projection_required(name, schema)
         lines.extend(
             [
                 f"/// Fields of [`{rust_type}`](crate::model::{rust_type}) for `projection!`.",
@@ -1171,7 +1179,7 @@ def generate_projection_fields(spec: dict) -> None:
                 "",
             ]
         )
-        for field, field_schema in (schema.get("properties") or {}).items():
+        for field, field_schema in response_properties(name, schema).items():
             value = rust_field_type(name, field, field_schema, required)
             wire = value
             if openapi_type(field_schema)[0] == "string" and "Id<" in value:
@@ -1187,6 +1195,7 @@ def generate_projection_fields(spec: dict) -> None:
                     f"        type Value = {value};",
                     f"        type Wire = {wire};",
                     f'        const NAME: &\'static str = "{escape(field)}";',
+                    f"        const REQUIRED: bool = {str(field in required).lower()};",
                     "    }",
                     "",
                 ]
@@ -1196,7 +1205,7 @@ def generate_projection_fields(spec: dict) -> None:
                 [
                     f"    /// `{REVISION_FIELD}`: revision of the item, changes on every update.",
                     "    ///",
-                    "    /// Never sent in `fields=`: Rentman adds it to every selection by itself.",
+                    "    /// Rentman sends this field automatically; it is not included in `fields=`.",
                     f"    pub struct {REVISION_FIELD};",
                     "",
                     f"    impl ProjectionField for {REVISION_FIELD} {{",
@@ -1204,6 +1213,7 @@ def generate_projection_fields(spec: dict) -> None:
                     f"        type Value = Revision<{rust_type}>;",
                     f"        type Wire = Revision<{rust_type}>;",
                     f'        const NAME: &\'static str = "{REVISION_FIELD}";',
+                    "        const REQUIRED: bool = true;",
                     "    }",
                     "",
                 ]
@@ -1247,8 +1257,44 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
             ]
         )
 
+    def test_collection_errors(
+        name: str,
+        call_base: str,
+        path: str,
+        operation_id: str,
+        item_type: str,
+    ) -> None:
+        tests.extend(
+            [
+                "    #[tokio::test]",
+                f"    async fn {name}_collection_errors() {{",
+                '        let server = spawn_server(vec![text_response("HTTP/1.1 400 Bad Request", "rejected"), text_response("HTTP/1.1 400 Bad Request", "rejected"), text_response("HTTP/1.1 400 Bad Request", "rejected")]);',
+                "        let client = client(&server);",
+            ]
+        )
+        calls = [
+            (f"{call_base}.list().all_as::<{item_type}IdProjection>()", "id"),
+            (f"{call_base}.list().first(1)", None),
+            (f"{call_base}.list().first_as::<{item_type}IdProjection>(1)", "id"),
+        ]
+        for call, fields in calls:
+            tests.extend(
+                [
+                    f"        let error = {call}.await.unwrap_err();",
+                    '        assert_eq!(error.status().map(|status| status.as_u16()), Some(400));',
+                    f'        assert_eq!(error.operation(), Some("{operation_id}"));',
+                    "        let request = server.next_request();",
+                    f'        assert_request(&request, "GET", "{path}");',
+                ]
+            )
+            if fields is not None:
+                tests.append(
+                    f'        assert_eq!(request.query_value("fields").as_deref(), Some("{fields}"));'
+                )
+        tests.extend(["        server.assert_no_more_requests();", "    }", ""])
+
     empty_page = 'json_response(r#"{"data":[],"itemCount":0,"limit":300}"#)'
-    empty_item = 'json_response(r#"{"data":{}}"#)'
+    empty_item = 'json_response(r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#)'
     sent_once = "let _ = result; // only the outgoing request is checked here"
 
     for operation in operations:
@@ -1266,12 +1312,19 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
                 impls.append(f"impl List for {owner} {{ type Item = {item}; const LIST: Operation = {constant}; }}")
                 reachable.append(f"<{owner} as List>::LIST.0.operation_id")
                 test(test_name, empty_page, f"{call_base}.list().all()", "GET", path, "assert!(result.unwrap().is_empty());")
+                test_collection_errors(
+                    test_name,
+                    call_base,
+                    path,
+                    operation["operation_id"],
+                    owner,
+                )
             elif method == "POST":
                 impls.append(
                     f"impl Create for {owner} {{ type Payload = {payload}; type Item = {item}; const CREATE: Operation = {constant}; }}"
                 )
                 reachable.append(f"<{owner} as Create>::CREATE.0.operation_id")
-                test(test_name, empty_item, f"{call_base}.create(&{payload_expression(spec, operation['request'], 'crate::')})", "POST", path, sent_once)
+                test(test_name, empty_item, f"{call_base}.create_as::<{owner}IdProjection>(&{payload_expression(spec, operation['request'], 'crate::')})", "POST", path, sent_once)
             else:
                 raise ValueError(f"unsupported collection operation {method} {path}")
         elif match := re.fullmatch(r"/([a-z_]+)/\{id\}", path):
@@ -1284,11 +1337,24 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
             if method == "PUT":
                 associated = f"type Payload = {payload}; {associated}"
             impls.append(f"impl {trait} for {owner} {{ {associated} const {const}: Operation = {constant}; }}")
+            if method == "GET":
+                fields = ", ".join(
+                    f'"{field}"'
+                    for field in response_properties(
+                        operation["response_schema"],
+                        spec["components"]["schemas"][operation["response_schema"]],
+                    )
+                    if field != "custom"
+                )
+                fields = f'{fields}, "{REVISION_FIELD}"'
+                impls.append(
+                    f"impl GetItem for {owner} {{ const GET_ITEM: Operation = {constant}; const ITEM_FIELDS: &'static [&'static str] = &[{fields}]; }}"
+                )
             reachable.append(f"<{owner} as {trait}>::{const}.0.operation_id")
             if method == "GET":
                 test(test_name, empty_item, f"{call_base}.get(crate::Id::new(7))", "GET", concrete, sent_once)
             elif method == "PUT":
-                test(test_name, empty_item, f"{call_base}.update(crate::Id::new(7), &{payload_expression(spec, operation['request'], 'crate::')})", "PUT", concrete, sent_once)
+                test(test_name, empty_item, f"{call_base}.update_as::<{owner}IdProjection>(crate::Id::new(7), &{payload_expression(spec, operation['request'], 'crate::')})", "PUT", concrete, sent_once)
             else:
                 test(test_name, 'empty_response("HTTP/1.1 204 No Content")', f"{call_base}.delete(crate::Id::new(7))", "DELETE", concrete, "result.unwrap();")
         elif match := re.fullmatch(r"/([a-z_]+)/\{id\}/([a-z_]+)", path):
@@ -1323,12 +1389,19 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
                 impls.append(f"impl List for {marker} {{ type Item = {item}; const LIST: Operation = {constant}; }}")
                 reachable.append(f"<{marker} as List>::LIST.0.operation_id")
                 test(test_name, empty_page, f"{call_base}.list().all()", "GET", concrete, "assert!(result.unwrap().is_empty());")
+                test_collection_errors(
+                    test_name,
+                    call_base,
+                    concrete,
+                    operation["operation_id"],
+                    child,
+                )
             elif method == "POST":
                 impls.append(
                     f"impl Create for {marker} {{ type Payload = {payload}; type Item = {item}; const CREATE: Operation = {constant}; }}"
                 )
                 reachable.append(f"<{marker} as Create>::CREATE.0.operation_id")
-                test(test_name, empty_item, f"{call_base}.create(&{payload_expression(spec, operation['request'], 'crate::')})", "POST", concrete, sent_once)
+                test(test_name, empty_item, f"{call_base}.create_as::<{child}IdProjection>(&{payload_expression(spec, operation['request'], 'crate::')})", "POST", concrete, sent_once)
             else:
                 raise ValueError(f"unsupported nested operation {method} {path}")
         elif match := re.fullmatch(r"/([a-z_]+)(/\{id\})?/:([A-Za-z]+)", path):
@@ -1389,7 +1462,7 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
         "//!",
         "//! This file is generated by `scripts/generate_endpoint_manifest.py`.",
         "",
-        "use super::{Collection, Create, Delete, Get, List, Operation, Update, sealed::Sealed};",
+        "use super::{Collection, Create, Delete, Get, GetItem, List, Operation, Update, sealed::Sealed};",
         "use crate::{",
         "    RentmanClient,",
         "    endpoint::{self, Endpoint},",
@@ -1427,6 +1500,11 @@ def generate_resources(spec: dict, operations: list[dict]) -> None:
             "    fn client(server: &TestServer) -> RentmanClient {",
             "        RentmanClient::with_base_url(Url::parse(server.base_url()).unwrap(), RentmanApiToken::new(\"token\")).unwrap()",
             "    }",
+            "",
+            *[
+                f"    crate::projection! {{ #[allow(dead_code)] struct {resource}IdProjection from {resource} {{ id }} }}"
+                for resource in sorted(RESOURCE_COLLECTIONS.values())
+            ],
             "",
             *tests,
             "}",
@@ -1544,17 +1622,18 @@ def generate_response_enum_tests(spec: dict) -> None:
     RESPONSE_ENUM_TESTS_OUTPUT.write_text("\n".join(lines))
 
 
-def sample_wire(rust_type: str, schema_name_value: str, field: str, field_schema: dict) -> object:
-    """A valid JSON value of the given field type, as Rentman sends it."""
+def sample_wire(rust_type: str, schema_name_value: str, field: str, schema: dict) -> object:
+    """A valid JSON value for a generated response field."""
     if rust_type.startswith("Option<"):
         return None
-    if rust_type == enum_type_name(schema_name_value, field):
-        return str(field_schema["enum"][0])
     if rust_type.startswith("Id<"):
         if field == "id":
             return 1
         target = rust_type[3:-1]
-        return f"/{next(c for c, t in RESOURCE_COLLECTIONS.items() if t == target)}/1"
+        collection = next(collection for collection, item in RESOURCE_COLLECTIONS.items() if item == target)
+        return f"/{collection}/1"
+    if "enum" in schema:
+        return str(schema["enum"][0])
     samples = {
         "String": "x",
         "DateTime<FixedOffset>": "2026-01-01T00:00:00+00:00",
@@ -1579,33 +1658,41 @@ def generate_revision_tests(spec: dict) -> None:
         if has_revision(name, schema)
     )
     lines = [
-        "//! One contract test per resource model: it reads Rentman's undocumented",
-        "//! `updateHash` as its revision, requires it, and exposes it through",
-        "//! `Revisioned` and the `updateHash` projection marker.",
+        "//! One contract test per resource model for Rentman's undocumented `updateHash`.",
         "//!",
         "//! This file is generated by `scripts/generate_endpoint_manifest.py`.",
         "",
         "use super::assert_carries_revision;",
         "use rentman_client::{model, projection_fields};",
         "",
-        "/// Resource types whose model carries a revision.",
         "pub(crate) const RESOURCES_WITH_REVISION: &[&str] = &[",
         *[f'    "{rust_type}",' for rust_type, _, _ in resources],
         "];",
         "",
     ]
-    for rust_type, name, schema in resources:
-        required = effective_required(name, schema)
+    for rust_type, schema_name_value, schema in resources:
+        required = effective_required(schema_name_value, schema)
+        properties = schema.get("properties") or {}
         item = {
-            field: sample_wire(rust_field_type(name, field, field_schema, required), name, field, field_schema)
-            for field, field_schema in (schema.get("properties") or {}).items()
+            field: (
+                {}
+                if field == "custom"
+                else sample_wire(
+                    rust_field_type(schema_name_value, field, field_schema, required),
+                    schema_name_value,
+                    field,
+                    field_schema,
+                )
+            )
+            for field, field_schema in properties.items()
         }
         lines.extend(
             [
                 "#[test]",
                 f"fn {rust_field(rust_type)}() {{",
                 f"    assert_carries_revision::<model::{rust_type}, projection_fields::{rust_type}::{REVISION_FIELD}>(",
-                f"        r#\"{json.dumps(item)}\"#,",
+                f'        r#"{json.dumps(item)}"#,',
+                f'        {str("custom" in properties).lower()},',
                 "    );",
                 "}",
                 "",
@@ -1622,8 +1709,8 @@ def main() -> None:
     generate_endpoints(operations)
     generate_live_sweep(operations)
     generate_response_enum_tests(spec)
-    generate_payload_constructor_tests(spec)
     generate_revision_tests(spec)
+    generate_payload_constructor_tests(spec)
     generate_resources(spec, operations)
     generate_fields(spec)
     generate_projection_fields(spec)

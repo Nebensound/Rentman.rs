@@ -26,6 +26,7 @@ pub mod Accessory {
         type Value = Id<Accessory>;
         type Wire = Id<Accessory>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -36,6 +37,7 @@ pub mod Accessory {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -46,6 +48,7 @@ pub mod Accessory {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -56,6 +59,7 @@ pub mod Accessory {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -66,6 +70,7 @@ pub mod Accessory {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_equipment`: The equipment that this item is an accessory of.
@@ -76,6 +81,7 @@ pub mod Accessory {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "parent_equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: The equipment that is represented by this accessory.
@@ -86,6 +92,7 @@ pub mod Accessory {
         type Value = Option<Id<Equipment>>;
         type Wire = Option<Link<Equipment>>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -96,6 +103,7 @@ pub mod Accessory {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `automatic`: Automatically add the accessory as soon as the equipment is added to the project.
@@ -106,6 +114,7 @@ pub mod Accessory {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "automatic";
+        const REQUIRED: bool = true;
     }
 
     /// `skip`: Do not add again if this accessory is already present in the project.
@@ -116,6 +125,7 @@ pub mod Accessory {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "skip";
+        const REQUIRED: bool = true;
     }
 
     /// `is_free`: Adding the accessory to the project with zero as price.
@@ -126,6 +136,7 @@ pub mod Accessory {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_free";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -136,6 +147,7 @@ pub mod Accessory {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `add_as_new_line`: The accessory is always added as a new line in the project as opposed to merging with the same accessory.
@@ -146,11 +158,12 @@ pub mod Accessory {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "add_as_new_line";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -158,6 +171,7 @@ pub mod Accessory {
         type Value = Revision<Accessory>;
         type Wire = Revision<Accessory>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -179,6 +193,7 @@ pub mod ActualContent {
         type Value = Id<ActualContent>;
         type Wire = Id<ActualContent>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -189,6 +204,7 @@ pub mod ActualContent {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -199,6 +215,7 @@ pub mod ActualContent {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -209,6 +226,7 @@ pub mod ActualContent {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -219,6 +237,7 @@ pub mod ActualContent {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -229,6 +248,7 @@ pub mod ActualContent {
         type Value = Option<Id<Equipment>>;
         type Wire = Option<Link<Equipment>>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `serial`: Rentman field `serial`.
@@ -239,6 +259,7 @@ pub mod ActualContent {
         type Value = Option<Id<SerialNumber>>;
         type Wire = Option<Link<SerialNumber>>;
         const NAME: &'static str = "serial";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -249,6 +270,7 @@ pub mod ActualContent {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `combination_serial`: GENERATED FIELD. The combination that contains this equipment.
@@ -259,11 +281,12 @@ pub mod ActualContent {
         type Value = Option<Id<SerialNumber>>;
         type Wire = Option<Link<SerialNumber>>;
         const NAME: &'static str = "combination_serial";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -271,6 +294,7 @@ pub mod ActualContent {
         type Value = Revision<ActualContent>;
         type Wire = Revision<ActualContent>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -292,6 +316,7 @@ pub mod Alternative {
         type Value = Id<Alternative>;
         type Wire = Id<Alternative>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -302,6 +327,7 @@ pub mod Alternative {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -312,6 +338,7 @@ pub mod Alternative {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -322,6 +349,7 @@ pub mod Alternative {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -332,6 +360,7 @@ pub mod Alternative {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -342,6 +371,7 @@ pub mod Alternative {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `alternative`: Rentman field `alternative`.
@@ -352,11 +382,12 @@ pub mod Alternative {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "alternative";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -364,6 +395,7 @@ pub mod Alternative {
         type Value = Revision<Alternative>;
         type Wire = Revision<Alternative>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -385,6 +417,7 @@ pub mod Appointment {
         type Value = Id<Appointment>;
         type Wire = Id<Appointment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -395,6 +428,7 @@ pub mod Appointment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -405,6 +439,7 @@ pub mod Appointment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -415,6 +450,7 @@ pub mod Appointment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -425,6 +461,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -435,6 +472,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `start`: Rentman field `start`.
@@ -445,6 +483,7 @@ pub mod Appointment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "start";
+        const REQUIRED: bool = true;
     }
 
     /// `end`: Rentman field `end`.
@@ -455,6 +494,7 @@ pub mod Appointment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "end";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -465,6 +505,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `location`: Rentman field `location`.
@@ -475,6 +516,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -485,6 +527,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `is_public`: Rentman field `is_public`.
@@ -495,6 +538,7 @@ pub mod Appointment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_public";
+        const REQUIRED: bool = true;
     }
 
     /// `is_plannable`: If yes, employees can be scheduled during this appointment.
@@ -505,6 +549,7 @@ pub mod Appointment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_plannable";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval_unit`: Period between each recurrence. E.g. every x day/week/month/year.
@@ -515,6 +560,7 @@ pub mod Appointment {
         type Value = AppointmentRecurrenceIntervalUnit;
         type Wire = AppointmentRecurrenceIntervalUnit;
         const NAME: &'static str = "recurrence_interval_unit";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_enddate`: Date the recurrence ends.
@@ -525,6 +571,7 @@ pub mod Appointment {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recurrence_enddate";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval`: Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
@@ -535,6 +582,7 @@ pub mod Appointment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrence_interval";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_group`: Identification which recurrences belong together.
@@ -545,6 +593,7 @@ pub mod Appointment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrence_group";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_weekdays`: GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
@@ -555,6 +604,7 @@ pub mod Appointment {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recurrence_weekdays";
+        const REQUIRED: bool = true;
     }
 
     /// `synchronization_id`: Rentman field `synchronization_id`.
@@ -565,6 +615,7 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "synchronization_id";
+        const REQUIRED: bool = true;
     }
 
     /// `synchronisation_uri`: Rentman field `synchronisation_uri`.
@@ -575,11 +626,12 @@ pub mod Appointment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "synchronisation_uri";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -587,6 +639,7 @@ pub mod Appointment {
         type Value = Revision<Appointment>;
         type Wire = Revision<Appointment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -608,6 +661,7 @@ pub mod AppointmentCrew {
         type Value = Id<AppointmentCrew>;
         type Wire = Id<AppointmentCrew>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -618,6 +672,7 @@ pub mod AppointmentCrew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -628,6 +683,7 @@ pub mod AppointmentCrew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -638,6 +694,7 @@ pub mod AppointmentCrew {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -648,6 +705,7 @@ pub mod AppointmentCrew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `appointment`: Rentman field `appointment`.
@@ -658,6 +716,7 @@ pub mod AppointmentCrew {
         type Value = Id<Appointment>;
         type Wire = Link<Appointment>;
         const NAME: &'static str = "appointment";
+        const REQUIRED: bool = true;
     }
 
     /// `crew`: Rentman field `crew`.
@@ -668,11 +727,12 @@ pub mod AppointmentCrew {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crew";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -680,6 +740,7 @@ pub mod AppointmentCrew {
         type Value = Revision<AppointmentCrew>;
         type Wire = Revision<AppointmentCrew>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -701,6 +762,7 @@ pub mod Contact {
         type Value = Id<Contact>;
         type Wire = Id<Contact>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -711,6 +773,7 @@ pub mod Contact {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -721,6 +784,7 @@ pub mod Contact {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -731,6 +795,7 @@ pub mod Contact {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -741,6 +806,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `folder`: Rentman field `folder`.
@@ -751,6 +817,7 @@ pub mod Contact {
         type Value = Option<Id<Folder>>;
         type Wire = Option<Link<Folder>>;
         const NAME: &'static str = "folder";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -761,6 +828,7 @@ pub mod Contact {
         type Value = ContactType;
         type Wire = ContactType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `ext_name_line`: Rentman field `ext_name_line`.
@@ -771,6 +839,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "ext_name_line";
+        const REQUIRED: bool = true;
     }
 
     /// `firstname`: Rentman field `firstname`.
@@ -781,6 +850,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "firstname";
+        const REQUIRED: bool = true;
     }
 
     /// `distance`: Distance from warehouse to visiting address.
@@ -791,6 +861,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
+        const REQUIRED: bool = true;
     }
 
     /// `travel_time`: Travel time (in minutes) from warehouse to visiting address.
@@ -801,6 +872,7 @@ pub mod Contact {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time";
+        const REQUIRED: bool = true;
     }
 
     /// `surfix`: Rentman field `surfix`.
@@ -811,6 +883,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "surfix";
+        const REQUIRED: bool = true;
     }
 
     /// `surname`: Rentman field `surname`.
@@ -821,6 +894,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "surname";
+        const REQUIRED: bool = true;
     }
 
     /// `longitude`: Rentman field `longitude`.
@@ -831,6 +905,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "longitude";
+        const REQUIRED: bool = true;
     }
 
     /// `latitude`: Rentman field `latitude`.
@@ -841,6 +916,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "latitude";
+        const REQUIRED: bool = true;
     }
 
     /// `code`: Automatically generated if left empty.
@@ -851,6 +927,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "code";
+        const REQUIRED: bool = true;
     }
 
     /// `accounting_code`: External identifier used for integrations with accounting software.
@@ -861,6 +938,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "accounting_code";
+        const REQUIRED: bool = true;
     }
 
     /// `vendor_accounting_code`: External identifier used for integrations with accounting software.
@@ -871,6 +949,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "vendor_accounting_code";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -881,6 +960,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `gender`: Rentman field `gender`.
@@ -891,6 +971,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "gender";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_city`: Rentman field `mailing_city`.
@@ -901,6 +982,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mailing_city";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_street`: Rentman field `mailing_street`.
@@ -911,6 +993,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mailing_street";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_number`: Rentman field `mailing_number`.
@@ -921,6 +1004,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mailing_number";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_unit_number`: Rentman field `mailing_unit_number`.
@@ -931,6 +1015,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "mailing_unit_number";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_district`: Rentman field `mailing_district`.
@@ -941,6 +1026,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "mailing_district";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_extra_address_line`: Rentman field `mailing_extra_address_line`.
@@ -951,6 +1037,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "mailing_extra_address_line";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_postalcode`: Rentman field `mailing_postalcode`.
@@ -961,6 +1048,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mailing_postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_state`: Rentman field `mailing_state`.
@@ -971,6 +1059,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mailing_state";
+        const REQUIRED: bool = true;
     }
 
     /// `mailing_country`: Rentman field `mailing_country`.
@@ -981,6 +1070,7 @@ pub mod Contact {
         type Value = ContactMailingCountry;
         type Wire = ContactMailingCountry;
         const NAME: &'static str = "mailing_country";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_city`: Rentman field `visit_city`.
@@ -991,6 +1081,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "visit_city";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_street`: Rentman field `visit_street`.
@@ -1001,6 +1092,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "visit_street";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_number`: Rentman field `visit_number`.
@@ -1011,6 +1103,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "visit_number";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_unit_number`: Rentman field `visit_unit_number`.
@@ -1021,6 +1114,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "visit_unit_number";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_district`: Rentman field `visit_district`.
@@ -1031,6 +1125,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "visit_district";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_extra_address_line`: Rentman field `visit_extra_address_line`.
@@ -1041,6 +1136,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "visit_extra_address_line";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_postalcode`: Rentman field `visit_postalcode`.
@@ -1051,6 +1147,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "visit_postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `visit_state`: Rentman field `visit_state`.
@@ -1061,6 +1158,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "visit_state";
+        const REQUIRED: bool = true;
     }
 
     /// `country`: Rentman field `country`.
@@ -1071,6 +1169,7 @@ pub mod Contact {
         type Value = ContactCountry;
         type Wire = ContactCountry;
         const NAME: &'static str = "country";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_city`: Rentman field `invoice_city`.
@@ -1081,6 +1180,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_city";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_street`: Rentman field `invoice_street`.
@@ -1091,6 +1191,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_street";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_number`: Rentman field `invoice_number`.
@@ -1101,6 +1202,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_number";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_unit_number`: Rentman field `invoice_unit_number`.
@@ -1111,6 +1213,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "invoice_unit_number";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_district`: Rentman field `invoice_district`.
@@ -1121,6 +1224,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "invoice_district";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_extra_address_line`: Rentman field `invoice_extra_address_line`.
@@ -1131,6 +1235,7 @@ pub mod Contact {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "invoice_extra_address_line";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_postalcode`: Rentman field `invoice_postalcode`.
@@ -1141,6 +1246,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_state`: Rentman field `invoice_state`.
@@ -1151,6 +1257,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_state";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_country`: Rentman field `invoice_country`.
@@ -1161,6 +1268,7 @@ pub mod Contact {
         type Value = ContactInvoiceCountry;
         type Wire = ContactInvoiceCountry;
         const NAME: &'static str = "invoice_country";
+        const REQUIRED: bool = true;
     }
 
     /// `phone_1`: Rentman field `phone_1`.
@@ -1171,6 +1279,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "phone_1";
+        const REQUIRED: bool = true;
     }
 
     /// `phone_2`: Rentman field `phone_2`.
@@ -1181,6 +1290,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "phone_2";
+        const REQUIRED: bool = true;
     }
 
     /// `email_1`: Rentman field `email_1`.
@@ -1191,6 +1301,7 @@ pub mod Contact {
         type Value = EmailAddress;
         type Wire = EmailAddress;
         const NAME: &'static str = "email_1";
+        const REQUIRED: bool = true;
     }
 
     /// `email_2`: Rentman field `email_2`.
@@ -1201,6 +1312,7 @@ pub mod Contact {
         type Value = EmailAddress;
         type Wire = EmailAddress;
         const NAME: &'static str = "email_2";
+        const REQUIRED: bool = true;
     }
 
     /// `website`: Rentman field `website`.
@@ -1211,6 +1323,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "website";
+        const REQUIRED: bool = true;
     }
 
     /// `VAT_code`: Rentman field `VAT_code`.
@@ -1221,6 +1334,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "VAT_code";
+        const REQUIRED: bool = true;
     }
 
     /// `fiscal_code`: This number is used in file exports of invoices.
@@ -1231,6 +1345,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "fiscal_code";
+        const REQUIRED: bool = true;
     }
 
     /// `commerce_code`: Rentman field `commerce_code`.
@@ -1241,6 +1356,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "commerce_code";
+        const REQUIRED: bool = true;
     }
 
     /// `purchase_number`: Rentman field `purchase_number`.
@@ -1251,6 +1367,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "purchase_number";
+        const REQUIRED: bool = true;
     }
 
     /// `bic`: Rentman field `bic`.
@@ -1261,6 +1378,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "bic";
+        const REQUIRED: bool = true;
     }
 
     /// `bank_account`: Rentman field `bank_account`.
@@ -1271,6 +1389,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "bank_account";
+        const REQUIRED: bool = true;
     }
 
     /// `default_person`: This contact person is automatically selected if you choose this contact in a project or subrental.
@@ -1281,6 +1400,7 @@ pub mod Contact {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "default_person";
+        const REQUIRED: bool = true;
     }
 
     /// `admin_contactperson`: This contact person is automatically selected when creating invoices.
@@ -1291,6 +1411,7 @@ pub mod Contact {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "admin_contactperson";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_crew`: Discount applied to the 'crew' category upon selecting this contact as a client in a project.
@@ -1301,6 +1422,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_crew";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_transport`: Discount applied to the 'transport' category upon selecting this contact as a client in a project.
@@ -1311,6 +1433,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_transport";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_rental`: Discount applied to the 'rental' category upon selecting this contact as a client in a project.
@@ -1321,6 +1444,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_rental";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_sale`: Discount applied to the 'sales' category upon selecting this contact as a client in a project.
@@ -1331,6 +1455,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_sale";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_total`: Discount applied to the total (sub)project upon selecting this contact as a client in a project.
@@ -1341,6 +1466,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_total";
+        const REQUIRED: bool = true;
     }
 
     /// `projectnote`: This remark is automatically added to projects upon selecting this contact as client or location.
@@ -1351,6 +1477,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "projectnote";
+        const REQUIRED: bool = true;
     }
 
     /// `projectnote_title`: This remark is automatically added to projects upon selecting this contact as client or location.
@@ -1361,6 +1488,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "projectnote_title";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_warning`: This warning is shown when this contact is selected as a client in a project.
@@ -1371,6 +1499,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_warning";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_subrent`: Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
@@ -1381,6 +1510,7 @@ pub mod Contact {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_subrent";
+        const REQUIRED: bool = true;
     }
 
     /// `image`: Rentman field `image`.
@@ -1391,6 +1521,7 @@ pub mod Contact {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "image";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -1401,6 +1532,7 @@ pub mod Contact {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -1408,14 +1540,15 @@ pub mod Contact {
 
     impl ProjectionField for custom {
         type Resource = Contact;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -1423,6 +1556,7 @@ pub mod Contact {
         type Value = Revision<Contact>;
         type Wire = Revision<Contact>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -1444,6 +1578,7 @@ pub mod ContactPerson {
         type Value = Id<ContactPerson>;
         type Wire = Id<ContactPerson>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -1454,6 +1589,7 @@ pub mod ContactPerson {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -1464,6 +1600,7 @@ pub mod ContactPerson {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -1474,6 +1611,7 @@ pub mod ContactPerson {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -1484,6 +1622,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `contact`: Rentman field `contact`.
@@ -1494,6 +1633,7 @@ pub mod ContactPerson {
         type Value = Id<Contact>;
         type Wire = Link<Contact>;
         const NAME: &'static str = "contact";
+        const REQUIRED: bool = true;
     }
 
     /// `firstname`: Rentman field `firstname`.
@@ -1504,6 +1644,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "firstname";
+        const REQUIRED: bool = true;
     }
 
     /// `middle_name`: Rentman field `middle_name`.
@@ -1514,6 +1655,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "middle_name";
+        const REQUIRED: bool = true;
     }
 
     /// `lastname`: Rentman field `lastname`.
@@ -1524,6 +1666,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "lastname";
+        const REQUIRED: bool = true;
     }
 
     /// `function`: Rentman field `function`.
@@ -1534,6 +1677,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "function";
+        const REQUIRED: bool = true;
     }
 
     /// `phone`: Rentman field `phone`.
@@ -1544,6 +1688,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "phone";
+        const REQUIRED: bool = true;
     }
 
     /// `street`: Rentman field `street`.
@@ -1554,6 +1699,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "street";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -1564,6 +1710,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `postalcode`: Rentman field `postalcode`.
@@ -1574,6 +1721,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `city`: Rentman field `city`.
@@ -1584,6 +1732,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "city";
+        const REQUIRED: bool = true;
     }
 
     /// `state`: Rentman field `state`.
@@ -1594,6 +1743,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "state";
+        const REQUIRED: bool = true;
     }
 
     /// `country`: Rentman field `country`.
@@ -1604,6 +1754,7 @@ pub mod ContactPerson {
         type Value = ContactPersonCountry;
         type Wire = ContactPersonCountry;
         const NAME: &'static str = "country";
+        const REQUIRED: bool = true;
     }
 
     /// `mobilephone`: Rentman field `mobilephone`.
@@ -1614,6 +1765,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mobilephone";
+        const REQUIRED: bool = true;
     }
 
     /// `email`: Rentman field `email`.
@@ -1624,6 +1776,7 @@ pub mod ContactPerson {
         type Value = EmailAddress;
         type Wire = EmailAddress;
         const NAME: &'static str = "email";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -1634,6 +1787,7 @@ pub mod ContactPerson {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -1641,14 +1795,15 @@ pub mod ContactPerson {
 
     impl ProjectionField for custom {
         type Resource = ContactPerson;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -1656,6 +1811,7 @@ pub mod ContactPerson {
         type Value = Revision<ContactPerson>;
         type Wire = Revision<ContactPerson>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -1677,6 +1833,7 @@ pub mod Contract {
         type Value = Id<Contract>;
         type Wire = Id<Contract>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -1687,6 +1844,7 @@ pub mod Contract {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -1697,6 +1855,7 @@ pub mod Contract {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -1707,6 +1866,7 @@ pub mod Contract {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -1717,6 +1877,7 @@ pub mod Contract {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -1727,6 +1888,7 @@ pub mod Contract {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `customer`: Rentman field `customer`.
@@ -1737,6 +1899,7 @@ pub mod Contract {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "customer";
+        const REQUIRED: bool = true;
     }
 
     /// `contact`: Rentman field `contact`.
@@ -1747,6 +1910,7 @@ pub mod Contract {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contact";
+        const REQUIRED: bool = true;
     }
 
     /// `date`: Rentman field `date`.
@@ -1757,6 +1921,7 @@ pub mod Contract {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "date";
+        const REQUIRED: bool = true;
     }
 
     /// `expiration_date`: The date on which this quotation expires.
@@ -1767,6 +1932,7 @@ pub mod Contract {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "expiration_date";
+        const REQUIRED: bool = true;
     }
 
     /// `version`: Rentman field `version`.
@@ -1777,6 +1943,7 @@ pub mod Contract {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "version";
+        const REQUIRED: bool = true;
     }
 
     /// `subject`: Rentman field `subject`.
@@ -1787,6 +1954,7 @@ pub mod Contract {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "subject";
+        const REQUIRED: bool = true;
     }
 
     /// `show_tax`: Rentman field `show_tax`.
@@ -1797,6 +1965,7 @@ pub mod Contract {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "show_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -1807,6 +1976,7 @@ pub mod Contract {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `filename`: Rentman field `filename`.
@@ -1817,6 +1987,7 @@ pub mod Contract {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "filename";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price`: GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -1824,9 +1995,10 @@ pub mod Contract {
 
     impl ProjectionField for project_total_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price_cancelled`: GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
@@ -1834,9 +2006,10 @@ pub mod Contract {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price_cancelled";
+        const REQUIRED: bool = true;
     }
 
     /// `project_rental_price`: GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
@@ -1844,9 +2017,10 @@ pub mod Contract {
 
     impl ProjectionField for project_rental_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_rental_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_sale_price`: GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
@@ -1854,9 +2028,10 @@ pub mod Contract {
 
     impl ProjectionField for project_sale_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_crew_price`: GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
@@ -1864,9 +2039,10 @@ pub mod Contract {
 
     impl ProjectionField for project_crew_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_crew_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_transport_price`: GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
@@ -1874,9 +2050,10 @@ pub mod Contract {
 
     impl ProjectionField for project_transport_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_transport_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_other_price`: GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
@@ -1884,9 +2061,10 @@ pub mod Contract {
 
     impl ProjectionField for project_other_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_other_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_insurance_price`: GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
@@ -1894,9 +2072,10 @@ pub mod Contract {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_insurance_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_services_price`: GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
@@ -1904,9 +2083,10 @@ pub mod Contract {
 
     impl ProjectionField for project_services_price {
         type Resource = Contract;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_services_price";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: GENERATED FIELD.
@@ -1917,6 +2097,7 @@ pub mod Contract {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `price_invat`: GENERATED FIELD.
@@ -1927,6 +2108,7 @@ pub mod Contract {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
+        const REQUIRED: bool = true;
     }
 
     /// `vat_amount`: GENERATED FIELD.
@@ -1937,11 +2119,12 @@ pub mod Contract {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -1949,6 +2132,7 @@ pub mod Contract {
         type Value = Revision<Contract>;
         type Wire = Revision<Contract>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -1970,6 +2154,7 @@ pub mod Crew {
         type Value = Id<Crew>;
         type Wire = Id<Crew>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -1980,6 +2165,7 @@ pub mod Crew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -1990,6 +2176,7 @@ pub mod Crew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -2000,6 +2187,7 @@ pub mod Crew {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -2010,6 +2198,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `folder`: Rentman field `folder`.
@@ -2020,6 +2209,7 @@ pub mod Crew {
         type Value = Option<Id<Folder>>;
         type Wire = Option<Link<Folder>>;
         const NAME: &'static str = "folder";
+        const REQUIRED: bool = true;
     }
 
     /// `street`: Rentman field `street`.
@@ -2030,6 +2220,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "street";
+        const REQUIRED: bool = true;
     }
 
     /// `housenumber`: Rentman field `housenumber`.
@@ -2040,6 +2231,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "housenumber";
+        const REQUIRED: bool = true;
     }
 
     /// `unit_number`: Rentman field `unit_number`.
@@ -2050,6 +2242,7 @@ pub mod Crew {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "unit_number";
+        const REQUIRED: bool = true;
     }
 
     /// `district`: Rentman field `district`.
@@ -2060,6 +2253,7 @@ pub mod Crew {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "district";
+        const REQUIRED: bool = true;
     }
 
     /// `city`: Rentman field `city`.
@@ -2070,6 +2264,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "city";
+        const REQUIRED: bool = true;
     }
 
     /// `postal_code`: Rentman field `postal_code`.
@@ -2080,6 +2275,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "postal_code";
+        const REQUIRED: bool = true;
     }
 
     /// `addressline2`: Rentman field `addressline2`.
@@ -2090,6 +2286,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "addressline2";
+        const REQUIRED: bool = true;
     }
 
     /// `extraaddressline`: Rentman field `extraaddressline`.
@@ -2100,6 +2297,7 @@ pub mod Crew {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "extraaddressline";
+        const REQUIRED: bool = true;
     }
 
     /// `state`: Rentman field `state`.
@@ -2110,6 +2308,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "state";
+        const REQUIRED: bool = true;
     }
 
     /// `country`: Rentman field `country`.
@@ -2120,6 +2319,7 @@ pub mod Crew {
         type Value = CrewCountry;
         type Wire = CrewCountry;
         const NAME: &'static str = "country";
+        const REQUIRED: bool = true;
     }
 
     /// `birthdate`: Rentman field `birthdate`.
@@ -2130,6 +2330,7 @@ pub mod Crew {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "birthdate";
+        const REQUIRED: bool = true;
     }
 
     /// `passport_number`: Rentman field `passport_number`.
@@ -2140,6 +2341,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "passport_number";
+        const REQUIRED: bool = true;
     }
 
     /// `emergency_contact`: Rentman field `emergency_contact`.
@@ -2150,6 +2352,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "emergency_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -2160,6 +2363,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `driving_license`: Rentman field `driving_license`.
@@ -2170,6 +2374,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "driving_license";
+        const REQUIRED: bool = true;
     }
 
     /// `contract`: Rentman field `contract`.
@@ -2180,6 +2385,7 @@ pub mod Crew {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "contract";
+        const REQUIRED: bool = true;
     }
 
     /// `bank`: Rentman field `bank`.
@@ -2190,6 +2396,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "bank";
+        const REQUIRED: bool = true;
     }
 
     /// `contract_date`: Rentman field `contract_date`.
@@ -2200,6 +2407,7 @@ pub mod Crew {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "contract_date";
+        const REQUIRED: bool = true;
     }
 
     /// `company_name`: Rentman field `company_name`.
@@ -2210,6 +2418,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "company_name";
+        const REQUIRED: bool = true;
     }
 
     /// `vat_code`: Rentman field `vat_code`.
@@ -2220,6 +2429,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "vat_code";
+        const REQUIRED: bool = true;
     }
 
     /// `coc_code`: Rentman field `coc_code`.
@@ -2230,6 +2440,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "coc_code";
+        const REQUIRED: bool = true;
     }
 
     /// `firstname`: Rentman field `firstname`.
@@ -2240,6 +2451,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "firstname";
+        const REQUIRED: bool = true;
     }
 
     /// `middle_name`: Rentman field `middle_name`.
@@ -2250,6 +2462,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "middle_name";
+        const REQUIRED: bool = true;
     }
 
     /// `lastname`: Rentman field `lastname`.
@@ -2260,6 +2473,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "lastname";
+        const REQUIRED: bool = true;
     }
 
     /// `email`: Rentman field `email`.
@@ -2270,6 +2484,7 @@ pub mod Crew {
         type Value = EmailAddress;
         type Wire = EmailAddress;
         const NAME: &'static str = "email";
+        const REQUIRED: bool = true;
     }
 
     /// `phone`: Rentman field `phone`.
@@ -2280,6 +2495,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "phone";
+        const REQUIRED: bool = true;
     }
 
     /// `active`: Rentman field `active`.
@@ -2290,6 +2506,7 @@ pub mod Crew {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "active";
+        const REQUIRED: bool = true;
     }
 
     /// `avatar`: Rentman field `avatar`.
@@ -2300,6 +2517,7 @@ pub mod Crew {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "avatar";
+        const REQUIRED: bool = true;
     }
 
     /// `vt_fullname`: Rentman field `vt_fullname`.
@@ -2310,6 +2528,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "vt_fullname";
+        const REQUIRED: bool = true;
     }
 
     /// `default_warehouse`: Rentman field `default_warehouse`.
@@ -2320,6 +2539,7 @@ pub mod Crew {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "default_warehouse";
+        const REQUIRED: bool = true;
     }
 
     /// `external_reference`: Can be used for the employee ID from your accounting software.
@@ -2330,6 +2550,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "external_reference";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -2340,6 +2561,7 @@ pub mod Crew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -2347,14 +2569,15 @@ pub mod Crew {
 
     impl ProjectionField for custom {
         type Resource = Crew;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -2362,6 +2585,7 @@ pub mod Crew {
         type Value = Revision<Crew>;
         type Wire = Revision<Crew>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -2383,6 +2607,7 @@ pub mod CrewAvailability {
         type Value = Id<CrewAvailability>;
         type Wire = Id<CrewAvailability>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -2393,6 +2618,7 @@ pub mod CrewAvailability {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -2403,6 +2629,7 @@ pub mod CrewAvailability {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -2413,6 +2640,7 @@ pub mod CrewAvailability {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -2423,6 +2651,7 @@ pub mod CrewAvailability {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `last_updater`: Rentman field `last_updater`.
@@ -2433,6 +2662,7 @@ pub mod CrewAvailability {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "last_updater";
+        const REQUIRED: bool = true;
     }
 
     /// `last_updated`: Rentman field `last_updated`.
@@ -2443,6 +2673,7 @@ pub mod CrewAvailability {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "last_updated";
+        const REQUIRED: bool = true;
     }
 
     /// `start`: Rentman field `start`.
@@ -2453,6 +2684,7 @@ pub mod CrewAvailability {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "start";
+        const REQUIRED: bool = true;
     }
 
     /// `end`: Rentman field `end`.
@@ -2463,6 +2695,7 @@ pub mod CrewAvailability {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "end";
+        const REQUIRED: bool = true;
     }
 
     /// `crewmember`: Rentman field `crewmember`.
@@ -2473,6 +2706,7 @@ pub mod CrewAvailability {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crewmember";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
@@ -2483,6 +2717,7 @@ pub mod CrewAvailability {
         type Value = CrewAvailabilityStatus;
         type Wire = CrewAvailabilityStatus;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -2493,6 +2728,7 @@ pub mod CrewAvailability {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval_unit`: Rentman field `recurrence_interval_unit`.
@@ -2503,6 +2739,7 @@ pub mod CrewAvailability {
         type Value = CrewAvailabilityRecurrenceIntervalUnit;
         type Wire = CrewAvailabilityRecurrenceIntervalUnit;
         const NAME: &'static str = "recurrence_interval_unit";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_enddate`: Rentman field `recurrence_enddate`.
@@ -2513,6 +2750,7 @@ pub mod CrewAvailability {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recurrence_enddate";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval`: interval in how many days/weeks/months/years the availability should reoccur.
@@ -2523,6 +2761,7 @@ pub mod CrewAvailability {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrence_interval";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrent_group`: Rentman field `recurrent_group`.
@@ -2533,6 +2772,7 @@ pub mod CrewAvailability {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrent_group";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_weekdays`: GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday. E.g.: for a recurrence on Monday and Wednesday, use [0, 2].
@@ -2543,11 +2783,12 @@ pub mod CrewAvailability {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "recurrence_weekdays";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -2555,6 +2796,7 @@ pub mod CrewAvailability {
         type Value = Revision<CrewAvailability>;
         type Wire = Revision<CrewAvailability>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -2576,6 +2818,7 @@ pub mod CrewRate {
         type Value = Id<CrewRate>;
         type Wire = Id<CrewRate>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -2586,6 +2829,7 @@ pub mod CrewRate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -2596,6 +2840,7 @@ pub mod CrewRate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -2606,6 +2851,7 @@ pub mod CrewRate {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -2616,6 +2862,7 @@ pub mod CrewRate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `naam`: Rentman field `naam`.
@@ -2626,6 +2873,7 @@ pub mod CrewRate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "naam";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_rate`: Rentman field `cost_rate`.
@@ -2636,6 +2884,7 @@ pub mod CrewRate {
         type Value = Option<Id<Rate>>;
         type Wire = Option<Link<Rate>>;
         const NAME: &'static str = "cost_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `medewerker`: Rentman field `medewerker`.
@@ -2646,11 +2895,12 @@ pub mod CrewRate {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "medewerker";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -2658,6 +2908,7 @@ pub mod CrewRate {
         type Value = Revision<CrewRate>;
         type Wire = Revision<CrewRate>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -2679,6 +2930,7 @@ pub mod Equipment {
         type Value = Id<Equipment>;
         type Wire = Id<Equipment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -2689,6 +2941,7 @@ pub mod Equipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -2699,6 +2952,7 @@ pub mod Equipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -2709,6 +2963,7 @@ pub mod Equipment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -2719,6 +2974,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `folder`: Rentman field `folder`.
@@ -2729,6 +2985,7 @@ pub mod Equipment {
         type Value = Option<Id<Folder>>;
         type Wire = Option<Link<Folder>>;
         const NAME: &'static str = "folder";
+        const REQUIRED: bool = true;
     }
 
     /// `code`: Rentman field `code`.
@@ -2739,6 +2996,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "code";
+        const REQUIRED: bool = true;
     }
 
     /// `factor_group`: Rentman field `factor_group`.
@@ -2749,6 +3007,7 @@ pub mod Equipment {
         type Value = Option<Id<FactorGroup>>;
         type Wire = Option<Link<FactorGroup>>;
         const NAME: &'static str = "factor_group";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -2759,6 +3018,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `internal_remark`: Note on packing lists.
@@ -2769,6 +3029,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "internal_remark";
+        const REQUIRED: bool = true;
     }
 
     /// `external_remark`: Note on financial documents.
@@ -2779,6 +3040,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "external_remark";
+        const REQUIRED: bool = true;
     }
 
     /// `unit`: Rentman field `unit`.
@@ -2789,6 +3051,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "unit";
+        const REQUIRED: bool = true;
     }
 
     /// `in_shop`: Rentman field `in_shop`.
@@ -2799,6 +3062,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_shop";
+        const REQUIRED: bool = true;
     }
 
     /// `surface_article`: Item with price calculation per square meter (width x height). Dimensions can be entered for each project.
@@ -2809,6 +3073,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "surface_article";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_description_short`: Rentman field `shop_description_short`.
@@ -2819,6 +3084,7 @@ pub mod Equipment {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "shop_description_short";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_description_long`: Rentman field `shop_description_long`.
@@ -2829,6 +3095,7 @@ pub mod Equipment {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "shop_description_long";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_seo_title`: Rentman field `shop_seo_title`.
@@ -2839,6 +3106,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "shop_seo_title";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_seo_keyword`: Rentman field `shop_seo_keyword`.
@@ -2849,6 +3117,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "shop_seo_keyword";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_seo_description`: Rentman field `shop_seo_description`.
@@ -2859,6 +3128,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "shop_seo_description";
+        const REQUIRED: bool = true;
     }
 
     /// `shop_featured`: Rentman field `shop_featured`.
@@ -2869,6 +3139,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "shop_featured";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: Rentman field `price`.
@@ -2879,6 +3150,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `subrental_costs`: Rentman field `subrental_costs`.
@@ -2889,6 +3161,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "subrental_costs";
+        const REQUIRED: bool = true;
     }
 
     /// `critical_stock_level`: Rentman field `critical_stock_level`.
@@ -2899,6 +3172,7 @@ pub mod Equipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "critical_stock_level";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -2909,6 +3183,7 @@ pub mod Equipment {
         type Value = EquipmentType;
         type Wire = EquipmentType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `rental_sales`: Rentman field `rental_sales`.
@@ -2919,6 +3194,7 @@ pub mod Equipment {
         type Value = EquipmentRentalSales;
         type Wire = EquipmentRentalSales;
         const NAME: &'static str = "rental_sales";
+        const REQUIRED: bool = true;
     }
 
     /// `temporary`: Rentman field `temporary`.
@@ -2929,6 +3205,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "temporary";
+        const REQUIRED: bool = true;
     }
 
     /// `in_planner`: Rentman field `in_planner`.
@@ -2939,6 +3216,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_planner";
+        const REQUIRED: bool = true;
     }
 
     /// `in_archive`: Rentman field `in_archive`.
@@ -2949,6 +3227,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_archive";
+        const REQUIRED: bool = true;
     }
 
     /// `stock_management`: Rentman field `stock_management`.
@@ -2959,6 +3238,7 @@ pub mod Equipment {
         type Value = EquipmentStockManagement;
         type Wire = EquipmentStockManagement;
         const NAME: &'static str = "stock_management";
+        const REQUIRED: bool = true;
     }
 
     /// `taxclass`: Rentman field `taxclass`.
@@ -2969,6 +3249,7 @@ pub mod Equipment {
         type Value = Option<Id<TaxClass>>;
         type Wire = Option<Link<TaxClass>>;
         const NAME: &'static str = "taxclass";
+        const REQUIRED: bool = true;
     }
 
     /// `list_price`: Rentman field `list_price`.
@@ -2979,6 +3260,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "list_price";
+        const REQUIRED: bool = true;
     }
 
     /// `volume`: Rentman field `volume`.
@@ -2989,6 +3271,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
+        const REQUIRED: bool = true;
     }
 
     /// `packed_per`: Rentman field `packed_per`.
@@ -2999,6 +3282,7 @@ pub mod Equipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "packed_per";
+        const REQUIRED: bool = true;
     }
 
     /// `height`: Rentman field `height`.
@@ -3009,6 +3293,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "height";
+        const REQUIRED: bool = true;
     }
 
     /// `width`: Rentman field `width`.
@@ -3019,6 +3304,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "width";
+        const REQUIRED: bool = true;
     }
 
     /// `length`: Rentman field `length`.
@@ -3029,6 +3315,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "length";
+        const REQUIRED: bool = true;
     }
 
     /// `weight`: Rentman field `weight`.
@@ -3039,6 +3326,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
+        const REQUIRED: bool = true;
     }
 
     /// `empty_weight`: Rentman field `empty_weight`.
@@ -3049,6 +3337,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "empty_weight";
+        const REQUIRED: bool = true;
     }
 
     /// `power`: Rentman field `power`.
@@ -3059,6 +3348,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "power";
+        const REQUIRED: bool = true;
     }
 
     /// `current`: Rentman field `current`.
@@ -3069,6 +3359,7 @@ pub mod Equipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "current";
+        const REQUIRED: bool = true;
     }
 
     /// `country_of_origin`: The country where the equipment was manufactured. This is used for e.g. carnet exports.
@@ -3079,6 +3370,7 @@ pub mod Equipment {
         type Value = EquipmentCountryOfOrigin;
         type Wire = EquipmentCountryOfOrigin;
         const NAME: &'static str = "country_of_origin";
+        const REQUIRED: bool = true;
     }
 
     /// `image`: Rentman field `image`.
@@ -3089,6 +3381,7 @@ pub mod Equipment {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "image";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger`: Rentman field `ledger`.
@@ -3099,6 +3392,7 @@ pub mod Equipment {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger_debit`: Rentman field `ledger_debit`.
@@ -3109,6 +3403,7 @@ pub mod Equipment {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger_debit";
+        const REQUIRED: bool = true;
     }
 
     /// `defaultgroup`: Enter an equipment group to automatically place the item in when planning.
@@ -3119,6 +3414,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "defaultgroup";
+        const REQUIRED: bool = true;
     }
 
     /// `is_combination`: Rentman field `is_combination`.
@@ -3129,6 +3425,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_combination";
+        const REQUIRED: bool = true;
     }
 
     /// `is_physical`: Rentman field `is_physical`.
@@ -3139,6 +3436,7 @@ pub mod Equipment {
         type Value = EquipmentIsPhysical;
         type Wire = EquipmentIsPhysical;
         const NAME: &'static str = "is_physical";
+        const REQUIRED: bool = true;
     }
 
     /// `can_edit_content_during_planning`: If 'No' is selected, equipment cannot be added to or removed from this combination. Also, quantities of the content cannot be adjusted.
@@ -3149,6 +3447,7 @@ pub mod Equipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "can_edit_content_during_planning";
+        const REQUIRED: bool = true;
     }
 
     /// `strict_container_content`: Determine whether the combination can contain actual content that is not part of the default content.
@@ -3159,6 +3458,7 @@ pub mod Equipment {
         type Value = EquipmentStrictContainerContent;
         type Wire = EquipmentStrictContainerContent;
         const NAME: &'static str = "strict_container_content";
+        const REQUIRED: bool = true;
     }
 
     /// `qrcodes`: GENERATED FIELD.
@@ -3169,6 +3469,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "qrcodes";
+        const REQUIRED: bool = true;
     }
 
     /// `qrcodes_of_serial_numbers`: GENERATED FIELD.
@@ -3179,6 +3480,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "qrcodes_of_serial_numbers";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -3189,6 +3491,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `current_quantity_excl_cases`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -3196,9 +3499,10 @@ pub mod Equipment {
 
     impl ProjectionField for current_quantity_excl_cases {
         type Resource = Equipment;
-        type Value = Option<i64>;
-        type Wire = Option<i64>;
+        type Value = i64;
+        type Wire = i64;
         const NAME: &'static str = "current_quantity_excl_cases";
+        const REQUIRED: bool = true;
     }
 
     /// `current_quantity`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -3206,9 +3510,10 @@ pub mod Equipment {
 
     impl ProjectionField for current_quantity {
         type Resource = Equipment;
-        type Value = Option<i64>;
-        type Wire = Option<i64>;
+        type Value = i64;
+        type Wire = i64;
         const NAME: &'static str = "current_quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity_in_cases`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -3216,9 +3521,10 @@ pub mod Equipment {
 
     impl ProjectionField for quantity_in_cases {
         type Resource = Equipment;
-        type Value = Option<i64>;
-        type Wire = Option<i64>;
+        type Value = i64;
+        type Wire = i64;
         const NAME: &'static str = "quantity_in_cases";
+        const REQUIRED: bool = true;
     }
 
     /// `location_in_warehouse`: GENERATED FIELD.
@@ -3229,6 +3535,7 @@ pub mod Equipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_in_warehouse";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -3236,14 +3543,15 @@ pub mod Equipment {
 
     impl ProjectionField for custom {
         type Resource = Equipment;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3251,6 +3559,7 @@ pub mod Equipment {
         type Value = Revision<Equipment>;
         type Wire = Revision<Equipment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3272,6 +3581,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Id<EquipmentAssignedSerial>;
         type Wire = Id<EquipmentAssignedSerial>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3282,6 +3592,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3292,6 +3603,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3302,6 +3614,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3312,6 +3625,7 @@ pub mod EquipmentAssignedSerial {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `combination`: Rentman field `combination`.
@@ -3322,6 +3636,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Id<SerialNumber>;
         type Wire = Link<SerialNumber>;
         const NAME: &'static str = "combination";
+        const REQUIRED: bool = true;
     }
 
     /// `serialnumber`: Rentman field `serialnumber`.
@@ -3332,11 +3647,12 @@ pub mod EquipmentAssignedSerial {
         type Value = Id<SerialNumber>;
         type Wire = Link<SerialNumber>;
         const NAME: &'static str = "serialnumber";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3344,6 +3660,7 @@ pub mod EquipmentAssignedSerial {
         type Value = Revision<EquipmentAssignedSerial>;
         type Wire = Revision<EquipmentAssignedSerial>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3365,6 +3682,7 @@ pub mod EquipmentSetContent {
         type Value = Id<EquipmentSetContent>;
         type Wire = Id<EquipmentSetContent>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3375,6 +3693,7 @@ pub mod EquipmentSetContent {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3385,6 +3704,7 @@ pub mod EquipmentSetContent {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3395,6 +3715,7 @@ pub mod EquipmentSetContent {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3405,6 +3726,7 @@ pub mod EquipmentSetContent {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Quantity in this combination.
@@ -3415,6 +3737,7 @@ pub mod EquipmentSetContent {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_equipment`: Rentman field `parent_equipment`.
@@ -3425,6 +3748,7 @@ pub mod EquipmentSetContent {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "parent_equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -3435,6 +3759,7 @@ pub mod EquipmentSetContent {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -3445,6 +3770,7 @@ pub mod EquipmentSetContent {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `is_fixed`: Permanently reduce the stock by the amount from this combination.
@@ -3455,6 +3781,7 @@ pub mod EquipmentSetContent {
         type Value = EquipmentSetContentIsFixed;
         type Wire = EquipmentSetContentIsFixed;
         const NAME: &'static str = "is_fixed";
+        const REQUIRED: bool = true;
     }
 
     /// `is_physically_connected`: When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
@@ -3465,11 +3792,12 @@ pub mod EquipmentSetContent {
         type Value = EquipmentSetContentIsPhysicallyConnected;
         type Wire = EquipmentSetContentIsPhysicallyConnected;
         const NAME: &'static str = "is_physically_connected";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3477,6 +3805,7 @@ pub mod EquipmentSetContent {
         type Value = Revision<EquipmentSetContent>;
         type Wire = Revision<EquipmentSetContent>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3498,6 +3827,7 @@ pub mod ExtraInputField {
         type Value = Id<ExtraInputField>;
         type Wire = Id<ExtraInputField>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3508,6 +3838,7 @@ pub mod ExtraInputField {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3518,6 +3849,7 @@ pub mod ExtraInputField {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3528,6 +3860,7 @@ pub mod ExtraInputField {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3538,6 +3871,7 @@ pub mod ExtraInputField {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -3548,6 +3882,7 @@ pub mod ExtraInputField {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `itemtype`: Rentman field `itemtype`.
@@ -3558,6 +3893,7 @@ pub mod ExtraInputField {
         type Value = ExtraInputFieldItemtype;
         type Wire = ExtraInputFieldItemtype;
         const NAME: &'static str = "itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `linkedItemType`: Rentman field `linkedItemType`.
@@ -3565,9 +3901,10 @@ pub mod ExtraInputField {
 
     impl ProjectionField for linkedItemType {
         type Resource = ExtraInputField;
-        type Value = Option<ExtraInputFieldLinkedItemType>;
-        type Wire = Option<ExtraInputFieldLinkedItemType>;
+        type Value = ExtraInputFieldLinkedItemType;
+        type Wire = ExtraInputFieldLinkedItemType;
         const NAME: &'static str = "linkedItemType";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: Rentman field `parent`.
@@ -3578,6 +3915,7 @@ pub mod ExtraInputField {
         type Value = Option<Id<ExtraInputField>>;
         type Wire = Option<Link<ExtraInputField>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -3588,6 +3926,7 @@ pub mod ExtraInputField {
         type Value = ExtraInputFieldType;
         type Wire = ExtraInputFieldType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -3598,6 +3937,7 @@ pub mod ExtraInputField {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `hidden`: Hides the field anywhere in the system.
@@ -3608,6 +3948,7 @@ pub mod ExtraInputField {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "hidden";
+        const REQUIRED: bool = true;
     }
 
     /// `classified`: Confidential fields are only visible to people with permission to see confidential fields.
@@ -3618,6 +3959,7 @@ pub mod ExtraInputField {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "classified";
+        const REQUIRED: bool = true;
     }
 
     /// `search_include`: Enable this option to make this field for searchable in the overviews.
@@ -3628,6 +3970,7 @@ pub mod ExtraInputField {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "search_include";
+        const REQUIRED: bool = true;
     }
 
     /// `search_minlength`: The minimum length that a search term must have before this field is searchable.
@@ -3638,6 +3981,7 @@ pub mod ExtraInputField {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "search_minlength";
+        const REQUIRED: bool = true;
     }
 
     /// `is_customfield_mandatory`: Required input fields must be filled in.
@@ -3648,11 +3992,12 @@ pub mod ExtraInputField {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_customfield_mandatory";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3660,6 +4005,7 @@ pub mod ExtraInputField {
         type Value = Revision<ExtraInputField>;
         type Wire = Revision<ExtraInputField>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3681,6 +4027,7 @@ pub mod Factor {
         type Value = Id<Factor>;
         type Wire = Id<Factor>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3691,6 +4038,7 @@ pub mod Factor {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3701,6 +4049,7 @@ pub mod Factor {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3711,6 +4060,7 @@ pub mod Factor {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3721,6 +4071,7 @@ pub mod Factor {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `from_days`: Rentman field `from_days`.
@@ -3731,6 +4082,7 @@ pub mod Factor {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "from_days";
+        const REQUIRED: bool = true;
     }
 
     /// `to_days`: Rentman field `to_days`.
@@ -3741,6 +4093,7 @@ pub mod Factor {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "to_days";
+        const REQUIRED: bool = true;
     }
 
     /// `factor`: Rentman field `factor`.
@@ -3751,6 +4104,7 @@ pub mod Factor {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
+        const REQUIRED: bool = true;
     }
 
     /// `factor_group`: Rentman field `factor_group`.
@@ -3761,11 +4115,12 @@ pub mod Factor {
         type Value = Id<FactorGroup>;
         type Wire = Link<FactorGroup>;
         const NAME: &'static str = "factor_group";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3773,6 +4128,7 @@ pub mod Factor {
         type Value = Revision<Factor>;
         type Wire = Revision<Factor>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3794,6 +4150,7 @@ pub mod FactorGroup {
         type Value = Id<FactorGroup>;
         type Wire = Id<FactorGroup>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3804,6 +4161,7 @@ pub mod FactorGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3814,6 +4172,7 @@ pub mod FactorGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3824,6 +4183,7 @@ pub mod FactorGroup {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3834,6 +4194,7 @@ pub mod FactorGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -3844,11 +4205,12 @@ pub mod FactorGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -3856,6 +4218,7 @@ pub mod FactorGroup {
         type Value = Revision<FactorGroup>;
         type Wire = Revision<FactorGroup>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -3877,6 +4240,7 @@ pub mod File {
         type Value = Id<File>;
         type Wire = Id<File>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -3887,6 +4251,7 @@ pub mod File {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -3897,6 +4262,7 @@ pub mod File {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -3907,6 +4273,7 @@ pub mod File {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -3917,6 +4284,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `readable_name`: Rentman field `readable_name`.
@@ -3927,6 +4295,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "readable_name";
+        const REQUIRED: bool = true;
     }
 
     /// `expiration`: Rentman field `expiration`.
@@ -3937,6 +4306,7 @@ pub mod File {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "expiration";
+        const REQUIRED: bool = true;
     }
 
     /// `size`: Rentman field `size`.
@@ -3947,6 +4317,7 @@ pub mod File {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "size";
+        const REQUIRED: bool = true;
     }
 
     /// `image`: Rentman field `image`.
@@ -3957,6 +4328,7 @@ pub mod File {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "image";
+        const REQUIRED: bool = true;
     }
 
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
@@ -3967,6 +4339,7 @@ pub mod File {
         type Value = Option<ItemId>;
         type Wire = Option<ItemId>;
         const NAME: &'static str = "item";
+        const REQUIRED: bool = true;
     }
 
     /// `itemtype`: Rentman field `itemtype`.
@@ -3977,6 +4350,7 @@ pub mod File {
         type Value = Option<FileItemtype>;
         type Wire = Option<FileItemtype>;
         const NAME: &'static str = "itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -3987,6 +4361,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `in_documents`: This setting relates to the block of images in document templates.
@@ -3997,6 +4372,7 @@ pub mod File {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_documents";
+        const REQUIRED: bool = true;
     }
 
     /// `in_webshop`: Rentman field `in_webshop`.
@@ -4007,6 +4383,7 @@ pub mod File {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_webshop";
+        const REQUIRED: bool = true;
     }
 
     /// `classified`: Confidential files are only visible with the user right to download all files.
@@ -4017,6 +4394,7 @@ pub mod File {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "classified";
+        const REQUIRED: bool = true;
     }
 
     /// `public`: Rentman field `public`.
@@ -4027,6 +4405,7 @@ pub mod File {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "public";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -4037,6 +4416,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `preview_of`: Rentman field `preview_of`.
@@ -4047,6 +4427,7 @@ pub mod File {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "preview_of";
+        const REQUIRED: bool = true;
     }
 
     /// `previewstatus`: Rentman field `previewstatus`.
@@ -4057,6 +4438,7 @@ pub mod File {
         type Value = FilePreviewstatus;
         type Wire = FilePreviewstatus;
         const NAME: &'static str = "previewstatus";
+        const REQUIRED: bool = true;
     }
 
     /// `file_item`: Rentman field `file_item`.
@@ -4067,6 +4449,7 @@ pub mod File {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "file_item";
+        const REQUIRED: bool = true;
     }
 
     /// `file_itemtype`: Rentman field `file_itemtype`.
@@ -4077,6 +4460,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "file_itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `folder`: Rentman field `folder`.
@@ -4087,6 +4471,7 @@ pub mod File {
         type Value = Option<Id<FileFolder>>;
         type Wire = Option<Link<FileFolder>>;
         const NAME: &'static str = "folder";
+        const REQUIRED: bool = true;
     }
 
     /// `path`: GENERATED FIELD.
@@ -4097,6 +4482,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "path";
+        const REQUIRED: bool = true;
     }
 
     /// `path_without_file_name`: GENERATED FIELD.
@@ -4107,6 +4493,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "path_without_file_name";
+        const REQUIRED: bool = true;
     }
 
     /// `path_with_file_folders`: GENERATED FIELD.
@@ -4117,6 +4504,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "path_with_file_folders";
+        const REQUIRED: bool = true;
     }
 
     /// `name_without_extension`: GENERATED FIELD.
@@ -4127,6 +4515,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name_without_extension";
+        const REQUIRED: bool = true;
     }
 
     /// `friendly_name_without_extension`: GENERATED FIELD.
@@ -4137,6 +4526,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "friendly_name_without_extension";
+        const REQUIRED: bool = true;
     }
 
     /// `extension`: GENERATED FIELD.
@@ -4147,6 +4537,7 @@ pub mod File {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "extension";
+        const REQUIRED: bool = true;
     }
 
     /// `url`: GENERATED FIELD.
@@ -4157,6 +4548,7 @@ pub mod File {
         type Value = Url;
         type Wire = Url;
         const NAME: &'static str = "url";
+        const REQUIRED: bool = true;
     }
 
     /// `proxy_url`: GENERATED FIELD.
@@ -4167,6 +4559,7 @@ pub mod File {
         type Value = Url;
         type Wire = Url;
         const NAME: &'static str = "proxy_url";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_api_path`: GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -4174,14 +4567,15 @@ pub mod File {
 
     impl ProjectionField for parent_api_path {
         type Resource = File;
-        type Value = Option<String>;
-        type Wire = Option<String>;
+        type Value = String;
+        type Wire = String;
         const NAME: &'static str = "parent_api_path";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -4189,6 +4583,7 @@ pub mod File {
         type Value = Revision<File>;
         type Wire = Revision<File>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -4210,6 +4605,7 @@ pub mod FileFolder {
         type Value = Id<FileFolder>;
         type Wire = Id<FileFolder>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -4220,6 +4616,7 @@ pub mod FileFolder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -4230,6 +4627,7 @@ pub mod FileFolder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -4240,6 +4638,7 @@ pub mod FileFolder {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -4250,6 +4649,7 @@ pub mod FileFolder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: Rentman field `parent`.
@@ -4260,6 +4660,7 @@ pub mod FileFolder {
         type Value = Option<Id<FileFolder>>;
         type Wire = Option<Link<FileFolder>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -4270,6 +4671,7 @@ pub mod FileFolder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `classified`: Confidential folders are only visible with the user right to download all files.
@@ -4280,6 +4682,7 @@ pub mod FileFolder {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "classified";
+        const REQUIRED: bool = true;
     }
 
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
@@ -4290,6 +4693,7 @@ pub mod FileFolder {
         type Value = Option<ItemId>;
         type Wire = Option<ItemId>;
         const NAME: &'static str = "item";
+        const REQUIRED: bool = true;
     }
 
     /// `itemtype`: Rentman field `itemtype`.
@@ -4300,6 +4704,7 @@ pub mod FileFolder {
         type Value = Option<FileFolderItemtype>;
         type Wire = Option<FileFolderItemtype>;
         const NAME: &'static str = "itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `is_template`: Rentman field `is_template`.
@@ -4310,6 +4715,7 @@ pub mod FileFolder {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_template";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_api_path`: GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -4317,14 +4723,15 @@ pub mod FileFolder {
 
     impl ProjectionField for parent_api_path {
         type Resource = FileFolder;
-        type Value = Option<String>;
-        type Wire = Option<String>;
+        type Value = String;
+        type Wire = String;
         const NAME: &'static str = "parent_api_path";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -4332,6 +4739,7 @@ pub mod FileFolder {
         type Value = Revision<FileFolder>;
         type Wire = Revision<FileFolder>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -4353,6 +4761,7 @@ pub mod Folder {
         type Value = Id<Folder>;
         type Wire = Id<Folder>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -4363,6 +4772,7 @@ pub mod Folder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -4373,6 +4783,7 @@ pub mod Folder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -4383,6 +4794,7 @@ pub mod Folder {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -4393,6 +4805,7 @@ pub mod Folder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: Rentman field `parent`.
@@ -4403,6 +4816,7 @@ pub mod Folder {
         type Value = Option<Id<Folder>>;
         type Wire = Option<Link<Folder>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -4413,6 +4827,7 @@ pub mod Folder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -4423,6 +4838,7 @@ pub mod Folder {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `itemtype`: The type of item in this folder.
@@ -4433,6 +4849,7 @@ pub mod Folder {
         type Value = FolderItemtype;
         type Wire = FolderItemtype;
         const NAME: &'static str = "itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `path`: GENERATED FIELD.
@@ -4443,11 +4860,12 @@ pub mod Folder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "path";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -4455,6 +4873,7 @@ pub mod Folder {
         type Value = Revision<Folder>;
         type Wire = Revision<Folder>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -4476,6 +4895,7 @@ pub mod Invitation {
         type Value = Id<Invitation>;
         type Wire = Id<Invitation>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -4486,6 +4906,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -4496,6 +4917,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -4506,6 +4928,7 @@ pub mod Invitation {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -4516,6 +4939,7 @@ pub mod Invitation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
@@ -4526,6 +4950,7 @@ pub mod Invitation {
         type Value = InvitationType;
         type Wire = InvitationType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `accepted`: Rentman field `accepted`.
@@ -4536,6 +4961,7 @@ pub mod Invitation {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "accepted";
+        const REQUIRED: bool = true;
     }
 
     /// `responded_timestamp`: Rentman field `responded_timestamp`.
@@ -4546,6 +4972,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "responded_timestamp";
+        const REQUIRED: bool = true;
     }
 
     /// `expiration_date`: Rentman field `expiration_date`.
@@ -4556,6 +4983,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "expiration_date";
+        const REQUIRED: bool = true;
     }
 
     /// `start`: Rentman field `start`.
@@ -4566,6 +4994,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "start";
+        const REQUIRED: bool = true;
     }
 
     /// `end`: Rentman field `end`.
@@ -4576,6 +5005,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "end";
+        const REQUIRED: bool = true;
     }
 
     /// `function`: Rentman field `function`.
@@ -4586,6 +5016,7 @@ pub mod Invitation {
         type Value = Option<Id<ProjectFunction>>;
         type Wire = Option<Link<ProjectFunction>>;
         const NAME: &'static str = "function";
+        const REQUIRED: bool = true;
     }
 
     /// `projectcrew`: Rentman field `projectcrew`.
@@ -4596,6 +5027,7 @@ pub mod Invitation {
         type Value = Option<Id<ProjectCrew>>;
         type Wire = Option<Link<ProjectCrew>>;
         const NAME: &'static str = "projectcrew";
+        const REQUIRED: bool = true;
     }
 
     /// `crewmember`: Rentman field `crewmember`.
@@ -4606,6 +5038,7 @@ pub mod Invitation {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crewmember";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -4616,6 +5049,7 @@ pub mod Invitation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `emailstatus`: Rentman field `emailstatus`.
@@ -4626,6 +5060,7 @@ pub mod Invitation {
         type Value = InvitationEmailstatus;
         type Wire = InvitationEmailstatus;
         const NAME: &'static str = "emailstatus";
+        const REQUIRED: bool = true;
     }
 
     /// `last_reminder`: Rentman field `last_reminder`.
@@ -4636,6 +5071,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "last_reminder";
+        const REQUIRED: bool = true;
     }
 
     /// `location_details`: GENERATED FIELD.
@@ -4646,6 +5082,7 @@ pub mod Invitation {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "location_details";
+        const REQUIRED: bool = true;
     }
 
     /// `auto_reminder_date`: Rentman field `auto_reminder_date`.
@@ -4656,6 +5093,7 @@ pub mod Invitation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "auto_reminder_date";
+        const REQUIRED: bool = true;
     }
 
     /// `auto_reminder_sent`: Rentman field `auto_reminder_sent`.
@@ -4666,11 +5104,12 @@ pub mod Invitation {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "auto_reminder_sent";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -4678,6 +5117,7 @@ pub mod Invitation {
         type Value = Revision<Invitation>;
         type Wire = Revision<Invitation>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -4699,6 +5139,7 @@ pub mod Invoice {
         type Value = Id<Invoice>;
         type Wire = Id<Invoice>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -4709,6 +5150,7 @@ pub mod Invoice {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -4719,6 +5161,7 @@ pub mod Invoice {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -4729,6 +5172,7 @@ pub mod Invoice {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -4739,6 +5183,7 @@ pub mod Invoice {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `customer`: Rentman field `customer`.
@@ -4749,6 +5194,7 @@ pub mod Invoice {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "customer";
+        const REQUIRED: bool = true;
     }
 
     /// `account_manager`: Rentman field `account_manager`.
@@ -4759,6 +5205,7 @@ pub mod Invoice {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "account_manager";
+        const REQUIRED: bool = true;
     }
 
     /// `contact`: Rentman field `contact`.
@@ -4769,6 +5216,7 @@ pub mod Invoice {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contact";
+        const REQUIRED: bool = true;
     }
 
     /// `expiration`: The latest payment date for this invoice.
@@ -4779,6 +5227,7 @@ pub mod Invoice {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "expiration";
+        const REQUIRED: bool = true;
     }
 
     /// `date`: Rentman field `date`.
@@ -4789,6 +5238,7 @@ pub mod Invoice {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "date";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -4799,6 +5249,7 @@ pub mod Invoice {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `procent`: Rentman field `procent`.
@@ -4809,6 +5260,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "procent";
+        const REQUIRED: bool = true;
     }
 
     /// `from_project`: Rentman field `from_project`.
@@ -4819,6 +5271,7 @@ pub mod Invoice {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "from_project";
+        const REQUIRED: bool = true;
     }
 
     /// `subject`: Rentman field `subject`.
@@ -4829,6 +5282,7 @@ pub mod Invoice {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "subject";
+        const REQUIRED: bool = true;
     }
 
     /// `finalized`: Rentman field `finalized`.
@@ -4839,6 +5293,7 @@ pub mod Invoice {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "finalized";
+        const REQUIRED: bool = true;
     }
 
     /// `integration_reference_id`: Rentman field `integration_reference_id`.
@@ -4849,6 +5304,7 @@ pub mod Invoice {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "integration_reference_id";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -4859,6 +5315,7 @@ pub mod Invoice {
         type Value = Option<Id<Project>>;
         type Wire = Option<Link<Project>>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `filename`: Rentman field `filename`.
@@ -4869,6 +5326,7 @@ pub mod Invoice {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "filename";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price`: GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -4876,9 +5334,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_total_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price_cancelled`: GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
@@ -4886,9 +5345,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price_cancelled";
+        const REQUIRED: bool = true;
     }
 
     /// `project_rental_price`: GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
@@ -4896,9 +5356,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_rental_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_rental_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_sale_price`: GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
@@ -4906,9 +5367,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_sale_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_crew_price`: GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
@@ -4916,9 +5378,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_crew_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_crew_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_transport_price`: GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
@@ -4926,9 +5389,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_transport_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_transport_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_other_price`: GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
@@ -4936,9 +5400,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_other_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_other_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_insurance_price`: GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
@@ -4946,9 +5411,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_insurance_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_services_price`: GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
@@ -4956,9 +5422,10 @@ pub mod Invoice {
 
     impl ProjectionField for project_services_price {
         type Resource = Invoice;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_services_price";
+        const REQUIRED: bool = true;
     }
 
     /// `sum_factuurregels`: GENERATED FIELD.
@@ -4969,6 +5436,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "sum_factuurregels";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: GENERATED FIELD.
@@ -4979,6 +5447,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `price_invat`: GENERATED FIELD.
@@ -4989,6 +5458,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
+        const REQUIRED: bool = true;
     }
 
     /// `vat_amount`: GENERATED FIELD.
@@ -4999,6 +5469,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `invoicetype`: GENERATED FIELD.
@@ -5009,6 +5480,7 @@ pub mod Invoice {
         type Value = InvoiceInvoicetype;
         type Wire = InvoiceInvoicetype;
         const NAME: &'static str = "invoicetype";
+        const REQUIRED: bool = true;
     }
 
     /// `outstanding_balance`: GENERATED FIELD.
@@ -5019,6 +5491,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "outstanding_balance";
+        const REQUIRED: bool = true;
     }
 
     /// `total_paid`: GENERATED FIELD.
@@ -5029,6 +5502,7 @@ pub mod Invoice {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "total_paid";
+        const REQUIRED: bool = true;
     }
 
     /// `is_paid`: GENERATED FIELD.
@@ -5039,6 +5513,7 @@ pub mod Invoice {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_paid";
+        const REQUIRED: bool = true;
     }
 
     /// `date_sent`: GENERATED FIELD.
@@ -5049,6 +5524,7 @@ pub mod Invoice {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "date_sent";
+        const REQUIRED: bool = true;
     }
 
     /// `payment_reminder_sent`: GENERATED FIELD.
@@ -5059,6 +5535,7 @@ pub mod Invoice {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "payment_reminder_sent";
+        const REQUIRED: bool = true;
     }
 
     /// `final_payment_reminder_sent`: GENERATED FIELD.
@@ -5069,6 +5546,7 @@ pub mod Invoice {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "final_payment_reminder_sent";
+        const REQUIRED: bool = true;
     }
 
     /// `payment_date`: GENERATED FIELD.
@@ -5079,6 +5557,7 @@ pub mod Invoice {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "payment_date";
+        const REQUIRED: bool = true;
     }
 
     /// `days_after_expiry`: GENERATED FIELD.
@@ -5089,6 +5568,7 @@ pub mod Invoice {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "days_after_expiry";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -5099,11 +5579,12 @@ pub mod Invoice {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5111,6 +5592,7 @@ pub mod Invoice {
         type Value = Revision<Invoice>;
         type Wire = Revision<Invoice>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5132,6 +5614,7 @@ pub mod InvoiceLine {
         type Value = Id<InvoiceLine>;
         type Wire = Id<InvoiceLine>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5142,6 +5625,7 @@ pub mod InvoiceLine {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5152,6 +5636,7 @@ pub mod InvoiceLine {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5162,6 +5647,7 @@ pub mod InvoiceLine {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5172,6 +5658,7 @@ pub mod InvoiceLine {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
@@ -5182,6 +5669,7 @@ pub mod InvoiceLine {
         type Value = Option<ItemId>;
         type Wire = Option<ItemId>;
         const NAME: &'static str = "item";
+        const REQUIRED: bool = true;
     }
 
     /// `base`: Rentman field `base`.
@@ -5192,6 +5680,7 @@ pub mod InvoiceLine {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "base";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger`: Rentman field `ledger`.
@@ -5202,6 +5691,7 @@ pub mod InvoiceLine {
         type Value = Id<LedgerCode>;
         type Wire = Link<LedgerCode>;
         const NAME: &'static str = "ledger";
+        const REQUIRED: bool = true;
     }
 
     /// `vatrate`: GENERATED FIELD.
@@ -5212,6 +5702,7 @@ pub mod InvoiceLine {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "vatrate";
+        const REQUIRED: bool = true;
     }
 
     /// `vatamount`: GENERATED FIELD.
@@ -5222,6 +5713,7 @@ pub mod InvoiceLine {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "vatamount";
+        const REQUIRED: bool = true;
     }
 
     /// `priceincl`: GENERATED FIELD.
@@ -5232,6 +5724,7 @@ pub mod InvoiceLine {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "priceincl";
+        const REQUIRED: bool = true;
     }
 
     /// `ledgercode`: GENERATED FIELD.
@@ -5242,6 +5735,7 @@ pub mod InvoiceLine {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "ledgercode";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_api_path`: GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -5249,14 +5743,15 @@ pub mod InvoiceLine {
 
     impl ProjectionField for parent_api_path {
         type Resource = InvoiceLine;
-        type Value = Option<String>;
-        type Wire = Option<String>;
+        type Value = String;
+        type Wire = String;
         const NAME: &'static str = "parent_api_path";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5264,6 +5759,7 @@ pub mod InvoiceLine {
         type Value = Revision<InvoiceLine>;
         type Wire = Revision<InvoiceLine>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5285,6 +5781,7 @@ pub mod LeaveMutation {
         type Value = Id<LeaveMutation>;
         type Wire = Id<LeaveMutation>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5295,6 +5792,7 @@ pub mod LeaveMutation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5305,6 +5803,7 @@ pub mod LeaveMutation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5315,6 +5814,7 @@ pub mod LeaveMutation {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5325,6 +5825,7 @@ pub mod LeaveMutation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -5335,6 +5836,7 @@ pub mod LeaveMutation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -5345,6 +5847,7 @@ pub mod LeaveMutation {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `crewmember`: Rentman field `crewmember`.
@@ -5355,6 +5858,7 @@ pub mod LeaveMutation {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crewmember";
+        const REQUIRED: bool = true;
     }
 
     /// `leavetype`: Rentman field `leavetype`.
@@ -5365,6 +5869,7 @@ pub mod LeaveMutation {
         type Value = Id<LeaveType>;
         type Wire = Link<LeaveType>;
         const NAME: &'static str = "leavetype";
+        const REQUIRED: bool = true;
     }
 
     /// `mutation_date`: Rentman field `mutation_date`.
@@ -5375,11 +5880,12 @@ pub mod LeaveMutation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "mutation_date";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5387,6 +5893,7 @@ pub mod LeaveMutation {
         type Value = Revision<LeaveMutation>;
         type Wire = Revision<LeaveMutation>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5408,6 +5915,7 @@ pub mod LeaveRequest {
         type Value = Id<LeaveRequest>;
         type Wire = Id<LeaveRequest>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5418,6 +5926,7 @@ pub mod LeaveRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5428,6 +5937,7 @@ pub mod LeaveRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5438,6 +5948,7 @@ pub mod LeaveRequest {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5448,6 +5959,7 @@ pub mod LeaveRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -5458,6 +5970,7 @@ pub mod LeaveRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `approval_status`: Rentman field `approval_status`.
@@ -5468,6 +5981,7 @@ pub mod LeaveRequest {
         type Value = LeaveRequestApprovalStatus;
         type Wire = LeaveRequestApprovalStatus;
         const NAME: &'static str = "approval_status";
+        const REQUIRED: bool = true;
     }
 
     /// `requested_for`: Rentman field `requested_for`.
@@ -5478,6 +5992,7 @@ pub mod LeaveRequest {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "requested_for";
+        const REQUIRED: bool = true;
     }
 
     /// `reviewed_on`: Rentman field `reviewed_on`.
@@ -5488,6 +6003,7 @@ pub mod LeaveRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "reviewed_on";
+        const REQUIRED: bool = true;
     }
 
     /// `reviewer`: Rentman field `reviewer`.
@@ -5498,11 +6014,12 @@ pub mod LeaveRequest {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "reviewer";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5510,6 +6027,7 @@ pub mod LeaveRequest {
         type Value = Revision<LeaveRequest>;
         type Wire = Revision<LeaveRequest>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5531,6 +6049,7 @@ pub mod LeaveType {
         type Value = Id<LeaveType>;
         type Wire = Id<LeaveType>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5541,6 +6060,7 @@ pub mod LeaveType {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5551,6 +6071,7 @@ pub mod LeaveType {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5561,6 +6082,7 @@ pub mod LeaveType {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5571,6 +6093,7 @@ pub mod LeaveType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -5581,6 +6104,7 @@ pub mod LeaveType {
         type Value = LeaveTypeType;
         type Wire = LeaveTypeType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -5591,6 +6115,7 @@ pub mod LeaveType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `payroll_code`: Rentman field `payroll_code`.
@@ -5601,6 +6126,7 @@ pub mod LeaveType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "payroll_code";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -5611,6 +6137,7 @@ pub mod LeaveType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `requires_approval`: Rentman field `requires_approval`.
@@ -5621,6 +6148,7 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "requires_approval";
+        const REQUIRED: bool = true;
     }
 
     /// `affects_availability`: Rentman field `affects_availability`.
@@ -5631,6 +6159,7 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "affects_availability";
+        const REQUIRED: bool = true;
     }
 
     /// `has_balance`: Rentman field `has_balance`.
@@ -5641,6 +6170,7 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "has_balance";
+        const REQUIRED: bool = true;
     }
 
     /// `balance_start_date`: Rentman field `balance_start_date`.
@@ -5651,6 +6181,7 @@ pub mod LeaveType {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "balance_start_date";
+        const REQUIRED: bool = true;
     }
 
     /// `is_labor`: Rentman field `is_labor`.
@@ -5661,6 +6192,7 @@ pub mod LeaveType {
         type Value = LeaveTypeIsLabor;
         type Wire = LeaveTypeIsLabor;
         const NAME: &'static str = "is_labor";
+        const REQUIRED: bool = true;
     }
 
     /// `has_calculated_duration`: Rentman field `has_calculated_duration`.
@@ -5671,6 +6203,7 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "has_calculated_duration";
+        const REQUIRED: bool = true;
     }
 
     /// `can_have_activities`: Rentman field `can_have_activities`.
@@ -5681,6 +6214,7 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "can_have_activities";
+        const REQUIRED: bool = true;
     }
 
     /// `counts_in_totals`: Rentman field `counts_in_totals`.
@@ -5691,11 +6225,12 @@ pub mod LeaveType {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "counts_in_totals";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5703,6 +6238,7 @@ pub mod LeaveType {
         type Value = Revision<LeaveType>;
         type Wire = Revision<LeaveType>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5724,6 +6260,7 @@ pub mod LedgerCode {
         type Value = Id<LedgerCode>;
         type Wire = Id<LedgerCode>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5734,6 +6271,7 @@ pub mod LedgerCode {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5744,6 +6282,7 @@ pub mod LedgerCode {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5754,6 +6293,7 @@ pub mod LedgerCode {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5764,6 +6304,7 @@ pub mod LedgerCode {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `code`: Rentman field `code`.
@@ -5774,6 +6315,7 @@ pub mod LedgerCode {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "code";
+        const REQUIRED: bool = true;
     }
 
     /// `is_credit`: Rentman field `is_credit`.
@@ -5784,6 +6326,7 @@ pub mod LedgerCode {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_credit";
+        const REQUIRED: bool = true;
     }
 
     /// `is_debit`: Rentman field `is_debit`.
@@ -5794,11 +6337,12 @@ pub mod LedgerCode {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_debit";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5806,6 +6350,7 @@ pub mod LedgerCode {
         type Value = Revision<LedgerCode>;
         type Wire = Revision<LedgerCode>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5827,6 +6372,7 @@ pub mod Payment {
         type Value = Id<Payment>;
         type Wire = Id<Payment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5837,6 +6383,7 @@ pub mod Payment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5847,6 +6394,7 @@ pub mod Payment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5857,6 +6405,7 @@ pub mod Payment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5867,6 +6416,7 @@ pub mod Payment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice`: Rentman field `invoice`.
@@ -5877,6 +6427,7 @@ pub mod Payment {
         type Value = Id<Invoice>;
         type Wire = Link<Invoice>;
         const NAME: &'static str = "invoice";
+        const REQUIRED: bool = true;
     }
 
     /// `moment`: Rentman field `moment`.
@@ -5887,6 +6438,7 @@ pub mod Payment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "moment";
+        const REQUIRED: bool = true;
     }
 
     /// `amount`: Rentman field `amount`.
@@ -5897,6 +6449,7 @@ pub mod Payment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "amount";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -5907,6 +6460,7 @@ pub mod Payment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `payment_import_source`: Accounting software this payment was imported from.
@@ -5914,14 +6468,15 @@ pub mod Payment {
 
     impl ProjectionField for payment_import_source {
         type Resource = Payment;
-        type Value = Option<PaymentPaymentImportSource>;
-        type Wire = Option<PaymentPaymentImportSource>;
+        type Value = PaymentPaymentImportSource;
+        type Wire = PaymentPaymentImportSource;
         const NAME: &'static str = "payment_import_source";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -5929,6 +6484,7 @@ pub mod Payment {
         type Value = Revision<Payment>;
         type Wire = Revision<Payment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -5950,6 +6506,7 @@ pub mod Project {
         type Value = Id<Project>;
         type Wire = Id<Project>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -5960,6 +6517,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -5970,6 +6528,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -5980,6 +6539,7 @@ pub mod Project {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -5990,6 +6550,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `location`: Rentman field `location`.
@@ -6000,6 +6561,7 @@ pub mod Project {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "location";
+        const REQUIRED: bool = true;
     }
 
     /// `refundabledeposit`: Rentman field `refundabledeposit`.
@@ -6010,6 +6572,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "refundabledeposit";
+        const REQUIRED: bool = true;
     }
 
     /// `deposit_status`: Rentman field `deposit_status`.
@@ -6020,6 +6583,7 @@ pub mod Project {
         type Value = ProjectDepositStatus;
         type Wire = ProjectDepositStatus;
         const NAME: &'static str = "deposit_status";
+        const REQUIRED: bool = true;
     }
 
     /// `customer`: Rentman field `customer`.
@@ -6030,6 +6594,7 @@ pub mod Project {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "customer";
+        const REQUIRED: bool = true;
     }
 
     /// `loc_contact`: Rentman field `loc_contact`.
@@ -6040,6 +6605,7 @@ pub mod Project {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "loc_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `cust_contact`: Rentman field `cust_contact`.
@@ -6050,6 +6616,7 @@ pub mod Project {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "cust_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `project_type`: Rentman field `project_type`.
@@ -6060,6 +6627,7 @@ pub mod Project {
         type Value = Id<ProjectType>;
         type Wire = Link<ProjectType>;
         const NAME: &'static str = "project_type";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -6070,6 +6638,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `reference`: Rentman field `reference`.
@@ -6080,6 +6649,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "reference";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -6090,6 +6660,7 @@ pub mod Project {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `account_manager`: Rentman field `account_manager`.
@@ -6100,6 +6671,7 @@ pub mod Project {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "account_manager";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -6110,6 +6682,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `conditions`: Rentman field `conditions`.
@@ -6120,6 +6693,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "conditions";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price`: GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -6127,9 +6701,10 @@ pub mod Project {
 
     impl ProjectionField for project_total_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price_cancelled`: GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
@@ -6137,9 +6712,10 @@ pub mod Project {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price_cancelled";
+        const REQUIRED: bool = true;
     }
 
     /// `project_rental_price`: GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
@@ -6147,9 +6723,10 @@ pub mod Project {
 
     impl ProjectionField for project_rental_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_rental_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_sale_price`: GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
@@ -6157,9 +6734,10 @@ pub mod Project {
 
     impl ProjectionField for project_sale_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_crew_price`: GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
@@ -6167,9 +6745,10 @@ pub mod Project {
 
     impl ProjectionField for project_crew_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_crew_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_transport_price`: GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
@@ -6177,9 +6756,10 @@ pub mod Project {
 
     impl ProjectionField for project_transport_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_transport_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_other_price`: GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
@@ -6187,9 +6767,10 @@ pub mod Project {
 
     impl ProjectionField for project_other_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_other_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_insurance_price`: GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
@@ -6197,9 +6778,10 @@ pub mod Project {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_insurance_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_services_price`: GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
@@ -6207,9 +6789,10 @@ pub mod Project {
 
     impl ProjectionField for project_services_price {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_services_price";
+        const REQUIRED: bool = true;
     }
 
     /// `estimated_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -6217,9 +6800,10 @@ pub mod Project {
 
     impl ProjectionField for estimated_cost {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "estimated_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `planned_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -6227,9 +6811,10 @@ pub mod Project {
 
     impl ProjectionField for planned_cost {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "planned_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `actual_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -6237,9 +6822,10 @@ pub mod Project {
 
     impl ProjectionField for actual_cost {
         type Resource = Project;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "actual_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `already_invoiced`: GENERATED FIELD.
@@ -6250,6 +6836,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "already_invoiced";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -6260,6 +6847,7 @@ pub mod Project {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: GENERATED FIELD.
@@ -6270,6 +6858,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: GENERATED FIELD.
@@ -6280,6 +6869,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: GENERATED FIELD.
@@ -6290,6 +6880,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: GENERATED FIELD.
@@ -6300,6 +6891,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `weight`: GENERATED FIELD.
@@ -6310,6 +6902,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
+        const REQUIRED: bool = true;
     }
 
     /// `power`: GENERATED FIELD.
@@ -6320,6 +6913,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "power";
+        const REQUIRED: bool = true;
     }
 
     /// `current`: GENERATED FIELD.
@@ -6330,6 +6924,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "current";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_period_from`: GENERATED FIELD.
@@ -6340,6 +6935,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "equipment_period_from";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_period_to`: GENERATED FIELD.
@@ -6350,6 +6946,7 @@ pub mod Project {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "equipment_period_to";
+        const REQUIRED: bool = true;
     }
 
     /// `purchasecosts`: GENERATED FIELD.
@@ -6360,6 +6957,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "purchasecosts";
+        const REQUIRED: bool = true;
     }
 
     /// `volume`: GENERATED FIELD.
@@ -6370,6 +6968,7 @@ pub mod Project {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -6377,14 +6976,15 @@ pub mod Project {
 
     impl ProjectionField for custom {
         type Resource = Project;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -6392,6 +6992,7 @@ pub mod Project {
         type Value = Revision<Project>;
         type Wire = Revision<Project>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -6413,6 +7014,7 @@ pub mod ProjectCost {
         type Value = Id<ProjectCost>;
         type Wire = Id<ProjectCost>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -6423,6 +7025,7 @@ pub mod ProjectCost {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -6433,6 +7036,7 @@ pub mod ProjectCost {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -6443,6 +7047,7 @@ pub mod ProjectCost {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -6453,6 +7058,7 @@ pub mod ProjectCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -6463,6 +7069,7 @@ pub mod ProjectCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -6473,6 +7080,7 @@ pub mod ProjectCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -6483,6 +7091,7 @@ pub mod ProjectCost {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -6493,6 +7102,7 @@ pub mod ProjectCost {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `discount`: Rentman field `discount`.
@@ -6503,6 +7113,7 @@ pub mod ProjectCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -6513,6 +7124,7 @@ pub mod ProjectCost {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject`: Rentman field `subproject`.
@@ -6523,6 +7135,7 @@ pub mod ProjectCost {
         type Value = Id<Subproject>;
         type Wire = Link<Subproject>;
         const NAME: &'static str = "subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `is_template`: Rentman field `is_template`.
@@ -6533,6 +7146,7 @@ pub mod ProjectCost {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_template";
+        const REQUIRED: bool = true;
     }
 
     /// `taxclass`: This class, in combination with the chosen VAT scheme at project level, determines the final VAT rate.
@@ -6543,6 +7157,7 @@ pub mod ProjectCost {
         type Value = Option<Id<TaxClass>>;
         type Wire = Option<Link<TaxClass>>;
         const NAME: &'static str = "taxclass";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger`: Rentman field `ledger`.
@@ -6553,6 +7168,7 @@ pub mod ProjectCost {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger_debit`: Rentman field `ledger_debit`.
@@ -6563,6 +7179,7 @@ pub mod ProjectCost {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger_debit";
+        const REQUIRED: bool = true;
     }
 
     /// `sale_price`: Rentman field `sale_price`.
@@ -6573,6 +7190,7 @@ pub mod ProjectCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `purchase_price`: Rentman field `purchase_price`.
@@ -6583,6 +7201,7 @@ pub mod ProjectCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "purchase_price";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -6590,14 +7209,15 @@ pub mod ProjectCost {
 
     impl ProjectionField for custom {
         type Resource = ProjectCost;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -6605,6 +7225,7 @@ pub mod ProjectCost {
         type Value = Revision<ProjectCost>;
         type Wire = Revision<ProjectCost>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -6626,6 +7247,7 @@ pub mod ProjectCrew {
         type Value = Id<ProjectCrew>;
         type Wire = Id<ProjectCrew>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -6636,6 +7258,7 @@ pub mod ProjectCrew {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -6646,6 +7269,7 @@ pub mod ProjectCrew {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -6656,6 +7280,7 @@ pub mod ProjectCrew {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -6666,6 +7291,7 @@ pub mod ProjectCrew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_rate`: Rentman field `cost_rate`.
@@ -6676,6 +7302,7 @@ pub mod ProjectCrew {
         type Value = Option<Id<Rate>>;
         type Wire = Option<Link<Rate>>;
         const NAME: &'static str = "cost_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_accommodation`: Rentman field `cost_accommodation`.
@@ -6686,6 +7313,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_accommodation";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_catering`: Rentman field `cost_catering`.
@@ -6696,6 +7324,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_catering";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_travel`: Rentman field `cost_travel`.
@@ -6706,6 +7335,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_travel";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_other`: Rentman field `cost_other`.
@@ -6716,6 +7346,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_other";
+        const REQUIRED: bool = true;
     }
 
     /// `function`: Rentman field `function`.
@@ -6726,6 +7357,7 @@ pub mod ProjectCrew {
         type Value = Id<ProjectFunction>;
         type Wire = Link<ProjectFunction>;
         const NAME: &'static str = "function";
+        const REQUIRED: bool = true;
     }
 
     /// `crewmember`: Rentman field `crewmember`.
@@ -6736,6 +7368,7 @@ pub mod ProjectCrew {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crewmember";
+        const REQUIRED: bool = true;
     }
 
     /// `visible`: Rentman field `visible`.
@@ -6746,6 +7379,7 @@ pub mod ProjectCrew {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "visible";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -6756,6 +7390,7 @@ pub mod ProjectCrew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -6766,6 +7401,7 @@ pub mod ProjectCrew {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `transport`: Rentman field `transport`.
@@ -6776,6 +7412,7 @@ pub mod ProjectCrew {
         type Value = ProjectCrewTransport;
         type Wire = ProjectCrewTransport;
         const NAME: &'static str = "transport";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -6786,6 +7423,7 @@ pub mod ProjectCrew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `remark_planner`: Only visible to crew planners.
@@ -6796,6 +7434,7 @@ pub mod ProjectCrew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark_planner";
+        const REQUIRED: bool = true;
     }
 
     /// `invoice_reference`: Rentman field `invoice_reference`.
@@ -6806,6 +7445,7 @@ pub mod ProjectCrew {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "invoice_reference";
+        const REQUIRED: bool = true;
     }
 
     /// `project_leader`: Rentman field `project_leader`.
@@ -6816,6 +7456,7 @@ pub mod ProjectCrew {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "project_leader";
+        const REQUIRED: bool = true;
     }
 
     /// `is_visible_on_dashboard`: Rentman field `is_visible_on_dashboard`.
@@ -6826,6 +7467,7 @@ pub mod ProjectCrew {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_visible_on_dashboard";
+        const REQUIRED: bool = true;
     }
 
     /// `costs`: GENERATED FIELD.
@@ -6836,6 +7478,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "costs";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_actual`: GENERATED FIELD. Costs for this activity based on the chosen rate and the registered hours of the scheduled crew member.
@@ -6846,6 +7489,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_actual";
+        const REQUIRED: bool = true;
     }
 
     /// `hours_registered`: GENERATED FIELD. Sum of the number of registered hours linked to this activity.
@@ -6856,6 +7500,7 @@ pub mod ProjectCrew {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "hours_registered";
+        const REQUIRED: bool = true;
     }
 
     /// `hours_planned`: GENERATED FIELD. Duration of the activity minus the break defined in the function.
@@ -6866,6 +7511,7 @@ pub mod ProjectCrew {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "hours_planned";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_planned`: GENERATED FIELD. Costs for this activity are based on the chosen rate and the duration of the scheduled crew member.
@@ -6876,6 +7522,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_planned";
+        const REQUIRED: bool = true;
     }
 
     /// `diff_cost`: GENERATED FIELD.
@@ -6886,6 +7533,7 @@ pub mod ProjectCrew {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "diff_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `diff_hours`: GENERATED FIELD.
@@ -6896,6 +7544,7 @@ pub mod ProjectCrew {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "diff_hours";
+        const REQUIRED: bool = true;
     }
 
     /// `activity_status`: GENERATED FIELD.
@@ -6906,6 +7555,7 @@ pub mod ProjectCrew {
         type Value = ProjectCrewActivityStatus;
         type Wire = ProjectCrewActivityStatus;
         const NAME: &'static str = "activity_status";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -6913,14 +7563,15 @@ pub mod ProjectCrew {
 
     impl ProjectionField for custom {
         type Resource = ProjectCrew;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -6928,6 +7579,7 @@ pub mod ProjectCrew {
         type Value = Revision<ProjectCrew>;
         type Wire = Revision<ProjectCrew>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -6949,6 +7601,7 @@ pub mod ProjectEquipment {
         type Value = Id<ProjectEquipment>;
         type Wire = Id<ProjectEquipment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -6959,6 +7612,7 @@ pub mod ProjectEquipment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -6969,6 +7623,7 @@ pub mod ProjectEquipment {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -6979,6 +7634,7 @@ pub mod ProjectEquipment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -6989,6 +7645,7 @@ pub mod ProjectEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -6999,6 +7656,7 @@ pub mod ProjectEquipment {
         type Value = Option<Id<Equipment>>;
         type Wire = Option<Link<Equipment>>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: The combination it is part of.
@@ -7009,6 +7667,7 @@ pub mod ProjectEquipment {
         type Value = Option<Id<ProjectEquipment>>;
         type Wire = Option<Link<ProjectEquipment>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger`: Rentman field `ledger`.
@@ -7019,6 +7678,7 @@ pub mod ProjectEquipment {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger_debit`: Rentman field `ledger_debit`.
@@ -7029,6 +7689,7 @@ pub mod ProjectEquipment {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger_debit";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -7039,6 +7700,7 @@ pub mod ProjectEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity_total`: Rentman field `quantity_total`.
@@ -7049,6 +7711,7 @@ pub mod ProjectEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity_total";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_group`: Rentman field `equipment_group`.
@@ -7059,6 +7722,7 @@ pub mod ProjectEquipment {
         type Value = Id<ProjectEquipmentGroup>;
         type Wire = Link<ProjectEquipmentGroup>;
         const NAME: &'static str = "equipment_group";
+        const REQUIRED: bool = true;
     }
 
     /// `discount`: Rentman field `discount`.
@@ -7069,6 +7733,7 @@ pub mod ProjectEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
+        const REQUIRED: bool = true;
     }
 
     /// `is_option`: Rentman field `is_option`.
@@ -7079,6 +7744,7 @@ pub mod ProjectEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_option";
+        const REQUIRED: bool = true;
     }
 
     /// `factor`: Rentman field `factor`.
@@ -7089,6 +7755,7 @@ pub mod ProjectEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -7099,6 +7766,7 @@ pub mod ProjectEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `unit_price`: Rentman field `unit_price`.
@@ -7109,6 +7777,7 @@ pub mod ProjectEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -7119,6 +7788,7 @@ pub mod ProjectEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `external_remark`: Note on financial documents.
@@ -7129,6 +7799,7 @@ pub mod ProjectEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "external_remark";
+        const REQUIRED: bool = true;
     }
 
     /// `internal_remark`: Note on packing lists.
@@ -7139,6 +7810,7 @@ pub mod ProjectEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "internal_remark";
+        const REQUIRED: bool = true;
     }
 
     /// `delay_notified`: Rentman field `delay_notified`.
@@ -7149,6 +7821,7 @@ pub mod ProjectEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "delay_notified";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -7159,6 +7832,7 @@ pub mod ProjectEquipment {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `is_delayed`: Rentman field `is_delayed`.
@@ -7169,6 +7843,7 @@ pub mod ProjectEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_delayed";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: GENERATED FIELD.
@@ -7179,6 +7854,7 @@ pub mod ProjectEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: GENERATED FIELD.
@@ -7189,6 +7865,7 @@ pub mod ProjectEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: GENERATED FIELD.
@@ -7199,6 +7876,7 @@ pub mod ProjectEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: GENERATED FIELD.
@@ -7209,6 +7887,7 @@ pub mod ProjectEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `has_missings`: GENERATED FIELD.
@@ -7219,6 +7898,7 @@ pub mod ProjectEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "has_missings";
+        const REQUIRED: bool = true;
     }
 
     /// `warehouse_reservations`: GENERATED FIELD.
@@ -7229,6 +7909,7 @@ pub mod ProjectEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "warehouse_reservations";
+        const REQUIRED: bool = true;
     }
 
     /// `subrent_reservations`: GENERATED FIELD.
@@ -7239,6 +7920,7 @@ pub mod ProjectEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "subrent_reservations";
+        const REQUIRED: bool = true;
     }
 
     /// `serial_number_ids`: GENERATED FIELD.
@@ -7249,6 +7931,7 @@ pub mod ProjectEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "serial_number_ids";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -7256,14 +7939,15 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for custom {
         type Resource = ProjectEquipment;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -7271,6 +7955,7 @@ pub mod ProjectEquipment {
         type Value = Revision<ProjectEquipment>;
         type Wire = Revision<ProjectEquipment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -7292,6 +7977,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Id<ProjectEquipmentGroup>;
         type Wire = Id<ProjectEquipmentGroup>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -7302,6 +7988,7 @@ pub mod ProjectEquipmentGroup {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -7312,6 +7999,7 @@ pub mod ProjectEquipmentGroup {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -7322,6 +8010,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -7332,6 +8021,7 @@ pub mod ProjectEquipmentGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -7342,6 +8032,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject`: Rentman field `subproject`.
@@ -7352,6 +8043,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Id<Subproject>;
         type Wire = Link<Subproject>;
         const NAME: &'static str = "subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `additional_scanned`: This group was additionally scanned from the warehouse.
@@ -7362,6 +8054,7 @@ pub mod ProjectEquipmentGroup {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "additional_scanned";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -7372,6 +8065,7 @@ pub mod ProjectEquipmentGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: Rentman field `usageperiod_start`.
@@ -7382,6 +8076,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: Rentman field `usageperiod_end`.
@@ -7392,6 +8087,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -7402,6 +8098,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -7412,6 +8109,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -7422,6 +8120,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `is_delayed`: Rentman field `is_delayed`.
@@ -7432,6 +8131,7 @@ pub mod ProjectEquipmentGroup {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_delayed";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -7442,6 +8142,7 @@ pub mod ProjectEquipmentGroup {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `in_price_calculation`: Rentman field `in_price_calculation`.
@@ -7452,6 +8153,7 @@ pub mod ProjectEquipmentGroup {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_price_calculation";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -7462,6 +8164,7 @@ pub mod ProjectEquipmentGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `weight`: GENERATED FIELD.
@@ -7472,6 +8175,7 @@ pub mod ProjectEquipmentGroup {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
+        const REQUIRED: bool = true;
     }
 
     /// `power`: GENERATED FIELD.
@@ -7482,6 +8186,7 @@ pub mod ProjectEquipmentGroup {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "power";
+        const REQUIRED: bool = true;
     }
 
     /// `current`: GENERATED FIELD.
@@ -7492,6 +8197,7 @@ pub mod ProjectEquipmentGroup {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "current";
+        const REQUIRED: bool = true;
     }
 
     /// `volume`: GENERATED FIELD.
@@ -7502,6 +8208,7 @@ pub mod ProjectEquipmentGroup {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
+        const REQUIRED: bool = true;
     }
 
     /// `total_new_price`: GENERATED FIELD.
@@ -7512,11 +8219,12 @@ pub mod ProjectEquipmentGroup {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "total_new_price";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -7524,6 +8232,7 @@ pub mod ProjectEquipmentGroup {
         type Value = Revision<ProjectEquipmentGroup>;
         type Wire = Revision<ProjectEquipmentGroup>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -7545,6 +8254,7 @@ pub mod ProjectFunction {
         type Value = Id<ProjectFunction>;
         type Wire = Id<ProjectFunction>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -7555,6 +8265,7 @@ pub mod ProjectFunction {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -7565,6 +8276,7 @@ pub mod ProjectFunction {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -7575,6 +8287,7 @@ pub mod ProjectFunction {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD. Name on packing slips.
@@ -7585,6 +8298,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_rate`: Rentman field `cost_rate`.
@@ -7595,6 +8309,7 @@ pub mod ProjectFunction {
         type Value = Id<Rate>;
         type Wire = Link<Rate>;
         const NAME: &'static str = "cost_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_accommodation`: Rentman field `cost_accommodation`.
@@ -7605,6 +8320,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_accommodation";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_catering`: Rentman field `cost_catering`.
@@ -7615,6 +8331,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_catering";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_travel`: Rentman field `cost_travel`.
@@ -7625,6 +8342,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_travel";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_other`: Rentman field `cost_other`.
@@ -7635,6 +8353,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "cost_other";
+        const REQUIRED: bool = true;
     }
 
     /// `price_rate`: Rentman field `price_rate`.
@@ -7645,6 +8364,7 @@ pub mod ProjectFunction {
         type Value = Id<Rate>;
         type Wire = Link<Rate>;
         const NAME: &'static str = "price_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `price_accommodation`: Rentman field `price_accommodation`.
@@ -7655,6 +8375,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_accommodation";
+        const REQUIRED: bool = true;
     }
 
     /// `price_catering`: Rentman field `price_catering`.
@@ -7665,6 +8386,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_catering";
+        const REQUIRED: bool = true;
     }
 
     /// `price_travel`: Rentman field `price_travel`.
@@ -7675,6 +8397,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_travel";
+        const REQUIRED: bool = true;
     }
 
     /// `price_other`: Rentman field `price_other`.
@@ -7685,6 +8408,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_other";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -7695,6 +8419,7 @@ pub mod ProjectFunction {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject`: Rentman field `subproject`.
@@ -7705,6 +8430,7 @@ pub mod ProjectFunction {
         type Value = Id<Subproject>;
         type Wire = Link<Subproject>;
         const NAME: &'static str = "subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `is_template`: Rentman field `is_template`.
@@ -7715,6 +8441,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_template";
+        const REQUIRED: bool = true;
     }
 
     /// `group`: Rentman field `group`.
@@ -7725,6 +8452,7 @@ pub mod ProjectFunction {
         type Value = Option<Id<ProjectFunctionGroup>>;
         type Wire = Option<Link<ProjectFunctionGroup>>;
         const NAME: &'static str = "group";
+        const REQUIRED: bool = true;
     }
 
     /// `name_external`: Name on financial documents.
@@ -7735,6 +8463,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name_external";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Name on packing lists.
@@ -7745,6 +8474,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `travel_time_before`: Rentman field `travel_time_before`.
@@ -7755,6 +8485,7 @@ pub mod ProjectFunction {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time_before";
+        const REQUIRED: bool = true;
     }
 
     /// `travel_time_after`: Rentman field `travel_time_after`.
@@ -7765,6 +8496,7 @@ pub mod ProjectFunction {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time_after";
+        const REQUIRED: bool = true;
     }
 
     /// `use_travel_time_from_location`: Rentman field `use_travel_time_from_location`.
@@ -7775,6 +8507,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "use_travel_time_from_location";
+        const REQUIRED: bool = true;
     }
 
     /// `use_distance_from_location`: Rentman field `use_distance_from_location`.
@@ -7785,6 +8518,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "use_distance_from_location";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: Rentman field `usageperiod_start`.
@@ -7795,6 +8529,7 @@ pub mod ProjectFunction {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start_schedule_is_start`: Rentman field `planperiod_start_schedule_is_start`.
@@ -7805,6 +8540,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionPlanperiodStartScheduleIsStart;
         type Wire = ProjectFunctionPlanperiodStartScheduleIsStart;
         const NAME: &'static str = "planperiod_start_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start_schedule_is_start`: Rentman field `usageperiod_start_schedule_is_start`.
@@ -7815,6 +8551,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionUsageperiodStartScheduleIsStart;
         type Wire = ProjectFunctionUsageperiodStartScheduleIsStart;
         const NAME: &'static str = "usageperiod_start_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end_schedule_is_start`: Rentman field `planperiod_end_schedule_is_start`.
@@ -7825,6 +8562,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionPlanperiodEndScheduleIsStart;
         type Wire = ProjectFunctionPlanperiodEndScheduleIsStart;
         const NAME: &'static str = "planperiod_end_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end_schedule_is_start`: Rentman field `usageperiod_end_schedule_is_start`.
@@ -7835,6 +8573,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionUsageperiodEndScheduleIsStart;
         type Wire = ProjectFunctionUsageperiodEndScheduleIsStart;
         const NAME: &'static str = "usageperiod_end_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: Rentman field `usageperiod_end`.
@@ -7845,6 +8584,7 @@ pub mod ProjectFunction {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -7855,6 +8595,7 @@ pub mod ProjectFunction {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -7865,6 +8606,7 @@ pub mod ProjectFunction {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -7875,6 +8617,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionType;
         type Wire = ProjectFunctionType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -7885,6 +8628,7 @@ pub mod ProjectFunction {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `amount`: Rentman field `amount`.
@@ -7895,6 +8639,7 @@ pub mod ProjectFunction {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "amount";
+        const REQUIRED: bool = true;
     }
 
     /// `break`: Rentman field `break`.
@@ -7905,6 +8650,7 @@ pub mod ProjectFunction {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break";
+        const REQUIRED: bool = true;
     }
 
     /// `distance`: Rentman field `distance`.
@@ -7915,6 +8661,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
+        const REQUIRED: bool = true;
     }
 
     /// `twoway`: Rentman field `twoway`.
@@ -7925,6 +8672,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "twoway";
+        const REQUIRED: bool = true;
     }
 
     /// `taxclass`: Rentman field `taxclass`.
@@ -7935,6 +8683,7 @@ pub mod ProjectFunction {
         type Value = Option<Id<TaxClass>>;
         type Wire = Option<Link<TaxClass>>;
         const NAME: &'static str = "taxclass";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger`: Rentman field `ledger`.
@@ -7945,6 +8694,7 @@ pub mod ProjectFunction {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger";
+        const REQUIRED: bool = true;
     }
 
     /// `ledger_debit`: Rentman field `ledger_debit`.
@@ -7955,6 +8705,7 @@ pub mod ProjectFunction {
         type Value = Option<Id<LedgerCode>>;
         type Wire = Option<Link<LedgerCode>>;
         const NAME: &'static str = "ledger_debit";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -7965,6 +8716,7 @@ pub mod ProjectFunction {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `remark_client`: Rentman field `remark_client`.
@@ -7975,6 +8727,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark_client";
+        const REQUIRED: bool = true;
     }
 
     /// `remark_planner`: Rentman field `remark_planner`.
@@ -7985,6 +8738,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark_planner";
+        const REQUIRED: bool = true;
     }
 
     /// `remark_crew`: Rentman field `remark_crew`.
@@ -7995,6 +8749,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark_crew";
+        const REQUIRED: bool = true;
     }
 
     /// `in_financial`: Rentman field `in_financial`.
@@ -8005,6 +8760,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_financial";
+        const REQUIRED: bool = true;
     }
 
     /// `in_planning`: Rentman field `in_planning`.
@@ -8015,6 +8771,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_planning";
+        const REQUIRED: bool = true;
     }
 
     /// `is_plannable`: If yes, crew members scheduled on this shift will be shown as available for other functions.
@@ -8025,6 +8782,7 @@ pub mod ProjectFunction {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_plannable";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_group`: Identification which recurrences belong together.
@@ -8035,6 +8793,7 @@ pub mod ProjectFunction {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrence_group";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_enddate`: Date the recurrence ends.
@@ -8045,6 +8804,7 @@ pub mod ProjectFunction {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recurrence_enddate";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval_unit`: Period between each recurrence. E.g. every x day/week/month/year.
@@ -8055,6 +8815,7 @@ pub mod ProjectFunction {
         type Value = ProjectFunctionRecurrenceIntervalUnit;
         type Wire = ProjectFunctionRecurrenceIntervalUnit;
         const NAME: &'static str = "recurrence_interval_unit";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_interval`: Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
@@ -8065,6 +8826,7 @@ pub mod ProjectFunction {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurrence_interval";
+        const REQUIRED: bool = true;
     }
 
     /// `recurrence_weekdays`: GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
@@ -8075,6 +8837,7 @@ pub mod ProjectFunction {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recurrence_weekdays";
+        const REQUIRED: bool = true;
     }
 
     /// `price_fixed`: GENERATED FIELD.
@@ -8085,6 +8848,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_fixed";
+        const REQUIRED: bool = true;
     }
 
     /// `price_variable`: GENERATED FIELD.
@@ -8095,6 +8859,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_variable";
+        const REQUIRED: bool = true;
     }
 
     /// `costs_fixed`: GENERATED FIELD.
@@ -8105,6 +8870,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "costs_fixed";
+        const REQUIRED: bool = true;
     }
 
     /// `costs_variable`: GENERATED FIELD.
@@ -8115,6 +8881,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "costs_variable";
+        const REQUIRED: bool = true;
     }
 
     /// `price_total`: GENERATED FIELD. Total price based on duration and selected price rate.
@@ -8125,6 +8892,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_total";
+        const REQUIRED: bool = true;
     }
 
     /// `costs_total`: GENERATED FIELD. Total costs based on duration and chosen cost rate.
@@ -8135,6 +8903,7 @@ pub mod ProjectFunction {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "costs_total";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -8145,6 +8914,7 @@ pub mod ProjectFunction {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -8152,14 +8922,15 @@ pub mod ProjectFunction {
 
     impl ProjectionField for custom {
         type Resource = ProjectFunction;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -8167,6 +8938,7 @@ pub mod ProjectFunction {
         type Value = Revision<ProjectFunction>;
         type Wire = Revision<ProjectFunction>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -8188,6 +8960,7 @@ pub mod ProjectFunctionGroup {
         type Value = Id<ProjectFunctionGroup>;
         type Wire = Id<ProjectFunctionGroup>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -8198,6 +8971,7 @@ pub mod ProjectFunctionGroup {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -8208,6 +8982,7 @@ pub mod ProjectFunctionGroup {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -8218,6 +8993,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -8228,6 +9004,7 @@ pub mod ProjectFunctionGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -8238,6 +9015,7 @@ pub mod ProjectFunctionGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -8248,6 +9026,7 @@ pub mod ProjectFunctionGroup {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject`: Rentman field `subproject`.
@@ -8258,6 +9037,7 @@ pub mod ProjectFunctionGroup {
         type Value = Id<Subproject>;
         type Wire = Link<Subproject>;
         const NAME: &'static str = "subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -8268,6 +9048,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start_schedule_is_start`: Rentman field `planperiod_start_schedule_is_start`.
@@ -8278,6 +9059,7 @@ pub mod ProjectFunctionGroup {
         type Value = ProjectFunctionGroupPlanperiodStartScheduleIsStart;
         type Wire = ProjectFunctionGroupPlanperiodStartScheduleIsStart;
         const NAME: &'static str = "planperiod_start_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start_schedule_is_start`: Rentman field `usageperiod_start_schedule_is_start`.
@@ -8288,6 +9070,7 @@ pub mod ProjectFunctionGroup {
         type Value = ProjectFunctionGroupUsageperiodStartScheduleIsStart;
         type Wire = ProjectFunctionGroupUsageperiodStartScheduleIsStart;
         const NAME: &'static str = "usageperiod_start_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end_schedule_is_start`: Rentman field `planperiod_end_schedule_is_start`.
@@ -8298,6 +9081,7 @@ pub mod ProjectFunctionGroup {
         type Value = ProjectFunctionGroupPlanperiodEndScheduleIsStart;
         type Wire = ProjectFunctionGroupPlanperiodEndScheduleIsStart;
         const NAME: &'static str = "planperiod_end_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end_schedule_is_start`: Rentman field `usageperiod_end_schedule_is_start`.
@@ -8308,6 +9092,7 @@ pub mod ProjectFunctionGroup {
         type Value = ProjectFunctionGroupUsageperiodEndScheduleIsStart;
         type Wire = ProjectFunctionGroupUsageperiodEndScheduleIsStart;
         const NAME: &'static str = "usageperiod_end_schedule_is_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: Rentman field `usageperiod_start`.
@@ -8318,6 +9103,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: Rentman field `usageperiod_end`.
@@ -8328,6 +9114,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -8338,6 +9125,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -8348,6 +9136,7 @@ pub mod ProjectFunctionGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -8358,11 +9147,12 @@ pub mod ProjectFunctionGroup {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -8370,6 +9160,7 @@ pub mod ProjectFunctionGroup {
         type Value = Revision<ProjectFunctionGroup>;
         type Wire = Revision<ProjectFunctionGroup>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -8391,6 +9182,7 @@ pub mod ProjectRequest {
         type Value = Id<ProjectRequest>;
         type Wire = Id<ProjectRequest>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -8401,6 +9193,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -8411,6 +9204,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -8421,6 +9215,7 @@ pub mod ProjectRequest {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -8431,6 +9226,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `linked_contact`: Rentman field `linked_contact`.
@@ -8441,6 +9237,7 @@ pub mod ProjectRequest {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "linked_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_mailing_number`: Rentman field `contact_mailing_number`.
@@ -8451,6 +9248,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_mailing_number";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_mailing_country`: Rentman field `contact_mailing_country`.
@@ -8461,6 +9259,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_mailing_country";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_name`: Rentman field `contact_name`.
@@ -8471,6 +9270,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_name";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_mailing_postalcode`: Rentman field `contact_mailing_postalcode`.
@@ -8481,6 +9281,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_mailing_postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_phone`: Rentman field `contact_phone`.
@@ -8491,6 +9292,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_phone";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_mailing_city`: Rentman field `contact_mailing_city`.
@@ -8501,6 +9303,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_mailing_city";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_mailing_street`: Rentman field `contact_mailing_street`.
@@ -8511,6 +9314,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_mailing_street";
+        const REQUIRED: bool = true;
     }
 
     /// `linked_contact_person`: Rentman field `linked_contact_person`.
@@ -8521,6 +9325,7 @@ pub mod ProjectRequest {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "linked_contact_person";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_person_lastname`: Rentman field `contact_person_lastname`.
@@ -8531,6 +9336,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_person_lastname";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_person_email`: Rentman field `contact_person_email`.
@@ -8541,6 +9347,7 @@ pub mod ProjectRequest {
         type Value = EmailAddress;
         type Wire = EmailAddress;
         const NAME: &'static str = "contact_person_email";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_person_middle_name`: Rentman field `contact_person_middle_name`.
@@ -8551,6 +9358,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_person_middle_name";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_person_first_name`: Rentman field `contact_person_first_name`.
@@ -8561,6 +9369,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "contact_person_first_name";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: Rentman field `usageperiod_end`.
@@ -8571,6 +9380,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: Rentman field `usageperiod_start`.
@@ -8581,6 +9391,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `is_paid`: Rentman field `is_paid`.
@@ -8591,6 +9402,7 @@ pub mod ProjectRequest {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_paid";
+        const REQUIRED: bool = true;
     }
 
     /// `language`: Rentman field `language`.
@@ -8601,6 +9413,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "language";
+        const REQUIRED: bool = true;
     }
 
     /// `in`: Rentman field `in`.
@@ -8611,6 +9424,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "in";
+        const REQUIRED: bool = true;
     }
 
     /// `out`: Rentman field `out`.
@@ -8621,6 +9435,7 @@ pub mod ProjectRequest {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "out";
+        const REQUIRED: bool = true;
     }
 
     /// `linked_location`: Rentman field `linked_location`.
@@ -8631,6 +9446,7 @@ pub mod ProjectRequest {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "linked_location";
+        const REQUIRED: bool = true;
     }
 
     /// `location_mailing_number`: Rentman field `location_mailing_number`.
@@ -8641,6 +9457,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_mailing_number";
+        const REQUIRED: bool = true;
     }
 
     /// `location_mailing_country`: Rentman field `location_mailing_country`.
@@ -8651,6 +9468,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_mailing_country";
+        const REQUIRED: bool = true;
     }
 
     /// `location_name`: Rentman field `location_name`.
@@ -8661,6 +9479,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_name";
+        const REQUIRED: bool = true;
     }
 
     /// `location_mailing_postalcode`: Rentman field `location_mailing_postalcode`.
@@ -8671,6 +9490,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_mailing_postalcode";
+        const REQUIRED: bool = true;
     }
 
     /// `location_mailing_city`: Rentman field `location_mailing_city`.
@@ -8681,6 +9501,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_mailing_city";
+        const REQUIRED: bool = true;
     }
 
     /// `location_mailing_street`: Rentman field `location_mailing_street`.
@@ -8691,6 +9512,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_mailing_street";
+        const REQUIRED: bool = true;
     }
 
     /// `location_phone`: Rentman field `location_phone`.
@@ -8701,6 +9523,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "location_phone";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -8711,6 +9534,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `external_reference`: Rentman field `external_reference`.
@@ -8721,6 +9545,7 @@ pub mod ProjectRequest {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "external_reference";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -8731,6 +9556,7 @@ pub mod ProjectRequest {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -8741,6 +9567,7 @@ pub mod ProjectRequest {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -8751,6 +9578,7 @@ pub mod ProjectRequest {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: Rentman field `price`.
@@ -8761,6 +9589,7 @@ pub mod ProjectRequest {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `linked_project`: Rentman field `linked_project`.
@@ -8771,6 +9600,7 @@ pub mod ProjectRequest {
         type Value = Option<Id<Project>>;
         type Wire = Option<Link<Project>>;
         const NAME: &'static str = "linked_project";
+        const REQUIRED: bool = true;
     }
 
     /// `source`: Rentman field `source`.
@@ -8781,6 +9611,7 @@ pub mod ProjectRequest {
         type Value = ProjectRequestSource;
         type Wire = ProjectRequestSource;
         const NAME: &'static str = "source";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: Rentman field `status`.
@@ -8791,11 +9622,12 @@ pub mod ProjectRequest {
         type Value = ProjectRequestStatus;
         type Wire = ProjectRequestStatus;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -8803,6 +9635,7 @@ pub mod ProjectRequest {
         type Value = Revision<ProjectRequest>;
         type Wire = Revision<ProjectRequest>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -8824,6 +9657,7 @@ pub mod ProjectRequestEquipment {
         type Value = Id<ProjectRequestEquipment>;
         type Wire = Id<ProjectRequestEquipment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -8834,6 +9668,7 @@ pub mod ProjectRequestEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -8844,6 +9679,7 @@ pub mod ProjectRequestEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -8854,6 +9690,7 @@ pub mod ProjectRequestEquipment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -8864,6 +9701,7 @@ pub mod ProjectRequestEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -8874,6 +9712,7 @@ pub mod ProjectRequestEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity_total`: Rentman field `quantity_total`.
@@ -8884,6 +9723,7 @@ pub mod ProjectRequestEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity_total";
+        const REQUIRED: bool = true;
     }
 
     /// `is_comment`: Rentman field `is_comment`.
@@ -8894,6 +9734,7 @@ pub mod ProjectRequestEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_comment";
+        const REQUIRED: bool = true;
     }
 
     /// `is_kit`: Rentman field `is_kit`.
@@ -8904,6 +9745,7 @@ pub mod ProjectRequestEquipment {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_kit";
+        const REQUIRED: bool = true;
     }
 
     /// `discount`: Rentman field `discount`.
@@ -8914,6 +9756,7 @@ pub mod ProjectRequestEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
+        const REQUIRED: bool = true;
     }
 
     /// `linked_equipment`: Rentman field `linked_equipment`.
@@ -8924,6 +9767,7 @@ pub mod ProjectRequestEquipment {
         type Value = Option<Id<Equipment>>;
         type Wire = Option<Link<Equipment>>;
         const NAME: &'static str = "linked_equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -8934,6 +9778,7 @@ pub mod ProjectRequestEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `external_remark`: Rentman field `external_remark`.
@@ -8944,6 +9789,7 @@ pub mod ProjectRequestEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "external_remark";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: The combination it is part of.
@@ -8954,6 +9800,7 @@ pub mod ProjectRequestEquipment {
         type Value = Option<Id<ProjectRequestEquipment>>;
         type Wire = Option<Link<ProjectRequestEquipment>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `unit_price`: Rentman field `unit_price`.
@@ -8964,6 +9811,7 @@ pub mod ProjectRequestEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_request`: Rentman field `project_request`.
@@ -8974,6 +9822,7 @@ pub mod ProjectRequestEquipment {
         type Value = Id<ProjectRequest>;
         type Wire = Link<ProjectRequest>;
         const NAME: &'static str = "project_request";
+        const REQUIRED: bool = true;
     }
 
     /// `factor`: Rentman field `factor`.
@@ -8984,6 +9833,7 @@ pub mod ProjectRequestEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -8994,11 +9844,12 @@ pub mod ProjectRequestEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9006,6 +9857,7 @@ pub mod ProjectRequestEquipment {
         type Value = Revision<ProjectRequestEquipment>;
         type Wire = Revision<ProjectRequestEquipment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9027,6 +9879,7 @@ pub mod ProjectStatus {
         type Value = Id<ProjectStatus>;
         type Wire = Id<ProjectStatus>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9037,6 +9890,7 @@ pub mod ProjectStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9047,6 +9901,7 @@ pub mod ProjectStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9057,6 +9912,7 @@ pub mod ProjectStatus {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9067,6 +9923,7 @@ pub mod ProjectStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -9077,11 +9934,12 @@ pub mod ProjectStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9089,6 +9947,7 @@ pub mod ProjectStatus {
         type Value = Revision<ProjectStatus>;
         type Wire = Revision<ProjectStatus>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9110,6 +9969,7 @@ pub mod ProjectTemplate {
         type Value = Id<ProjectTemplate>;
         type Wire = Id<ProjectTemplate>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9120,6 +9980,7 @@ pub mod ProjectTemplate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9130,6 +9991,7 @@ pub mod ProjectTemplate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9140,6 +10002,7 @@ pub mod ProjectTemplate {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9150,6 +10013,7 @@ pub mod ProjectTemplate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -9160,11 +10024,12 @@ pub mod ProjectTemplate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9172,6 +10037,7 @@ pub mod ProjectTemplate {
         type Value = Revision<ProjectTemplate>;
         type Wire = Revision<ProjectTemplate>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9193,6 +10059,7 @@ pub mod ProjectType {
         type Value = Id<ProjectType>;
         type Wire = Id<ProjectType>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9203,6 +10070,7 @@ pub mod ProjectType {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9213,6 +10081,7 @@ pub mod ProjectType {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9223,6 +10092,7 @@ pub mod ProjectType {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9233,6 +10103,7 @@ pub mod ProjectType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -9243,6 +10114,7 @@ pub mod ProjectType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -9253,6 +10125,7 @@ pub mod ProjectType {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -9263,11 +10136,12 @@ pub mod ProjectType {
         type Value = ProjectTypeType;
         type Wire = ProjectTypeType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9275,6 +10149,7 @@ pub mod ProjectType {
         type Value = Revision<ProjectType>;
         type Wire = Revision<ProjectType>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9296,6 +10171,7 @@ pub mod ProjectVehicle {
         type Value = Id<ProjectVehicle>;
         type Wire = Id<ProjectVehicle>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9306,6 +10182,7 @@ pub mod ProjectVehicle {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9316,6 +10193,7 @@ pub mod ProjectVehicle {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9326,6 +10204,7 @@ pub mod ProjectVehicle {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9336,6 +10215,7 @@ pub mod ProjectVehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_rate`: Rentman field `cost_rate`.
@@ -9346,6 +10226,7 @@ pub mod ProjectVehicle {
         type Value = Option<Id<Rate>>;
         type Wire = Option<Link<Rate>>;
         const NAME: &'static str = "cost_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `function`: Rentman field `function`.
@@ -9356,6 +10237,7 @@ pub mod ProjectVehicle {
         type Value = Id<ProjectFunction>;
         type Wire = Link<ProjectFunction>;
         const NAME: &'static str = "function";
+        const REQUIRED: bool = true;
     }
 
     /// `transport`: Rentman field `transport`.
@@ -9366,6 +10248,7 @@ pub mod ProjectVehicle {
         type Value = ProjectVehicleTransport;
         type Wire = ProjectVehicleTransport;
         const NAME: &'static str = "transport";
+        const REQUIRED: bool = true;
     }
 
     /// `vehicle`: Rentman field `vehicle`.
@@ -9376,6 +10259,7 @@ pub mod ProjectVehicle {
         type Value = Id<Vehicle>;
         type Wire = Link<Vehicle>;
         const NAME: &'static str = "vehicle";
+        const REQUIRED: bool = true;
     }
 
     /// `planningperiod_start`: Rentman field `planningperiod_start`.
@@ -9386,6 +10270,7 @@ pub mod ProjectVehicle {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planningperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planningperiod_end`: Rentman field `planningperiod_end`.
@@ -9396,6 +10281,7 @@ pub mod ProjectVehicle {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planningperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -9406,6 +10292,7 @@ pub mod ProjectVehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `remark_planner`: Rentman field `remark_planner`.
@@ -9416,6 +10303,7 @@ pub mod ProjectVehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark_planner";
+        const REQUIRED: bool = true;
     }
 
     /// `costs`: GENERATED FIELD.
@@ -9426,6 +10314,7 @@ pub mod ProjectVehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "costs";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -9433,14 +10322,15 @@ pub mod ProjectVehicle {
 
     impl ProjectionField for custom {
         type Resource = ProjectVehicle;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9448,6 +10338,7 @@ pub mod ProjectVehicle {
         type Value = Revision<ProjectVehicle>;
         type Wire = Revision<ProjectVehicle>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9469,6 +10360,7 @@ pub mod PurchaseOrder {
         type Value = Id<PurchaseOrder>;
         type Wire = Id<PurchaseOrder>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9479,6 +10371,7 @@ pub mod PurchaseOrder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9489,6 +10382,7 @@ pub mod PurchaseOrder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9499,6 +10393,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9509,6 +10404,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `filename`: Rentman field `filename`.
@@ -9519,6 +10415,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "filename";
+        const REQUIRED: bool = true;
     }
 
     /// `subject`: Rentman field `subject`.
@@ -9529,6 +10426,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "subject";
+        const REQUIRED: bool = true;
     }
 
     /// `owner`: Rentman field `owner`.
@@ -9539,6 +10437,7 @@ pub mod PurchaseOrder {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "owner";
+        const REQUIRED: bool = true;
     }
 
     /// `date_of_issue`: Rentman field `date_of_issue`.
@@ -9549,6 +10448,7 @@ pub mod PurchaseOrder {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "date_of_issue";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_date`: Rentman field `delivery_date`.
@@ -9559,6 +10459,7 @@ pub mod PurchaseOrder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "delivery_date";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -9569,6 +10470,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -9579,6 +10481,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `approval_status`: Rentman field `approval_status`.
@@ -9589,6 +10492,7 @@ pub mod PurchaseOrder {
         type Value = PurchaseOrderApprovalStatus;
         type Wire = PurchaseOrderApprovalStatus;
         const NAME: &'static str = "approval_status";
+        const REQUIRED: bool = true;
     }
 
     /// `previous_status`: Rentman field `previous_status`.
@@ -9596,9 +10500,10 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for previous_status {
         type Resource = PurchaseOrder;
-        type Value = Option<PurchaseOrderPreviousStatus>;
-        type Wire = Option<PurchaseOrderPreviousStatus>;
+        type Value = PurchaseOrderPreviousStatus;
+        type Wire = PurchaseOrderPreviousStatus;
         const NAME: &'static str = "previous_status";
+        const REQUIRED: bool = true;
     }
 
     /// `approved_amount`: Rentman field `approved_amount`.
@@ -9609,6 +10514,7 @@ pub mod PurchaseOrder {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "approved_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `supplier`: Rentman field `supplier`.
@@ -9619,6 +10525,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "supplier";
+        const REQUIRED: bool = true;
     }
 
     /// `contact_person`: Rentman field `contact_person`.
@@ -9629,6 +10536,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contact_person";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_type`: Rentman field `delivery_type`.
@@ -9639,6 +10547,7 @@ pub mod PurchaseOrder {
         type Value = PurchaseOrderDeliveryType;
         type Wire = PurchaseOrderDeliveryType;
         const NAME: &'static str = "delivery_type";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_location`: Rentman field `delivery_location`.
@@ -9649,6 +10558,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "delivery_location";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_location_person`: Rentman field `delivery_location_person`.
@@ -9659,6 +10569,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "delivery_location_person";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_warehouse`: Rentman field `delivery_warehouse`.
@@ -9669,6 +10580,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "delivery_warehouse";
+        const REQUIRED: bool = true;
     }
 
     /// `accounting_code`: External identifier used for integrations with accounting software.
@@ -9679,6 +10591,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "accounting_code";
+        const REQUIRED: bool = true;
     }
 
     /// `export_status`: Rentman field `export_status`.
@@ -9689,6 +10602,7 @@ pub mod PurchaseOrder {
         type Value = PurchaseOrderExportStatus;
         type Wire = PurchaseOrderExportStatus;
         const NAME: &'static str = "export_status";
+        const REQUIRED: bool = true;
     }
 
     /// `export_date`: Rentman field `export_date`.
@@ -9699,6 +10613,7 @@ pub mod PurchaseOrder {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "export_date";
+        const REQUIRED: bool = true;
     }
 
     /// `export_message`: Rentman field `export_message`.
@@ -9709,6 +10624,7 @@ pub mod PurchaseOrder {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "export_message";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -9719,6 +10635,7 @@ pub mod PurchaseOrder {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount`: GENERATED FIELD.
@@ -9729,6 +10646,7 @@ pub mod PurchaseOrder {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount_tax`: GENERATED FIELD.
@@ -9739,6 +10657,7 @@ pub mod PurchaseOrder {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount_with_tax`: GENERATED FIELD.
@@ -9749,6 +10668,7 @@ pub mod PurchaseOrder {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_with_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `approved_by`: GENERATED FIELD.
@@ -9759,6 +10679,7 @@ pub mod PurchaseOrder {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "approved_by";
+        const REQUIRED: bool = true;
     }
 
     /// `approved_at`: GENERATED FIELD.
@@ -9769,6 +10690,7 @@ pub mod PurchaseOrder {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "approved_at";
+        const REQUIRED: bool = true;
     }
 
     /// `projects_json`: GENERATED FIELD.
@@ -9779,6 +10701,7 @@ pub mod PurchaseOrder {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "projects_json";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -9786,14 +10709,15 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for custom {
         type Resource = PurchaseOrder;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9801,6 +10725,7 @@ pub mod PurchaseOrder {
         type Value = Revision<PurchaseOrder>;
         type Wire = Revision<PurchaseOrder>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9822,6 +10747,7 @@ pub mod PurchaseOrderCost {
         type Value = Id<PurchaseOrderCost>;
         type Wire = Id<PurchaseOrderCost>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9832,6 +10758,7 @@ pub mod PurchaseOrderCost {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -9842,6 +10769,7 @@ pub mod PurchaseOrderCost {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -9852,6 +10780,7 @@ pub mod PurchaseOrderCost {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -9862,6 +10791,7 @@ pub mod PurchaseOrderCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `purchase_order`: Rentman field `purchase_order`.
@@ -9872,6 +10802,7 @@ pub mod PurchaseOrderCost {
         type Value = Id<PurchaseOrder>;
         type Wire = Link<PurchaseOrder>;
         const NAME: &'static str = "purchase_order";
+        const REQUIRED: bool = true;
     }
 
     /// `costitem`: Rentman field `costitem`.
@@ -9882,6 +10813,7 @@ pub mod PurchaseOrderCost {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "costitem";
+        const REQUIRED: bool = true;
     }
 
     /// `costitemtype`: Rentman field `costitemtype`.
@@ -9892,6 +10824,7 @@ pub mod PurchaseOrderCost {
         type Value = PurchaseOrderCostCostitemtype;
         type Wire = PurchaseOrderCostCostitemtype;
         const NAME: &'static str = "costitemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `approved_amount`: Rentman field `approved_amount`.
@@ -9902,6 +10835,7 @@ pub mod PurchaseOrderCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "approved_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: GENERATED FIELD.
@@ -9912,6 +10846,7 @@ pub mod PurchaseOrderCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount`: GENERATED FIELD.
@@ -9922,6 +10857,7 @@ pub mod PurchaseOrderCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount_tax`: GENERATED FIELD.
@@ -9932,6 +10868,7 @@ pub mod PurchaseOrderCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `underlying_cost_amount_with_tax`: GENERATED FIELD.
@@ -9942,6 +10879,7 @@ pub mod PurchaseOrderCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_with_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: GENERATED FIELD.
@@ -9952,11 +10890,12 @@ pub mod PurchaseOrderCost {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -9964,6 +10903,7 @@ pub mod PurchaseOrderCost {
         type Value = Revision<PurchaseOrderCost>;
         type Wire = Revision<PurchaseOrderCost>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -9985,6 +10925,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Id<PurchaseOrderGlobalCost>;
         type Wire = Id<PurchaseOrderGlobalCost>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -9995,6 +10936,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10005,6 +10947,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10015,6 +10958,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10025,6 +10969,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `purchase_order`: Rentman field `purchase_order`.
@@ -10035,6 +10980,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Id<PurchaseOrder>;
         type Wire = Link<PurchaseOrder>;
         const NAME: &'static str = "purchase_order";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -10045,6 +10991,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `unit_purchase_cost`: Rentman field `unit_purchase_cost`.
@@ -10055,6 +11002,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "unit_purchase_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -10065,6 +11013,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `taxclass`: Rentman field `taxclass`.
@@ -10075,11 +11024,12 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Option<Id<TaxClass>>;
         type Wire = Option<Link<TaxClass>>;
         const NAME: &'static str = "taxclass";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -10087,6 +11037,7 @@ pub mod PurchaseOrderGlobalCost {
         type Value = Revision<PurchaseOrderGlobalCost>;
         type Wire = Revision<PurchaseOrderGlobalCost>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -10108,6 +11059,7 @@ pub mod Quote {
         type Value = Id<Quote>;
         type Wire = Id<Quote>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -10118,6 +11070,7 @@ pub mod Quote {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10128,6 +11081,7 @@ pub mod Quote {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10138,6 +11092,7 @@ pub mod Quote {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10148,6 +11103,7 @@ pub mod Quote {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -10158,6 +11114,7 @@ pub mod Quote {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `customer`: Rentman field `customer`.
@@ -10168,6 +11125,7 @@ pub mod Quote {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "customer";
+        const REQUIRED: bool = true;
     }
 
     /// `contact`: Rentman field `contact`.
@@ -10178,6 +11136,7 @@ pub mod Quote {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contact";
+        const REQUIRED: bool = true;
     }
 
     /// `date`: Rentman field `date`.
@@ -10188,6 +11147,7 @@ pub mod Quote {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "date";
+        const REQUIRED: bool = true;
     }
 
     /// `expiration_date`: The date on which this quotation expires.
@@ -10198,6 +11158,7 @@ pub mod Quote {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "expiration_date";
+        const REQUIRED: bool = true;
     }
 
     /// `version`: Rentman field `version`.
@@ -10208,6 +11169,7 @@ pub mod Quote {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "version";
+        const REQUIRED: bool = true;
     }
 
     /// `subject`: Rentman field `subject`.
@@ -10218,6 +11180,7 @@ pub mod Quote {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "subject";
+        const REQUIRED: bool = true;
     }
 
     /// `show_tax`: Rentman field `show_tax`.
@@ -10228,6 +11191,7 @@ pub mod Quote {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "show_tax";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -10238,6 +11202,7 @@ pub mod Quote {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `filename`: Rentman field `filename`.
@@ -10248,6 +11213,7 @@ pub mod Quote {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "filename";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price`: GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -10255,9 +11221,10 @@ pub mod Quote {
 
     impl ProjectionField for project_total_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price_cancelled`: GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
@@ -10265,9 +11232,10 @@ pub mod Quote {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price_cancelled";
+        const REQUIRED: bool = true;
     }
 
     /// `project_rental_price`: GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
@@ -10275,9 +11243,10 @@ pub mod Quote {
 
     impl ProjectionField for project_rental_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_rental_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_sale_price`: GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
@@ -10285,9 +11254,10 @@ pub mod Quote {
 
     impl ProjectionField for project_sale_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_crew_price`: GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
@@ -10295,9 +11265,10 @@ pub mod Quote {
 
     impl ProjectionField for project_crew_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_crew_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_transport_price`: GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
@@ -10305,9 +11276,10 @@ pub mod Quote {
 
     impl ProjectionField for project_transport_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_transport_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_other_price`: GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
@@ -10315,9 +11287,10 @@ pub mod Quote {
 
     impl ProjectionField for project_other_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_other_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_insurance_price`: GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
@@ -10325,9 +11298,10 @@ pub mod Quote {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_insurance_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_services_price`: GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
@@ -10335,9 +11309,10 @@ pub mod Quote {
 
     impl ProjectionField for project_services_price {
         type Resource = Quote;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_services_price";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: GENERATED FIELD.
@@ -10348,6 +11323,7 @@ pub mod Quote {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `price_invat`: GENERATED FIELD.
@@ -10358,6 +11334,7 @@ pub mod Quote {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
+        const REQUIRED: bool = true;
     }
 
     /// `vat_amount`: GENERATED FIELD.
@@ -10368,6 +11345,7 @@ pub mod Quote {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -10378,11 +11356,12 @@ pub mod Quote {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -10390,6 +11369,7 @@ pub mod Quote {
         type Value = Revision<Quote>;
         type Wire = Revision<Quote>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -10411,6 +11391,7 @@ pub mod Rate {
         type Value = Id<Rate>;
         type Wire = Id<Rate>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -10421,6 +11402,7 @@ pub mod Rate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10431,6 +11413,7 @@ pub mod Rate {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10441,6 +11424,7 @@ pub mod Rate {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10451,6 +11435,7 @@ pub mod Rate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -10461,6 +11446,7 @@ pub mod Rate {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `archived`: Rentman field `archived`.
@@ -10471,6 +11457,7 @@ pub mod Rate {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "archived";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -10481,6 +11468,7 @@ pub mod Rate {
         type Value = RateType;
         type Wire = RateType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `subtype`: Rentman field `subtype`.
@@ -10491,11 +11479,12 @@ pub mod Rate {
         type Value = RateSubtype;
         type Wire = RateSubtype;
         const NAME: &'static str = "subtype";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -10503,6 +11492,7 @@ pub mod Rate {
         type Value = Revision<Rate>;
         type Wire = Revision<Rate>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -10524,6 +11514,7 @@ pub mod RateFactor {
         type Value = Id<RateFactor>;
         type Wire = Id<RateFactor>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -10534,6 +11525,7 @@ pub mod RateFactor {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10544,6 +11536,7 @@ pub mod RateFactor {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10554,6 +11547,7 @@ pub mod RateFactor {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10564,6 +11558,7 @@ pub mod RateFactor {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `rate_id`: Rentman field `rate_id`.
@@ -10574,6 +11569,7 @@ pub mod RateFactor {
         type Value = Id<Rate>;
         type Wire = Link<Rate>;
         const NAME: &'static str = "rate_id";
+        const REQUIRED: bool = true;
     }
 
     /// `from`: Rentman field `from`.
@@ -10584,6 +11580,7 @@ pub mod RateFactor {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "from";
+        const REQUIRED: bool = true;
     }
 
     /// `to`: Rentman field `to`.
@@ -10594,6 +11591,7 @@ pub mod RateFactor {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "to";
+        const REQUIRED: bool = true;
     }
 
     /// `variable`: Rentman field `variable`.
@@ -10604,6 +11602,7 @@ pub mod RateFactor {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "variable";
+        const REQUIRED: bool = true;
     }
 
     /// `fixed`: Rentman field `fixed`.
@@ -10614,11 +11613,12 @@ pub mod RateFactor {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "fixed";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -10626,6 +11626,7 @@ pub mod RateFactor {
         type Value = Revision<RateFactor>;
         type Wire = Revision<RateFactor>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -10647,6 +11648,7 @@ pub mod Repair {
         type Value = Id<Repair>;
         type Wire = Id<Repair>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -10657,6 +11659,7 @@ pub mod Repair {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10667,6 +11670,7 @@ pub mod Repair {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10677,6 +11681,7 @@ pub mod Repair {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10687,6 +11692,7 @@ pub mod Repair {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `internal_name`: Rentman field `internal_name`.
@@ -10697,6 +11703,7 @@ pub mod Repair {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "internal_name";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -10707,6 +11714,7 @@ pub mod Repair {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `serialnumber`: Rentman field `serialnumber`.
@@ -10717,6 +11725,7 @@ pub mod Repair {
         type Value = Option<Id<SerialNumber>>;
         type Wire = Option<Link<SerialNumber>>;
         const NAME: &'static str = "serialnumber";
+        const REQUIRED: bool = true;
     }
 
     /// `reporter`: Rentman field `reporter`.
@@ -10727,6 +11736,7 @@ pub mod Repair {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "reporter";
+        const REQUIRED: bool = true;
     }
 
     /// `assignee`: Rentman field `assignee`.
@@ -10737,6 +11747,7 @@ pub mod Repair {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "assignee";
+        const REQUIRED: bool = true;
     }
 
     /// `external_repairer`: Rentman field `external_repairer`.
@@ -10747,6 +11758,7 @@ pub mod Repair {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "external_repairer";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -10757,6 +11769,7 @@ pub mod Repair {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `repairperiod_start`: Rentman field `repairperiod_start`.
@@ -10767,6 +11780,7 @@ pub mod Repair {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "repairperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `repairperiod_end`: Rentman field `repairperiod_end`.
@@ -10777,6 +11791,7 @@ pub mod Repair {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "repairperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `amount`: Rentman field `amount`.
@@ -10787,6 +11802,7 @@ pub mod Repair {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "amount";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -10797,6 +11813,7 @@ pub mod Repair {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `repair_costs`: Rentman field `repair_costs`.
@@ -10807,6 +11824,7 @@ pub mod Repair {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "repair_costs";
+        const REQUIRED: bool = true;
     }
 
     /// `is_usable`: Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
@@ -10817,6 +11835,7 @@ pub mod Repair {
         type Value = RepairIsUsable;
         type Wire = RepairIsUsable;
         const NAME: &'static str = "is_usable";
+        const REQUIRED: bool = true;
     }
 
     /// `costs_charged_to_customer`: Rentman field `costs_charged_to_customer`.
@@ -10827,6 +11846,7 @@ pub mod Repair {
         type Value = Option<Id<ProjectCost>>;
         type Wire = Option<Link<ProjectCost>>;
         const NAME: &'static str = "costs_charged_to_customer";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject`: Rentman field `subproject`.
@@ -10837,6 +11857,7 @@ pub mod Repair {
         type Value = Option<Id<Subproject>>;
         type Wire = Option<Link<Subproject>>;
         const NAME: &'static str = "subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `stock_location`: Rentman field `stock_location`.
@@ -10847,6 +11868,7 @@ pub mod Repair {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "stock_location";
+        const REQUIRED: bool = true;
     }
 
     /// `repair_status`: Rentman field `repair_status`.
@@ -10857,6 +11879,7 @@ pub mod Repair {
         type Value = RepairRepairStatus;
         type Wire = RepairRepairStatus;
         const NAME: &'static str = "repair_status";
+        const REQUIRED: bool = true;
     }
 
     /// `unrepairable_of`: Rentman field `unrepairable_of`.
@@ -10867,6 +11890,7 @@ pub mod Repair {
         type Value = Option<Id<Repair>>;
         type Wire = Option<Link<Repair>>;
         const NAME: &'static str = "unrepairable_of";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -10877,6 +11901,7 @@ pub mod Repair {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -10884,14 +11909,15 @@ pub mod Repair {
 
     impl ProjectionField for custom {
         type Resource = Repair;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -10899,6 +11925,7 @@ pub mod Repair {
         type Value = Revision<Repair>;
         type Wire = Revision<Repair>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -10920,6 +11947,7 @@ pub mod SerialNumber {
         type Value = Id<SerialNumber>;
         type Wire = Id<SerialNumber>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -10930,6 +11958,7 @@ pub mod SerialNumber {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -10940,6 +11969,7 @@ pub mod SerialNumber {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -10950,6 +11980,7 @@ pub mod SerialNumber {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -10960,6 +11991,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -10970,6 +12002,7 @@ pub mod SerialNumber {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `serial`: The manufacturer serial number of the equipment.
@@ -10980,6 +12013,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "serial";
+        const REQUIRED: bool = true;
     }
 
     /// `purchasedate`: Rentman field `purchasedate`.
@@ -10990,6 +12024,7 @@ pub mod SerialNumber {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "purchasedate";
+        const REQUIRED: bool = true;
     }
 
     /// `depreciation_monthly`: Rentman field `depreciation_monthly`.
@@ -11000,6 +12035,7 @@ pub mod SerialNumber {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "depreciation_monthly";
+        const REQUIRED: bool = true;
     }
 
     /// `book_value`: Rentman field `book_value`.
@@ -11010,6 +12046,7 @@ pub mod SerialNumber {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "book_value";
+        const REQUIRED: bool = true;
     }
 
     /// `residual_value`: Rentman field `residual_value`.
@@ -11020,6 +12057,7 @@ pub mod SerialNumber {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "residual_value";
+        const REQUIRED: bool = true;
     }
 
     /// `purchase_costs`: Rentman field `purchase_costs`.
@@ -11030,6 +12068,7 @@ pub mod SerialNumber {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "purchase_costs";
+        const REQUIRED: bool = true;
     }
 
     /// `active`: Rentman field `active`.
@@ -11040,6 +12079,7 @@ pub mod SerialNumber {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "active";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -11050,6 +12090,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `ref`: Internal reference of a specific serial number.
@@ -11060,6 +12101,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "ref";
+        const REQUIRED: bool = true;
     }
 
     /// `asset_location`: Rentman field `asset_location`.
@@ -11070,6 +12112,7 @@ pub mod SerialNumber {
         type Value = Id<StockLocation>;
         type Wire = Link<StockLocation>;
         const NAME: &'static str = "asset_location";
+        const REQUIRED: bool = true;
     }
 
     /// `image`: Rentman field `image`.
@@ -11080,6 +12123,7 @@ pub mod SerialNumber {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "image";
+        const REQUIRED: bool = true;
     }
 
     /// `current_book_value`: GENERATED FIELD.
@@ -11090,6 +12134,7 @@ pub mod SerialNumber {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "current_book_value";
+        const REQUIRED: bool = true;
     }
 
     /// `next_inspection`: GENERATED FIELD.
@@ -11100,6 +12145,7 @@ pub mod SerialNumber {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "next_inspection";
+        const REQUIRED: bool = true;
     }
 
     /// `qrcodes`: GENERATED FIELD.
@@ -11110,6 +12156,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "qrcodes";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -11120,6 +12167,7 @@ pub mod SerialNumber {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `last_subproject`: GENERATED FIELD.
@@ -11130,6 +12178,7 @@ pub mod SerialNumber {
         type Value = Option<Id<Subproject>>;
         type Wire = Option<Link<Subproject>>;
         const NAME: &'static str = "last_subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `sealed`: GENERATED FIELD.
@@ -11140,6 +12189,7 @@ pub mod SerialNumber {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "sealed";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -11147,14 +12197,15 @@ pub mod SerialNumber {
 
     impl ProjectionField for custom {
         type Resource = SerialNumber;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -11162,6 +12213,7 @@ pub mod SerialNumber {
         type Value = Revision<SerialNumber>;
         type Wire = Revision<SerialNumber>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -11183,6 +12235,7 @@ pub mod Status {
         type Value = Id<Status>;
         type Wire = Id<Status>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -11193,6 +12246,7 @@ pub mod Status {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -11203,6 +12257,7 @@ pub mod Status {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -11213,6 +12268,7 @@ pub mod Status {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -11223,6 +12279,7 @@ pub mod Status {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -11233,11 +12290,12 @@ pub mod Status {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -11245,6 +12303,7 @@ pub mod Status {
         type Value = Revision<Status>;
         type Wire = Revision<Status>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -11266,6 +12325,7 @@ pub mod StockLocation {
         type Value = Id<StockLocation>;
         type Wire = Id<StockLocation>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -11276,6 +12336,7 @@ pub mod StockLocation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -11286,6 +12347,7 @@ pub mod StockLocation {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -11296,6 +12358,7 @@ pub mod StockLocation {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -11306,6 +12369,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -11316,6 +12380,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `city`: Rentman field `city`.
@@ -11326,6 +12391,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "city";
+        const REQUIRED: bool = true;
     }
 
     /// `street`: Rentman field `street`.
@@ -11336,6 +12402,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "street";
+        const REQUIRED: bool = true;
     }
 
     /// `house_number`: Rentman field `house_number`.
@@ -11346,6 +12413,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "house_number";
+        const REQUIRED: bool = true;
     }
 
     /// `postal_code`: Rentman field `postal_code`.
@@ -11356,6 +12424,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "postal_code";
+        const REQUIRED: bool = true;
     }
 
     /// `state_province`: Rentman field `state_province`.
@@ -11366,6 +12435,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "state_province";
+        const REQUIRED: bool = true;
     }
 
     /// `country`: Rentman field `country`.
@@ -11376,6 +12446,7 @@ pub mod StockLocation {
         type Value = StockLocationCountry;
         type Wire = StockLocationCountry;
         const NAME: &'static str = "country";
+        const REQUIRED: bool = true;
     }
 
     /// `active`: Rentman field `active`.
@@ -11386,6 +12457,7 @@ pub mod StockLocation {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "active";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Projects can only be planned from warehouses. Storage locations are used as (temporary) storage and deliver equipment to warehouses. You can change the number of paid warehouses in your license. Storage locations are free of charge.
@@ -11396,6 +12468,7 @@ pub mod StockLocation {
         type Value = StockLocationType;
         type Wire = StockLocationType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -11406,6 +12479,7 @@ pub mod StockLocation {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `in_archive`: This stock location is archived. This means that it cannot be used in equipment planning.
@@ -11416,11 +12490,12 @@ pub mod StockLocation {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_archive";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -11428,6 +12503,7 @@ pub mod StockLocation {
         type Value = Revision<StockLocation>;
         type Wire = Revision<StockLocation>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -11449,6 +12525,7 @@ pub mod StockMovement {
         type Value = Id<StockMovement>;
         type Wire = Id<StockMovement>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -11459,6 +12536,7 @@ pub mod StockMovement {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -11469,6 +12547,7 @@ pub mod StockMovement {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -11479,6 +12558,7 @@ pub mod StockMovement {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -11489,6 +12569,7 @@ pub mod StockMovement {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `amount`: Rentman field `amount`.
@@ -11499,6 +12580,7 @@ pub mod StockMovement {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "amount";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -11509,6 +12591,7 @@ pub mod StockMovement {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `projectequipment`: Rentman field `projectequipment`.
@@ -11519,6 +12602,7 @@ pub mod StockMovement {
         type Value = Option<Id<ProjectEquipment>>;
         type Wire = Option<Link<ProjectEquipment>>;
         const NAME: &'static str = "projectequipment";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -11529,6 +12613,7 @@ pub mod StockMovement {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `details`: Rentman field `details`.
@@ -11539,6 +12624,7 @@ pub mod StockMovement {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "details";
+        const REQUIRED: bool = true;
     }
 
     /// `date`: Rentman field `date`.
@@ -11549,6 +12635,7 @@ pub mod StockMovement {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "date";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -11559,6 +12646,7 @@ pub mod StockMovement {
         type Value = StockMovementType;
         type Wire = StockMovementType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `stock_location`: Rentman field `stock_location`.
@@ -11569,6 +12657,7 @@ pub mod StockMovement {
         type Value = Id<StockLocation>;
         type Wire = Link<StockLocation>;
         const NAME: &'static str = "stock_location";
+        const REQUIRED: bool = true;
     }
 
     /// `api_client`: Rentman field `api_client`.
@@ -11579,11 +12668,12 @@ pub mod StockMovement {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "api_client";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -11591,6 +12681,7 @@ pub mod StockMovement {
         type Value = Revision<StockMovement>;
         type Wire = Revision<StockMovement>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -11612,6 +12703,7 @@ pub mod Subproject {
         type Value = Id<Subproject>;
         type Wire = Id<Subproject>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -11622,6 +12714,7 @@ pub mod Subproject {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -11632,6 +12725,7 @@ pub mod Subproject {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -11642,6 +12736,7 @@ pub mod Subproject {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -11652,6 +12747,7 @@ pub mod Subproject {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `project`: Rentman field `project`.
@@ -11662,6 +12758,7 @@ pub mod Subproject {
         type Value = Id<Project>;
         type Wire = Link<Project>;
         const NAME: &'static str = "project";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -11672,6 +12769,7 @@ pub mod Subproject {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -11682,6 +12780,7 @@ pub mod Subproject {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: Rentman field `status`.
@@ -11692,6 +12791,7 @@ pub mod Subproject {
         type Value = Id<Status>;
         type Wire = Link<Status>;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `is_template`: Rentman field `is_template`.
@@ -11702,6 +12802,7 @@ pub mod Subproject {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_template";
+        const REQUIRED: bool = true;
     }
 
     /// `location`: Rentman field `location`.
@@ -11712,6 +12813,7 @@ pub mod Subproject {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "location";
+        const REQUIRED: bool = true;
     }
 
     /// `loc_contact`: Rentman field `loc_contact`.
@@ -11722,6 +12824,7 @@ pub mod Subproject {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "loc_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `insurance_rate`: Rentman field `insurance_rate`.
@@ -11732,6 +12835,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "insurance_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_rental`: Rentman field `discount_rental`.
@@ -11742,6 +12846,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_rental";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_sale`: Rentman field `discount_sale`.
@@ -11752,6 +12857,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_sale";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_crew`: Rentman field `discount_crew`.
@@ -11762,6 +12868,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_crew";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_transport`: Rentman field `discount_transport`.
@@ -11772,6 +12879,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_transport";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_additional_costs`: Rentman field `discount_additional_costs`.
@@ -11782,6 +12890,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_additional_costs";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_services`: Rentman field `discount_services`.
@@ -11792,6 +12901,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_services";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_subproject`: Rentman field `discount_subproject`.
@@ -11802,6 +12912,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_subproject";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_fixed`: Rentman field `discount_fixed`.
@@ -11812,6 +12923,7 @@ pub mod Subproject {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "discount_fixed";
+        const REQUIRED: bool = true;
     }
 
     /// `discount_fixed_amount`: Rentman field `discount_fixed_amount`.
@@ -11822,6 +12934,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount_fixed_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `fixed_price`: Rentman field `fixed_price`.
@@ -11832,6 +12945,7 @@ pub mod Subproject {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "fixed_price";
+        const REQUIRED: bool = true;
     }
 
     /// `in_planning`: Rentman field `in_planning`.
@@ -11842,6 +12956,7 @@ pub mod Subproject {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_planning";
+        const REQUIRED: bool = true;
     }
 
     /// `in_financial`: Rentman field `in_financial`.
@@ -11852,6 +12967,7 @@ pub mod Subproject {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_financial";
+        const REQUIRED: bool = true;
     }
 
     /// `asset_location_from`: Rentman field `asset_location_from`.
@@ -11862,6 +12978,7 @@ pub mod Subproject {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "asset_location_from";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price`: GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -11869,9 +12986,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_total_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_total_price_cancelled`: GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
@@ -11879,9 +12997,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_total_price_cancelled";
+        const REQUIRED: bool = true;
     }
 
     /// `project_rental_price`: GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
@@ -11889,9 +13008,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_rental_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_rental_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_sale_price`: GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
@@ -11899,9 +13019,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_sale_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_sale_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_crew_price`: GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
@@ -11909,9 +13030,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_crew_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_crew_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_transport_price`: GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
@@ -11919,9 +13041,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_transport_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_transport_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_other_price`: GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
@@ -11929,9 +13052,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_other_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_other_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_insurance_price`: GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
@@ -11939,9 +13063,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_insurance_price";
+        const REQUIRED: bool = true;
     }
 
     /// `project_services_price`: GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
@@ -11949,9 +13074,10 @@ pub mod Subproject {
 
     impl ProjectionField for project_services_price {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "project_services_price";
+        const REQUIRED: bool = true;
     }
 
     /// `estimated_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -11959,9 +13085,10 @@ pub mod Subproject {
 
     impl ProjectionField for estimated_cost {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "estimated_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `planned_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -11969,9 +13096,10 @@ pub mod Subproject {
 
     impl ProjectionField for planned_cost {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "planned_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `actual_cost`: GENERATED FIELD. Not visible in collection responses unless explicitly requested.
@@ -11979,9 +13107,10 @@ pub mod Subproject {
 
     impl ProjectionField for actual_cost {
         type Resource = Subproject;
-        type Value = Option<RentmanAmount>;
-        type Wire = Option<RentmanAmount>;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "actual_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `already_invoiced`: GENERATED FIELD.
@@ -11992,6 +13121,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "already_invoiced";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: GENERATED FIELD.
@@ -12002,6 +13132,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: GENERATED FIELD.
@@ -12012,6 +13143,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: GENERATED FIELD.
@@ -12022,6 +13154,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: GENERATED FIELD.
@@ -12032,6 +13165,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `weight`: GENERATED FIELD.
@@ -12042,6 +13176,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
+        const REQUIRED: bool = true;
     }
 
     /// `power`: GENERATED FIELD.
@@ -12052,6 +13187,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "power";
+        const REQUIRED: bool = true;
     }
 
     /// `current`: GENERATED FIELD.
@@ -12062,6 +13198,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "current";
+        const REQUIRED: bool = true;
     }
 
     /// `purchasecosts`: GENERATED FIELD.
@@ -12072,6 +13209,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "purchasecosts";
+        const REQUIRED: bool = true;
     }
 
     /// `volume`: GENERATED FIELD.
@@ -12082,6 +13220,7 @@ pub mod Subproject {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_period_from`: GENERATED FIELD.
@@ -12092,6 +13231,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "equipment_period_from";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_period_to`: GENERATED FIELD.
@@ -12102,6 +13242,7 @@ pub mod Subproject {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "equipment_period_to";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -12109,14 +13250,15 @@ pub mod Subproject {
 
     impl ProjectionField for custom {
         type Resource = Subproject;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -12124,6 +13266,7 @@ pub mod Subproject {
         type Value = Revision<Subproject>;
         type Wire = Revision<Subproject>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -12145,6 +13288,7 @@ pub mod Subrental {
         type Value = Id<Subrental>;
         type Wire = Id<Subrental>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -12155,6 +13299,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -12165,6 +13310,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -12175,6 +13321,7 @@ pub mod Subrental {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -12185,6 +13332,7 @@ pub mod Subrental {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -12195,6 +13343,7 @@ pub mod Subrental {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `accountmanager`: Rentman field `accountmanager`.
@@ -12205,6 +13354,7 @@ pub mod Subrental {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "accountmanager";
+        const REQUIRED: bool = true;
     }
 
     /// `reference`: Rentman field `reference`.
@@ -12215,6 +13365,7 @@ pub mod Subrental {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "reference";
+        const REQUIRED: bool = true;
     }
 
     /// `supplier`: Rentman field `supplier`.
@@ -12225,6 +13376,7 @@ pub mod Subrental {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "supplier";
+        const REQUIRED: bool = true;
     }
 
     /// `number`: Rentman field `number`.
@@ -12235,6 +13387,7 @@ pub mod Subrental {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "number";
+        const REQUIRED: bool = true;
     }
 
     /// `contactperson`: Rentman field `contactperson`.
@@ -12245,6 +13398,7 @@ pub mod Subrental {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contactperson";
+        const REQUIRED: bool = true;
     }
 
     /// `location`: Rentman field `location`.
@@ -12255,6 +13409,7 @@ pub mod Subrental {
         type Value = Option<Id<Contact>>;
         type Wire = Option<Link<Contact>>;
         const NAME: &'static str = "location";
+        const REQUIRED: bool = true;
     }
 
     /// `location_contact`: Rentman field `location_contact`.
@@ -12265,6 +13420,7 @@ pub mod Subrental {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "location_contact";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_start`: Rentman field `usageperiod_start`.
@@ -12275,6 +13431,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `usageperiod_end`: Rentman field `usageperiod_end`.
@@ -12285,6 +13442,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "usageperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -12295,6 +13453,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -12305,6 +13464,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_in`: Rentman field `delivery_in`.
@@ -12315,6 +13475,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "delivery_in";
+        const REQUIRED: bool = true;
     }
 
     /// `delivery_out`: Rentman field `delivery_out`.
@@ -12325,6 +13486,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "delivery_out";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment_cost`: Rentman field `equipment_cost`.
@@ -12335,6 +13497,7 @@ pub mod Subrental {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "equipment_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: Rentman field `price`.
@@ -12345,6 +13508,7 @@ pub mod Subrental {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `extra_cost`: For possible transport costs, administration costs etc.
@@ -12355,6 +13519,7 @@ pub mod Subrental {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "extra_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `auto_update_costs`: Rentman field `auto_update_costs`.
@@ -12365,6 +13530,7 @@ pub mod Subrental {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "auto_update_costs";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -12375,6 +13541,7 @@ pub mod Subrental {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -12385,6 +13552,7 @@ pub mod Subrental {
         type Value = SubrentalType;
         type Wire = SubrentalType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: Rentman field `status`.
@@ -12395,6 +13563,7 @@ pub mod Subrental {
         type Value = Id<Status>;
         type Wire = Link<Status>;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `sent`: Rentman field `sent`.
@@ -12405,6 +13574,7 @@ pub mod Subrental {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "sent";
+        const REQUIRED: bool = true;
     }
 
     /// `asset_location_to`: Rentman field `asset_location_to`.
@@ -12415,6 +13585,7 @@ pub mod Subrental {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "asset_location_to";
+        const REQUIRED: bool = true;
     }
 
     /// `asset_location_from`: Rentman field `asset_location_from`.
@@ -12425,6 +13596,7 @@ pub mod Subrental {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "asset_location_from";
+        const REQUIRED: bool = true;
     }
 
     /// `is_internal`: Rentman field `is_internal`.
@@ -12435,6 +13607,7 @@ pub mod Subrental {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_internal";
+        const REQUIRED: bool = true;
     }
 
     /// `supplier_project`: Rentman field `supplier_project`.
@@ -12445,6 +13618,7 @@ pub mod Subrental {
         type Value = Option<Id<Project>>;
         type Wire = Option<Link<Project>>;
         const NAME: &'static str = "supplier_project";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -12455,6 +13629,7 @@ pub mod Subrental {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -12462,14 +13637,15 @@ pub mod Subrental {
 
     impl ProjectionField for custom {
         type Resource = Subrental;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -12477,6 +13653,7 @@ pub mod Subrental {
         type Value = Revision<Subrental>;
         type Wire = Revision<Subrental>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -12498,6 +13675,7 @@ pub mod SubrentalEquipment {
         type Value = Id<SubrentalEquipment>;
         type Wire = Id<SubrentalEquipment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -12508,6 +13686,7 @@ pub mod SubrentalEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -12518,6 +13697,7 @@ pub mod SubrentalEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -12528,6 +13708,7 @@ pub mod SubrentalEquipment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -12538,6 +13719,7 @@ pub mod SubrentalEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `subrental_group`: Rentman field `subrental_group`.
@@ -12548,6 +13730,7 @@ pub mod SubrentalEquipment {
         type Value = Id<SubrentalEquipmentGroup>;
         type Wire = Link<SubrentalEquipmentGroup>;
         const NAME: &'static str = "subrental_group";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -12558,6 +13741,7 @@ pub mod SubrentalEquipment {
         type Value = Option<Id<Equipment>>;
         type Wire = Option<Link<Equipment>>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `parent`: Rentman field `parent`.
@@ -12568,6 +13752,7 @@ pub mod SubrentalEquipment {
         type Value = Option<Id<SubrentalEquipment>>;
         type Wire = Option<Link<SubrentalEquipment>>;
         const NAME: &'static str = "parent";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_start`: Rentman field `planperiod_start`.
@@ -12578,6 +13763,7 @@ pub mod SubrentalEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_start";
+        const REQUIRED: bool = true;
     }
 
     /// `planperiod_end`: Rentman field `planperiod_end`.
@@ -12588,6 +13774,7 @@ pub mod SubrentalEquipment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "planperiod_end";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -12598,6 +13785,7 @@ pub mod SubrentalEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity`: Rentman field `quantity`.
@@ -12608,6 +13796,7 @@ pub mod SubrentalEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity";
+        const REQUIRED: bool = true;
     }
 
     /// `quantity_total`: Rentman field `quantity_total`.
@@ -12618,6 +13807,7 @@ pub mod SubrentalEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "quantity_total";
+        const REQUIRED: bool = true;
     }
 
     /// `unit_price`: Rentman field `unit_price`.
@@ -12628,6 +13818,7 @@ pub mod SubrentalEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
+        const REQUIRED: bool = true;
     }
 
     /// `discount`: Rentman field `discount`.
@@ -12638,6 +13829,7 @@ pub mod SubrentalEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
+        const REQUIRED: bool = true;
     }
 
     /// `factor`: Rentman field `factor`.
@@ -12648,6 +13840,7 @@ pub mod SubrentalEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -12658,6 +13851,7 @@ pub mod SubrentalEquipment {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -12668,6 +13862,7 @@ pub mod SubrentalEquipment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `lineprice`: Rentman field `lineprice`.
@@ -12678,6 +13873,7 @@ pub mod SubrentalEquipment {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "lineprice";
+        const REQUIRED: bool = true;
     }
 
     /// `supplier_planningmateriaal`: Rentman field `supplier_planningmateriaal`.
@@ -12688,11 +13884,12 @@ pub mod SubrentalEquipment {
         type Value = Option<Id<ProjectEquipment>>;
         type Wire = Option<Link<ProjectEquipment>>;
         const NAME: &'static str = "supplier_planningmateriaal";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -12700,6 +13897,7 @@ pub mod SubrentalEquipment {
         type Value = Revision<SubrentalEquipment>;
         type Wire = Revision<SubrentalEquipment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -12721,6 +13919,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Id<SubrentalEquipmentGroup>;
         type Wire = Id<SubrentalEquipmentGroup>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -12731,6 +13930,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -12741,6 +13941,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -12751,6 +13952,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -12761,6 +13963,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `subrental`: Rentman field `subrental`.
@@ -12771,6 +13974,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Id<Subrental>;
         type Wire = Link<Subrental>;
         const NAME: &'static str = "subrental";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -12781,6 +13985,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -12791,6 +13996,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `supplier_category`: Rentman field `supplier_category`.
@@ -12801,11 +14007,12 @@ pub mod SubrentalEquipmentGroup {
         type Value = Option<Id<ProjectEquipmentGroup>>;
         type Wire = Option<Link<ProjectEquipmentGroup>>;
         const NAME: &'static str = "supplier_category";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -12813,6 +14020,7 @@ pub mod SubrentalEquipmentGroup {
         type Value = Revision<SubrentalEquipmentGroup>;
         type Wire = Revision<SubrentalEquipmentGroup>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -12834,6 +14042,7 @@ pub mod Subtask {
         type Value = Id<Subtask>;
         type Wire = Id<Subtask>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -12844,6 +14053,7 @@ pub mod Subtask {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -12854,6 +14064,7 @@ pub mod Subtask {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -12864,6 +14075,7 @@ pub mod Subtask {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -12874,6 +14086,7 @@ pub mod Subtask {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `task`: Rentman field `task`.
@@ -12884,6 +14097,7 @@ pub mod Subtask {
         type Value = Id<Task>;
         type Wire = Link<Task>;
         const NAME: &'static str = "task";
+        const REQUIRED: bool = true;
     }
 
     /// `title`: Rentman field `title`.
@@ -12894,6 +14108,7 @@ pub mod Subtask {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "title";
+        const REQUIRED: bool = true;
     }
 
     /// `completed`: Rentman field `completed`.
@@ -12904,11 +14119,12 @@ pub mod Subtask {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "completed";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -12916,6 +14132,7 @@ pub mod Subtask {
         type Value = Revision<Subtask>;
         type Wire = Revision<Subtask>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -12937,6 +14154,7 @@ pub mod Supplier {
         type Value = Id<Supplier>;
         type Wire = Id<Supplier>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -12947,6 +14165,7 @@ pub mod Supplier {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -12957,6 +14176,7 @@ pub mod Supplier {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -12967,6 +14187,7 @@ pub mod Supplier {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -12977,6 +14198,7 @@ pub mod Supplier {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `equipment`: Rentman field `equipment`.
@@ -12987,6 +14209,7 @@ pub mod Supplier {
         type Value = Id<Equipment>;
         type Wire = Link<Equipment>;
         const NAME: &'static str = "equipment";
+        const REQUIRED: bool = true;
     }
 
     /// `contact`: Rentman field `contact`.
@@ -12997,6 +14220,7 @@ pub mod Supplier {
         type Value = Id<Contact>;
         type Wire = Link<Contact>;
         const NAME: &'static str = "contact";
+        const REQUIRED: bool = true;
     }
 
     /// `contactperson`: Rentman field `contactperson`.
@@ -13007,6 +14231,7 @@ pub mod Supplier {
         type Value = Option<Id<ContactPerson>>;
         type Wire = Option<Link<ContactPerson>>;
         const NAME: &'static str = "contactperson";
+        const REQUIRED: bool = true;
     }
 
     /// `price`: Rentman field `price`.
@@ -13017,6 +14242,7 @@ pub mod Supplier {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "price";
+        const REQUIRED: bool = true;
     }
 
     /// `details`: Rentman field `details`.
@@ -13027,11 +14253,12 @@ pub mod Supplier {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "details";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13039,6 +14266,7 @@ pub mod Supplier {
         type Value = Revision<Supplier>;
         type Wire = Revision<Supplier>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13060,6 +14288,7 @@ pub mod Task {
         type Value = Id<Task>;
         type Wire = Id<Task>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13070,6 +14299,7 @@ pub mod Task {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13080,6 +14310,7 @@ pub mod Task {
         type Value = DateTime<FixedOffset>;
         type Wire = DateTime<FixedOffset>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13090,6 +14321,7 @@ pub mod Task {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13100,6 +14332,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `recurhoe`: Rentman field `recurhoe`.
@@ -13110,6 +14343,7 @@ pub mod Task {
         type Value = TaskRecurhoe;
         type Wire = TaskRecurhoe;
         const NAME: &'static str = "recurhoe";
+        const REQUIRED: bool = true;
     }
 
     /// `recureind`: Rentman field `recureind`.
@@ -13120,6 +14354,7 @@ pub mod Task {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "recureind";
+        const REQUIRED: bool = true;
     }
 
     /// `recurperiode`: Rentman field `recurperiode`.
@@ -13130,6 +14365,7 @@ pub mod Task {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "recurperiode";
+        const REQUIRED: bool = true;
     }
 
     /// `is_template`: Rentman field `is_template`.
@@ -13140,6 +14376,7 @@ pub mod Task {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_template";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -13150,6 +14387,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `details`: Rentman field `details`.
@@ -13160,6 +14398,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "details";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -13170,6 +14409,7 @@ pub mod Task {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `priority`: Rentman field `priority`.
@@ -13180,6 +14420,7 @@ pub mod Task {
         type Value = TaskPriority;
         type Wire = TaskPriority;
         const NAME: &'static str = "priority";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -13190,6 +14431,7 @@ pub mod Task {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline`: Rentman field `deadline`.
@@ -13200,6 +14442,7 @@ pub mod Task {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "deadline";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline_type`: Rentman field `deadline_type`.
@@ -13210,6 +14453,7 @@ pub mod Task {
         type Value = TaskDeadlineType;
         type Wire = TaskDeadlineType;
         const NAME: &'static str = "deadline_type";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline_relative_offset_base`: Rentman field `deadline_relative_offset_base`.
@@ -13220,6 +14464,7 @@ pub mod Task {
         type Value = TaskDeadlineRelativeOffsetBase;
         type Wire = TaskDeadlineRelativeOffsetBase;
         const NAME: &'static str = "deadline_relative_offset_base";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline_relative_offset_amount`: Rentman field `deadline_relative_offset_amount`.
@@ -13230,6 +14475,7 @@ pub mod Task {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "deadline_relative_offset_amount";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline_relative_offset_unit`: Rentman field `deadline_relative_offset_unit`.
@@ -13240,6 +14486,7 @@ pub mod Task {
         type Value = TaskDeadlineRelativeOffsetUnit;
         type Wire = TaskDeadlineRelativeOffsetUnit;
         const NAME: &'static str = "deadline_relative_offset_unit";
+        const REQUIRED: bool = true;
     }
 
     /// `deadline_relative_offset_direction`: Rentman field `deadline_relative_offset_direction`.
@@ -13250,6 +14497,7 @@ pub mod Task {
         type Value = TaskDeadlineRelativeOffsetDirection;
         type Wire = TaskDeadlineRelativeOffsetDirection;
         const NAME: &'static str = "deadline_relative_offset_direction";
+        const REQUIRED: bool = true;
     }
 
     /// `completed_at`: Rentman field `completed_at`.
@@ -13260,6 +14508,7 @@ pub mod Task {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "completed_at";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: Rentman field `status`.
@@ -13270,6 +14519,7 @@ pub mod Task {
         type Value = Id<TaskStatus>;
         type Wire = Link<TaskStatus>;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
@@ -13280,6 +14530,7 @@ pub mod Task {
         type Value = Option<ItemId>;
         type Wire = Option<ItemId>;
         const NAME: &'static str = "item";
+        const REQUIRED: bool = true;
     }
 
     /// `itemtype`: Rentman field `itemtype`.
@@ -13290,6 +14541,7 @@ pub mod Task {
         type Value = Option<TaskItemtype>;
         type Wire = Option<TaskItemtype>;
         const NAME: &'static str = "itemtype";
+        const REQUIRED: bool = true;
     }
 
     /// `synchronization_id`: Rentman field `synchronization_id`.
@@ -13300,6 +14552,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "synchronization_id";
+        const REQUIRED: bool = true;
     }
 
     /// `synchronization_uri`: Rentman field `synchronization_uri`.
@@ -13310,6 +14563,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "synchronization_uri";
+        const REQUIRED: bool = true;
     }
 
     /// `public`: Rentman field `public`.
@@ -13320,6 +14574,7 @@ pub mod Task {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "public";
+        const REQUIRED: bool = true;
     }
 
     /// `assignment_type`: Rentman field `assignment_type`.
@@ -13330,6 +14585,7 @@ pub mod Task {
         type Value = TaskAssignmentType;
         type Wire = TaskAssignmentType;
         const NAME: &'static str = "assignment_type";
+        const REQUIRED: bool = true;
     }
 
     /// `completed_by`: Rentman field `completed_by`.
@@ -13340,6 +14596,7 @@ pub mod Task {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "completed_by";
+        const REQUIRED: bool = true;
     }
 
     /// `expiry_notification_date`: Rentman field `expiry_notification_date`.
@@ -13350,6 +14607,7 @@ pub mod Task {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "expiry_notification_date";
+        const REQUIRED: bool = true;
     }
 
     /// `time_budget`: Rentman field `time_budget`.
@@ -13360,6 +14618,7 @@ pub mod Task {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "time_budget";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -13370,6 +14629,7 @@ pub mod Task {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `parent_api_path`: GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -13377,9 +14637,10 @@ pub mod Task {
 
     impl ProjectionField for parent_api_path {
         type Resource = Task;
-        type Value = Option<String>;
-        type Wire = Option<String>;
+        type Value = String;
+        type Wire = String;
         const NAME: &'static str = "parent_api_path";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -13387,14 +14648,15 @@ pub mod Task {
 
     impl ProjectionField for custom {
         type Resource = Task;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13402,6 +14664,7 @@ pub mod Task {
         type Value = Revision<Task>;
         type Wire = Revision<Task>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13423,6 +14686,7 @@ pub mod TaskAssignment {
         type Value = Id<TaskAssignment>;
         type Wire = Id<TaskAssignment>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13433,6 +14697,7 @@ pub mod TaskAssignment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13443,6 +14708,7 @@ pub mod TaskAssignment {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13453,6 +14719,7 @@ pub mod TaskAssignment {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13463,6 +14730,7 @@ pub mod TaskAssignment {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `task`: Rentman field `task`.
@@ -13473,6 +14741,7 @@ pub mod TaskAssignment {
         type Value = Id<Task>;
         type Wire = Link<Task>;
         const NAME: &'static str = "task";
+        const REQUIRED: bool = true;
     }
 
     /// `crew`: Rentman field `crew`.
@@ -13483,11 +14752,12 @@ pub mod TaskAssignment {
         type Value = Id<Crew>;
         type Wire = Link<Crew>;
         const NAME: &'static str = "crew";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13495,6 +14765,7 @@ pub mod TaskAssignment {
         type Value = Revision<TaskAssignment>;
         type Wire = Revision<TaskAssignment>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13516,6 +14787,7 @@ pub mod TaskStatus {
         type Value = Id<TaskStatus>;
         type Wire = Id<TaskStatus>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13526,6 +14798,7 @@ pub mod TaskStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13536,6 +14809,7 @@ pub mod TaskStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13546,6 +14820,7 @@ pub mod TaskStatus {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13556,6 +14831,7 @@ pub mod TaskStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -13566,6 +14842,7 @@ pub mod TaskStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `color`: Rentman field `color`.
@@ -13576,6 +14853,7 @@ pub mod TaskStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "color";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -13586,6 +14864,7 @@ pub mod TaskStatus {
         type Value = TaskStatusType;
         type Wire = TaskStatusType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `order`: Rentman field `order`.
@@ -13596,11 +14875,12 @@ pub mod TaskStatus {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "order";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13608,6 +14888,7 @@ pub mod TaskStatus {
         type Value = Revision<TaskStatus>;
         type Wire = Revision<TaskStatus>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13629,6 +14910,7 @@ pub mod TaxClass {
         type Value = Id<TaxClass>;
         type Wire = Id<TaxClass>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13639,6 +14921,7 @@ pub mod TaxClass {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13649,6 +14932,7 @@ pub mod TaxClass {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13659,6 +14943,7 @@ pub mod TaxClass {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13669,6 +14954,7 @@ pub mod TaxClass {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -13679,6 +14965,7 @@ pub mod TaxClass {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `code`: Rentman field `code`.
@@ -13689,6 +14976,7 @@ pub mod TaxClass {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "code";
+        const REQUIRED: bool = true;
     }
 
     /// `type`: Rentman field `type`.
@@ -13699,11 +14987,12 @@ pub mod TaxClass {
         type Value = TaxClassType;
         type Wire = TaxClassType;
         const NAME: &'static str = "type";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13711,6 +15000,7 @@ pub mod TaxClass {
         type Value = Revision<TaxClass>;
         type Wire = Revision<TaxClass>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13732,6 +15022,7 @@ pub mod TimeRegistration {
         type Value = Id<TimeRegistration>;
         type Wire = Id<TimeRegistration>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13742,6 +15033,7 @@ pub mod TimeRegistration {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13752,6 +15044,7 @@ pub mod TimeRegistration {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13762,6 +15055,7 @@ pub mod TimeRegistration {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13772,6 +15066,7 @@ pub mod TimeRegistration {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `crewmember`: Rentman field `crewmember`.
@@ -13782,6 +15077,7 @@ pub mod TimeRegistration {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "crewmember";
+        const REQUIRED: bool = true;
     }
 
     /// `start`: Rentman field `start`.
@@ -13792,6 +15088,7 @@ pub mod TimeRegistration {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "start";
+        const REQUIRED: bool = true;
     }
 
     /// `end`: Rentman field `end`.
@@ -13802,6 +15099,7 @@ pub mod TimeRegistration {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "end";
+        const REQUIRED: bool = true;
     }
 
     /// `distance`: Rentman field `distance`.
@@ -13812,6 +15110,7 @@ pub mod TimeRegistration {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
+        const REQUIRED: bool = true;
     }
 
     /// `is_lunch_included`: Rentman field `is_lunch_included`.
@@ -13822,6 +15121,7 @@ pub mod TimeRegistration {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_lunch_included";
+        const REQUIRED: bool = true;
     }
 
     /// `leavetype`: Rentman field `leavetype`.
@@ -13832,6 +15132,7 @@ pub mod TimeRegistration {
         type Value = Option<Id<LeaveType>>;
         type Wire = Option<Link<LeaveType>>;
         const NAME: &'static str = "leavetype";
+        const REQUIRED: bool = true;
     }
 
     /// `leaverequest`: Rentman field `leaverequest`.
@@ -13842,6 +15143,7 @@ pub mod TimeRegistration {
         type Value = Option<Id<LeaveRequest>>;
         type Wire = Option<Link<LeaveRequest>>;
         const NAME: &'static str = "leaverequest";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
@@ -13852,6 +15154,7 @@ pub mod TimeRegistration {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `break_duration`: Rentman field `break_duration`.
@@ -13862,6 +15165,7 @@ pub mod TimeRegistration {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break_duration";
+        const REQUIRED: bool = true;
     }
 
     /// `travel_time`: Rentman field `travel_time`.
@@ -13872,6 +15176,7 @@ pub mod TimeRegistration {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time";
+        const REQUIRED: bool = true;
     }
 
     /// `correction_duration`: Rentman field `correction_duration`.
@@ -13882,6 +15187,7 @@ pub mod TimeRegistration {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "correction_duration";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -13892,6 +15198,7 @@ pub mod TimeRegistration {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `status`: Rentman field `status`.
@@ -13902,6 +15209,7 @@ pub mod TimeRegistration {
         type Value = TimeRegistrationStatus;
         type Wire = TimeRegistrationStatus;
         const NAME: &'static str = "status";
+        const REQUIRED: bool = true;
     }
 
     /// `break_duration_with_start_end`: GENERATED FIELD. The sum of breaks that were created for this time registration with exact start and end time.
@@ -13912,6 +15220,7 @@ pub mod TimeRegistration {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break_duration_with_start_end";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -13919,14 +15228,15 @@ pub mod TimeRegistration {
 
     impl ProjectionField for custom {
         type Resource = TimeRegistration;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -13934,6 +15244,7 @@ pub mod TimeRegistration {
         type Value = Revision<TimeRegistration>;
         type Wire = Revision<TimeRegistration>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -13955,6 +15266,7 @@ pub mod TimeRegistrationActivity {
         type Value = Id<TimeRegistrationActivity>;
         type Wire = Id<TimeRegistrationActivity>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -13965,6 +15277,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -13975,6 +15288,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -13985,6 +15299,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -13995,6 +15310,7 @@ pub mod TimeRegistrationActivity {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `time_registration`: Rentman field `time_registration`.
@@ -14005,6 +15321,7 @@ pub mod TimeRegistrationActivity {
         type Value = Id<TimeRegistration>;
         type Wire = Link<TimeRegistration>;
         const NAME: &'static str = "time_registration";
+        const REQUIRED: bool = true;
     }
 
     /// `project_function`: Rentman field `project_function`.
@@ -14015,6 +15332,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<Id<ProjectFunction>>;
         type Wire = Option<Link<ProjectFunction>>;
         const NAME: &'static str = "project_function";
+        const REQUIRED: bool = true;
     }
 
     /// `subproject_function`: Rentman field `subproject_function`.
@@ -14025,6 +15343,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<Id<Subproject>>;
         type Wire = Option<Link<Subproject>>;
         const NAME: &'static str = "subproject_function";
+        const REQUIRED: bool = true;
     }
 
     /// `description`: Rentman field `description`.
@@ -14035,6 +15354,7 @@ pub mod TimeRegistrationActivity {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "description";
+        const REQUIRED: bool = true;
     }
 
     /// `duration`: Rentman field `duration`.
@@ -14045,6 +15365,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<RentmanAmount>;
         type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
+        const REQUIRED: bool = true;
     }
 
     /// `is_activity`: Rentman field `is_activity`.
@@ -14055,6 +15376,7 @@ pub mod TimeRegistrationActivity {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "is_activity";
+        const REQUIRED: bool = true;
     }
 
     /// `from`: Rentman field `from`.
@@ -14065,6 +15387,7 @@ pub mod TimeRegistrationActivity {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "from";
+        const REQUIRED: bool = true;
     }
 
     /// `to`: Rentman field `to`.
@@ -14075,11 +15398,12 @@ pub mod TimeRegistrationActivity {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "to";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -14087,6 +15411,7 @@ pub mod TimeRegistrationActivity {
         type Value = Revision<TimeRegistrationActivity>;
         type Wire = Revision<TimeRegistrationActivity>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -14108,6 +15433,7 @@ pub mod Vehicle {
         type Value = Id<Vehicle>;
         type Wire = Id<Vehicle>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -14118,6 +15444,7 @@ pub mod Vehicle {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -14128,6 +15455,7 @@ pub mod Vehicle {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -14138,6 +15466,7 @@ pub mod Vehicle {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -14148,6 +15477,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `folder`: Rentman field `folder`.
@@ -14158,6 +15488,7 @@ pub mod Vehicle {
         type Value = Option<Id<Folder>>;
         type Wire = Option<Link<Folder>>;
         const NAME: &'static str = "folder";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -14168,6 +15499,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `cost_rate`: Rentman field `cost_rate`.
@@ -14178,6 +15510,7 @@ pub mod Vehicle {
         type Value = Option<Id<Rate>>;
         type Wire = Option<Link<Rate>>;
         const NAME: &'static str = "cost_rate";
+        const REQUIRED: bool = true;
     }
 
     /// `in_planner`: Rentman field `in_planner`.
@@ -14188,6 +15521,7 @@ pub mod Vehicle {
         type Value = bool;
         type Wire = bool;
         const NAME: &'static str = "in_planner";
+        const REQUIRED: bool = true;
     }
 
     /// `height`: Rentman field `height`.
@@ -14198,6 +15532,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "height";
+        const REQUIRED: bool = true;
     }
 
     /// `length`: Rentman field `length`.
@@ -14208,6 +15543,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "length";
+        const REQUIRED: bool = true;
     }
 
     /// `width`: Rentman field `width`.
@@ -14218,6 +15554,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "width";
+        const REQUIRED: bool = true;
     }
 
     /// `seats`: Rentman field `seats`.
@@ -14228,6 +15565,7 @@ pub mod Vehicle {
         type Value = i64;
         type Wire = i64;
         const NAME: &'static str = "seats";
+        const REQUIRED: bool = true;
     }
 
     /// `inspection_date`: Rentman field `inspection_date`.
@@ -14238,6 +15576,7 @@ pub mod Vehicle {
         type Value = Option<String>;
         type Wire = Option<String>;
         const NAME: &'static str = "inspection_date";
+        const REQUIRED: bool = true;
     }
 
     /// `licenseplate`: Rentman field `licenseplate`.
@@ -14248,6 +15587,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "licenseplate";
+        const REQUIRED: bool = true;
     }
 
     /// `remark`: Rentman field `remark`.
@@ -14258,6 +15598,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "remark";
+        const REQUIRED: bool = true;
     }
 
     /// `payload_capacity`: Rentman field `payload_capacity`.
@@ -14268,6 +15609,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "payload_capacity";
+        const REQUIRED: bool = true;
     }
 
     /// `surface_area`: Rentman field `surface_area`.
@@ -14278,6 +15620,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "surface_area";
+        const REQUIRED: bool = true;
     }
 
     /// `multiple`: Can be scheduled more than once at the same time. For example, for employment agencies.
@@ -14288,6 +15631,7 @@ pub mod Vehicle {
         type Value = VehicleMultiple;
         type Wire = VehicleMultiple;
         const NAME: &'static str = "multiple";
+        const REQUIRED: bool = true;
     }
 
     /// `image`: Rentman field `image`.
@@ -14298,6 +15642,7 @@ pub mod Vehicle {
         type Value = Option<Id<File>>;
         type Wire = Option<Link<File>>;
         const NAME: &'static str = "image";
+        const REQUIRED: bool = true;
     }
 
     /// `asset_location`: Rentman field `asset_location`.
@@ -14308,6 +15653,7 @@ pub mod Vehicle {
         type Value = Option<Id<StockLocation>>;
         type Wire = Option<Link<StockLocation>>;
         const NAME: &'static str = "asset_location";
+        const REQUIRED: bool = true;
     }
 
     /// `tags`: GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -14318,6 +15664,7 @@ pub mod Vehicle {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "tags";
+        const REQUIRED: bool = true;
     }
 
     /// `distance_cost`: GENERATED FIELD. Costs per kilometer.
@@ -14328,6 +15675,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "distance_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `fixed_cost`: GENERATED FIELD.
@@ -14338,6 +15686,7 @@ pub mod Vehicle {
         type Value = RentmanAmount;
         type Wire = RentmanAmount;
         const NAME: &'static str = "fixed_cost";
+        const REQUIRED: bool = true;
     }
 
     /// `custom`: The object containing all custom defined fields.
@@ -14345,14 +15694,15 @@ pub mod Vehicle {
 
     impl ProjectionField for custom {
         type Resource = Vehicle;
-        type Value = CustomFields;
-        type Wire = CustomFields;
+        type Value = Option<CustomFields>;
+        type Wire = Option<CustomFields>;
         const NAME: &'static str = "custom";
+        const REQUIRED: bool = false;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -14360,6 +15710,7 @@ pub mod Vehicle {
         type Value = Revision<Vehicle>;
         type Wire = Revision<Vehicle>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }
 
@@ -14381,6 +15732,7 @@ pub mod WarehouseStatus {
         type Value = Id<WarehouseStatus>;
         type Wire = Id<WarehouseStatus>;
         const NAME: &'static str = "id";
+        const REQUIRED: bool = true;
     }
 
     /// `created`: Rentman field `created`.
@@ -14391,6 +15743,7 @@ pub mod WarehouseStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "created";
+        const REQUIRED: bool = true;
     }
 
     /// `modified`: Rentman field `modified`.
@@ -14401,6 +15754,7 @@ pub mod WarehouseStatus {
         type Value = Option<DateTime<FixedOffset>>;
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "modified";
+        const REQUIRED: bool = true;
     }
 
     /// `creator`: Rentman field `creator`.
@@ -14411,6 +15765,7 @@ pub mod WarehouseStatus {
         type Value = Option<Id<Crew>>;
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "creator";
+        const REQUIRED: bool = true;
     }
 
     /// `displayname`: GENERATED FIELD.
@@ -14421,6 +15776,7 @@ pub mod WarehouseStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "displayname";
+        const REQUIRED: bool = true;
     }
 
     /// `name`: Rentman field `name`.
@@ -14431,11 +15787,12 @@ pub mod WarehouseStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+        const REQUIRED: bool = true;
     }
 
     /// `updateHash`: revision of the item, changes on every update.
     ///
-    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    /// Rentman sends this field automatically; it is not included in `fields=`.
     pub struct updateHash;
 
     impl ProjectionField for updateHash {
@@ -14443,5 +15800,6 @@ pub mod WarehouseStatus {
         type Value = Revision<WarehouseStatus>;
         type Wire = Revision<WarehouseStatus>;
         const NAME: &'static str = "updateHash";
+        const REQUIRED: bool = true;
     }
 }

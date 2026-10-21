@@ -2,11 +2,14 @@
 
 use chrono::NaiveDate;
 use rentman_client::model::{
-    Crew, CrewId, EmailAddress, Invoice, LINK_FIELDS, Payment, ProjectsCreateFromTemplatePayload,
-    RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass, TaxClassType,
+    Crew, CrewId, EmailAddress, Equipment, Invoice, LINK_FIELDS, Payment,
+    ProjectsCreateFromTemplatePayload, RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass,
+    TaxClassType,
 };
 use rentman_client::model::{InvoiceId, PaymentId};
-use rentman_client::{Id, LinkError, ProjectionField, Resource, Revision, Revisioned};
+use rentman_client::{
+    CustomFieldsResource, Id, LinkError, ProjectionField, Resource, Revision, Revisioned,
+};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, fmt::Debug, fs};
@@ -149,46 +152,6 @@ fn field_constants_cover_every_queryable_field() {
 }
 
 #[test]
-fn every_resource_model_carries_the_documented_revision() {
-    let spec = openapi_spec();
-    // Rentman documents `updateHash` in the API introduction only.
-    let introduction = spec["info"]["description"]
-        .as_str()
-        .expect("OpenAPI introduction is a string");
-    assert!(
-        introduction.contains("## updateHash")
-            && introduction.contains("computed with the `id` and `modified` field"),
-        "the API introduction no longer documents updateHash; review REVISION_FIELD"
-    );
-    for (name, schema) in spec["components"]["schemas"]
-        .as_object()
-        .expect("OpenAPI schemas are an object")
-    {
-        assert!(
-            schema["properties"].get("updateHash").is_none(),
-            "{name} now documents updateHash; review REVISION_FIELD"
-        );
-    }
-
-    let resources = RESOURCE_COLLECTIONS
-        .iter()
-        .map(|(rust_type, _)| *rust_type)
-        .collect::<BTreeSet<_>>();
-    let carrying = generated_revisions::RESOURCES_WITH_REVISION
-        .iter()
-        .copied()
-        .collect::<BTreeSet<_>>();
-    assert_eq!(resources, carrying);
-
-    // Not a queryable field: Rentman rejects it in filters and sorting.
-    assert!(
-        rentman_client::fields::QUERYABLE_FIELDS
-            .iter()
-            .all(|(_, field)| *field != "updateHash")
-    );
-}
-
-#[test]
 fn every_link_targets_its_documented_collection() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]
@@ -276,36 +239,77 @@ fn every_resource_is_the_item_type_of_its_collection() {
 }
 
 #[test]
+fn every_resource_model_carries_the_documented_revision() {
+    let spec = openapi_spec();
+    let introduction = spec["info"]["description"]
+        .as_str()
+        .expect("OpenAPI introduction is a string");
+    assert!(
+        introduction.contains("## updateHash")
+            && introduction.contains("computed with the `id` and `modified` field"),
+        "the API introduction no longer documents updateHash"
+    );
+
+    for (name, schema) in spec["components"]["schemas"]
+        .as_object()
+        .expect("OpenAPI schemas are an object")
+    {
+        assert!(
+            schema["properties"].get("updateHash").is_none(),
+            "{name} now documents updateHash; review the synthetic revision mapping"
+        );
+    }
+
+    let resources = RESOURCE_COLLECTIONS
+        .iter()
+        .map(|(resource, _)| *resource)
+        .collect::<BTreeSet<_>>();
+    let generated = generated_revisions::RESOURCES_WITH_REVISION
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    assert_eq!(resources, generated);
+    assert!(
+        rentman_client::fields::QUERYABLE_FIELDS
+            .iter()
+            .all(|(_, field)| *field != "updateHash")
+    );
+}
+
+#[test]
 fn generated_models_read_and_write_typed_links() {
     let payment: Payment = serde_json::from_value(json!({
-        "id": 99, "created": null, "modified": null, "creator": "/crew/3",
+        "id": 99, "updateHash": "payment-99", "created": null, "modified": null,
+        "creator": "/crew/3",
         "displayname": "Payment 99", "invoice": "/invoices/7",
         "moment": "2026-07-05T00:00:00.000+02:00", "amount": 42.5,
-        "description": "Manual booking", "updateHash": "p99"
+        "description": "Manual booking"
     }))
     .unwrap();
     assert_eq!(payment.id, PaymentId::new(99));
-    assert_eq!(payment.invoice, InvoiceId::new(7));
+    assert_eq!(payment.invoice, Some(InvoiceId::new(7)));
     assert_eq!(payment.creator, Some(CrewId::new(3)));
     let wire = serde_json::to_value(&payment).unwrap();
     assert_eq!(wire["id"], json!(99));
     assert_eq!(wire["invoice"], json!("/invoices/7"));
     assert_eq!(wire["creator"], json!("/crew/3"));
 
-    // A nullable link may also be missing.
+    // A nullable link is present even when it has no value.
     let payment: Payment = serde_json::from_value(json!({
-        "id": 99, "created": null, "modified": null, "displayname": "Payment 99",
+        "id": 99, "updateHash": "payment-99", "created": null, "modified": null,
+        "creator": null,
+        "displayname": "Payment 99",
         "invoice": "/invoices/7", "moment": "2026-07-05T00:00:00.000+02:00",
-        "amount": 1, "description": "", "updateHash": "p99"
+        "amount": 1, "description": ""
     }))
     .unwrap();
     assert_eq!(payment.creator, None);
 
     let error = serde_json::from_value::<Payment>(json!({
-        "id": 99, "created": null, "modified": null, "creator": null,
+        "id": 99, "updateHash": "payment-99", "created": null, "modified": null,
+        "creator": null,
         "displayname": "Payment 99", "invoice": "/projects/7",
-        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 1, "description": "",
-        "updateHash": "p99"
+        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 1, "description": ""
     }))
     .unwrap_err();
     assert!(
@@ -336,6 +340,45 @@ fn wire_email_addresses_are_validated() {
             .to_string()
             .contains("Rentman email address must contain '@'")
     );
+}
+
+#[test]
+fn custom_fields_serialize_and_deserialize_application_types() {
+    #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+    enum Choice {
+        #[serde(rename = "one")]
+        One,
+        #[serde(rename = "two")]
+        Two,
+    }
+
+    let mut fields = rentman_client::model::CustomFields::default();
+    fields.set(8, &Choice::Two).unwrap();
+    assert_eq!(fields.get::<Choice>(8).unwrap(), Choice::Two);
+    assert_eq!(
+        fields.0.get("custom_8"),
+        Some(&rentman_client::model::CustomFieldValue::Text(
+            "two".to_string()
+        ))
+    );
+    assert!(matches!(
+        fields.get::<Choice>(99),
+        Err(rentman_client::CustomFieldValueError::Missing { id: 99 })
+    ));
+    assert!(matches!(
+        fields.get::<String>(99),
+        Err(rentman_client::CustomFieldValueError::Missing { id: 99 })
+    ));
+    assert!(matches!(
+        fields.get::<bool>(8),
+        Err(rentman_client::CustomFieldValueError::Json(_))
+    ));
+
+    let raw = serde_json::value::RawValue::from_string("1e9999".to_string()).unwrap();
+    assert!(matches!(
+        fields.set(44, &raw),
+        Err(rentman_client::CustomFieldValueError::Json(_))
+    ));
 }
 
 #[test]
@@ -370,6 +413,50 @@ fn wire_date_fields_serialize_as_date_only() {
         )
         .is_err()
     );
+}
+
+#[test]
+fn resource_responses_allow_unselected_fields_and_ignore_unknown_fields() {
+    let equipment: Equipment = serde_json::from_value(json!({
+        "id": 5463,
+        "created": "2024-02-12T11:15:30+01:00",
+        "modified": "2026-10-21T16:02:33+02:00",
+        "creator": "/crew/244",
+        "updateHash": "opaque",
+        "futureField": "ignored"
+    }))
+    .unwrap();
+
+    assert_eq!(equipment.id, Id::new(5463));
+    assert_eq!(equipment.creator, Some(CrewId::new(244)));
+    assert!(equipment.price.is_none());
+    assert!(equipment.custom.is_none());
+
+    let serialized = serde_json::to_value(equipment).unwrap();
+    assert!(serialized.get("futureField").is_none());
+    assert_eq!(serialized["updateHash"], "opaque");
+    assert!(serialized.get("price").is_none());
+
+    let nullable_core = json!({
+        "id": 5463,
+        "updateHash": "opaque",
+        "created": null,
+        "modified": null,
+        "creator": null
+    });
+    let equipment: Equipment = serde_json::from_value(nullable_core.clone()).unwrap();
+    assert!(equipment.created.is_none());
+    assert!(equipment.modified.is_none());
+    assert!(equipment.creator.is_none());
+
+    for field in ["id", "updateHash", "created", "modified", "creator"] {
+        let mut response = nullable_core.clone();
+        response.as_object_mut().unwrap().remove(field);
+        assert!(
+            serde_json::from_value::<Equipment>(response).is_err(),
+            "missing core field {field} must fail"
+        );
+    }
 }
 
 #[test]
@@ -425,61 +512,23 @@ fn undocumented_response_enum_values_are_kept_as_unknown() {
 fn an_undocumented_enum_value_does_not_fail_the_collection() {
     let items: Vec<TaxClass> = serde_json::from_value(json!(
         [
-            {"id": 1, "created": null, "modified": null, "creator": null,
-             "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat",
-             "updateHash": "t1"},
-            {"id": 2, "created": null, "modified": null, "creator": null,
-             "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge",
-             "updateHash": "t2"}
+            {"id": 1, "updateHash": "tax-1", "created": null, "modified": null, "creator": null,
+             "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat"},
+            {"id": 2, "updateHash": "tax-2", "created": null, "modified": null, "creator": null,
+             "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge"}
         ]
     ))
     .unwrap();
 
-    assert_eq!(items[0].type_, TaxClassType::Vat);
+    assert_eq!(items[0].type_, Some(TaxClassType::Vat));
     assert_eq!(
         items[1].type_,
-        TaxClassType::Unknown("reverse_charge".to_string())
+        Some(TaxClassType::Unknown("reverse_charge".to_string()))
     );
     assert_eq!(
         serde_json::to_value(&items[1]).unwrap()["type"],
         json!("reverse_charge")
     );
-}
-
-/// Asserts that resource `R`, read from a sample item with ID 1, takes its
-/// revision from `updateHash`, requires it, writes it back, and exposes it
-/// through [`Revisioned`] and the projection marker `F`.
-fn assert_carries_revision<R, F>(sample: &str)
-where
-    R: Revisioned + DeserializeOwned + Serialize + Debug,
-    F: ProjectionField<Resource = R, Value = Revision<R>>,
-{
-    assert_eq!(F::NAME, "updateHash");
-    let mut wire: Value = serde_json::from_str(sample).expect("sample item is JSON");
-    let item = serde_json::from_value::<R>(wire.clone());
-    assert!(
-        item.unwrap_err()
-            .to_string()
-            .contains("missing field `updateHash`"),
-        "{} reads an item without updateHash",
-        R::COLLECTION
-    );
-
-    wire["updateHash"] = json!("d21b3fd9d594582874d23f8d26234732");
-    let item: R = serde_json::from_value(wire.clone())
-        .unwrap_or_else(|error| panic!("{}: {error}", R::COLLECTION));
-    assert_eq!(item.id(), Id::new(1));
-    assert_eq!(
-        item.revision(),
-        &Revision::new("d21b3fd9d594582874d23f8d26234732").unwrap()
-    );
-    assert_eq!(
-        serde_json::to_value(&item).unwrap()["updateHash"],
-        wire["updateHash"]
-    );
-
-    wire["updateHash"] = json!("");
-    assert!(serde_json::from_value::<R>(wire).is_err());
 }
 
 /// Asserts that every value the OpenAPI document lists for `schema.field`
@@ -527,6 +576,47 @@ fn assert_sends_exactly<T: Serialize>(payload: &T, schema_name: &str, fields: &[
         .map(String::as_str)
         .collect::<BTreeSet<_>>();
     assert_eq!(sent, required, "{schema_name} sends other fields");
+}
+
+fn assert_carries_revision<R, F>(sample: &str, has_custom: bool)
+where
+    R: Revisioned + CustomFieldsResource + DeserializeOwned + Serialize + Debug,
+    F: ProjectionField<Resource = R, Value = Revision<R>>,
+{
+    assert_eq!(F::NAME, "updateHash");
+    let mut wire: Value = serde_json::from_str(sample).expect("sample item is JSON");
+    let missing_revision = wire
+        .as_object_mut()
+        .expect("sample item is object")
+        .remove("updateHash");
+    let item = serde_json::from_value::<R>(wire.clone());
+    assert!(
+        item.is_err(),
+        "{} accepts an item without updateHash",
+        R::COLLECTION
+    );
+    wire["updateHash"] = json!("d21b3fd9d594582874d23f8d26234732");
+    let mut item: R = serde_json::from_value(wire.clone())
+        .unwrap_or_else(|error| panic!("{}: {error}", R::COLLECTION));
+    assert_eq!(item.id(), Id::new(1));
+    assert_eq!(
+        item.custom_fields_mut().is_some(),
+        has_custom,
+        "{}",
+        R::COLLECTION
+    );
+    assert_eq!(
+        item.revision(),
+        &Revision::new("d21b3fd9d594582874d23f8d26234732").unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&item).unwrap()["updateHash"],
+        wire["updateHash"]
+    );
+    assert!(missing_revision.is_none());
+
+    wire["updateHash"] = json!("");
+    assert!(serde_json::from_value::<R>(wire).is_err());
 }
 
 fn openapi_spec() -> Value {

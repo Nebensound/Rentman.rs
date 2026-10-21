@@ -2,6 +2,7 @@
 
 use crate::{
     RentmanApiToken,
+    custom_fields::{CustomFieldRegistry, CustomFieldsResource},
     transport::{CompositeRateLimiter, RetryPolicy, send_with_retry, send_with_retry_unit},
 };
 use crate::{
@@ -26,6 +27,7 @@ pub struct RentmanClient {
     http_writes: HttpClient,
     limiter: Arc<CompositeRateLimiter>,
     pub(crate) retry_policy: RetryPolicy,
+    pub(crate) custom_fields: Arc<CustomFieldRegistry>,
 }
 
 pub(crate) struct RentmanRequestBuilder {
@@ -113,7 +115,23 @@ impl RentmanClient {
                 .expect("an HTTP client without redirects builds like the default client"),
             retry_policy: RetryPolicy::from_config(&config),
             limiter: Arc::new(CompositeRateLimiter::new(config.min_request_interval())),
+            custom_fields: Arc::new(CustomFieldRegistry::default()),
         }
+    }
+
+    /// Registers the account-specific custom fields that responses must contain.
+    pub fn with_custom_fields(mut self, custom_fields: CustomFieldRegistry) -> Self {
+        self.custom_fields = Arc::new(custom_fields);
+        self
+    }
+
+    pub(crate) fn apply_custom_fields<R: CustomFieldsResource>(&self, item: &mut R) -> Result<()> {
+        self.custom_fields
+            .apply(R::COLLECTION, item.custom_fields_mut())
+    }
+
+    pub(crate) fn custom_fields_registered<R: crate::id::Resource>(&self) -> bool {
+        self.custom_fields.has_fields(R::COLLECTION)
     }
 
     pub(crate) fn request(&self, method: Method, path: &str) -> RentmanRequestBuilder {

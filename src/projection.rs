@@ -5,11 +5,13 @@ use serde::{Deserialize, Deserializer, de::DeserializeOwned};
 use serde_json::value::RawValue;
 use std::collections::HashMap;
 
+const NEVER_REQUESTED_FIELDS: &[&str] = &["updateHash"];
+
 /// A struct declared with [`projection!`](crate::projection), whose fields
 /// are the `fields=` selection of its resource.
 pub trait Projection: Sized {
     /// Resource the projection selects from, e.g. `model::Crew`.
-    type Resource;
+    type Resource: Resource;
     /// Rentman names of the selected fields.
     #[doc(hidden)]
     const FIELDS: &'static [&'static str];
@@ -30,6 +32,8 @@ pub trait ProjectionField {
     type Wire: DeserializeOwned + IntoValue<Self::Value>;
     /// Rentman name of the field, e.g. `type`.
     const NAME: &'static str;
+    /// Whether this key must be present in the selected response.
+    const REQUIRED: bool = false;
 }
 
 /// Turns the wire form of a field into its value.
@@ -72,14 +76,73 @@ impl<R> IntoValue<Option<Id<R>>> for Option<Link<R>> {
 pub struct ProjectedItem(HashMap<String, Box<RawValue>>);
 
 impl ProjectedItem {
+    pub(crate) fn custom_fields_complete(
+        &self,
+        registry: &crate::CustomFieldRegistry,
+        collection: &'static str,
+    ) -> Result<bool, serde_json::Error> {
+        if !registry.has_fields(collection) {
+            return Ok(true);
+        }
+        let Some(raw) = self.0.get("custom") else {
+            return Ok(false);
+        };
+        let fields = serde_json::from_str::<crate::model::CustomFields>(raw.get())?;
+        Ok(registry.contains_all(collection, Some(&fields)))
+    }
+
+    pub(crate) fn apply_custom_fields(
+        &mut self,
+        registry: &crate::CustomFieldRegistry,
+        collection: &'static str,
+    ) -> crate::Result<()> {
+        if !registry.has_fields(collection) {
+            self.0.remove("custom");
+            return Ok(());
+        }
+        let raw = self.0.remove("custom");
+        let Some(raw) = raw else {
+            return registry.apply(collection, None);
+        };
+        let mut fields = serde_json::from_str::<crate::model::CustomFields>(raw.get())
+            .map_err(|error| crate::Error::new(crate::ErrorKind::Decode(error)))?;
+        registry.apply(collection, Some(&mut fields))?;
+        let raw = serde_json::value::to_raw_value(&fields)
+            .expect("CustomFields contain only serializable JSON values");
+        self.0.insert("custom".to_string(), raw);
+        Ok(())
+    }
+
+    pub(crate) fn has_fields<P: Projection>(&self) -> bool {
+        self.has_field_names(P::FIELDS)
+    }
+
+    pub(crate) fn has_field_names(&self, fields: &[&str]) -> bool {
+        fields.iter().all(|field| self.0.contains_key(*field))
+    }
+
+    pub(crate) fn resource_id<R: Resource>(&self) -> crate::Result<Id<R>> {
+        serde_json::from_str::<Id<R>>(self.0.get("id").map_or("null", |raw| raw.get()))
+            .map_err(|error| crate::Error::new(crate::ErrorKind::Decode(error)))
+    }
+
+    pub(crate) fn deserialize<T: DeserializeOwned>(self) -> crate::Result<T> {
+        let json =
+            serde_json::to_string(&self.0).expect("ProjectedItem contains only parsed JSON values");
+        serde_json::from_str(&json)
+            .map_err(|error| crate::Error::new(crate::ErrorKind::Decode(error)))
+    }
+
     /// Takes the field `F` out of the item; a missing field reads as `null`,
     /// so only `Option` fields may be missing.
     pub fn take<F: ProjectionField>(&mut self) -> Result<F::Value, serde_json::Error> {
+        if F::REQUIRED && !self.0.contains_key(F::NAME) {
+            return Err(serde::de::Error::missing_field(F::NAME));
+        }
         self.take_named::<F::Wire>(F::NAME)
             .map(IntoValue::into_value)
     }
 
-    /// Takes the field `name` out of the item as its wire form `T`.
     pub(crate) fn take_named<T: DeserializeOwned>(
         &mut self,
         name: &str,
@@ -101,30 +164,22 @@ pub(crate) fn decode<P: Projection>(mut item: ProjectedItem) -> crate::Result<P>
     P::decode(&mut item).map_err(|error| crate::Error::new(crate::ErrorKind::Decode(error)))
 }
 
-/// Fields Rentman adds to every selection by itself but does not accept in
-/// `fields=` (`REVISION_FIELD` in the generator): next to other fields it
-/// drops them silently, and named alone it ignores the whole selection and
-/// returns full items (verified live on 2026-10-21).
-const ALWAYS_SENT: &[&str] = &["updateHash"];
-
 /// The `fields=` value of a projection, e.g. `id,firstname`.
 pub(crate) fn fields<P: Projection>() -> String {
-    selection(P::FIELDS)
+    fields_named(P::FIELDS)
 }
 
-/// Joins the fields to request. Fields Rentman always sends are left out; a
-/// selection of only such fields requests `id`, which Rentman accepts and adds
-/// them to.
-fn selection(fields: &[&str]) -> String {
-    let selected = fields
+pub(crate) fn fields_named(fields: &[&str]) -> String {
+    let requested = fields
         .iter()
         .copied()
-        .filter(|field| !ALWAYS_SENT.contains(field))
+        .filter(|field| !NEVER_REQUESTED_FIELDS.contains(field))
         .collect::<Vec<_>>();
-    if selected.is_empty() {
-        return "id".to_string();
+    if requested.is_empty() {
+        "id".to_string()
+    } else {
+        requested.join(",")
     }
-    selected.join(",")
 }
 
 /// Declares a struct whose fields are a selection of a resource's fields.
@@ -197,7 +252,7 @@ mod tests {
 
     crate::projection! {
         /// Some fields of a task status.
-        struct StatusName from TaskStatus { id, name, r#type, creator }
+        struct StatusName from TaskStatus { id, updateHash, name, r#type, creator }
     }
 
     fn decode_json(value: serde_json::Value) -> crate::Result<StatusName> {
@@ -206,32 +261,49 @@ mod tests {
 
     #[test]
     fn selects_exactly_the_declared_fields() {
-        assert_eq!(StatusName::FIELDS, ["id", "name", "type", "creator"]);
+        assert_eq!(
+            StatusName::FIELDS,
+            ["id", "updateHash", "name", "type", "creator"]
+        );
         assert_eq!(fields::<StatusName>(), "id,name,type,creator");
+        assert_eq!(fields::<OnlyRevision>(), "id");
+    }
+
+    crate::projection! {
+        struct OnlyRevision from TaskStatus { updateHash }
+    }
+
+    crate::projection! {
+        struct StatusCore from TaskStatus { id, updateHash, created, modified, creator }
     }
 
     #[test]
     fn decodes_items_with_links_and_ignores_extra_fields() {
         let status = decode_json(json!({
-            "id": 5, "name": "Done", "type": "done", "creator": "/crew/3",
-            "created": "2026-01-01T00:00:00+00:00", "updateHash": "x", "custom": {}
+            "id": 5, "updateHash": "status-5", "name": "Done", "type": "done", "creator": "/crew/3",
+            "created": "2026-01-01T00:00:00+00:00", "custom": {}
         }))
         .unwrap();
         assert_eq!(
             status,
             StatusName {
                 id: TaskStatusId::new(5),
+                updateHash: crate::Revision::new("status-5").unwrap(),
                 name: "Done".to_string(),
                 r#type: TaskStatusType::Done,
                 creator: Some(CrewId::new(3)),
             }
         );
 
-        // A missing optional field reads as `None`.
-        let status = decode_json(json!({"id": 5, "name": "Done", "type": "done"})).unwrap();
-        assert_eq!(status.creator, None);
-        let status =
-            decode_json(json!({"id": 5, "name": "Done", "type": "done", "creator": null})).unwrap();
+        // Nullable fields must be present, but their value may be null.
+        let status = decode_json(json!({
+            "id": 5,
+            "updateHash": "status-5",
+            "name": "Done",
+            "type": "done",
+            "creator": null
+        }))
+        .unwrap();
         assert_eq!(status.creator, None);
     }
 
@@ -239,11 +311,17 @@ mod tests {
     fn names_the_field_that_does_not_decode() {
         for (item, message) in [
             (
-                json!({"id": 5, "type": "done"}),
-                "field `name`: invalid type: null",
+                json!({"id": 5, "updateHash": "status-5", "type": "done"}),
+                "missing field `name`",
             ),
             (
-                json!({"id": 5, "name": "Done", "type": "done", "creator": "/projects/3"}),
+                json!({
+                    "id": 5,
+                    "updateHash": "status-5",
+                    "name": "Done",
+                    "type": "done",
+                    "creator": "/projects/3"
+                }),
                 "field `creator`: link to /projects where a link to /crew was expected",
             ),
         ] {
@@ -256,39 +334,30 @@ mod tests {
         assert!(serde_json::from_str::<ProjectedItem>("[1]").is_err());
     }
 
-    crate::projection! {
-        struct StatusRevision from TaskStatus { id, updateHash }
-    }
-
-    crate::projection! {
-        struct OnlyRevision from TaskStatus { updateHash }
-    }
-
     #[test]
-    fn reads_the_revision_without_requesting_it() {
-        assert_eq!(StatusRevision::FIELDS, ["id", "updateHash"]);
-        assert_eq!(fields::<StatusRevision>(), "id");
-        assert_eq!(OnlyRevision::FIELDS, ["updateHash"]);
-        assert_eq!(fields::<OnlyRevision>(), "id");
+    fn nullable_core_projection_fields_must_be_present_but_may_be_null() {
+        let base = json!({
+            "id": 5,
+            "updateHash": "status-5",
+            "created": null,
+            "modified": null,
+            "creator": null
+        });
+        let item: ProjectedItem = serde_json::from_value(base.clone()).unwrap();
+        let status = decode::<StatusCore>(item).unwrap();
+        assert_eq!(status.created, None);
+        assert_eq!(status.modified, None);
+        assert_eq!(status.creator, None);
 
-        let item = serde_json::from_str::<ProjectedItem>(
-            r#"{"id": 5, "modified": null, "updateHash": "d21b3fd9"}"#,
-        )
-        .unwrap();
-        let status: StatusRevision = decode(item).unwrap();
-        assert_eq!(status.id, TaskStatusId::new(5));
-        assert_eq!(status.updateHash.as_str(), "d21b3fd9");
-
-        for wire in [r#"{"id": 5}"#, r#"{"updateHash": ""}"#] {
-            let item = serde_json::from_str::<ProjectedItem>(wire).unwrap();
-            let error = decode::<OnlyRevision>(item).unwrap_err();
+        for field in ["id", "updateHash", "created", "modified", "creator"] {
+            let mut wire = base.clone();
+            wire.as_object_mut().unwrap().remove(field);
+            let item: ProjectedItem = serde_json::from_value(wire).unwrap();
+            let error = decode::<StatusCore>(item).unwrap_err();
             let ErrorKind::Decode(cause) = error.kind() else {
                 panic!("expected a decode error, got {error:?}");
             };
-            assert!(
-                cause.to_string().starts_with("field `updateHash`"),
-                "{cause}"
-            );
+            assert!(cause.to_string().contains(field), "{cause}");
         }
     }
 
@@ -314,5 +383,102 @@ mod tests {
         let missing: Option<Link<crate::model::Crew>> = None;
         assert_eq!(IntoValue::<Option<CrewId>>::into_value(missing), None);
         assert_eq!(IntoValue::<i64>::into_value(7_i64), 7);
+    }
+
+    #[test]
+    fn handles_custom_fields_with_and_without_a_registry() {
+        use crate::model::ExtraInputFieldType;
+        use crate::{CustomFieldDefinition, CustomFieldRegistry};
+
+        let empty = CustomFieldRegistry::default();
+        let registry = CustomFieldRegistry::new([CustomFieldDefinition::new::<
+            crate::model::Equipment,
+        >(8, ExtraInputFieldType::Text)])
+        .unwrap();
+        let item: ProjectedItem =
+            serde_json::from_str(r#"{"id":1,"custom":{"custom_8":"x"}}"#).unwrap();
+        assert!(item.custom_fields_complete(&empty, "equipment").unwrap());
+        assert!(item.custom_fields_complete(&registry, "equipment").unwrap());
+
+        let missing: ProjectedItem = serde_json::from_str(r#"{"id":1}"#).unwrap();
+        assert!(
+            !missing
+                .custom_fields_complete(&registry, "equipment")
+                .unwrap()
+        );
+        let malformed: ProjectedItem =
+            serde_json::from_str(r#"{"id":1,"custom":"invalid"}"#).unwrap();
+        assert!(
+            malformed
+                .custom_fields_complete(&registry, "equipment")
+                .is_err()
+        );
+
+        let mut without_registry: ProjectedItem =
+            serde_json::from_str(r#"{"custom":{"custom_8":"x"}}"#).unwrap();
+        without_registry
+            .apply_custom_fields(&empty, "equipment")
+            .unwrap();
+        assert!(!without_registry.0.contains_key("custom"));
+
+        let mut with_unknown: ProjectedItem =
+            serde_json::from_str(r#"{"custom":{"custom_8":"x","custom_999":true}}"#).unwrap();
+        with_unknown
+            .apply_custom_fields(&registry, "equipment")
+            .unwrap();
+        let kept: crate::model::CustomFields =
+            serde_json::from_str(with_unknown.0["custom"].get()).unwrap();
+        assert_eq!(kept.0.len(), 1);
+
+        let mut missing: ProjectedItem = serde_json::from_str(r#"{"id":1}"#).unwrap();
+        assert!(matches!(
+            missing
+                .apply_custom_fields(&registry, "equipment")
+                .unwrap_err()
+                .kind(),
+            crate::ErrorKind::CustomField(crate::CustomFieldError::MissingValue { id: 8, .. })
+        ));
+        let mut malformed: ProjectedItem = serde_json::from_str(r#"{"custom":"invalid"}"#).unwrap();
+        assert!(matches!(
+            malformed
+                .apply_custom_fields(&registry, "equipment")
+                .unwrap_err()
+                .kind(),
+            crate::ErrorKind::Decode(_)
+        ));
+    }
+
+    #[test]
+    fn extracts_resource_ids_and_decodes_write_items() {
+        let item: ProjectedItem = serde_json::from_str(r#"{"id":12,"updateHash":"h12"}"#).unwrap();
+        assert_eq!(
+            item.resource_id::<crate::model::Equipment>().unwrap(),
+            crate::model::EquipmentId::new(12)
+        );
+        let item: ProjectedItem = serde_json::from_str(
+            r#"{"id":12,"updateHash":"h12","created":null,"modified":null,"creator":null}"#,
+        )
+        .unwrap();
+        let equipment: crate::model::Equipment = item.deserialize().unwrap();
+        assert_eq!(equipment.id, crate::model::EquipmentId::new(12));
+        assert_eq!(equipment.revision.as_str(), "h12");
+
+        let missing: ProjectedItem = serde_json::from_str(r#"{"updateHash":"h12"}"#).unwrap();
+        assert!(matches!(
+            missing
+                .resource_id::<crate::model::Equipment>()
+                .unwrap_err()
+                .kind(),
+            crate::ErrorKind::Decode(_)
+        ));
+        let invalid: ProjectedItem =
+            serde_json::from_str(r#"{"id":"bad","updateHash":"h12"}"#).unwrap();
+        assert!(matches!(
+            invalid
+                .deserialize::<crate::model::Equipment>()
+                .unwrap_err()
+                .kind(),
+            crate::ErrorKind::Decode(_)
+        ));
     }
 }
