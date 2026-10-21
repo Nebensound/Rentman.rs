@@ -1,7 +1,7 @@
-//! The Rentman API client and its untyped request builder.
+//! The Rentman API client and its internal request builder.
 
 use crate::{
-    RentmanApiToken, RentmanEndpointRequest, endpoint,
+    RentmanApiToken,
     transport::{CompositeRateLimiter, RetryPolicy, send_with_retry, send_with_retry_unit},
 };
 use crate::{
@@ -61,12 +61,6 @@ impl RentmanRequestBuilder {
         self.send_unit_with(retry_policy).await
     }
 
-    /// Sends a non-idempotent write exactly once.
-    pub(crate) async fn send_unit_once(self) -> Result<()> {
-        let retry_policy = self.client.retry_policy.single_attempt();
-        self.send_unit_with(retry_policy).await
-    }
-
     async fn send_unit_with(self, retry_policy: RetryPolicy) -> Result<()> {
         send_with_retry_unit(self.client.limiter, retry_policy, self.request).await
     }
@@ -120,11 +114,6 @@ impl RentmanClient {
             retry_policy: RetryPolicy::from_config(&config),
             limiter: Arc::new(CompositeRateLimiter::new(config.min_request_interval())),
         }
-    }
-
-    /// Starts a request for any typed Rentman API endpoint.
-    pub fn endpoint<E: endpoint::Endpoint>(&self) -> RentmanEndpointRequest<E> {
-        RentmanEndpointRequest::new(self.clone())
     }
 
     pub(crate) fn request(&self, method: Method, path: &str) -> RentmanRequestBuilder {

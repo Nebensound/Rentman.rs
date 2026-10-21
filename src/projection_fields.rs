@@ -11,11 +11,11 @@
 /// Fields of [`Accessory`](crate::model::Accessory) for `projection!`.
 pub mod Accessory {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -152,11 +152,11 @@ pub mod Accessory {
 /// Fields of [`ActualContent`](crate::model::ActualContent) for `projection!`.
 pub mod ActualContent {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -253,11 +253,11 @@ pub mod ActualContent {
 /// Fields of [`Alternative`](crate::model::Alternative) for `projection!`.
 pub mod Alternative {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -334,11 +334,11 @@ pub mod Alternative {
 /// Fields of [`Appointment`](crate::model::Appointment) for `projection!`.
 pub mod Appointment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -545,11 +545,11 @@ pub mod Appointment {
 /// Fields of [`AppointmentCrew`](crate::model::AppointmentCrew) for `projection!`.
 pub mod AppointmentCrew {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -626,11 +626,11 @@ pub mod AppointmentCrew {
 /// Fields of [`Contact`](crate::model::Contact) for `projection!`.
 pub mod Contact {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -728,8 +728,8 @@ pub mod Contact {
 
     impl ProjectionField for distance {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
     }
 
@@ -738,8 +738,8 @@ pub mod Contact {
 
     impl ProjectionField for travel_time {
         type Resource = Contact;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time";
     }
 
@@ -768,8 +768,8 @@ pub mod Contact {
 
     impl ProjectionField for longitude {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "longitude";
     }
 
@@ -778,8 +778,8 @@ pub mod Contact {
 
     impl ProjectionField for latitude {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "latitude";
     }
 
@@ -1238,8 +1238,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_crew {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_crew";
     }
 
@@ -1248,8 +1248,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_transport {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_transport";
     }
 
@@ -1258,8 +1258,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_rental {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_rental";
     }
 
@@ -1268,8 +1268,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_sale {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_sale";
     }
 
@@ -1278,8 +1278,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_total {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_total";
     }
 
@@ -1318,8 +1318,8 @@ pub mod Contact {
 
     impl ProjectionField for discount_subrent {
         type Resource = Contact;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_subrent";
     }
 
@@ -1357,11 +1357,11 @@ pub mod Contact {
 /// Fields of [`ContactPerson`](crate::model::ContactPerson) for `projection!`.
 pub mod ContactPerson {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -1578,11 +1578,11 @@ pub mod ContactPerson {
 /// Fields of [`Contract`](crate::model::Contract) for `projection!`.
 pub mod Contract {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -1740,8 +1740,8 @@ pub mod Contract {
 
     impl ProjectionField for project_total_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price";
     }
 
@@ -1750,8 +1750,8 @@ pub mod Contract {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price_cancelled";
     }
 
@@ -1760,8 +1760,8 @@ pub mod Contract {
 
     impl ProjectionField for project_rental_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_rental_price";
     }
 
@@ -1770,8 +1770,8 @@ pub mod Contract {
 
     impl ProjectionField for project_sale_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_sale_price";
     }
 
@@ -1780,8 +1780,8 @@ pub mod Contract {
 
     impl ProjectionField for project_crew_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_crew_price";
     }
 
@@ -1790,8 +1790,8 @@ pub mod Contract {
 
     impl ProjectionField for project_transport_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_transport_price";
     }
 
@@ -1800,8 +1800,8 @@ pub mod Contract {
 
     impl ProjectionField for project_other_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_other_price";
     }
 
@@ -1810,8 +1810,8 @@ pub mod Contract {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_insurance_price";
     }
 
@@ -1820,8 +1820,8 @@ pub mod Contract {
 
     impl ProjectionField for project_services_price {
         type Resource = Contract;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_services_price";
     }
 
@@ -1830,8 +1830,8 @@ pub mod Contract {
 
     impl ProjectionField for price {
         type Resource = Contract;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -1840,8 +1840,8 @@ pub mod Contract {
 
     impl ProjectionField for price_invat {
         type Resource = Contract;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
     }
 
@@ -1850,8 +1850,8 @@ pub mod Contract {
 
     impl ProjectionField for vat_amount {
         type Resource = Contract;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
     }
 }
@@ -1859,11 +1859,11 @@ pub mod Contract {
 /// Fields of [`Crew`](crate::model::Crew) for `projection!`.
 pub mod Crew {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -2260,11 +2260,11 @@ pub mod Crew {
 /// Fields of [`CrewAvailability`](crate::model::CrewAvailability) for `projection!`.
 pub mod CrewAvailability {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -2441,11 +2441,11 @@ pub mod CrewAvailability {
 /// Fields of [`CrewRate`](crate::model::CrewRate) for `projection!`.
 pub mod CrewRate {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -2532,11 +2532,11 @@ pub mod CrewRate {
 /// Fields of [`Equipment`](crate::model::Equipment) for `projection!`.
 pub mod Equipment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -2744,8 +2744,8 @@ pub mod Equipment {
 
     impl ProjectionField for price {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -2754,8 +2754,8 @@ pub mod Equipment {
 
     impl ProjectionField for subrental_costs {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "subrental_costs";
     }
 
@@ -2844,8 +2844,8 @@ pub mod Equipment {
 
     impl ProjectionField for list_price {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "list_price";
     }
 
@@ -2854,8 +2854,8 @@ pub mod Equipment {
 
     impl ProjectionField for volume {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
     }
 
@@ -2874,8 +2874,8 @@ pub mod Equipment {
 
     impl ProjectionField for height {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "height";
     }
 
@@ -2884,8 +2884,8 @@ pub mod Equipment {
 
     impl ProjectionField for width {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "width";
     }
 
@@ -2894,8 +2894,8 @@ pub mod Equipment {
 
     impl ProjectionField for length {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "length";
     }
 
@@ -2904,8 +2904,8 @@ pub mod Equipment {
 
     impl ProjectionField for weight {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
     }
 
@@ -2914,8 +2914,8 @@ pub mod Equipment {
 
     impl ProjectionField for empty_weight {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "empty_weight";
     }
 
@@ -2924,8 +2924,8 @@ pub mod Equipment {
 
     impl ProjectionField for power {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "power";
     }
 
@@ -2934,8 +2934,8 @@ pub mod Equipment {
 
     impl ProjectionField for current {
         type Resource = Equipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "current";
     }
 
@@ -3113,11 +3113,11 @@ pub mod Equipment {
 /// Fields of [`EquipmentAssignedSerial`](crate::model::EquipmentAssignedSerial) for `projection!`.
 pub mod EquipmentAssignedSerial {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3194,11 +3194,11 @@ pub mod EquipmentAssignedSerial {
 /// Fields of [`EquipmentSetContent`](crate::model::EquipmentSetContent) for `projection!`.
 pub mod EquipmentSetContent {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3315,11 +3315,11 @@ pub mod EquipmentSetContent {
 /// Fields of [`ExtraInputField`](crate::model::ExtraInputField) for `projection!`.
 pub mod ExtraInputField {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3486,11 +3486,11 @@ pub mod ExtraInputField {
 /// Fields of [`Factor`](crate::model::Factor) for `projection!`.
 pub mod Factor {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3568,8 +3568,8 @@ pub mod Factor {
 
     impl ProjectionField for factor {
         type Resource = Factor;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
     }
 
@@ -3587,11 +3587,11 @@ pub mod Factor {
 /// Fields of [`FactorGroup`](crate::model::FactorGroup) for `projection!`.
 pub mod FactorGroup {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3658,11 +3658,11 @@ pub mod FactorGroup {
 /// Fields of [`File`](crate::model::File) for `projection!`.
 pub mod File {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -3979,11 +3979,11 @@ pub mod File {
 /// Fields of [`FileFolder`](crate::model::FileFolder) for `projection!`.
 pub mod FileFolder {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -4110,11 +4110,11 @@ pub mod FileFolder {
 /// Fields of [`Folder`](crate::model::Folder) for `projection!`.
 pub mod Folder {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -4221,11 +4221,11 @@ pub mod Folder {
 /// Fields of [`Invitation`](crate::model::Invitation) for `projection!`.
 pub mod Invitation {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -4432,11 +4432,11 @@ pub mod Invitation {
 /// Fields of [`Invoice`](crate::model::Invoice) for `projection!`.
 pub mod Invoice {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -4554,8 +4554,8 @@ pub mod Invoice {
 
     impl ProjectionField for procent {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "procent";
     }
 
@@ -4624,8 +4624,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_total_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price";
     }
 
@@ -4634,8 +4634,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price_cancelled";
     }
 
@@ -4644,8 +4644,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_rental_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_rental_price";
     }
 
@@ -4654,8 +4654,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_sale_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_sale_price";
     }
 
@@ -4664,8 +4664,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_crew_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_crew_price";
     }
 
@@ -4674,8 +4674,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_transport_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_transport_price";
     }
 
@@ -4684,8 +4684,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_other_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_other_price";
     }
 
@@ -4694,8 +4694,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_insurance_price";
     }
 
@@ -4704,8 +4704,8 @@ pub mod Invoice {
 
     impl ProjectionField for project_services_price {
         type Resource = Invoice;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_services_price";
     }
 
@@ -4714,8 +4714,8 @@ pub mod Invoice {
 
     impl ProjectionField for sum_factuurregels {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "sum_factuurregels";
     }
 
@@ -4724,8 +4724,8 @@ pub mod Invoice {
 
     impl ProjectionField for price {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -4734,8 +4734,8 @@ pub mod Invoice {
 
     impl ProjectionField for price_invat {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
     }
 
@@ -4744,8 +4744,8 @@ pub mod Invoice {
 
     impl ProjectionField for vat_amount {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
     }
 
@@ -4764,8 +4764,8 @@ pub mod Invoice {
 
     impl ProjectionField for outstanding_balance {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "outstanding_balance";
     }
 
@@ -4774,8 +4774,8 @@ pub mod Invoice {
 
     impl ProjectionField for total_paid {
         type Resource = Invoice;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "total_paid";
     }
 
@@ -4853,11 +4853,11 @@ pub mod Invoice {
 /// Fields of [`InvoiceLine`](crate::model::InvoiceLine) for `projection!`.
 pub mod InvoiceLine {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -4925,8 +4925,8 @@ pub mod InvoiceLine {
 
     impl ProjectionField for base {
         type Resource = InvoiceLine;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "base";
     }
 
@@ -4945,8 +4945,8 @@ pub mod InvoiceLine {
 
     impl ProjectionField for vatrate {
         type Resource = InvoiceLine;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "vatrate";
     }
 
@@ -4955,8 +4955,8 @@ pub mod InvoiceLine {
 
     impl ProjectionField for vatamount {
         type Resource = InvoiceLine;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "vatamount";
     }
 
@@ -4965,8 +4965,8 @@ pub mod InvoiceLine {
 
     impl ProjectionField for priceincl {
         type Resource = InvoiceLine;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "priceincl";
     }
 
@@ -4994,11 +4994,11 @@ pub mod InvoiceLine {
 /// Fields of [`LeaveMutation`](crate::model::LeaveMutation) for `projection!`.
 pub mod LeaveMutation {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5066,8 +5066,8 @@ pub mod LeaveMutation {
 
     impl ProjectionField for duration {
         type Resource = LeaveMutation;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "duration";
     }
 
@@ -5105,11 +5105,11 @@ pub mod LeaveMutation {
 /// Fields of [`LeaveRequest`](crate::model::LeaveRequest) for `projection!`.
 pub mod LeaveRequest {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5216,11 +5216,11 @@ pub mod LeaveRequest {
 /// Fields of [`LeaveType`](crate::model::LeaveType) for `projection!`.
 pub mod LeaveType {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5397,11 +5397,11 @@ pub mod LeaveType {
 /// Fields of [`LedgerCode`](crate::model::LedgerCode) for `projection!`.
 pub mod LedgerCode {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5488,11 +5488,11 @@ pub mod LedgerCode {
 /// Fields of [`Payment`](crate::model::Payment) for `projection!`.
 pub mod Payment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5570,8 +5570,8 @@ pub mod Payment {
 
     impl ProjectionField for amount {
         type Resource = Payment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "amount";
     }
 
@@ -5599,11 +5599,11 @@ pub mod Payment {
 /// Fields of [`Project`](crate::model::Project) for `projection!`.
 pub mod Project {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -5671,8 +5671,8 @@ pub mod Project {
 
     impl ProjectionField for refundabledeposit {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "refundabledeposit";
     }
 
@@ -5791,8 +5791,8 @@ pub mod Project {
 
     impl ProjectionField for project_total_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price";
     }
 
@@ -5801,8 +5801,8 @@ pub mod Project {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price_cancelled";
     }
 
@@ -5811,8 +5811,8 @@ pub mod Project {
 
     impl ProjectionField for project_rental_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_rental_price";
     }
 
@@ -5821,8 +5821,8 @@ pub mod Project {
 
     impl ProjectionField for project_sale_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_sale_price";
     }
 
@@ -5831,8 +5831,8 @@ pub mod Project {
 
     impl ProjectionField for project_crew_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_crew_price";
     }
 
@@ -5841,8 +5841,8 @@ pub mod Project {
 
     impl ProjectionField for project_transport_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_transport_price";
     }
 
@@ -5851,8 +5851,8 @@ pub mod Project {
 
     impl ProjectionField for project_other_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_other_price";
     }
 
@@ -5861,8 +5861,8 @@ pub mod Project {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_insurance_price";
     }
 
@@ -5871,8 +5871,8 @@ pub mod Project {
 
     impl ProjectionField for project_services_price {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_services_price";
     }
 
@@ -5881,8 +5881,8 @@ pub mod Project {
 
     impl ProjectionField for estimated_cost {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "estimated_cost";
     }
 
@@ -5891,8 +5891,8 @@ pub mod Project {
 
     impl ProjectionField for planned_cost {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "planned_cost";
     }
 
@@ -5901,8 +5901,8 @@ pub mod Project {
 
     impl ProjectionField for actual_cost {
         type Resource = Project;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "actual_cost";
     }
 
@@ -5911,8 +5911,8 @@ pub mod Project {
 
     impl ProjectionField for already_invoiced {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "already_invoiced";
     }
 
@@ -5971,8 +5971,8 @@ pub mod Project {
 
     impl ProjectionField for weight {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
     }
 
@@ -5981,8 +5981,8 @@ pub mod Project {
 
     impl ProjectionField for power {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "power";
     }
 
@@ -5991,8 +5991,8 @@ pub mod Project {
 
     impl ProjectionField for current {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "current";
     }
 
@@ -6021,8 +6021,8 @@ pub mod Project {
 
     impl ProjectionField for purchasecosts {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "purchasecosts";
     }
 
@@ -6031,8 +6031,8 @@ pub mod Project {
 
     impl ProjectionField for volume {
         type Resource = Project;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
     }
 
@@ -6050,11 +6050,11 @@ pub mod Project {
 /// Fields of [`ProjectCost`](crate::model::ProjectCost) for `projection!`.
 pub mod ProjectCost {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -6152,8 +6152,8 @@ pub mod ProjectCost {
 
     impl ProjectionField for discount {
         type Resource = ProjectCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
     }
 
@@ -6222,8 +6222,8 @@ pub mod ProjectCost {
 
     impl ProjectionField for sale_price {
         type Resource = ProjectCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "sale_price";
     }
 
@@ -6232,8 +6232,8 @@ pub mod ProjectCost {
 
     impl ProjectionField for purchase_price {
         type Resource = ProjectCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "purchase_price";
     }
 
@@ -6251,11 +6251,11 @@ pub mod ProjectCost {
 /// Fields of [`ProjectCrew`](crate::model::ProjectCrew) for `projection!`.
 pub mod ProjectCrew {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -6323,8 +6323,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_accommodation {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_accommodation";
     }
 
@@ -6333,8 +6333,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_catering {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_catering";
     }
 
@@ -6343,8 +6343,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_travel {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_travel";
     }
 
@@ -6353,8 +6353,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_other {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_other";
     }
 
@@ -6473,8 +6473,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for costs {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "costs";
     }
 
@@ -6483,8 +6483,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_actual {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_actual";
     }
 
@@ -6493,8 +6493,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for hours_registered {
         type Resource = ProjectCrew;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "hours_registered";
     }
 
@@ -6503,8 +6503,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for hours_planned {
         type Resource = ProjectCrew;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "hours_planned";
     }
 
@@ -6513,8 +6513,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for cost_planned {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_planned";
     }
 
@@ -6523,8 +6523,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for diff_cost {
         type Resource = ProjectCrew;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "diff_cost";
     }
 
@@ -6533,8 +6533,8 @@ pub mod ProjectCrew {
 
     impl ProjectionField for diff_hours {
         type Resource = ProjectCrew;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "diff_hours";
     }
 
@@ -6562,11 +6562,11 @@ pub mod ProjectCrew {
 /// Fields of [`ProjectEquipment`](crate::model::ProjectEquipment) for `projection!`.
 pub mod ProjectEquipment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -6694,8 +6694,8 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for discount {
         type Resource = ProjectEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
     }
 
@@ -6714,8 +6714,8 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for factor {
         type Resource = ProjectEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
     }
 
@@ -6734,8 +6734,8 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for unit_price {
         type Resource = ProjectEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
     }
 
@@ -6784,8 +6784,8 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for duration {
         type Resource = ProjectEquipment;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
     }
 
@@ -6893,11 +6893,11 @@ pub mod ProjectEquipment {
 /// Fields of [`ProjectEquipmentGroup`](crate::model::ProjectEquipmentGroup) for `projection!`.
 pub mod ProjectEquipmentGroup {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -7015,8 +7015,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for duration {
         type Resource = ProjectEquipmentGroup;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
     }
 
@@ -7085,8 +7085,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for weight {
         type Resource = ProjectEquipmentGroup;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
     }
 
@@ -7095,8 +7095,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for power {
         type Resource = ProjectEquipmentGroup;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "power";
     }
 
@@ -7105,8 +7105,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for current {
         type Resource = ProjectEquipmentGroup;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "current";
     }
 
@@ -7115,8 +7115,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for volume {
         type Resource = ProjectEquipmentGroup;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
     }
 
@@ -7125,8 +7125,8 @@ pub mod ProjectEquipmentGroup {
 
     impl ProjectionField for total_new_price {
         type Resource = ProjectEquipmentGroup;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "total_new_price";
     }
 }
@@ -7134,11 +7134,11 @@ pub mod ProjectEquipmentGroup {
 /// Fields of [`ProjectFunction`](crate::model::ProjectFunction) for `projection!`.
 pub mod ProjectFunction {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -7206,8 +7206,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for cost_accommodation {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_accommodation";
     }
 
@@ -7216,8 +7216,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for cost_catering {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_catering";
     }
 
@@ -7226,8 +7226,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for cost_travel {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_travel";
     }
 
@@ -7236,8 +7236,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for cost_other {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "cost_other";
     }
 
@@ -7256,8 +7256,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_accommodation {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_accommodation";
     }
 
@@ -7266,8 +7266,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_catering {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_catering";
     }
 
@@ -7276,8 +7276,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_travel {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_travel";
     }
 
@@ -7286,8 +7286,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_other {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_other";
     }
 
@@ -7356,8 +7356,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for travel_time_before {
         type Resource = ProjectFunction;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time_before";
     }
 
@@ -7366,8 +7366,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for travel_time_after {
         type Resource = ProjectFunction;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time_after";
     }
 
@@ -7486,8 +7486,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for duration {
         type Resource = ProjectFunction;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
     }
 
@@ -7506,8 +7506,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for r#break {
         type Resource = ProjectFunction;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break";
     }
 
@@ -7516,8 +7516,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for distance {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
     }
 
@@ -7686,8 +7686,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_fixed {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_fixed";
     }
 
@@ -7696,8 +7696,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_variable {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_variable";
     }
 
@@ -7706,8 +7706,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for costs_fixed {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "costs_fixed";
     }
 
@@ -7716,8 +7716,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for costs_variable {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "costs_variable";
     }
 
@@ -7726,8 +7726,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for price_total {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_total";
     }
 
@@ -7736,8 +7736,8 @@ pub mod ProjectFunction {
 
     impl ProjectionField for costs_total {
         type Resource = ProjectFunction;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "costs_total";
     }
 
@@ -7765,11 +7765,11 @@ pub mod ProjectFunction {
 /// Fields of [`ProjectFunctionGroup`](crate::model::ProjectFunctionGroup) for `projection!`.
 pub mod ProjectFunctionGroup {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -7857,8 +7857,8 @@ pub mod ProjectFunctionGroup {
 
     impl ProjectionField for duration {
         type Resource = ProjectFunctionGroup;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
     }
 
@@ -7956,11 +7956,11 @@ pub mod ProjectFunctionGroup {
 /// Fields of [`ProjectRequest`](crate::model::ProjectRequest) for `projection!`.
 pub mod ProjectRequest {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8338,8 +8338,8 @@ pub mod ProjectRequest {
 
     impl ProjectionField for price {
         type Resource = ProjectRequest;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -8377,11 +8377,11 @@ pub mod ProjectRequest {
 /// Fields of [`ProjectRequestEquipment`](crate::model::ProjectRequestEquipment) for `projection!`.
 pub mod ProjectRequestEquipment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8479,8 +8479,8 @@ pub mod ProjectRequestEquipment {
 
     impl ProjectionField for discount {
         type Resource = ProjectRequestEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
     }
 
@@ -8529,8 +8529,8 @@ pub mod ProjectRequestEquipment {
 
     impl ProjectionField for unit_price {
         type Resource = ProjectRequestEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
     }
 
@@ -8549,8 +8549,8 @@ pub mod ProjectRequestEquipment {
 
     impl ProjectionField for factor {
         type Resource = ProjectRequestEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
     }
 
@@ -8568,11 +8568,11 @@ pub mod ProjectRequestEquipment {
 /// Fields of [`ProjectStatus`](crate::model::ProjectStatus) for `projection!`.
 pub mod ProjectStatus {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8639,11 +8639,11 @@ pub mod ProjectStatus {
 /// Fields of [`ProjectTemplate`](crate::model::ProjectTemplate) for `projection!`.
 pub mod ProjectTemplate {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8710,11 +8710,11 @@ pub mod ProjectTemplate {
 /// Fields of [`ProjectType`](crate::model::ProjectType) for `projection!`.
 pub mod ProjectType {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8801,11 +8801,11 @@ pub mod ProjectType {
 /// Fields of [`ProjectVehicle`](crate::model::ProjectVehicle) for `projection!`.
 pub mod ProjectVehicle {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -8943,8 +8943,8 @@ pub mod ProjectVehicle {
 
     impl ProjectionField for costs {
         type Resource = ProjectVehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "costs";
     }
 
@@ -8962,11 +8962,11 @@ pub mod ProjectVehicle {
 /// Fields of [`PurchaseOrder`](crate::model::PurchaseOrder) for `projection!`.
 pub mod PurchaseOrder {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -9114,8 +9114,8 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for approved_amount {
         type Resource = PurchaseOrder;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "approved_amount";
     }
 
@@ -9234,8 +9234,8 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for underlying_cost_amount {
         type Resource = PurchaseOrder;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount";
     }
 
@@ -9244,8 +9244,8 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for underlying_cost_amount_tax {
         type Resource = PurchaseOrder;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_tax";
     }
 
@@ -9254,8 +9254,8 @@ pub mod PurchaseOrder {
 
     impl ProjectionField for underlying_cost_amount_with_tax {
         type Resource = PurchaseOrder;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_with_tax";
     }
 
@@ -9303,11 +9303,11 @@ pub mod PurchaseOrder {
 /// Fields of [`PurchaseOrderCost`](crate::model::PurchaseOrderCost) for `projection!`.
 pub mod PurchaseOrderCost {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -9395,8 +9395,8 @@ pub mod PurchaseOrderCost {
 
     impl ProjectionField for approved_amount {
         type Resource = PurchaseOrderCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "approved_amount";
     }
 
@@ -9415,8 +9415,8 @@ pub mod PurchaseOrderCost {
 
     impl ProjectionField for underlying_cost_amount {
         type Resource = PurchaseOrderCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount";
     }
 
@@ -9425,8 +9425,8 @@ pub mod PurchaseOrderCost {
 
     impl ProjectionField for underlying_cost_amount_tax {
         type Resource = PurchaseOrderCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_tax";
     }
 
@@ -9435,8 +9435,8 @@ pub mod PurchaseOrderCost {
 
     impl ProjectionField for underlying_cost_amount_with_tax {
         type Resource = PurchaseOrderCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "underlying_cost_amount_with_tax";
     }
 
@@ -9454,11 +9454,11 @@ pub mod PurchaseOrderCost {
 /// Fields of [`PurchaseOrderGlobalCost`](crate::model::PurchaseOrderGlobalCost) for `projection!`.
 pub mod PurchaseOrderGlobalCost {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -9536,8 +9536,8 @@ pub mod PurchaseOrderGlobalCost {
 
     impl ProjectionField for unit_purchase_cost {
         type Resource = PurchaseOrderGlobalCost;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "unit_purchase_cost";
     }
 
@@ -9565,11 +9565,11 @@ pub mod PurchaseOrderGlobalCost {
 /// Fields of [`Quote`](crate::model::Quote) for `projection!`.
 pub mod Quote {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -9727,8 +9727,8 @@ pub mod Quote {
 
     impl ProjectionField for project_total_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price";
     }
 
@@ -9737,8 +9737,8 @@ pub mod Quote {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price_cancelled";
     }
 
@@ -9747,8 +9747,8 @@ pub mod Quote {
 
     impl ProjectionField for project_rental_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_rental_price";
     }
 
@@ -9757,8 +9757,8 @@ pub mod Quote {
 
     impl ProjectionField for project_sale_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_sale_price";
     }
 
@@ -9767,8 +9767,8 @@ pub mod Quote {
 
     impl ProjectionField for project_crew_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_crew_price";
     }
 
@@ -9777,8 +9777,8 @@ pub mod Quote {
 
     impl ProjectionField for project_transport_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_transport_price";
     }
 
@@ -9787,8 +9787,8 @@ pub mod Quote {
 
     impl ProjectionField for project_other_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_other_price";
     }
 
@@ -9797,8 +9797,8 @@ pub mod Quote {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_insurance_price";
     }
 
@@ -9807,8 +9807,8 @@ pub mod Quote {
 
     impl ProjectionField for project_services_price {
         type Resource = Quote;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_services_price";
     }
 
@@ -9817,8 +9817,8 @@ pub mod Quote {
 
     impl ProjectionField for price {
         type Resource = Quote;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -9827,8 +9827,8 @@ pub mod Quote {
 
     impl ProjectionField for price_invat {
         type Resource = Quote;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price_invat";
     }
 
@@ -9837,8 +9837,8 @@ pub mod Quote {
 
     impl ProjectionField for vat_amount {
         type Resource = Quote;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
     }
 
@@ -9856,11 +9856,11 @@ pub mod Quote {
 /// Fields of [`Rate`](crate::model::Rate) for `projection!`.
 pub mod Rate {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -9957,11 +9957,11 @@ pub mod Rate {
 /// Fields of [`RateFactor`](crate::model::RateFactor) for `projection!`.
 pub mod RateFactor {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10029,8 +10029,8 @@ pub mod RateFactor {
 
     impl ProjectionField for from {
         type Resource = RateFactor;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "from";
     }
 
@@ -10039,8 +10039,8 @@ pub mod RateFactor {
 
     impl ProjectionField for to {
         type Resource = RateFactor;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "to";
     }
 
@@ -10049,8 +10049,8 @@ pub mod RateFactor {
 
     impl ProjectionField for variable {
         type Resource = RateFactor;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "variable";
     }
 
@@ -10059,8 +10059,8 @@ pub mod RateFactor {
 
     impl ProjectionField for fixed {
         type Resource = RateFactor;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "fixed";
     }
 }
@@ -10068,11 +10068,11 @@ pub mod RateFactor {
 /// Fields of [`Repair`](crate::model::Repair) for `projection!`.
 pub mod Repair {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10240,8 +10240,8 @@ pub mod Repair {
 
     impl ProjectionField for repair_costs {
         type Resource = Repair;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "repair_costs";
     }
 
@@ -10329,11 +10329,11 @@ pub mod Repair {
 /// Fields of [`SerialNumber`](crate::model::SerialNumber) for `projection!`.
 pub mod SerialNumber {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10421,8 +10421,8 @@ pub mod SerialNumber {
 
     impl ProjectionField for depreciation_monthly {
         type Resource = SerialNumber;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "depreciation_monthly";
     }
 
@@ -10431,8 +10431,8 @@ pub mod SerialNumber {
 
     impl ProjectionField for book_value {
         type Resource = SerialNumber;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "book_value";
     }
 
@@ -10441,8 +10441,8 @@ pub mod SerialNumber {
 
     impl ProjectionField for residual_value {
         type Resource = SerialNumber;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "residual_value";
     }
 
@@ -10451,8 +10451,8 @@ pub mod SerialNumber {
 
     impl ProjectionField for purchase_costs {
         type Resource = SerialNumber;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "purchase_costs";
     }
 
@@ -10511,8 +10511,8 @@ pub mod SerialNumber {
 
     impl ProjectionField for current_book_value {
         type Resource = SerialNumber;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "current_book_value";
     }
 
@@ -10580,11 +10580,11 @@ pub mod SerialNumber {
 /// Fields of [`Status`](crate::model::Status) for `projection!`.
 pub mod Status {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10651,11 +10651,11 @@ pub mod Status {
 /// Fields of [`StockLocation`](crate::model::StockLocation) for `projection!`.
 pub mod StockLocation {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10822,11 +10822,11 @@ pub mod StockLocation {
 /// Fields of [`StockMovement`](crate::model::StockMovement) for `projection!`.
 pub mod StockMovement {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -10973,11 +10973,11 @@ pub mod StockMovement {
 /// Fields of [`Subproject`](crate::model::Subproject) for `projection!`.
 pub mod Subproject {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -11105,8 +11105,8 @@ pub mod Subproject {
 
     impl ProjectionField for insurance_rate {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "insurance_rate";
     }
 
@@ -11115,8 +11115,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_rental {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_rental";
     }
 
@@ -11125,8 +11125,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_sale {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_sale";
     }
 
@@ -11135,8 +11135,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_crew {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_crew";
     }
 
@@ -11145,8 +11145,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_transport {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_transport";
     }
 
@@ -11155,8 +11155,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_additional_costs {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_additional_costs";
     }
 
@@ -11165,8 +11165,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_services {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_services";
     }
 
@@ -11175,8 +11175,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_subproject {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_subproject";
     }
 
@@ -11195,8 +11195,8 @@ pub mod Subproject {
 
     impl ProjectionField for discount_fixed_amount {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount_fixed_amount";
     }
 
@@ -11245,8 +11245,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_total_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price";
     }
 
@@ -11255,8 +11255,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_total_price_cancelled {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_total_price_cancelled";
     }
 
@@ -11265,8 +11265,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_rental_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_rental_price";
     }
 
@@ -11275,8 +11275,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_sale_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_sale_price";
     }
 
@@ -11285,8 +11285,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_crew_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_crew_price";
     }
 
@@ -11295,8 +11295,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_transport_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_transport_price";
     }
 
@@ -11305,8 +11305,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_other_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_other_price";
     }
 
@@ -11315,8 +11315,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_insurance_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_insurance_price";
     }
 
@@ -11325,8 +11325,8 @@ pub mod Subproject {
 
     impl ProjectionField for project_services_price {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "project_services_price";
     }
 
@@ -11335,8 +11335,8 @@ pub mod Subproject {
 
     impl ProjectionField for estimated_cost {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "estimated_cost";
     }
 
@@ -11345,8 +11345,8 @@ pub mod Subproject {
 
     impl ProjectionField for planned_cost {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "planned_cost";
     }
 
@@ -11355,8 +11355,8 @@ pub mod Subproject {
 
     impl ProjectionField for actual_cost {
         type Resource = Subproject;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "actual_cost";
     }
 
@@ -11365,8 +11365,8 @@ pub mod Subproject {
 
     impl ProjectionField for already_invoiced {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "already_invoiced";
     }
 
@@ -11415,8 +11415,8 @@ pub mod Subproject {
 
     impl ProjectionField for weight {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "weight";
     }
 
@@ -11425,8 +11425,8 @@ pub mod Subproject {
 
     impl ProjectionField for power {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "power";
     }
 
@@ -11435,8 +11435,8 @@ pub mod Subproject {
 
     impl ProjectionField for current {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "current";
     }
 
@@ -11445,8 +11445,8 @@ pub mod Subproject {
 
     impl ProjectionField for purchasecosts {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "purchasecosts";
     }
 
@@ -11455,8 +11455,8 @@ pub mod Subproject {
 
     impl ProjectionField for volume {
         type Resource = Subproject;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "volume";
     }
 
@@ -11494,11 +11494,11 @@ pub mod Subproject {
 /// Fields of [`Subrental`](crate::model::Subrental) for `projection!`.
 pub mod Subrental {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -11696,8 +11696,8 @@ pub mod Subrental {
 
     impl ProjectionField for equipment_cost {
         type Resource = Subrental;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "equipment_cost";
     }
 
@@ -11706,8 +11706,8 @@ pub mod Subrental {
 
     impl ProjectionField for price {
         type Resource = Subrental;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -11716,8 +11716,8 @@ pub mod Subrental {
 
     impl ProjectionField for extra_cost {
         type Resource = Subrental;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "extra_cost";
     }
 
@@ -11835,11 +11835,11 @@ pub mod Subrental {
 /// Fields of [`SubrentalEquipment`](crate::model::SubrentalEquipment) for `projection!`.
 pub mod SubrentalEquipment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -11977,8 +11977,8 @@ pub mod SubrentalEquipment {
 
     impl ProjectionField for unit_price {
         type Resource = SubrentalEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "unit_price";
     }
 
@@ -11987,8 +11987,8 @@ pub mod SubrentalEquipment {
 
     impl ProjectionField for discount {
         type Resource = SubrentalEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "discount";
     }
 
@@ -11997,8 +11997,8 @@ pub mod SubrentalEquipment {
 
     impl ProjectionField for factor {
         type Resource = SubrentalEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "factor";
     }
 
@@ -12027,8 +12027,8 @@ pub mod SubrentalEquipment {
 
     impl ProjectionField for lineprice {
         type Resource = SubrentalEquipment;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "lineprice";
     }
 
@@ -12046,11 +12046,11 @@ pub mod SubrentalEquipment {
 /// Fields of [`SubrentalEquipmentGroup`](crate::model::SubrentalEquipmentGroup) for `projection!`.
 pub mod SubrentalEquipmentGroup {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12147,11 +12147,11 @@ pub mod SubrentalEquipmentGroup {
 /// Fields of [`Subtask`](crate::model::Subtask) for `projection!`.
 pub mod Subtask {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12238,11 +12238,11 @@ pub mod Subtask {
 /// Fields of [`Supplier`](crate::model::Supplier) for `projection!`.
 pub mod Supplier {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12330,8 +12330,8 @@ pub mod Supplier {
 
     impl ProjectionField for price {
         type Resource = Supplier;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "price";
     }
 
@@ -12349,11 +12349,11 @@ pub mod Supplier {
 /// Fields of [`Task`](crate::model::Task) for `projection!`.
 pub mod Task {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12661,8 +12661,8 @@ pub mod Task {
 
     impl ProjectionField for time_budget {
         type Resource = Task;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "time_budget";
     }
 
@@ -12700,11 +12700,11 @@ pub mod Task {
 /// Fields of [`TaskAssignment`](crate::model::TaskAssignment) for `projection!`.
 pub mod TaskAssignment {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12781,11 +12781,11 @@ pub mod TaskAssignment {
 /// Fields of [`TaskStatus`](crate::model::TaskStatus) for `projection!`.
 pub mod TaskStatus {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12882,11 +12882,11 @@ pub mod TaskStatus {
 /// Fields of [`TaxClass`](crate::model::TaxClass) for `projection!`.
 pub mod TaxClass {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -12973,11 +12973,11 @@ pub mod TaxClass {
 /// Fields of [`TimeRegistration`](crate::model::TimeRegistration) for `projection!`.
 pub mod TimeRegistration {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -13065,8 +13065,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for distance {
         type Resource = TimeRegistration;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "distance";
     }
 
@@ -13105,8 +13105,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for duration {
         type Resource = TimeRegistration;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "duration";
     }
 
@@ -13115,8 +13115,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for break_duration {
         type Resource = TimeRegistration;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break_duration";
     }
 
@@ -13125,8 +13125,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for travel_time {
         type Resource = TimeRegistration;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "travel_time";
     }
 
@@ -13135,8 +13135,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for correction_duration {
         type Resource = TimeRegistration;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "correction_duration";
     }
 
@@ -13165,8 +13165,8 @@ pub mod TimeRegistration {
 
     impl ProjectionField for break_duration_with_start_end {
         type Resource = TimeRegistration;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "break_duration_with_start_end";
     }
 
@@ -13184,11 +13184,11 @@ pub mod TimeRegistration {
 /// Fields of [`TimeRegistrationActivity`](crate::model::TimeRegistrationActivity) for `projection!`.
 pub mod TimeRegistrationActivity {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -13286,8 +13286,8 @@ pub mod TimeRegistrationActivity {
 
     impl ProjectionField for duration {
         type Resource = TimeRegistrationActivity;
-        type Value = Option<Decimal>;
-        type Wire = Option<Decimal>;
+        type Value = Option<RentmanAmount>;
+        type Wire = Option<RentmanAmount>;
         const NAME: &'static str = "duration";
     }
 
@@ -13325,11 +13325,11 @@ pub mod TimeRegistrationActivity {
 /// Fields of [`Vehicle`](crate::model::Vehicle) for `projection!`.
 pub mod Vehicle {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.
@@ -13427,8 +13427,8 @@ pub mod Vehicle {
 
     impl ProjectionField for height {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "height";
     }
 
@@ -13437,8 +13437,8 @@ pub mod Vehicle {
 
     impl ProjectionField for length {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "length";
     }
 
@@ -13447,8 +13447,8 @@ pub mod Vehicle {
 
     impl ProjectionField for width {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "width";
     }
 
@@ -13497,8 +13497,8 @@ pub mod Vehicle {
 
     impl ProjectionField for payload_capacity {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "payload_capacity";
     }
 
@@ -13557,8 +13557,8 @@ pub mod Vehicle {
 
     impl ProjectionField for distance_cost {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "distance_cost";
     }
 
@@ -13567,8 +13567,8 @@ pub mod Vehicle {
 
     impl ProjectionField for fixed_cost {
         type Resource = Vehicle;
-        type Value = Decimal;
-        type Wire = Decimal;
+        type Value = RentmanAmount;
+        type Wire = RentmanAmount;
         const NAME: &'static str = "fixed_cost";
     }
 
@@ -13586,11 +13586,11 @@ pub mod Vehicle {
 /// Fields of [`WarehouseStatus`](crate::model::WarehouseStatus) for `projection!`.
 pub mod WarehouseStatus {
     use crate::ProjectionField;
+    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
-    use ::rust_decimal::Decimal;
     use ::url::Url;
 
     /// `id`: Rentman field `id`.

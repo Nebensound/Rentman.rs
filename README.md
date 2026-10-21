@@ -22,20 +22,25 @@ boundaries, redacted secrets, retry handling, and rate limiting.
 The public crate surface is Rentman-focused:
 
 - `RentmanClient` owns authentication, retry handling, rate limiting, and async
-  HTTP transport.
-- `model` contains typed Rentman API request and response models.
-- `endpoint` contains typed Rentman API endpoint definitions and endpoint
-  metadata.
-- High-level domain methods such as `all_invoices()` keep common workflows
-  smaller and stricter than raw API calls.
+  HTTP transport, and is the entry point to every resource (`client.crew()`).
+- `resource` contains the collections and their operations (`List`, `Get`,
+  `Create`, `Update`, `Delete`, `ListRequest`).
+- `model` contains the item types (`Crew`), write payloads (`CrewPayload`),
+  enums, and ID aliases (`CrewId`).
+- `fields` contains the filter and sort constants, `projection!` and
+  `projection_fields` the field selection.
+- `Id<R>`, `RentmanAmount`, `PageSize`, and the typed `Error`.
 
-The checked-in Rentman OpenAPI definition lives in `openapi/rentman-oas.json`.
-It is an internal contract source, not the public abstraction. The generated
-files `src/model/generated.rs` and `src/endpoint/generated.rs` are exposed as
-Rentman API models and endpoints through `model` and `endpoint`.
+The resource layer is the only public API for Rentman data. The endpoint layer
+(`src/endpoint.rs` and `src/endpoint/generated.rs`: one typed endpoint per
+documented operation with its parameters, body, response, and error statuses)
+and the response envelopes (`CollectionResponse`, `ItemResponse`) are the
+crate-internal foundation the resources are built on; compile-fail doctests in
+`src/resource.rs` keep them private. The checked-in Rentman OpenAPI definition
+lives in `openapi/rentman-oas.json`; it is an internal contract source, not
+the public abstraction.
 
-Every documented endpoint is executable through the typed endpoint layer and
-reachable through the resource layer (`src/resource.rs`): the generator groups
+Every documented operation is reachable through the resource layer (`src/resource.rs`): the generator groups
 the documented paths into collections (`client.crew()`), nested collections
 (`client.crew().appointments(id)`), and named actions
 (`client.projects().set_client(id, &payload)`). Accessors are the snake_case
@@ -84,9 +89,11 @@ the crates.io README and included as the crate-level rustdoc, so its Rust
 example is compile-checked by `cargo test --doc`. This README is the
 contributor documentation and stays out of the published package.
 
-The hand-written domain facade translates API formats into narrower domain
-types such as
-`RentmanApiToken`, `InvoiceNumber`, and `RentmanAmount`.
+Hand-written boundary types translate API formats into narrower types such as
+`RentmanApiToken`, `Id<R>`, and `RentmanAmount`. Every JSON number in the
+generated models and payloads is a `RentmanAmount`, read and written exactly
+from its JSON text (also inside projections), never through `f64`. Values in
+the open `custom` fields object stay `Decimal`.
 
 IDs are typed by their resource: `Id<R>` (`src/id.rs`) is used for an item's
 own `id` and for every link to it, with a generated alias per resource
@@ -202,9 +209,9 @@ A token already set in the environment takes precedence over `.env`, so
 
 Live tests only read, with one opt-in exception: when
 `RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
-equipment item, a test writes its current price back unchanged through
-`update_equipment_prices()` and through a typed `send_once()` request, and
-checks that no price field changed. Without the variable nothing is written.
+equipment item, a test reads its prices through a projection, writes the current price back
+unchanged through `client.equipment().update(...)`, and checks against the
+stored JSON text that no price field changed. Without the variable nothing is written.
 Payments are not covered, because a created payment cannot be undone without
 side effects; that needs a dedicated Rentman test account. In CI the
 `live-api` workflow reads the ID from the optional `RENTMAN_LIVE_WRITE_EQUIPMENT_ID`
@@ -254,6 +261,47 @@ uploaded as a workflow artifact and reproduced with
 test in the library. `fuzz/` is a separate crate with its own lockfile, kept
 in line with the library's `Cargo.lock`, and is not part of the published
 package.
+
+## Migrating to the resource layer
+
+The resource layer replaces the endpoint API (`client.endpoint::<E>()`,
+`RentmanEndpointRequest`, `CollectionResponse`, `ItemResponse`) and the
+hand-written helpers. Their equivalents:
+
+```rust,ignore
+use rentman_client::{PageSize, fields::equipment, model, projection};
+
+// all_active_equipment(): a typed filter and a projection of the price fields.
+projection! {
+    pub struct EquipmentPrices from Equipment { id, price, list_price, subrental_costs }
+}
+let active: Vec<EquipmentPrices> = client
+    .equipment()
+    .list()
+    .filter(equipment::IN_ARCHIVE.eq(false))
+    .page_size(PageSize::MAX)
+    .all_as()
+    .await?;
+
+// update_equipment_prices(id, &payload): `update` with the generated payload
+// (only the fields that are set are sent; PUT is retried).
+let payload = model::EquipmentPayload { price: Some(amount), ..Default::default() };
+client.equipment().update(equipment_id, &payload).await?;
+
+// all_invoices() / all_payments_by_invoice(): projections; group as needed.
+projection! { pub struct InvoiceRow from Invoice { id, number, is_paid, price_invat } }
+projection! { pub struct PaymentRow from Payment { id, invoice, moment, amount, description } }
+let invoices: Vec<InvoiceRow> = client.invoices().list().all_as().await?;
+let mut payments: std::collections::HashMap<model::InvoiceId, Vec<PaymentRow>> = Default::default();
+for payment in client.payments().list().all_as::<PaymentRow>().await? {
+    payments.entry(payment.invoice).or_default().push(payment);
+}
+
+// update_payment(id, &payload) / create_payment(invoice, &payload): `update`,
+// and the nested `create`, which is sent exactly once.
+client.payments().update(payment_id, &payment_payload).await?;
+client.invoices().payments(invoice_id).create(&payment_payload).await?;
+```
 
 ## Versioning
 
@@ -324,8 +372,8 @@ Every line of the OpenAPI definition must be handled deliberately. Schemas,
 fields, enum values, path/query parameters, request bodies, success responses,
 pagination metadata, and every documented error status code must be represented
 in the generated contract or in an explicit hand-written boundary type. The
-public API must expose this as Rentman API models/endpoints, not as an
-`openapi` user-facing module.
+public API exposes this as resources, models, and field constants, not as an
+`openapi` or endpoint module.
 
 Complete collections are read through one shared paging core (`src/paging.rs`);
 no other code pages by itself. It follows Rentman's `next_page_url` unchanged
@@ -336,13 +384,13 @@ leaves the configured API origin (it would receive the API token) fails with
 an `UnexpectedResponse` error. Page sizes are a validated `PageSize` (1 to
 1500, default 300).
 
-Every generated endpoint must be executable. The build checks that each endpoint
-has a serializable request type and a deserializable response type, and unit
-tests verify the shared execution path for path parameters, query parameters,
-typed JSON bodies, typed JSON responses, and no-content responses.
-Documented path/query parameters are represented as `EndpointParameterSpec`
-metadata; clear parameter semantics also get typed builder helpers such as
-`id(Id<R>)`, where `R` is the resource of the path's collection.
+Every documented operation must be reachable through a resource; a contract
+test compares `resource::REACHABLE_OPERATIONS` with the OpenAPI document. The
+internal endpoint metadata records every documented path/query parameter
+(`EndpointParameterSpec`), body, response, and error status; its contract test
+lives next to it in `src/endpoint.rs` because the types are crate-internal.
+Path parameters are typed in the resource methods (`get(Id<R>)`,
+`appointments(Id<Crew>)`).
 
 All Rentman API I/O is async. Public API operations return futures and are used
 with `.await`; production code must not add blocking HTTP clients, blocking
@@ -397,7 +445,7 @@ write is reported as an error whose outcome is unknown, because the first
 server may already have applied it.
 Requests that create data (`POST`) are sent exactly once, and their
 documentation names the read method to reconcile with after an error. Every
-high-level write documents its retry behavior, and a test proves how many
+write method of the resource layer documents its retry behavior, and a test proves how many
 requests reach the server on a transient failure.
 
 ### Toolchain and CI

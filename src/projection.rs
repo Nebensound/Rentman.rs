@@ -2,7 +2,8 @@
 
 use crate::id::{Id, Resource};
 use serde::{Deserialize, Deserializer, de::DeserializeOwned};
-use serde_json::{Map, Value};
+use serde_json::value::RawValue;
+use std::collections::HashMap;
 
 /// A struct declared with [`projection!`](crate::projection), whose fields
 /// are the `fields=` selection of its resource.
@@ -66,16 +67,16 @@ impl<R> IntoValue<Option<Id<R>>> for Option<Link<R>> {
 }
 
 /// One item of a projected response, from which the projection takes its
-/// fields.
+/// fields. Each field keeps its raw JSON text, so amounts are read exactly.
 #[doc(hidden)]
-pub struct ProjectedItem(Map<String, Value>);
+pub struct ProjectedItem(HashMap<String, Box<RawValue>>);
 
 impl ProjectedItem {
     /// Takes the field `F` out of the item; a missing field reads as `null`,
     /// so only `Option` fields may be missing.
     pub fn take<F: ProjectionField>(&mut self) -> Result<F::Value, serde_json::Error> {
-        let value = self.0.remove(F::NAME).unwrap_or(Value::Null);
-        serde_json::from_value::<F::Wire>(value)
+        let raw = self.0.remove(F::NAME);
+        serde_json::from_str::<F::Wire>(raw.as_deref().map_or("null", RawValue::get))
             .map(IntoValue::into_value)
             .map_err(|error| serde::de::Error::custom(format!("field `{}`: {error}", F::NAME)))
     }
@@ -83,7 +84,7 @@ impl ProjectedItem {
 
 impl<'de> Deserialize<'de> for ProjectedItem {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        Map::deserialize(deserializer).map(Self)
+        HashMap::deserialize(deserializer).map(Self)
     }
 }
 
@@ -171,7 +172,7 @@ mod tests {
     }
 
     fn decode_json(value: serde_json::Value) -> crate::Result<StatusName> {
-        decode(serde_json::from_value::<ProjectedItem>(value).unwrap())
+        decode(serde_json::from_str::<ProjectedItem>(&value.to_string()).unwrap())
     }
 
     #[test]
@@ -223,7 +224,22 @@ mod tests {
             };
             assert!(cause.to_string().starts_with(message), "{cause}");
         }
-        assert!(serde_json::from_value::<ProjectedItem>(json!([1])).is_err());
+        assert!(serde_json::from_str::<ProjectedItem>("[1]").is_err());
+    }
+
+    crate::projection! {
+        struct ContactDistance from Contact { id, distance }
+    }
+
+    #[test]
+    fn reads_amounts_exactly() {
+        let mut item: ProjectedItem =
+            serde_json::from_str(r#"{"id":1,"distance":123.45678901234567890123}"#).unwrap();
+        let contact = ContactDistance::decode(&mut item).unwrap();
+        assert_eq!(
+            contact.distance.as_decimal().to_string(),
+            "123.45678901234567890123"
+        );
     }
 
     #[test]

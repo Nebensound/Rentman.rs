@@ -1,7 +1,6 @@
 #![doc = include_str!("../crates-io.md")]
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
-pub mod endpoint;
 pub mod fields;
 pub mod model;
 pub mod projection_fields;
@@ -10,13 +9,11 @@ pub mod resource;
 mod amount;
 mod client;
 mod config;
-mod endpoint_request;
-mod equipment;
+mod endpoint;
 mod error;
 mod filter;
 mod id;
 mod ids;
-mod invoices;
 mod paging;
 mod projection;
 #[cfg(test)]
@@ -31,17 +28,10 @@ pub use config::{
     ConfigError, MAX_ATTEMPTS_VAR, MIN_REQUEST_INTERVAL_VAR, RETRY_BASE_DELAY_VAR,
     RentmanClientConfig,
 };
-pub use endpoint_request::RentmanEndpointRequest;
-pub use equipment::{EquipmentPricePayload, RentmanEquipment};
 pub use error::{Error, ErrorKind, InvalidRequest, RequestOutcome, ResourceRef, Result};
 pub use filter::{Field, Filter, FilterValue, Sort};
 pub use id::{Id, ItemId, LinkError, Resource};
-pub use ids::{InvoiceNumber, RentmanApiToken};
-pub use invoices::{
-    InvoicePaymentStatus, PaymentImportSource, RentmanInvoice, RentmanPayment,
-    RentmanPaymentPayload,
-};
-pub use model::{EquipmentId, InvoiceId, PaymentId};
+pub use ids::RentmanApiToken;
 pub use paging::PageSize;
 pub use projection::{Projection, ProjectionField};
 /// Re-export of the URL type used for client configuration.

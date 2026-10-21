@@ -1,16 +1,12 @@
 //! Contract tests against the checked-in Rentman OpenAPI document.
 
 use chrono::NaiveDate;
-use rentman_client::endpoint::{
-    ALL_ENDPOINTS, EndpointErrorSpec, EndpointParameterLocation, EndpointParameterSpec,
-    EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
-};
 use rentman_client::model::{
-    CollectionResponse, Crew, CrewId, EmailAddress, Invoice, LINK_FIELDS, Payment,
-    ProjectsCreateFromTemplatePayload, RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass,
-    TaxClassType,
+    Crew, CrewId, EmailAddress, Invoice, LINK_FIELDS, Payment, ProjectsCreateFromTemplatePayload,
+    RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass, TaxClassType,
 };
-use rentman_client::{Id, InvoiceId, LinkError, PaymentId, Resource};
+use rentman_client::model::{InvoiceId, PaymentId};
+use rentman_client::{Id, LinkError, Resource};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, fmt::Debug, fs};
@@ -19,21 +15,6 @@ use std::{collections::BTreeSet, fmt::Debug, fs};
 mod generated_payload_constructors;
 #[path = "contract/generated_response_enums.rs"]
 mod generated_response_enums;
-
-#[test]
-fn endpoint_manifest_covers_every_documented_operation() {
-    let documented = documented_operations();
-    let covered = ALL_ENDPOINTS
-        .iter()
-        .copied()
-        .map(OwnedEndpointSpec::from)
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        documented, covered,
-        "endpoint manifest drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py and review the API surface"
-    );
-}
 
 #[test]
 fn wire_models_cover_every_documented_schema() {
@@ -110,9 +91,13 @@ fn every_schema_maps_to_exactly_one_resource_named_type() {
 
 #[test]
 fn every_documented_operation_is_reachable_through_a_resource() {
-    let mut documented = documented_operations()
-        .into_iter()
-        .map(|operation| operation.operation_id)
+    let mut documented = openapi_spec()["paths"]
+        .as_object()
+        .expect("OpenAPI paths are an object")
+        .values()
+        .flat_map(|methods| methods.as_object().into_iter().flatten())
+        .filter_map(|(_, operation)| operation["operationId"].as_str())
+        .map(str::to_string)
         .collect::<Vec<_>>();
     let mut reachable = rentman_client::resource::REACHABLE_OPERATIONS
         .iter()
@@ -345,388 +330,6 @@ fn wire_date_fields_serialize_as_date_only() {
 }
 
 #[test]
-fn high_level_invoice_fields_match_openapi_schema() {
-    let spec = openapi_spec();
-    let invoice = schema(&spec, "FactuurResponse");
-
-    assert_required(invoice, "id");
-    assert_required(invoice, "number");
-    assert_required(invoice, "is_paid");
-    assert_type(property(invoice, "id"), "integer");
-    assert_type(property(invoice, "number"), "string");
-    assert_type(property(invoice, "is_paid"), "boolean");
-    assert_type(property(invoice, "price_invat"), "number");
-}
-
-#[test]
-fn high_level_payment_fields_match_openapi_schema() {
-    let spec = openapi_spec();
-    let payment = schema(&spec, "PaymentResponse");
-
-    assert_required(payment, "id");
-    assert_required(payment, "invoice");
-    assert_required(payment, "moment");
-    assert_type(property(payment, "id"), "integer");
-    assert_type(property(payment, "invoice"), "string");
-    assert_type(property(payment, "moment"), "string");
-    assert_eq!(property(payment, "moment")["format"], "date-time");
-    assert_type(property(payment, "amount"), "number");
-    assert_type(property(payment, "description"), "string");
-}
-
-#[test]
-fn high_level_equipment_fields_match_openapi_schema() {
-    let spec = openapi_spec();
-    let equipment = schema(&spec, "EquipmentResponse");
-
-    assert_required(equipment, "id");
-    assert_type(property(equipment, "id"), "integer");
-    for field in ["price", "list_price", "subrental_costs"] {
-        assert_type(property(equipment, field), "number");
-    }
-    assert_type(property(equipment, "in_archive"), "boolean");
-}
-
-#[test]
-fn equipment_price_payload_matches_openapi_schema() {
-    let spec = openapi_spec();
-    let equipment = schema(&spec, "EquipmentRequest");
-
-    for field in ["price", "list_price", "subrental_costs"] {
-        assert_type(property(equipment, field), "number");
-    }
-}
-
-#[test]
-fn payment_payload_matches_openapi_schema() {
-    let spec = openapi_spec();
-    let payment = schema(&spec, "PaymentRequest");
-
-    assert_required(payment, "moment");
-    assert_type(property(payment, "moment"), "string");
-    assert_eq!(property(payment, "moment")["format"], "date-time");
-    assert_type(property(payment, "amount"), "number");
-    assert_type(property(payment, "description"), "string");
-
-    let import_source = property(payment, "payment_import_source");
-    assert_type(import_source, "string");
-    assert_enum_contains(import_source, "none");
-    assert_enum_contains(import_source, "publicapi");
-}
-
-#[test]
-fn high_level_methods_still_point_to_documented_operations() {
-    let operations = documented_operations();
-
-    assert!(operations.iter().any(|operation| operation.matches(
-        "GET",
-        "/invoices",
-        "getFactuurCollection",
-        "invoices"
-    )));
-    assert!(operations.iter().any(|operation| operation.matches(
-        "GET",
-        "/payments",
-        "getPaymentCollection",
-        "payments"
-    )));
-    assert!(operations.iter().any(|operation| operation.matches(
-        "PUT",
-        "/payments/{id}",
-        "updatePayment",
-        "payments"
-    )));
-    assert!(operations.iter().any(|operation| operation.matches(
-        "POST",
-        "/invoices/{id}/payments",
-        "createPayment",
-        "invoices"
-    )));
-    assert!(operations.iter().any(|operation| operation.matches(
-        "GET",
-        "/equipment",
-        "getEquipmentCollection",
-        "equipment"
-    )));
-    assert!(operations.iter().any(|operation| operation.matches(
-        "PUT",
-        "/equipment/{id}",
-        "updateEquipment",
-        "equipment"
-    )));
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct OwnedEndpointSpec {
-    method: String,
-    path: String,
-    operation_id: String,
-    tag: String,
-    parameters: Vec<OwnedEndpointParameterSpec>,
-    request: OwnedEndpointRequestSpec,
-    response: OwnedEndpointResponseSpec,
-    errors: Vec<OwnedEndpointErrorSpec>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct OwnedEndpointParameterSpec {
-    name: String,
-    location: OwnedEndpointParameterLocation,
-    required: bool,
-    value: OwnedEndpointParameterValueSpec,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum OwnedEndpointParameterLocation {
-    Path,
-    Query,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum OwnedEndpointParameterValueSpec {
-    Integer,
-    Number,
-    Boolean,
-    String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum OwnedEndpointRequestSpec {
-    None,
-    Json(String),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-enum OwnedEndpointResponseSpec {
-    NoContent,
-    Item(String),
-    Collection(String),
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-struct OwnedEndpointErrorSpec {
-    status: u16,
-    description: String,
-}
-
-impl From<EndpointSpec> for OwnedEndpointSpec {
-    fn from(value: EndpointSpec) -> Self {
-        Self {
-            method: value.method.to_string(),
-            path: value.path.to_string(),
-            operation_id: value.operation_id.to_string(),
-            tag: value.tag.to_string(),
-            parameters: value.parameters.iter().copied().map(Into::into).collect(),
-            request: value.request.into(),
-            response: value.response.into(),
-            errors: value.errors.iter().copied().map(Into::into).collect(),
-        }
-    }
-}
-
-impl OwnedEndpointSpec {
-    fn matches(&self, method: &str, path: &str, operation_id: &str, tag: &str) -> bool {
-        self.method == method
-            && self.path == path
-            && self.operation_id == operation_id
-            && self.tag == tag
-    }
-}
-
-impl From<EndpointParameterSpec> for OwnedEndpointParameterSpec {
-    fn from(value: EndpointParameterSpec) -> Self {
-        Self {
-            name: value.name.to_string(),
-            location: value.location.into(),
-            required: value.required,
-            value: value.value.into(),
-        }
-    }
-}
-
-impl From<EndpointParameterLocation> for OwnedEndpointParameterLocation {
-    fn from(value: EndpointParameterLocation) -> Self {
-        match value {
-            EndpointParameterLocation::Path => Self::Path,
-            EndpointParameterLocation::Query => Self::Query,
-        }
-    }
-}
-
-impl From<EndpointParameterValueSpec> for OwnedEndpointParameterValueSpec {
-    fn from(value: EndpointParameterValueSpec) -> Self {
-        match value {
-            EndpointParameterValueSpec::Integer => Self::Integer,
-            EndpointParameterValueSpec::Number => Self::Number,
-            EndpointParameterValueSpec::Boolean => Self::Boolean,
-            EndpointParameterValueSpec::String => Self::String,
-        }
-    }
-}
-
-impl From<EndpointRequestSpec> for OwnedEndpointRequestSpec {
-    fn from(value: EndpointRequestSpec) -> Self {
-        match value {
-            EndpointRequestSpec::None => Self::None,
-            EndpointRequestSpec::Json(schema) => Self::Json(schema.to_string()),
-        }
-    }
-}
-
-impl From<EndpointResponseSpec> for OwnedEndpointResponseSpec {
-    fn from(value: EndpointResponseSpec) -> Self {
-        match value {
-            EndpointResponseSpec::NoContent => Self::NoContent,
-            EndpointResponseSpec::Item(schema) => Self::Item(schema.to_string()),
-            EndpointResponseSpec::Collection(schema) => Self::Collection(schema.to_string()),
-        }
-    }
-}
-
-impl From<EndpointErrorSpec> for OwnedEndpointErrorSpec {
-    fn from(value: EndpointErrorSpec) -> Self {
-        Self {
-            status: value.status,
-            description: value.description.to_string(),
-        }
-    }
-}
-
-fn documented_operations() -> BTreeSet<OwnedEndpointSpec> {
-    let spec = openapi_spec();
-    spec["paths"]
-        .as_object()
-        .expect("OpenAPI paths are an object")
-        .iter()
-        .flat_map(|(path, methods)| {
-            methods
-                .as_object()
-                .expect("OpenAPI path item is an object")
-                .iter()
-                .filter_map(move |(method, operation)| {
-                    let operation_id = operation["operationId"].as_str()?;
-                    let tag = operation["tags"]
-                        .as_array()
-                        .and_then(|tags| tags.first())
-                        .and_then(Value::as_str)
-                        .unwrap_or("");
-                    Some(OwnedEndpointSpec {
-                        method: method.to_uppercase(),
-                        path: path.to_string(),
-                        operation_id: operation_id.to_string(),
-                        tag: tag.to_string(),
-                        parameters: documented_parameters(operation),
-                        request: documented_request(operation),
-                        response: documented_response(operation),
-                        errors: documented_errors(operation),
-                    })
-                })
-        })
-        .collect()
-}
-
-fn documented_parameters(operation: &Value) -> Vec<OwnedEndpointParameterSpec> {
-    operation["parameters"]
-        .as_array()
-        .map(|parameters| {
-            parameters
-                .iter()
-                .map(|parameter| OwnedEndpointParameterSpec {
-                    name: parameter["name"]
-                        .as_str()
-                        .expect("parameter has name")
-                        .to_string(),
-                    location: documented_parameter_location(parameter),
-                    required: parameter["required"].as_bool().unwrap_or(false),
-                    value: documented_parameter_value(&parameter["schema"]),
-                })
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-fn documented_parameter_location(parameter: &Value) -> OwnedEndpointParameterLocation {
-    match parameter["in"].as_str().expect("parameter has location") {
-        "path" => OwnedEndpointParameterLocation::Path,
-        "query" => OwnedEndpointParameterLocation::Query,
-        location => panic!("unsupported OpenAPI parameter location {location}"),
-    }
-}
-
-fn documented_parameter_value(schema: &Value) -> OwnedEndpointParameterValueSpec {
-    match schema["type"].as_str().expect("parameter has schema type") {
-        "integer" => OwnedEndpointParameterValueSpec::Integer,
-        "number" => OwnedEndpointParameterValueSpec::Number,
-        "boolean" => OwnedEndpointParameterValueSpec::Boolean,
-        "string" => OwnedEndpointParameterValueSpec::String,
-        value => panic!("unsupported OpenAPI parameter value type {value}"),
-    }
-}
-
-fn documented_request(operation: &Value) -> OwnedEndpointRequestSpec {
-    let schema = &operation["requestBody"]["content"]["application/json"]["schema"];
-    let Some(reference) = schema["$ref"].as_str() else {
-        return OwnedEndpointRequestSpec::None;
-    };
-    OwnedEndpointRequestSpec::Json(reference_name(reference).to_string())
-}
-
-fn documented_response(operation: &Value) -> OwnedEndpointResponseSpec {
-    let schema = &operation["responses"]["200"]["content"]["application/json"]["schema"];
-    if schema["type"].as_str() == Some("null") {
-        return OwnedEndpointResponseSpec::NoContent;
-    }
-
-    let data = schema["allOf"]
-        .as_array()
-        .expect("success response uses allOf")
-        .iter()
-        .find_map(|item| {
-            item["properties"]["data"]
-                .as_object()
-                .map(|_| &item["properties"]["data"])
-        })
-        .expect("success response has data property");
-
-    if data["type"].as_str() == Some("array") {
-        return OwnedEndpointResponseSpec::Collection(
-            reference_name(data["items"]["$ref"].as_str().expect("array item has ref")).to_string(),
-        );
-    }
-
-    OwnedEndpointResponseSpec::Item(
-        reference_name(data["$ref"].as_str().expect("item response has ref")).to_string(),
-    )
-}
-
-fn documented_errors(operation: &Value) -> Vec<OwnedEndpointErrorSpec> {
-    let mut errors = operation["responses"]
-        .as_object()
-        .expect("operation responses are an object")
-        .iter()
-        .filter(|(status, _)| status.as_str() != "200")
-        .map(|(status, response)| OwnedEndpointErrorSpec {
-            status: status
-                .parse()
-                .expect("documented response status is numeric"),
-            description: response["description"]
-                .as_str()
-                .unwrap_or_default()
-                .to_string(),
-        })
-        .collect::<Vec<_>>();
-    errors.sort();
-    errors
-}
-
-fn reference_name(reference: &str) -> &str {
-    reference
-        .rsplit_once('/')
-        .map(|(_, name)| name)
-        .expect("OpenAPI reference has a schema name")
-}
-
-#[test]
 fn every_documented_response_enum_is_open() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]
@@ -777,25 +380,23 @@ fn undocumented_response_enum_values_are_kept_as_unknown() {
 
 #[test]
 fn an_undocumented_enum_value_does_not_fail_the_collection() {
-    let page: CollectionResponse<TaxClass> = serde_json::from_value(json!({
-        "itemCount": 2,
-        "limit": 300,
-        "data": [
+    let items: Vec<TaxClass> = serde_json::from_value(json!(
+        [
             {"id": 1, "created": null, "modified": null, "creator": null,
              "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat"},
             {"id": 2, "created": null, "modified": null, "creator": null,
              "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge"}
         ]
-    }))
+    ))
     .unwrap();
 
-    assert_eq!(page.data[0].type_, TaxClassType::Vat);
+    assert_eq!(items[0].type_, TaxClassType::Vat);
     assert_eq!(
-        page.data[1].type_,
+        items[1].type_,
         TaxClassType::Unknown("reverse_charge".to_string())
     );
     assert_eq!(
-        serde_json::to_value(&page.data[1]).unwrap()["type"],
+        serde_json::to_value(&items[1]).unwrap()["type"],
         json!("reverse_charge")
     );
 }
@@ -860,26 +461,6 @@ fn property<'a>(schema: &'a Value, name: &str) -> &'a Value {
     &schema["properties"][name]
 }
 
-fn assert_required(schema: &Value, name: &str) {
-    let required = schema["required"]
-        .as_array()
-        .expect("schema has required array");
-    assert!(
-        required.iter().any(|value| value.as_str() == Some(name)),
-        "{name} should still be required in OpenAPI"
-    );
-}
-
 fn assert_type(schema: &Value, expected: &str) {
     assert_eq!(schema["type"], expected);
-}
-
-fn assert_enum_contains(schema: &Value, expected: &str) {
-    let variants = schema["enum"].as_array().expect("schema has enum array");
-    assert!(
-        variants
-            .iter()
-            .any(|value| value.as_str() == Some(expected)),
-        "{expected} should still be allowed by OpenAPI"
-    );
 }

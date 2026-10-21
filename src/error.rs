@@ -54,33 +54,6 @@ pub enum ErrorKind {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum InvalidRequest {
-    /// A path parameter was set that the endpoint path does not contain.
-    #[error("the endpoint has no {{{name}}} path parameter")]
-    UnknownPathParameter {
-        /// Name of the parameter.
-        name: String,
-    },
-    /// The endpoint path still contains unset path parameters.
-    #[error("missing path parameters for {path}")]
-    MissingPathParameters {
-        /// Documented path template of the endpoint.
-        path: &'static str,
-    },
-    /// The endpoint requires a JSON body, but none was set.
-    #[error("a {schema} JSON request body is required")]
-    MissingBody {
-        /// Name of the documented request schema.
-        schema: &'static str,
-    },
-    /// A body was set for an endpoint that does not accept one.
-    #[error("the endpoint does not accept a JSON request body")]
-    UnexpectedBody,
-    /// The query parameters cannot be encoded into the URL.
-    #[error("the query cannot be encoded: {0}")]
-    Query(#[source] serde_urlencoded::ser::Error),
-    /// The request body cannot be encoded as JSON.
-    #[error("the body cannot be encoded as JSON: {0}")]
-    Body(#[source] serde_json::Error),
     /// The page size is outside the range Rentman documents (1 to 1500).
     #[error("page size {requested} is outside the documented range 1..=1500")]
     PageSize {
@@ -332,7 +305,7 @@ mod tests {
         assert_eq!(status(500).outcome(), RequestOutcome::Unknown);
         assert_eq!(status(303).outcome(), RequestOutcome::Unknown);
         assert_eq!(
-            Error::invalid_request(InvalidRequest::UnexpectedBody).outcome(),
+            Error::invalid_request(InvalidRequest::PageSize { requested: 0 }).outcome(),
             RequestOutcome::NotApplied
         );
         assert_eq!(
@@ -383,30 +356,10 @@ mod tests {
 
     #[test]
     fn describes_every_invalid_request() {
-        let cases = [
-            (
-                InvalidRequest::UnknownPathParameter { name: "x".into() },
-                "the endpoint has no {x} path parameter",
-            ),
-            (
-                InvalidRequest::MissingPathParameters { path: "/a/{id}" },
-                "missing path parameters for /a/{id}",
-            ),
-            (
-                InvalidRequest::MissingBody {
-                    schema: "PaymentRequest",
-                },
-                "a PaymentRequest JSON request body is required",
-            ),
-            (
-                InvalidRequest::UnexpectedBody,
-                "the endpoint does not accept a JSON request body",
-            ),
-            (
-                InvalidRequest::PageSize { requested: 0 },
-                "page size 0 is outside the documented range 1..=1500",
-            ),
-        ];
+        let cases = [(
+            InvalidRequest::PageSize { requested: 0 },
+            "page size 0 is outside the documented range 1..=1500",
+        )];
         for (reason, text) in cases {
             let error = Error::invalid_request(reason);
             assert_eq!(
@@ -416,12 +369,6 @@ mod tests {
             assert!(error.source().is_some());
         }
 
-        let error = Error::invalid_request(InvalidRequest::Body(decode_error()));
-        assert!(
-            error
-                .to_string()
-                .starts_with("invalid Rentman API request: the body cannot be encoded as JSON: ")
-        );
         let error = Error::invalid_request(InvalidRequest::Http(builder_error()));
         assert!(
             error

@@ -2,8 +2,9 @@
 
 Typed Rust client for the [Rentman](https://rentman.io) rental management API.
 
-Every documented Rentman API endpoint is callable through a typed endpoint
-definition with typed request and response models. Authentication, retry
+Every documented Rentman API operation is reachable through a typed resource:
+`client.crew().list().all()` returns `Vec<Crew>`, without response envelopes,
+paging, or query strings. Authentication, retry
 handling, and rate limiting are built into the client, and all API I/O is
 async.
 
@@ -85,18 +86,19 @@ let names: Vec<CrewName> = client
   and `page_size(n)`, `get`, `create`, `update`, `delete`, and named actions
   such as `client.projects().set_client(id, &payload)`. IDs are typed
   (`Id<Crew>`, alias `CrewId`), also in link fields such as `/crew/12`.
-- `endpoint` defines every documented Rentman API operation, including typed
-  path and query parameter metadata and the documented error statuses.
+- `list()` follows Rentman's `next_page_url` through every page; filters
+  (`fields::contact::COUNTRY.eq(...)`) and sorting are typed per resource and
+  value type, and `projection!` declares an own struct whose fields are the
+  `fields=` selection.
 - `model` contains typed models for every documented schema: timestamps are
-  `DateTime<FixedOffset>`, money-like values are exact decimals, identifiers
-  and tokens are dedicated types — never bare strings or floats.
-- High-level helpers such as `all_invoices()`, `all_payments_by_invoice()`
-  and `all_active_equipment()` handle pagination (`next_page_url` with offset
-  fallback) for common workflows; amounts are exact `RentmanAmount` decimals
-  (values beyond `Decimal`'s precision are rounded with a `tracing` warning).
-- `send_once()` sends a typed request without retries, for non-idempotent
-  writes where a lost response must not cause a second write.
-  `create_payment()` always sends exactly once.
+  `DateTime<FixedOffset>`, numbers are exact `RentmanAmount` decimals read
+  from the JSON text (values beyond `Decimal`'s precision are rounded with a
+  `tracing` warning), enums accept values Rentman adds later as `Unknown`,
+  and identifiers and tokens are dedicated types — never bare strings or
+  floats.
+- `create` and actions are sent exactly once, because a retry after a lost
+  response would write twice; `get`, `update`, `delete`, and list pages are
+  retried.
 - Errors are a typed `rentman_client::Error`: match on `kind()` (HTTP status,
   transport, decode, unexpected response, invalid request), read the failed
   `operation()` and `resource()`, and use `outcome()` to learn whether a

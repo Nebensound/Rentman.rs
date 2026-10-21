@@ -226,7 +226,7 @@ mod tests {
     use crate::test_support::capture_warnings;
     use bigdecimal::{BigDecimal, RoundingMode, Signed, ToPrimitive, num_bigint::BigInt};
 
-    use crate::{EquipmentId, EquipmentPricePayload, RentmanAmount};
+    use crate::{RentmanAmount, model::EquipmentPayload};
 
     use proptest::prelude::*;
 
@@ -241,7 +241,7 @@ mod tests {
     }
 
     #[test]
-    fn reads_amounts_exactly_and_exposes_equipment_ids() {
+    fn reads_amounts_exactly() {
         let amount: RentmanAmount = serde_json::from_str("19.99").unwrap();
         assert_eq!(amount.as_decimal(), Decimal::new(1999, 2));
         let scientific: RentmanAmount = serde_json::from_str("1.5e2").unwrap();
@@ -253,7 +253,6 @@ mod tests {
         assert!(serde_json::from_str::<RentmanAmount>("\"expensive\"").is_err());
         assert!(serde_json::from_str::<RentmanAmount>("true").is_err());
         assert!(serde_json::from_str::<RentmanAmount>("").is_err());
-        assert_eq!(EquipmentId::new(2163).to_string(), "2163");
     }
 
     #[test]
@@ -518,9 +517,10 @@ mod tests {
         assert_eq!(amount.as_decimal(), expected);
         assert_eq!(serde_json::to_string(&amount).unwrap(), text);
 
-        let payload = EquipmentPricePayload {
+        // Generated payloads write amounts exactly as well.
+        let payload = EquipmentPayload {
             list_price: Some(amount),
-            ..EquipmentPricePayload::default()
+            ..EquipmentPayload::default()
         };
         assert_eq!(
             serde_json::to_string(&payload).unwrap(),

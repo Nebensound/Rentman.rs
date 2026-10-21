@@ -19,7 +19,7 @@ RESOURCE_OUTPUT = ROOT / "src" / "resource" / "generated.rs"
 FIELDS_OUTPUT = ROOT / "src" / "fields.rs"
 PROJECTION_FIELDS_OUTPUT = ROOT / "src" / "projection_fields.rs"
 FILTERABLE_TYPES = {
-    "Decimal", "i64", "bool", "String", "DateTime<FixedOffset>", "EmailAddress", "ItemId",
+    "RentmanAmount", "i64", "bool", "String", "DateTime<FixedOffset>", "EmailAddress", "ItemId",
 }
 
 # Item types whose accessor stays singular, like `crew`.
@@ -93,11 +93,12 @@ RESPONSE_TYPE_OVERRIDES = {
     ("ActualContentResponse", "quantity"): "i64",
     ("EquipmentSetContentResponse", "quantity"): "i64",
     ("ProjectEquipmentResponse", "quantity"): "i64",
-    # factor is documented as string but returned as a number (e.g. 2.8).
-    ("FactorsResponse", "factor"): "Decimal",
-    ("ProjectEquipmentResponse", "factor"): "Decimal",
-    ("ProjectRequestEquipmentResponse", "factor"): "Decimal",
-    ("SubrentalEquipmentResponse", "factor"): "Decimal",
+    # factor is documented as string but returned as a number (e.g. 2.8),
+    # read exactly like every other number.
+    ("FactorsResponse", "factor"): "RentmanAmount",
+    ("ProjectEquipmentResponse", "factor"): "RentmanAmount",
+    ("ProjectRequestEquipmentResponse", "factor"): "RentmanAmount",
+    ("SubrentalEquipmentResponse", "factor"): "RentmanAmount",
     # number is documented as string but returned as an integer here; it is a
     # real string on contracts, invoices, and purchase orders.
     ("ProjectResponse", "number"): "i64",
@@ -371,7 +372,7 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
             raise ValueError(f"{schema_name_value}.{field} needs an ID_FIELDS entry")
         return "i64"
     if kind == "number":
-        return "Decimal"
+        return "RentmanAmount"
     if kind == "boolean":
         return "bool"
     if kind == "object":
@@ -562,6 +563,7 @@ def generate_wire(spec: dict) -> None:
         "",
         "use crate::id::{Id, ItemId, Resource};",
         "use chrono::{DateTime, FixedOffset, NaiveDate};",
+        "use crate::RentmanAmount;",
         "use rust_decimal::Decimal;",
         "use serde::{Deserialize, Serialize};",
         "use std::collections::BTreeMap;",
@@ -569,15 +571,15 @@ def generate_wire(spec: dict) -> None:
         "",
         "/// Marker type for endpoints without a JSON request body.",
         "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
-        "pub struct NoRequest;",
+        "pub(crate) struct NoRequest;",
         "",
         "/// Marker type for endpoints without a JSON response body.",
         "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
-        "pub struct NoContent;",
+        "pub(crate) struct NoContent;",
         "",
         "/// Rentman collection response wrapper.",
         "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
-        "pub struct CollectionResponse<T> {",
+        "pub(crate) struct CollectionResponse<T> {",
         "    /// Returned collection items.",
         "    pub data: Vec<T>,",
         "    /// Number of items in this response.",
@@ -595,7 +597,7 @@ def generate_wire(spec: dict) -> None:
         "",
         "/// Rentman item response wrapper.",
         "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
-        "pub struct ItemResponse<T> {",
+        "pub(crate) struct ItemResponse<T> {",
         "    /// Returned item.",
         "    pub data: T,",
         "    /// Number of items in this response.",
@@ -809,7 +811,7 @@ def generate_wire(spec: dict) -> None:
 
 def generate_endpoints(operations: list[dict]) -> None:
     lines = [
-        "use super::{Endpoint, EndpointErrorSpec, EndpointParameterLocation, EndpointParameterSpec, EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec, EndpointWithId, ExecutableEndpoint};",
+        "use super::{Endpoint, EndpointErrorSpec, EndpointParameterLocation, EndpointParameterSpec, EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec, ExecutableEndpoint};",
         "use crate::model::*;",
         "use crate::model::{CollectionResponse, ItemResponse, NoContent, NoRequest};",
         "",
@@ -867,7 +869,7 @@ def generate_endpoints(operations: list[dict]) -> None:
             [
                 f"/// Typed endpoint for `{operation['method']} {operation['path']}`.",
                 "#[derive(Debug, Clone, Copy, PartialEq, Eq)]",
-                f"pub struct {operation['endpoint_name']};",
+                f"pub(crate) struct {operation['endpoint_name']};",
                 "",
                 f"impl Endpoint for {operation['endpoint_name']} {{",
                 f"    type Request = {request_type};",
@@ -887,21 +889,8 @@ def generate_endpoints(operations: list[dict]) -> None:
                 "",
             ]
         )
-        if any(
-            parameter["name"] == "id"
-            and parameter["location"] == "Path"
-            and parameter["value"] == "Integer"
-            for parameter in operation["parameters"]
-        ):
-            collection = operation["path"].split("/")[1]
-            resource = resource_for_collection(collection, operation["operation_id"])
-            lines.append(f"impl EndpointWithId for {operation['endpoint_name']} {{")
-            lines.append(f"    type Resource = {resource};")
-            lines.append("}")
-            lines.append("")
-
     lines.append("/// All operations in the checked-in Rentman API document.")
-    lines.append("pub const ALL_ENDPOINTS: &[EndpointSpec] = &[")
+    lines.append("pub(crate) const ALL_ENDPOINTS: &[EndpointSpec] = &[")
     for operation in operations:
         lines.append(f"    <{operation['endpoint_name']} as Endpoint>::SPEC,")
     lines.append("];")
@@ -1045,7 +1034,7 @@ def generate_fields(spec: dict) -> None:
         "use crate::id::{Id, ItemId};",
         "use crate::model::*;",
         "use chrono::{DateTime, FixedOffset, NaiveDate};",
-        "use rust_decimal::Decimal;",
+        "use crate::RentmanAmount;",
         "use std::marker::PhantomData;",
         "use url::Url;",
         "",
@@ -1125,7 +1114,7 @@ def generate_projection_fields(spec: dict) -> None:
         "    use crate::model::*;",
         "    use crate::projection::Link;",
         "    use ::chrono::{DateTime, FixedOffset, NaiveDate};",
-        "    use ::rust_decimal::Decimal;",
+        "    use crate::RentmanAmount;",
         "    use ::url::Url;",
     ]
     for name, schema in sorted(schemas.items(), key=lambda item: rust_type_name(item[0])):
@@ -1405,7 +1394,7 @@ def sample_value(rust_type: str, schema_name_value: str, field: str, field_schem
         "NaiveDate": "chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap()",
         "i64": "1",
         "bool": "true",
-        "Decimal": "rust_decimal::Decimal::ONE",
+        "RentmanAmount": f"{prefix}RentmanAmount::new(rust_decimal::Decimal::ONE)",
         "ItemId": f"{prefix}ItemId::new(1)",
     }
     if rust_type not in samples:

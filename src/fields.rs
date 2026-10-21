@@ -7,11 +7,11 @@
 
 #![allow(unused_imports)]
 
+use crate::RentmanAmount;
 use crate::filter::{EnumFilterValue, Field};
 use crate::id::{Id, ItemId};
 use crate::model::*;
 use chrono::{DateTime, FixedOffset, NaiveDate};
-use rust_decimal::Decimal;
 use std::marker::PhantomData;
 use url::Url;
 
@@ -411,12 +411,12 @@ pub mod contact {
         types: PhantomData,
     };
     /// `distance`: Distance from warehouse to visiting address.
-    pub const DISTANCE: Field<Contact, Decimal> = Field {
+    pub const DISTANCE: Field<Contact, RentmanAmount> = Field {
         name: "distance",
         types: PhantomData,
     };
     /// `travel_time`: Travel time (in minutes) from warehouse to visiting address.
-    pub const TRAVEL_TIME: Field<Contact, Decimal> = Field {
+    pub const TRAVEL_TIME: Field<Contact, RentmanAmount> = Field {
         name: "travel_time",
         types: PhantomData,
     };
@@ -431,12 +431,12 @@ pub mod contact {
         types: PhantomData,
     };
     /// `longitude`: Rentman field `longitude`.
-    pub const LONGITUDE: Field<Contact, Decimal> = Field {
+    pub const LONGITUDE: Field<Contact, RentmanAmount> = Field {
         name: "longitude",
         types: PhantomData,
     };
     /// `latitude`: Rentman field `latitude`.
-    pub const LATITUDE: Field<Contact, Decimal> = Field {
+    pub const LATITUDE: Field<Contact, RentmanAmount> = Field {
         name: "latitude",
         types: PhantomData,
     };
@@ -666,27 +666,27 @@ pub mod contact {
         types: PhantomData,
     };
     /// `discount_crew`: Discount applied to the 'crew' category upon selecting this contact as a client in a project.
-    pub const DISCOUNT_CREW: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_CREW: Field<Contact, RentmanAmount> = Field {
         name: "discount_crew",
         types: PhantomData,
     };
     /// `discount_transport`: Discount applied to the 'transport' category upon selecting this contact as a client in a project.
-    pub const DISCOUNT_TRANSPORT: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_TRANSPORT: Field<Contact, RentmanAmount> = Field {
         name: "discount_transport",
         types: PhantomData,
     };
     /// `discount_rental`: Discount applied to the 'rental' category upon selecting this contact as a client in a project.
-    pub const DISCOUNT_RENTAL: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_RENTAL: Field<Contact, RentmanAmount> = Field {
         name: "discount_rental",
         types: PhantomData,
     };
     /// `discount_sale`: Discount applied to the 'sales' category upon selecting this contact as a client in a project.
-    pub const DISCOUNT_SALE: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_SALE: Field<Contact, RentmanAmount> = Field {
         name: "discount_sale",
         types: PhantomData,
     };
     /// `discount_total`: Discount applied to the total (sub)project upon selecting this contact as a client in a project.
-    pub const DISCOUNT_TOTAL: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_TOTAL: Field<Contact, RentmanAmount> = Field {
         name: "discount_total",
         types: PhantomData,
     };
@@ -706,7 +706,7 @@ pub mod contact {
         types: PhantomData,
     };
     /// `discount_subrent`: Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
-    pub const DISCOUNT_SUBRENT: Field<Contact, Decimal> = Field {
+    pub const DISCOUNT_SUBRENT: Field<Contact, RentmanAmount> = Field {
         name: "discount_subrent",
         types: PhantomData,
     };
@@ -1300,12 +1300,12 @@ pub mod equipment {
         types: PhantomData,
     };
     /// `price`: Rentman field `price`.
-    pub const PRICE: Field<Equipment, Decimal> = Field {
+    pub const PRICE: Field<Equipment, RentmanAmount> = Field {
         name: "price",
         types: PhantomData,
     };
     /// `subrental_costs`: Rentman field `subrental_costs`.
-    pub const SUBRENTAL_COSTS: Field<Equipment, Decimal> = Field {
+    pub const SUBRENTAL_COSTS: Field<Equipment, RentmanAmount> = Field {
         name: "subrental_costs",
         types: PhantomData,
     };
@@ -1350,12 +1350,12 @@ pub mod equipment {
         types: PhantomData,
     };
     /// `list_price`: Rentman field `list_price`.
-    pub const LIST_PRICE: Field<Equipment, Decimal> = Field {
+    pub const LIST_PRICE: Field<Equipment, RentmanAmount> = Field {
         name: "list_price",
         types: PhantomData,
     };
     /// `volume`: Rentman field `volume`.
-    pub const VOLUME: Field<Equipment, Decimal> = Field {
+    pub const VOLUME: Field<Equipment, RentmanAmount> = Field {
         name: "volume",
         types: PhantomData,
     };
@@ -1365,37 +1365,37 @@ pub mod equipment {
         types: PhantomData,
     };
     /// `height`: Rentman field `height`.
-    pub const HEIGHT: Field<Equipment, Decimal> = Field {
+    pub const HEIGHT: Field<Equipment, RentmanAmount> = Field {
         name: "height",
         types: PhantomData,
     };
     /// `width`: Rentman field `width`.
-    pub const WIDTH: Field<Equipment, Decimal> = Field {
+    pub const WIDTH: Field<Equipment, RentmanAmount> = Field {
         name: "width",
         types: PhantomData,
     };
     /// `length`: Rentman field `length`.
-    pub const LENGTH: Field<Equipment, Decimal> = Field {
+    pub const LENGTH: Field<Equipment, RentmanAmount> = Field {
         name: "length",
         types: PhantomData,
     };
     /// `weight`: Rentman field `weight`.
-    pub const WEIGHT: Field<Equipment, Decimal> = Field {
+    pub const WEIGHT: Field<Equipment, RentmanAmount> = Field {
         name: "weight",
         types: PhantomData,
     };
     /// `empty_weight`: Rentman field `empty_weight`.
-    pub const EMPTY_WEIGHT: Field<Equipment, Decimal> = Field {
+    pub const EMPTY_WEIGHT: Field<Equipment, RentmanAmount> = Field {
         name: "empty_weight",
         types: PhantomData,
     };
     /// `power`: Rentman field `power`.
-    pub const POWER: Field<Equipment, Decimal> = Field {
+    pub const POWER: Field<Equipment, RentmanAmount> = Field {
         name: "power",
         types: PhantomData,
     };
     /// `current`: Rentman field `current`.
-    pub const CURRENT: Field<Equipment, Decimal> = Field {
+    pub const CURRENT: Field<Equipment, RentmanAmount> = Field {
         name: "current",
         types: PhantomData,
     };
@@ -1657,7 +1657,7 @@ pub mod factor {
         types: PhantomData,
     };
     /// `factor`: Rentman field `factor`.
-    pub const FACTOR: Field<Factor, Decimal> = Field {
+    pub const FACTOR: Field<Factor, RentmanAmount> = Field {
         name: "factor",
         types: PhantomData,
     };
@@ -2063,7 +2063,7 @@ pub mod invoice {
         types: PhantomData,
     };
     /// `procent`: Rentman field `procent`.
-    pub const PROCENT: Field<Invoice, Decimal> = Field {
+    pub const PROCENT: Field<Invoice, RentmanAmount> = Field {
         name: "procent",
         types: PhantomData,
     };
@@ -2129,7 +2129,7 @@ pub mod invoice_line {
         types: PhantomData,
     };
     /// `base`: Rentman field `base`.
-    pub const BASE: Field<InvoiceLine, Decimal> = Field {
+    pub const BASE: Field<InvoiceLine, RentmanAmount> = Field {
         name: "base",
         types: PhantomData,
     };
@@ -2170,7 +2170,7 @@ pub mod leave_mutation {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<LeaveMutation, Decimal> = Field {
+    pub const DURATION: Field<LeaveMutation, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -2404,7 +2404,7 @@ pub mod payment {
         types: PhantomData,
     };
     /// `amount`: Rentman field `amount`.
-    pub const AMOUNT: Field<Payment, Decimal> = Field {
+    pub const AMOUNT: Field<Payment, RentmanAmount> = Field {
         name: "amount",
         types: PhantomData,
     };
@@ -2450,7 +2450,7 @@ pub mod project {
         types: PhantomData,
     };
     /// `refundabledeposit`: Rentman field `refundabledeposit`.
-    pub const REFUNDABLEDEPOSIT: Field<Project, Decimal> = Field {
+    pub const REFUNDABLEDEPOSIT: Field<Project, RentmanAmount> = Field {
         name: "refundabledeposit",
         types: PhantomData,
     };
@@ -2556,7 +2556,7 @@ pub mod project_cost {
         types: PhantomData,
     };
     /// `discount`: Rentman field `discount`.
-    pub const DISCOUNT: Field<ProjectCost, Decimal> = Field {
+    pub const DISCOUNT: Field<ProjectCost, RentmanAmount> = Field {
         name: "discount",
         types: PhantomData,
     };
@@ -2591,12 +2591,12 @@ pub mod project_cost {
         types: PhantomData,
     };
     /// `sale_price`: Rentman field `sale_price`.
-    pub const SALE_PRICE: Field<ProjectCost, Decimal> = Field {
+    pub const SALE_PRICE: Field<ProjectCost, RentmanAmount> = Field {
         name: "sale_price",
         types: PhantomData,
     };
     /// `purchase_price`: Rentman field `purchase_price`.
-    pub const PURCHASE_PRICE: Field<ProjectCost, Decimal> = Field {
+    pub const PURCHASE_PRICE: Field<ProjectCost, RentmanAmount> = Field {
         name: "purchase_price",
         types: PhantomData,
     };
@@ -2632,22 +2632,22 @@ pub mod project_crew {
         types: PhantomData,
     };
     /// `cost_accommodation`: Rentman field `cost_accommodation`.
-    pub const COST_ACCOMMODATION: Field<ProjectCrew, Decimal> = Field {
+    pub const COST_ACCOMMODATION: Field<ProjectCrew, RentmanAmount> = Field {
         name: "cost_accommodation",
         types: PhantomData,
     };
     /// `cost_catering`: Rentman field `cost_catering`.
-    pub const COST_CATERING: Field<ProjectCrew, Decimal> = Field {
+    pub const COST_CATERING: Field<ProjectCrew, RentmanAmount> = Field {
         name: "cost_catering",
         types: PhantomData,
     };
     /// `cost_travel`: Rentman field `cost_travel`.
-    pub const COST_TRAVEL: Field<ProjectCrew, Decimal> = Field {
+    pub const COST_TRAVEL: Field<ProjectCrew, RentmanAmount> = Field {
         name: "cost_travel",
         types: PhantomData,
     };
     /// `cost_other`: Rentman field `cost_other`.
-    pub const COST_OTHER: Field<ProjectCrew, Decimal> = Field {
+    pub const COST_OTHER: Field<ProjectCrew, RentmanAmount> = Field {
         name: "cost_other",
         types: PhantomData,
     };
@@ -2768,7 +2768,7 @@ pub mod project_equipment {
         types: PhantomData,
     };
     /// `discount`: Rentman field `discount`.
-    pub const DISCOUNT: Field<ProjectEquipment, Decimal> = Field {
+    pub const DISCOUNT: Field<ProjectEquipment, RentmanAmount> = Field {
         name: "discount",
         types: PhantomData,
     };
@@ -2778,7 +2778,7 @@ pub mod project_equipment {
         types: PhantomData,
     };
     /// `factor`: Rentman field `factor`.
-    pub const FACTOR: Field<ProjectEquipment, Decimal> = Field {
+    pub const FACTOR: Field<ProjectEquipment, RentmanAmount> = Field {
         name: "factor",
         types: PhantomData,
     };
@@ -2788,7 +2788,7 @@ pub mod project_equipment {
         types: PhantomData,
     };
     /// `unit_price`: Rentman field `unit_price`.
-    pub const UNIT_PRICE: Field<ProjectEquipment, Decimal> = Field {
+    pub const UNIT_PRICE: Field<ProjectEquipment, RentmanAmount> = Field {
         name: "unit_price",
         types: PhantomData,
     };
@@ -2813,7 +2813,7 @@ pub mod project_equipment {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<ProjectEquipment, Decimal> = Field {
+    pub const DURATION: Field<ProjectEquipment, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -2879,7 +2879,7 @@ pub mod project_equipment_group {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<ProjectEquipmentGroup, Decimal> = Field {
+    pub const DURATION: Field<ProjectEquipmentGroup, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -2945,22 +2945,22 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `cost_accommodation`: Rentman field `cost_accommodation`.
-    pub const COST_ACCOMMODATION: Field<ProjectFunction, Decimal> = Field {
+    pub const COST_ACCOMMODATION: Field<ProjectFunction, RentmanAmount> = Field {
         name: "cost_accommodation",
         types: PhantomData,
     };
     /// `cost_catering`: Rentman field `cost_catering`.
-    pub const COST_CATERING: Field<ProjectFunction, Decimal> = Field {
+    pub const COST_CATERING: Field<ProjectFunction, RentmanAmount> = Field {
         name: "cost_catering",
         types: PhantomData,
     };
     /// `cost_travel`: Rentman field `cost_travel`.
-    pub const COST_TRAVEL: Field<ProjectFunction, Decimal> = Field {
+    pub const COST_TRAVEL: Field<ProjectFunction, RentmanAmount> = Field {
         name: "cost_travel",
         types: PhantomData,
     };
     /// `cost_other`: Rentman field `cost_other`.
-    pub const COST_OTHER: Field<ProjectFunction, Decimal> = Field {
+    pub const COST_OTHER: Field<ProjectFunction, RentmanAmount> = Field {
         name: "cost_other",
         types: PhantomData,
     };
@@ -2970,22 +2970,22 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `price_accommodation`: Rentman field `price_accommodation`.
-    pub const PRICE_ACCOMMODATION: Field<ProjectFunction, Decimal> = Field {
+    pub const PRICE_ACCOMMODATION: Field<ProjectFunction, RentmanAmount> = Field {
         name: "price_accommodation",
         types: PhantomData,
     };
     /// `price_catering`: Rentman field `price_catering`.
-    pub const PRICE_CATERING: Field<ProjectFunction, Decimal> = Field {
+    pub const PRICE_CATERING: Field<ProjectFunction, RentmanAmount> = Field {
         name: "price_catering",
         types: PhantomData,
     };
     /// `price_travel`: Rentman field `price_travel`.
-    pub const PRICE_TRAVEL: Field<ProjectFunction, Decimal> = Field {
+    pub const PRICE_TRAVEL: Field<ProjectFunction, RentmanAmount> = Field {
         name: "price_travel",
         types: PhantomData,
     };
     /// `price_other`: Rentman field `price_other`.
-    pub const PRICE_OTHER: Field<ProjectFunction, Decimal> = Field {
+    pub const PRICE_OTHER: Field<ProjectFunction, RentmanAmount> = Field {
         name: "price_other",
         types: PhantomData,
     };
@@ -3020,12 +3020,12 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `travel_time_before`: Rentman field `travel_time_before`.
-    pub const TRAVEL_TIME_BEFORE: Field<ProjectFunction, Decimal> = Field {
+    pub const TRAVEL_TIME_BEFORE: Field<ProjectFunction, RentmanAmount> = Field {
         name: "travel_time_before",
         types: PhantomData,
     };
     /// `travel_time_after`: Rentman field `travel_time_after`.
-    pub const TRAVEL_TIME_AFTER: Field<ProjectFunction, Decimal> = Field {
+    pub const TRAVEL_TIME_AFTER: Field<ProjectFunction, RentmanAmount> = Field {
         name: "travel_time_after",
         types: PhantomData,
     };
@@ -3097,7 +3097,7 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<ProjectFunction, Decimal> = Field {
+    pub const DURATION: Field<ProjectFunction, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -3107,12 +3107,12 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `break`: Rentman field `break`.
-    pub const BREAK: Field<ProjectFunction, Decimal> = Field {
+    pub const BREAK: Field<ProjectFunction, RentmanAmount> = Field {
         name: "break",
         types: PhantomData,
     };
     /// `distance`: Rentman field `distance`.
-    pub const DISTANCE: Field<ProjectFunction, Decimal> = Field {
+    pub const DISTANCE: Field<ProjectFunction, RentmanAmount> = Field {
         name: "distance",
         types: PhantomData,
     };
@@ -3236,7 +3236,7 @@ pub mod project_function_group {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<ProjectFunctionGroup, Decimal> = Field {
+    pub const DURATION: Field<ProjectFunctionGroup, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -3484,7 +3484,7 @@ pub mod project_request {
         types: PhantomData,
     };
     /// `price`: Rentman field `price`.
-    pub const PRICE: Field<ProjectRequest, Decimal> = Field {
+    pub const PRICE: Field<ProjectRequest, RentmanAmount> = Field {
         name: "price",
         types: PhantomData,
     };
@@ -3550,7 +3550,7 @@ pub mod project_request_equipment {
         types: PhantomData,
     };
     /// `discount`: Rentman field `discount`.
-    pub const DISCOUNT: Field<ProjectRequestEquipment, Decimal> = Field {
+    pub const DISCOUNT: Field<ProjectRequestEquipment, RentmanAmount> = Field {
         name: "discount",
         types: PhantomData,
     };
@@ -3575,7 +3575,7 @@ pub mod project_request_equipment {
         types: PhantomData,
     };
     /// `unit_price`: Rentman field `unit_price`.
-    pub const UNIT_PRICE: Field<ProjectRequestEquipment, Decimal> = Field {
+    pub const UNIT_PRICE: Field<ProjectRequestEquipment, RentmanAmount> = Field {
         name: "unit_price",
         types: PhantomData,
     };
@@ -3585,7 +3585,7 @@ pub mod project_request_equipment {
         types: PhantomData,
     };
     /// `factor`: Rentman field `factor`.
-    pub const FACTOR: Field<ProjectRequestEquipment, Decimal> = Field {
+    pub const FACTOR: Field<ProjectRequestEquipment, RentmanAmount> = Field {
         name: "factor",
         types: PhantomData,
     };
@@ -3835,7 +3835,7 @@ pub mod purchase_order {
         types: PhantomData,
     };
     /// `approved_amount`: Rentman field `approved_amount`.
-    pub const APPROVED_AMOUNT: Field<PurchaseOrder, Decimal> = Field {
+    pub const APPROVED_AMOUNT: Field<PurchaseOrder, RentmanAmount> = Field {
         name: "approved_amount",
         types: PhantomData,
     };
@@ -3931,7 +3931,7 @@ pub mod purchase_order_cost {
         types: PhantomData,
     };
     /// `approved_amount`: Rentman field `approved_amount`.
-    pub const APPROVED_AMOUNT: Field<PurchaseOrderCost, Decimal> = Field {
+    pub const APPROVED_AMOUNT: Field<PurchaseOrderCost, RentmanAmount> = Field {
         name: "approved_amount",
         types: PhantomData,
     };
@@ -3972,7 +3972,7 @@ pub mod purchase_order_global_cost {
         types: PhantomData,
     };
     /// `unit_purchase_cost`: Rentman field `unit_purchase_cost`.
-    pub const UNIT_PURCHASE_COST: Field<PurchaseOrderGlobalCost, Decimal> = Field {
+    pub const UNIT_PURCHASE_COST: Field<PurchaseOrderGlobalCost, RentmanAmount> = Field {
         name: "unit_purchase_cost",
         types: PhantomData,
     };
@@ -4140,22 +4140,22 @@ pub mod rate_factor {
         types: PhantomData,
     };
     /// `from`: Rentman field `from`.
-    pub const FROM: Field<RateFactor, Decimal> = Field {
+    pub const FROM: Field<RateFactor, RentmanAmount> = Field {
         name: "from",
         types: PhantomData,
     };
     /// `to`: Rentman field `to`.
-    pub const TO: Field<RateFactor, Decimal> = Field {
+    pub const TO: Field<RateFactor, RentmanAmount> = Field {
         name: "to",
         types: PhantomData,
     };
     /// `variable`: Rentman field `variable`.
-    pub const VARIABLE: Field<RateFactor, Decimal> = Field {
+    pub const VARIABLE: Field<RateFactor, RentmanAmount> = Field {
         name: "variable",
         types: PhantomData,
     };
     /// `fixed`: Rentman field `fixed`.
-    pub const FIXED: Field<RateFactor, Decimal> = Field {
+    pub const FIXED: Field<RateFactor, RentmanAmount> = Field {
         name: "fixed",
         types: PhantomData,
     };
@@ -4241,7 +4241,7 @@ pub mod repair {
         types: PhantomData,
     };
     /// `repair_costs`: Rentman field `repair_costs`.
-    pub const REPAIR_COSTS: Field<Repair, Decimal> = Field {
+    pub const REPAIR_COSTS: Field<Repair, RentmanAmount> = Field {
         name: "repair_costs",
         types: PhantomData,
     };
@@ -4317,22 +4317,22 @@ pub mod serial_number {
         types: PhantomData,
     };
     /// `depreciation_monthly`: Rentman field `depreciation_monthly`.
-    pub const DEPRECIATION_MONTHLY: Field<SerialNumber, Decimal> = Field {
+    pub const DEPRECIATION_MONTHLY: Field<SerialNumber, RentmanAmount> = Field {
         name: "depreciation_monthly",
         types: PhantomData,
     };
     /// `book_value`: Rentman field `book_value`.
-    pub const BOOK_VALUE: Field<SerialNumber, Decimal> = Field {
+    pub const BOOK_VALUE: Field<SerialNumber, RentmanAmount> = Field {
         name: "book_value",
         types: PhantomData,
     };
     /// `residual_value`: Rentman field `residual_value`.
-    pub const RESIDUAL_VALUE: Field<SerialNumber, Decimal> = Field {
+    pub const RESIDUAL_VALUE: Field<SerialNumber, RentmanAmount> = Field {
         name: "residual_value",
         types: PhantomData,
     };
     /// `purchase_costs`: Rentman field `purchase_costs`.
-    pub const PURCHASE_COSTS: Field<SerialNumber, Decimal> = Field {
+    pub const PURCHASE_COSTS: Field<SerialNumber, RentmanAmount> = Field {
         name: "purchase_costs",
         types: PhantomData,
     };
@@ -4606,42 +4606,42 @@ pub mod subproject {
         types: PhantomData,
     };
     /// `insurance_rate`: Rentman field `insurance_rate`.
-    pub const INSURANCE_RATE: Field<Subproject, Decimal> = Field {
+    pub const INSURANCE_RATE: Field<Subproject, RentmanAmount> = Field {
         name: "insurance_rate",
         types: PhantomData,
     };
     /// `discount_rental`: Rentman field `discount_rental`.
-    pub const DISCOUNT_RENTAL: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_RENTAL: Field<Subproject, RentmanAmount> = Field {
         name: "discount_rental",
         types: PhantomData,
     };
     /// `discount_sale`: Rentman field `discount_sale`.
-    pub const DISCOUNT_SALE: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_SALE: Field<Subproject, RentmanAmount> = Field {
         name: "discount_sale",
         types: PhantomData,
     };
     /// `discount_crew`: Rentman field `discount_crew`.
-    pub const DISCOUNT_CREW: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_CREW: Field<Subproject, RentmanAmount> = Field {
         name: "discount_crew",
         types: PhantomData,
     };
     /// `discount_transport`: Rentman field `discount_transport`.
-    pub const DISCOUNT_TRANSPORT: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_TRANSPORT: Field<Subproject, RentmanAmount> = Field {
         name: "discount_transport",
         types: PhantomData,
     };
     /// `discount_additional_costs`: Rentman field `discount_additional_costs`.
-    pub const DISCOUNT_ADDITIONAL_COSTS: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_ADDITIONAL_COSTS: Field<Subproject, RentmanAmount> = Field {
         name: "discount_additional_costs",
         types: PhantomData,
     };
     /// `discount_services`: Rentman field `discount_services`.
-    pub const DISCOUNT_SERVICES: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_SERVICES: Field<Subproject, RentmanAmount> = Field {
         name: "discount_services",
         types: PhantomData,
     };
     /// `discount_subproject`: Rentman field `discount_subproject`.
-    pub const DISCOUNT_SUBPROJECT: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_SUBPROJECT: Field<Subproject, RentmanAmount> = Field {
         name: "discount_subproject",
         types: PhantomData,
     };
@@ -4651,7 +4651,7 @@ pub mod subproject {
         types: PhantomData,
     };
     /// `discount_fixed_amount`: Rentman field `discount_fixed_amount`.
-    pub const DISCOUNT_FIXED_AMOUNT: Field<Subproject, Decimal> = Field {
+    pub const DISCOUNT_FIXED_AMOUNT: Field<Subproject, RentmanAmount> = Field {
         name: "discount_fixed_amount",
         types: PhantomData,
     };
@@ -4772,17 +4772,17 @@ pub mod subrental {
         types: PhantomData,
     };
     /// `equipment_cost`: Rentman field `equipment_cost`.
-    pub const EQUIPMENT_COST: Field<Subrental, Decimal> = Field {
+    pub const EQUIPMENT_COST: Field<Subrental, RentmanAmount> = Field {
         name: "equipment_cost",
         types: PhantomData,
     };
     /// `price`: Rentman field `price`.
-    pub const PRICE: Field<Subrental, Decimal> = Field {
+    pub const PRICE: Field<Subrental, RentmanAmount> = Field {
         name: "price",
         types: PhantomData,
     };
     /// `extra_cost`: For possible transport costs, administration costs etc.
-    pub const EXTRA_COST: Field<Subrental, Decimal> = Field {
+    pub const EXTRA_COST: Field<Subrental, RentmanAmount> = Field {
         name: "extra_cost",
         types: PhantomData,
     };
@@ -4898,17 +4898,17 @@ pub mod subrental_equipment {
         types: PhantomData,
     };
     /// `unit_price`: Rentman field `unit_price`.
-    pub const UNIT_PRICE: Field<SubrentalEquipment, Decimal> = Field {
+    pub const UNIT_PRICE: Field<SubrentalEquipment, RentmanAmount> = Field {
         name: "unit_price",
         types: PhantomData,
     };
     /// `discount`: Rentman field `discount`.
-    pub const DISCOUNT: Field<SubrentalEquipment, Decimal> = Field {
+    pub const DISCOUNT: Field<SubrentalEquipment, RentmanAmount> = Field {
         name: "discount",
         types: PhantomData,
     };
     /// `factor`: Rentman field `factor`.
-    pub const FACTOR: Field<SubrentalEquipment, Decimal> = Field {
+    pub const FACTOR: Field<SubrentalEquipment, RentmanAmount> = Field {
         name: "factor",
         types: PhantomData,
     };
@@ -4923,7 +4923,7 @@ pub mod subrental_equipment {
         types: PhantomData,
     };
     /// `lineprice`: Rentman field `lineprice`.
-    pub const LINEPRICE: Field<SubrentalEquipment, Decimal> = Field {
+    pub const LINEPRICE: Field<SubrentalEquipment, RentmanAmount> = Field {
         name: "lineprice",
         types: PhantomData,
     };
@@ -5062,7 +5062,7 @@ pub mod supplier {
         types: PhantomData,
     };
     /// `price`: Rentman field `price`.
-    pub const PRICE: Field<Supplier, Decimal> = Field {
+    pub const PRICE: Field<Supplier, RentmanAmount> = Field {
         name: "price",
         types: PhantomData,
     };
@@ -5224,7 +5224,7 @@ pub mod task {
         types: PhantomData,
     };
     /// `time_budget`: Rentman field `time_budget`.
-    pub const TIME_BUDGET: Field<Task, Decimal> = Field {
+    pub const TIME_BUDGET: Field<Task, RentmanAmount> = Field {
         name: "time_budget",
         types: PhantomData,
     };
@@ -5393,7 +5393,7 @@ pub mod time_registration {
         types: PhantomData,
     };
     /// `distance`: Rentman field `distance`.
-    pub const DISTANCE: Field<TimeRegistration, Decimal> = Field {
+    pub const DISTANCE: Field<TimeRegistration, RentmanAmount> = Field {
         name: "distance",
         types: PhantomData,
     };
@@ -5413,22 +5413,22 @@ pub mod time_registration {
         types: PhantomData,
     };
     /// `duration`: For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
-    pub const DURATION: Field<TimeRegistration, Decimal> = Field {
+    pub const DURATION: Field<TimeRegistration, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
     /// `break_duration`: Rentman field `break_duration`.
-    pub const BREAK_DURATION: Field<TimeRegistration, Decimal> = Field {
+    pub const BREAK_DURATION: Field<TimeRegistration, RentmanAmount> = Field {
         name: "break_duration",
         types: PhantomData,
     };
     /// `travel_time`: Rentman field `travel_time`.
-    pub const TRAVEL_TIME: Field<TimeRegistration, Decimal> = Field {
+    pub const TRAVEL_TIME: Field<TimeRegistration, RentmanAmount> = Field {
         name: "travel_time",
         types: PhantomData,
     };
     /// `correction_duration`: Rentman field `correction_duration`.
-    pub const CORRECTION_DURATION: Field<TimeRegistration, Decimal> = Field {
+    pub const CORRECTION_DURATION: Field<TimeRegistration, RentmanAmount> = Field {
         name: "correction_duration",
         types: PhantomData,
     };
@@ -5489,7 +5489,7 @@ pub mod time_registration_activity {
         types: PhantomData,
     };
     /// `duration`: Rentman field `duration`.
-    pub const DURATION: Field<TimeRegistrationActivity, Decimal> = Field {
+    pub const DURATION: Field<TimeRegistrationActivity, RentmanAmount> = Field {
         name: "duration",
         types: PhantomData,
     };
@@ -5555,17 +5555,17 @@ pub mod vehicle {
         types: PhantomData,
     };
     /// `height`: Rentman field `height`.
-    pub const HEIGHT: Field<Vehicle, Decimal> = Field {
+    pub const HEIGHT: Field<Vehicle, RentmanAmount> = Field {
         name: "height",
         types: PhantomData,
     };
     /// `length`: Rentman field `length`.
-    pub const LENGTH: Field<Vehicle, Decimal> = Field {
+    pub const LENGTH: Field<Vehicle, RentmanAmount> = Field {
         name: "length",
         types: PhantomData,
     };
     /// `width`: Rentman field `width`.
-    pub const WIDTH: Field<Vehicle, Decimal> = Field {
+    pub const WIDTH: Field<Vehicle, RentmanAmount> = Field {
         name: "width",
         types: PhantomData,
     };
@@ -5590,7 +5590,7 @@ pub mod vehicle {
         types: PhantomData,
     };
     /// `payload_capacity`: Rentman field `payload_capacity`.
-    pub const PAYLOAD_CAPACITY: Field<Vehicle, Decimal> = Field {
+    pub const PAYLOAD_CAPACITY: Field<Vehicle, RentmanAmount> = Field {
         name: "payload_capacity",
         types: PhantomData,
     };
