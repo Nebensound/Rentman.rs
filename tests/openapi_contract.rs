@@ -109,6 +109,24 @@ fn every_schema_maps_to_exactly_one_resource_named_type() {
 }
 
 #[test]
+fn every_documented_operation_is_reachable_through_a_resource() {
+    let mut documented = documented_operations()
+        .into_iter()
+        .map(|operation| operation.operation_id)
+        .collect::<Vec<_>>();
+    let mut reachable = rentman_client::resource::REACHABLE_OPERATIONS
+        .iter()
+        .map(|operation| operation.to_string())
+        .collect::<Vec<_>>();
+    documented.sort();
+    reachable.sort();
+    assert_eq!(
+        documented, reachable,
+        "resources drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+    );
+}
+
+#[test]
 fn every_link_targets_its_documented_collection() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]

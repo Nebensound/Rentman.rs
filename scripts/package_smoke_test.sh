@@ -36,7 +36,7 @@ rentman-client = { path = "../rentman-client" }
 TOML
 
 cat > "$work_dir/smoke/src/main.rs" <<'RUST'
-use rentman_client::{RentmanApiToken, RentmanClient, endpoint, model};
+use rentman_client::{RentmanApiToken, RentmanClient, model};
 
 fn main() {
     let token = RentmanApiToken::new("smoke-secret");
@@ -47,9 +47,8 @@ fn main() {
 
     // Building typed requests needs no network access.
     let client = RentmanClient::new(token);
-    let _request = client
-        .endpoint::<endpoint::GetAccessoryItemEndpoint>()
-        .id(model::AccessoryId::new(1));
+    let _list = client.accessories().list();
+    let _nested = client.crew().appointments(model::CrewId::new(1)).list();
 
     println!("rentman-client package smoke test passed");
 }
