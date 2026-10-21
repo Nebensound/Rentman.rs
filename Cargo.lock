@@ -1338,7 +1338,11 @@ dependencies = [
 
 [[package]]
 name = "rentman-client"
+<<<<<<< HEAD
 version = "0.8.0"
+=======
+version = "0.7.0"
+>>>>>>> origin/main
 dependencies = [
  "backon",
  "bigdecimal",
