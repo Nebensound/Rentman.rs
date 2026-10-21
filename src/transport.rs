@@ -524,18 +524,22 @@ mod tests {
 
     #[tokio::test]
     async fn rate_limiter_spaces_requests_by_the_minimum_interval() {
-        let limiter = CompositeRateLimiter::new(Duration::from_millis(50));
+        let min_interval = Duration::from_millis(50);
+        let limiter = CompositeRateLimiter::new(min_interval);
 
-        let started = std::time::Instant::now();
         limiter.acquire().await;
+        let first = std::time::Instant::now();
         limiter.acquire().await;
+        let second = std::time::Instant::now();
         limiter.acquire().await;
+        let third = std::time::Instant::now();
 
-        assert!(
-            started.elapsed() >= Duration::from_millis(100),
-            "three requests need at least two intervals, took {:?}",
-            started.elapsed()
-        );
+        for (interval, elapsed) in [(1, second - first), (2, third - second)] {
+            assert!(
+                elapsed >= min_interval,
+                "interval {interval} must be at least {min_interval:?}, took {elapsed:?}"
+            );
+        }
     }
 
     #[tokio::test]
