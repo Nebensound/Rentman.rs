@@ -11,10 +11,10 @@
 /// Fields of [`Accessory`](crate::model::Accessory) for `projection!`.
 pub mod Accessory {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -147,15 +147,27 @@ pub mod Accessory {
         type Wire = bool;
         const NAME: &'static str = "add_as_new_line";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Accessory;
+        type Value = Revision<Accessory>;
+        type Wire = Revision<Accessory>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ActualContent`](crate::model::ActualContent) for `projection!`.
 pub mod ActualContent {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -248,15 +260,27 @@ pub mod ActualContent {
         type Wire = Option<Link<SerialNumber>>;
         const NAME: &'static str = "combination_serial";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ActualContent;
+        type Value = Revision<ActualContent>;
+        type Wire = Revision<ActualContent>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Alternative`](crate::model::Alternative) for `projection!`.
 pub mod Alternative {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -329,15 +353,27 @@ pub mod Alternative {
         type Wire = Link<Equipment>;
         const NAME: &'static str = "alternative";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Alternative;
+        type Value = Revision<Alternative>;
+        type Wire = Revision<Alternative>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Appointment`](crate::model::Appointment) for `projection!`.
 pub mod Appointment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -540,15 +576,27 @@ pub mod Appointment {
         type Wire = String;
         const NAME: &'static str = "synchronisation_uri";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Appointment;
+        type Value = Revision<Appointment>;
+        type Wire = Revision<Appointment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`AppointmentCrew`](crate::model::AppointmentCrew) for `projection!`.
 pub mod AppointmentCrew {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -621,15 +669,27 @@ pub mod AppointmentCrew {
         type Wire = Link<Crew>;
         const NAME: &'static str = "crew";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = AppointmentCrew;
+        type Value = Revision<AppointmentCrew>;
+        type Wire = Revision<AppointmentCrew>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Contact`](crate::model::Contact) for `projection!`.
 pub mod Contact {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -1352,15 +1412,27 @@ pub mod Contact {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Contact;
+        type Value = Revision<Contact>;
+        type Wire = Revision<Contact>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ContactPerson`](crate::model::ContactPerson) for `projection!`.
 pub mod ContactPerson {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -1573,15 +1645,27 @@ pub mod ContactPerson {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ContactPerson;
+        type Value = Revision<ContactPerson>;
+        type Wire = Revision<ContactPerson>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Contract`](crate::model::Contract) for `projection!`.
 pub mod Contract {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -1854,15 +1938,27 @@ pub mod Contract {
         type Wire = RentmanAmount;
         const NAME: &'static str = "vat_amount";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Contract;
+        type Value = Revision<Contract>;
+        type Wire = Revision<Contract>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Crew`](crate::model::Crew) for `projection!`.
 pub mod Crew {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -2255,15 +2351,27 @@ pub mod Crew {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Crew;
+        type Value = Revision<Crew>;
+        type Wire = Revision<Crew>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`CrewAvailability`](crate::model::CrewAvailability) for `projection!`.
 pub mod CrewAvailability {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -2436,15 +2544,27 @@ pub mod CrewAvailability {
         type Wire = String;
         const NAME: &'static str = "recurrence_weekdays";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = CrewAvailability;
+        type Value = Revision<CrewAvailability>;
+        type Wire = Revision<CrewAvailability>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`CrewRate`](crate::model::CrewRate) for `projection!`.
 pub mod CrewRate {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -2527,15 +2647,27 @@ pub mod CrewRate {
         type Wire = Link<Crew>;
         const NAME: &'static str = "medewerker";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = CrewRate;
+        type Value = Revision<CrewRate>;
+        type Wire = Revision<CrewRate>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Equipment`](crate::model::Equipment) for `projection!`.
 pub mod Equipment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3108,15 +3240,27 @@ pub mod Equipment {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Equipment;
+        type Value = Revision<Equipment>;
+        type Wire = Revision<Equipment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`EquipmentAssignedSerial`](crate::model::EquipmentAssignedSerial) for `projection!`.
 pub mod EquipmentAssignedSerial {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3189,15 +3333,27 @@ pub mod EquipmentAssignedSerial {
         type Wire = Link<SerialNumber>;
         const NAME: &'static str = "serialnumber";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = EquipmentAssignedSerial;
+        type Value = Revision<EquipmentAssignedSerial>;
+        type Wire = Revision<EquipmentAssignedSerial>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`EquipmentSetContent`](crate::model::EquipmentSetContent) for `projection!`.
 pub mod EquipmentSetContent {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3310,15 +3466,27 @@ pub mod EquipmentSetContent {
         type Wire = EquipmentSetContentIsPhysicallyConnected;
         const NAME: &'static str = "is_physically_connected";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = EquipmentSetContent;
+        type Value = Revision<EquipmentSetContent>;
+        type Wire = Revision<EquipmentSetContent>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ExtraInputField`](crate::model::ExtraInputField) for `projection!`.
 pub mod ExtraInputField {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3481,15 +3649,27 @@ pub mod ExtraInputField {
         type Wire = bool;
         const NAME: &'static str = "is_customfield_mandatory";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ExtraInputField;
+        type Value = Revision<ExtraInputField>;
+        type Wire = Revision<ExtraInputField>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Factor`](crate::model::Factor) for `projection!`.
 pub mod Factor {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3582,15 +3762,27 @@ pub mod Factor {
         type Wire = Link<FactorGroup>;
         const NAME: &'static str = "factor_group";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Factor;
+        type Value = Revision<Factor>;
+        type Wire = Revision<Factor>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`FactorGroup`](crate::model::FactorGroup) for `projection!`.
 pub mod FactorGroup {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3653,15 +3845,27 @@ pub mod FactorGroup {
         type Wire = String;
         const NAME: &'static str = "name";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = FactorGroup;
+        type Value = Revision<FactorGroup>;
+        type Wire = Revision<FactorGroup>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`File`](crate::model::File) for `projection!`.
 pub mod File {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -3974,15 +4178,27 @@ pub mod File {
         type Wire = Option<String>;
         const NAME: &'static str = "parent_api_path";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = File;
+        type Value = Revision<File>;
+        type Wire = Revision<File>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`FileFolder`](crate::model::FileFolder) for `projection!`.
 pub mod FileFolder {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -4105,15 +4321,27 @@ pub mod FileFolder {
         type Wire = Option<String>;
         const NAME: &'static str = "parent_api_path";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = FileFolder;
+        type Value = Revision<FileFolder>;
+        type Wire = Revision<FileFolder>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Folder`](crate::model::Folder) for `projection!`.
 pub mod Folder {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -4216,15 +4444,27 @@ pub mod Folder {
         type Wire = String;
         const NAME: &'static str = "path";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Folder;
+        type Value = Revision<Folder>;
+        type Wire = Revision<Folder>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Invitation`](crate::model::Invitation) for `projection!`.
 pub mod Invitation {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -4427,15 +4667,27 @@ pub mod Invitation {
         type Wire = i64;
         const NAME: &'static str = "auto_reminder_sent";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Invitation;
+        type Value = Revision<Invitation>;
+        type Wire = Revision<Invitation>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Invoice`](crate::model::Invoice) for `projection!`.
 pub mod Invoice {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -4848,15 +5100,27 @@ pub mod Invoice {
         type Wire = String;
         const NAME: &'static str = "tags";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Invoice;
+        type Value = Revision<Invoice>;
+        type Wire = Revision<Invoice>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`InvoiceLine`](crate::model::InvoiceLine) for `projection!`.
 pub mod InvoiceLine {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -4989,15 +5253,27 @@ pub mod InvoiceLine {
         type Wire = Option<String>;
         const NAME: &'static str = "parent_api_path";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = InvoiceLine;
+        type Value = Revision<InvoiceLine>;
+        type Wire = Revision<InvoiceLine>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`LeaveMutation`](crate::model::LeaveMutation) for `projection!`.
 pub mod LeaveMutation {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -5100,15 +5376,27 @@ pub mod LeaveMutation {
         type Wire = String;
         const NAME: &'static str = "mutation_date";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = LeaveMutation;
+        type Value = Revision<LeaveMutation>;
+        type Wire = Revision<LeaveMutation>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`LeaveRequest`](crate::model::LeaveRequest) for `projection!`.
 pub mod LeaveRequest {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -5211,15 +5499,27 @@ pub mod LeaveRequest {
         type Wire = Option<Link<Crew>>;
         const NAME: &'static str = "reviewer";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = LeaveRequest;
+        type Value = Revision<LeaveRequest>;
+        type Wire = Revision<LeaveRequest>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`LeaveType`](crate::model::LeaveType) for `projection!`.
 pub mod LeaveType {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -5392,15 +5692,27 @@ pub mod LeaveType {
         type Wire = bool;
         const NAME: &'static str = "counts_in_totals";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = LeaveType;
+        type Value = Revision<LeaveType>;
+        type Wire = Revision<LeaveType>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`LedgerCode`](crate::model::LedgerCode) for `projection!`.
 pub mod LedgerCode {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -5483,15 +5795,27 @@ pub mod LedgerCode {
         type Wire = bool;
         const NAME: &'static str = "is_debit";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = LedgerCode;
+        type Value = Revision<LedgerCode>;
+        type Wire = Revision<LedgerCode>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Payment`](crate::model::Payment) for `projection!`.
 pub mod Payment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -5594,15 +5918,27 @@ pub mod Payment {
         type Wire = Option<PaymentPaymentImportSource>;
         const NAME: &'static str = "payment_import_source";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Payment;
+        type Value = Revision<Payment>;
+        type Wire = Revision<Payment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Project`](crate::model::Project) for `projection!`.
 pub mod Project {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -6045,15 +6381,27 @@ pub mod Project {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Project;
+        type Value = Revision<Project>;
+        type Wire = Revision<Project>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectCost`](crate::model::ProjectCost) for `projection!`.
 pub mod ProjectCost {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -6246,15 +6594,27 @@ pub mod ProjectCost {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectCost;
+        type Value = Revision<ProjectCost>;
+        type Wire = Revision<ProjectCost>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectCrew`](crate::model::ProjectCrew) for `projection!`.
 pub mod ProjectCrew {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -6557,15 +6917,27 @@ pub mod ProjectCrew {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectCrew;
+        type Value = Revision<ProjectCrew>;
+        type Wire = Revision<ProjectCrew>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectEquipment`](crate::model::ProjectEquipment) for `projection!`.
 pub mod ProjectEquipment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -6888,15 +7260,27 @@ pub mod ProjectEquipment {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectEquipment;
+        type Value = Revision<ProjectEquipment>;
+        type Wire = Revision<ProjectEquipment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectEquipmentGroup`](crate::model::ProjectEquipmentGroup) for `projection!`.
 pub mod ProjectEquipmentGroup {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -7129,15 +7513,27 @@ pub mod ProjectEquipmentGroup {
         type Wire = RentmanAmount;
         const NAME: &'static str = "total_new_price";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectEquipmentGroup;
+        type Value = Revision<ProjectEquipmentGroup>;
+        type Wire = Revision<ProjectEquipmentGroup>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectFunction`](crate::model::ProjectFunction) for `projection!`.
 pub mod ProjectFunction {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -7760,15 +8156,27 @@ pub mod ProjectFunction {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectFunction;
+        type Value = Revision<ProjectFunction>;
+        type Wire = Revision<ProjectFunction>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectFunctionGroup`](crate::model::ProjectFunctionGroup) for `projection!`.
 pub mod ProjectFunctionGroup {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -7951,15 +8359,27 @@ pub mod ProjectFunctionGroup {
         type Wire = Option<String>;
         const NAME: &'static str = "remark";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectFunctionGroup;
+        type Value = Revision<ProjectFunctionGroup>;
+        type Wire = Revision<ProjectFunctionGroup>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectRequest`](crate::model::ProjectRequest) for `projection!`.
 pub mod ProjectRequest {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8372,15 +8792,27 @@ pub mod ProjectRequest {
         type Wire = ProjectRequestStatus;
         const NAME: &'static str = "status";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectRequest;
+        type Value = Revision<ProjectRequest>;
+        type Wire = Revision<ProjectRequest>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectRequestEquipment`](crate::model::ProjectRequestEquipment) for `projection!`.
 pub mod ProjectRequestEquipment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8563,15 +8995,27 @@ pub mod ProjectRequestEquipment {
         type Wire = i64;
         const NAME: &'static str = "order";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectRequestEquipment;
+        type Value = Revision<ProjectRequestEquipment>;
+        type Wire = Revision<ProjectRequestEquipment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectStatus`](crate::model::ProjectStatus) for `projection!`.
 pub mod ProjectStatus {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8634,15 +9078,27 @@ pub mod ProjectStatus {
         type Wire = String;
         const NAME: &'static str = "name";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectStatus;
+        type Value = Revision<ProjectStatus>;
+        type Wire = Revision<ProjectStatus>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectTemplate`](crate::model::ProjectTemplate) for `projection!`.
 pub mod ProjectTemplate {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8705,15 +9161,27 @@ pub mod ProjectTemplate {
         type Wire = String;
         const NAME: &'static str = "name";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectTemplate;
+        type Value = Revision<ProjectTemplate>;
+        type Wire = Revision<ProjectTemplate>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectType`](crate::model::ProjectType) for `projection!`.
 pub mod ProjectType {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8796,15 +9264,27 @@ pub mod ProjectType {
         type Wire = ProjectTypeType;
         const NAME: &'static str = "type";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectType;
+        type Value = Revision<ProjectType>;
+        type Wire = Revision<ProjectType>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`ProjectVehicle`](crate::model::ProjectVehicle) for `projection!`.
 pub mod ProjectVehicle {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -8957,15 +9437,27 @@ pub mod ProjectVehicle {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = ProjectVehicle;
+        type Value = Revision<ProjectVehicle>;
+        type Wire = Revision<ProjectVehicle>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`PurchaseOrder`](crate::model::PurchaseOrder) for `projection!`.
 pub mod PurchaseOrder {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -9298,15 +9790,27 @@ pub mod PurchaseOrder {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = PurchaseOrder;
+        type Value = Revision<PurchaseOrder>;
+        type Wire = Revision<PurchaseOrder>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`PurchaseOrderCost`](crate::model::PurchaseOrderCost) for `projection!`.
 pub mod PurchaseOrderCost {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -9449,15 +9953,27 @@ pub mod PurchaseOrderCost {
         type Wire = i64;
         const NAME: &'static str = "quantity";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = PurchaseOrderCost;
+        type Value = Revision<PurchaseOrderCost>;
+        type Wire = Revision<PurchaseOrderCost>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`PurchaseOrderGlobalCost`](crate::model::PurchaseOrderGlobalCost) for `projection!`.
 pub mod PurchaseOrderGlobalCost {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -9560,15 +10076,27 @@ pub mod PurchaseOrderGlobalCost {
         type Wire = Option<Link<TaxClass>>;
         const NAME: &'static str = "taxclass";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = PurchaseOrderGlobalCost;
+        type Value = Revision<PurchaseOrderGlobalCost>;
+        type Wire = Revision<PurchaseOrderGlobalCost>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Quote`](crate::model::Quote) for `projection!`.
 pub mod Quote {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -9851,15 +10379,27 @@ pub mod Quote {
         type Wire = String;
         const NAME: &'static str = "tags";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Quote;
+        type Value = Revision<Quote>;
+        type Wire = Revision<Quote>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Rate`](crate::model::Rate) for `projection!`.
 pub mod Rate {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -9952,15 +10492,27 @@ pub mod Rate {
         type Wire = RateSubtype;
         const NAME: &'static str = "subtype";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Rate;
+        type Value = Revision<Rate>;
+        type Wire = Revision<Rate>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`RateFactor`](crate::model::RateFactor) for `projection!`.
 pub mod RateFactor {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10063,15 +10615,27 @@ pub mod RateFactor {
         type Wire = RentmanAmount;
         const NAME: &'static str = "fixed";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = RateFactor;
+        type Value = Revision<RateFactor>;
+        type Wire = Revision<RateFactor>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Repair`](crate::model::Repair) for `projection!`.
 pub mod Repair {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10324,15 +10888,27 @@ pub mod Repair {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Repair;
+        type Value = Revision<Repair>;
+        type Wire = Revision<Repair>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`SerialNumber`](crate::model::SerialNumber) for `projection!`.
 pub mod SerialNumber {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10575,15 +11151,27 @@ pub mod SerialNumber {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = SerialNumber;
+        type Value = Revision<SerialNumber>;
+        type Wire = Revision<SerialNumber>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Status`](crate::model::Status) for `projection!`.
 pub mod Status {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10646,15 +11234,27 @@ pub mod Status {
         type Wire = String;
         const NAME: &'static str = "name";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Status;
+        type Value = Revision<Status>;
+        type Wire = Revision<Status>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`StockLocation`](crate::model::StockLocation) for `projection!`.
 pub mod StockLocation {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10817,15 +11417,27 @@ pub mod StockLocation {
         type Wire = bool;
         const NAME: &'static str = "in_archive";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = StockLocation;
+        type Value = Revision<StockLocation>;
+        type Wire = Revision<StockLocation>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`StockMovement`](crate::model::StockMovement) for `projection!`.
 pub mod StockMovement {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -10968,15 +11580,27 @@ pub mod StockMovement {
         type Wire = String;
         const NAME: &'static str = "api_client";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = StockMovement;
+        type Value = Revision<StockMovement>;
+        type Wire = Revision<StockMovement>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Subproject`](crate::model::Subproject) for `projection!`.
 pub mod Subproject {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -11489,15 +12113,27 @@ pub mod Subproject {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Subproject;
+        type Value = Revision<Subproject>;
+        type Wire = Revision<Subproject>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Subrental`](crate::model::Subrental) for `projection!`.
 pub mod Subrental {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -11830,15 +12466,27 @@ pub mod Subrental {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Subrental;
+        type Value = Revision<Subrental>;
+        type Wire = Revision<Subrental>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`SubrentalEquipment`](crate::model::SubrentalEquipment) for `projection!`.
 pub mod SubrentalEquipment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12041,15 +12689,27 @@ pub mod SubrentalEquipment {
         type Wire = Option<Link<ProjectEquipment>>;
         const NAME: &'static str = "supplier_planningmateriaal";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = SubrentalEquipment;
+        type Value = Revision<SubrentalEquipment>;
+        type Wire = Revision<SubrentalEquipment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`SubrentalEquipmentGroup`](crate::model::SubrentalEquipmentGroup) for `projection!`.
 pub mod SubrentalEquipmentGroup {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12142,15 +12802,27 @@ pub mod SubrentalEquipmentGroup {
         type Wire = Option<Link<ProjectEquipmentGroup>>;
         const NAME: &'static str = "supplier_category";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = SubrentalEquipmentGroup;
+        type Value = Revision<SubrentalEquipmentGroup>;
+        type Wire = Revision<SubrentalEquipmentGroup>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Subtask`](crate::model::Subtask) for `projection!`.
 pub mod Subtask {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12233,15 +12905,27 @@ pub mod Subtask {
         type Wire = bool;
         const NAME: &'static str = "completed";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Subtask;
+        type Value = Revision<Subtask>;
+        type Wire = Revision<Subtask>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Supplier`](crate::model::Supplier) for `projection!`.
 pub mod Supplier {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12344,15 +13028,27 @@ pub mod Supplier {
         type Wire = String;
         const NAME: &'static str = "details";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Supplier;
+        type Value = Revision<Supplier>;
+        type Wire = Revision<Supplier>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Task`](crate::model::Task) for `projection!`.
 pub mod Task {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12695,15 +13391,27 @@ pub mod Task {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Task;
+        type Value = Revision<Task>;
+        type Wire = Revision<Task>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`TaskAssignment`](crate::model::TaskAssignment) for `projection!`.
 pub mod TaskAssignment {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12776,15 +13484,27 @@ pub mod TaskAssignment {
         type Wire = Link<Crew>;
         const NAME: &'static str = "crew";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = TaskAssignment;
+        type Value = Revision<TaskAssignment>;
+        type Wire = Revision<TaskAssignment>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`TaskStatus`](crate::model::TaskStatus) for `projection!`.
 pub mod TaskStatus {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12877,15 +13597,27 @@ pub mod TaskStatus {
         type Wire = i64;
         const NAME: &'static str = "order";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = TaskStatus;
+        type Value = Revision<TaskStatus>;
+        type Wire = Revision<TaskStatus>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`TaxClass`](crate::model::TaxClass) for `projection!`.
 pub mod TaxClass {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -12968,15 +13700,27 @@ pub mod TaxClass {
         type Wire = TaxClassType;
         const NAME: &'static str = "type";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = TaxClass;
+        type Value = Revision<TaxClass>;
+        type Wire = Revision<TaxClass>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`TimeRegistration`](crate::model::TimeRegistration) for `projection!`.
 pub mod TimeRegistration {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -13179,15 +13923,27 @@ pub mod TimeRegistration {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = TimeRegistration;
+        type Value = Revision<TimeRegistration>;
+        type Wire = Revision<TimeRegistration>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`TimeRegistrationActivity`](crate::model::TimeRegistrationActivity) for `projection!`.
 pub mod TimeRegistrationActivity {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -13320,15 +14076,27 @@ pub mod TimeRegistrationActivity {
         type Wire = Option<DateTime<FixedOffset>>;
         const NAME: &'static str = "to";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = TimeRegistrationActivity;
+        type Value = Revision<TimeRegistrationActivity>;
+        type Wire = Revision<TimeRegistrationActivity>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`Vehicle`](crate::model::Vehicle) for `projection!`.
 pub mod Vehicle {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -13581,15 +14349,27 @@ pub mod Vehicle {
         type Wire = CustomFields;
         const NAME: &'static str = "custom";
     }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = Vehicle;
+        type Value = Revision<Vehicle>;
+        type Wire = Revision<Vehicle>;
+        const NAME: &'static str = "updateHash";
+    }
 }
 
 /// Fields of [`WarehouseStatus`](crate::model::WarehouseStatus) for `projection!`.
 pub mod WarehouseStatus {
     use crate::ProjectionField;
-    use crate::RentmanAmount;
     use crate::id::{Id, ItemId};
     use crate::model::*;
     use crate::projection::Link;
+    use crate::{RentmanAmount, Revision};
     use ::chrono::{DateTime, FixedOffset, NaiveDate};
     use ::url::Url;
 
@@ -13651,5 +14431,17 @@ pub mod WarehouseStatus {
         type Value = String;
         type Wire = String;
         const NAME: &'static str = "name";
+    }
+
+    /// `updateHash`: revision of the item, changes on every update.
+    ///
+    /// Never sent in `fields=`: Rentman adds it to every selection by itself.
+    pub struct updateHash;
+
+    impl ProjectionField for updateHash {
+        type Resource = WarehouseStatus;
+        type Value = Revision<WarehouseStatus>;
+        type Wire = Revision<WarehouseStatus>;
+        const NAME: &'static str = "updateHash";
     }
 }

@@ -22,7 +22,7 @@ mod generated_sweep;
 
 use bigdecimal::BigDecimal;
 use rentman_client::{
-    PageSize, RentmanApiToken, RentmanClient,
+    PageSize, RentmanApiToken, RentmanClient, Revisioned, Revisions,
     fields::equipment,
     model::{self, EquipmentId},
 };
@@ -358,7 +358,7 @@ async fn filters_survive_the_cursor_live() {
 
 rentman_client::projection! {
     /// The fields of an equipment item this test selects.
-    struct EquipmentName from Equipment { id, name, in_archive, creator }
+    struct EquipmentName from Equipment { id, name, in_archive, creator, updateHash }
 }
 
 /// Runs without credentials: the projection used by the live test below
@@ -369,10 +369,11 @@ fn equipment_projection_decodes_outside_the_crate() {
 
     assert_eq!(
         EquipmentName::FIELDS,
-        ["id", "name", "in_archive", "creator"]
+        ["id", "name", "in_archive", "creator", "updateHash"]
     );
     let mut item: ProjectedItem = serde_json::from_str(
-        r#"{"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "custom": {}}"#,
+        r#"{"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "custom": {},
+            "updateHash": "d21b3fd9"}"#,
     )
     .unwrap();
     let equipment = EquipmentName::decode(&mut item).unwrap();
@@ -383,15 +384,18 @@ fn equipment_projection_decodes_outside_the_crate() {
         equipment.creator,
         Some(rentman_client::model::CrewId::new(2))
     );
+    assert_eq!(equipment.updateHash.as_str(), "d21b3fd9");
 
     // Every field that does not decode fails with its name.
-    let valid =
-        serde_json::json!({"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2"});
+    let valid = serde_json::json!(
+        {"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "d21b3fd9"}
+    );
     for (field, broken) in [
         ("id", serde_json::json!("three")),
         ("name", serde_json::Value::Null),
         ("in_archive", serde_json::json!("yes")),
         ("creator", serde_json::json!("/projects/2")),
+        ("updateHash", serde_json::json!("")),
     ] {
         let mut wire = valid.clone();
         wire[field] = broken;
@@ -434,5 +438,50 @@ async fn projections_keep_their_field_selection_across_the_cursor_live() {
         assert_eq!(projected.name, full.name);
         assert!(projected.in_archive);
         assert_eq!(projected.creator, full.creator);
+        // Rentman sends the revision although the projection cannot request it.
+        assert_eq!(&projected.updateHash, full.revision());
     }
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
+async fn revisions_identify_item_states_live() {
+    let client = live_client();
+    let archived = || {
+        client
+            .equipment()
+            .list()
+            .filter(equipment::IN_ARCHIVE.eq(true))
+    };
+    // Small pages make the revisions travel through several cursors.
+    let revisions = archived()
+        .page_size(PageSize::new(100).unwrap())
+        .revisions()
+        .await
+        .unwrap();
+    let full = archived().page_size(PageSize::MAX).all().await.unwrap();
+
+    // The cheap listing agrees with the revisions of the full items, and every
+    // item has its own revision.
+    assert_eq!(revisions, full.iter().collect::<Revisions<_>>());
+    let distinct = revisions
+        .iter()
+        .map(|(_, revision)| revision)
+        .collect::<std::collections::HashSet<_>>()
+        .len();
+    assert_eq!(distinct, revisions.len(), "two items share an updateHash");
+
+    // Reading the same state again yields the same revision. An item whose
+    // `modified` moved in between was updated, so its revision may differ.
+    for item in full.iter().take(3) {
+        let again = client.equipment().get(item.id).await.unwrap();
+        if again.modified == item.modified {
+            assert_eq!(again.revision(), item.revision(), "equipment {}", item.id);
+        }
+    }
+    let unchanged = full.iter().collect::<Revisions<_>>();
+    assert!(revisions.changes_since(&unchanged).is_empty());
 }

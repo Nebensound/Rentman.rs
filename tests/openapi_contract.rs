@@ -6,7 +6,7 @@ use rentman_client::model::{
     RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass, TaxClassType,
 };
 use rentman_client::model::{InvoiceId, PaymentId};
-use rentman_client::{Id, LinkError, Resource};
+use rentman_client::{Id, LinkError, ProjectionField, Resource, Revision, Revisioned};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, fmt::Debug, fs};
@@ -15,6 +15,8 @@ use std::{collections::BTreeSet, fmt::Debug, fs};
 mod generated_payload_constructors;
 #[path = "contract/generated_response_enums.rs"]
 mod generated_response_enums;
+#[path = "contract/generated_revisions.rs"]
+mod generated_revisions;
 
 #[test]
 fn wire_models_cover_every_documented_schema() {
@@ -147,6 +149,46 @@ fn field_constants_cover_every_queryable_field() {
 }
 
 #[test]
+fn every_resource_model_carries_the_documented_revision() {
+    let spec = openapi_spec();
+    // Rentman documents `updateHash` in the API introduction only.
+    let introduction = spec["info"]["description"]
+        .as_str()
+        .expect("OpenAPI introduction is a string");
+    assert!(
+        introduction.contains("## updateHash")
+            && introduction.contains("computed with the `id` and `modified` field"),
+        "the API introduction no longer documents updateHash; review REVISION_FIELD"
+    );
+    for (name, schema) in spec["components"]["schemas"]
+        .as_object()
+        .expect("OpenAPI schemas are an object")
+    {
+        assert!(
+            schema["properties"].get("updateHash").is_none(),
+            "{name} now documents updateHash; review REVISION_FIELD"
+        );
+    }
+
+    let resources = RESOURCE_COLLECTIONS
+        .iter()
+        .map(|(rust_type, _)| *rust_type)
+        .collect::<BTreeSet<_>>();
+    let carrying = generated_revisions::RESOURCES_WITH_REVISION
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    assert_eq!(resources, carrying);
+
+    // Not a queryable field: Rentman rejects it in filters and sorting.
+    assert!(
+        rentman_client::fields::QUERYABLE_FIELDS
+            .iter()
+            .all(|(_, field)| *field != "updateHash")
+    );
+}
+
+#[test]
 fn every_link_targets_its_documented_collection() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]
@@ -239,7 +281,7 @@ fn generated_models_read_and_write_typed_links() {
         "id": 99, "created": null, "modified": null, "creator": "/crew/3",
         "displayname": "Payment 99", "invoice": "/invoices/7",
         "moment": "2026-07-05T00:00:00.000+02:00", "amount": 42.5,
-        "description": "Manual booking"
+        "description": "Manual booking", "updateHash": "p99"
     }))
     .unwrap();
     assert_eq!(payment.id, PaymentId::new(99));
@@ -254,7 +296,7 @@ fn generated_models_read_and_write_typed_links() {
     let payment: Payment = serde_json::from_value(json!({
         "id": 99, "created": null, "modified": null, "displayname": "Payment 99",
         "invoice": "/invoices/7", "moment": "2026-07-05T00:00:00.000+02:00",
-        "amount": 1, "description": ""
+        "amount": 1, "description": "", "updateHash": "p99"
     }))
     .unwrap();
     assert_eq!(payment.creator, None);
@@ -262,7 +304,8 @@ fn generated_models_read_and_write_typed_links() {
     let error = serde_json::from_value::<Payment>(json!({
         "id": 99, "created": null, "modified": null, "creator": null,
         "displayname": "Payment 99", "invoice": "/projects/7",
-        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 1, "description": ""
+        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 1, "description": "",
+        "updateHash": "p99"
     }))
     .unwrap_err();
     assert!(
@@ -383,9 +426,11 @@ fn an_undocumented_enum_value_does_not_fail_the_collection() {
     let items: Vec<TaxClass> = serde_json::from_value(json!(
         [
             {"id": 1, "created": null, "modified": null, "creator": null,
-             "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat"},
+             "displayname": "VAT 19%", "name": "VAT 19%", "code": "19", "type": "vat",
+             "updateHash": "t1"},
             {"id": 2, "created": null, "modified": null, "creator": null,
-             "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge"}
+             "displayname": "New", "name": "New", "code": "N", "type": "reverse_charge",
+             "updateHash": "t2"}
         ]
     ))
     .unwrap();
@@ -399,6 +444,42 @@ fn an_undocumented_enum_value_does_not_fail_the_collection() {
         serde_json::to_value(&items[1]).unwrap()["type"],
         json!("reverse_charge")
     );
+}
+
+/// Asserts that resource `R`, read from a sample item with ID 1, takes its
+/// revision from `updateHash`, requires it, writes it back, and exposes it
+/// through [`Revisioned`] and the projection marker `F`.
+fn assert_carries_revision<R, F>(sample: &str)
+where
+    R: Revisioned + DeserializeOwned + Serialize + Debug,
+    F: ProjectionField<Resource = R, Value = Revision<R>>,
+{
+    assert_eq!(F::NAME, "updateHash");
+    let mut wire: Value = serde_json::from_str(sample).expect("sample item is JSON");
+    let item = serde_json::from_value::<R>(wire.clone());
+    assert!(
+        item.unwrap_err()
+            .to_string()
+            .contains("missing field `updateHash`"),
+        "{} reads an item without updateHash",
+        R::COLLECTION
+    );
+
+    wire["updateHash"] = json!("d21b3fd9d594582874d23f8d26234732");
+    let item: R = serde_json::from_value(wire.clone())
+        .unwrap_or_else(|error| panic!("{}: {error}", R::COLLECTION));
+    assert_eq!(item.id(), Id::new(1));
+    assert_eq!(
+        item.revision(),
+        &Revision::new("d21b3fd9d594582874d23f8d26234732").unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&item).unwrap()["updateHash"],
+        wire["updateHash"]
+    );
+
+    wire["updateHash"] = json!("");
+    assert!(serde_json::from_value::<R>(wire).is_err());
 }
 
 /// Asserts that every value the OpenAPI document lists for `schema.field`

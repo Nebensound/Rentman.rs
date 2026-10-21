@@ -75,10 +75,18 @@ impl ProjectedItem {
     /// Takes the field `F` out of the item; a missing field reads as `null`,
     /// so only `Option` fields may be missing.
     pub fn take<F: ProjectionField>(&mut self) -> Result<F::Value, serde_json::Error> {
-        let raw = self.0.remove(F::NAME);
-        serde_json::from_str::<F::Wire>(raw.as_deref().map_or("null", RawValue::get))
+        self.take_named::<F::Wire>(F::NAME)
             .map(IntoValue::into_value)
-            .map_err(|error| serde::de::Error::custom(format!("field `{}`: {error}", F::NAME)))
+    }
+
+    /// Takes the field `name` out of the item as its wire form `T`.
+    pub(crate) fn take_named<T: DeserializeOwned>(
+        &mut self,
+        name: &str,
+    ) -> Result<T, serde_json::Error> {
+        let raw = self.0.remove(name);
+        serde_json::from_str::<T>(raw.as_deref().map_or("null", RawValue::get))
+            .map_err(|error| serde::de::Error::custom(format!("field `{name}`: {error}")))
     }
 }
 
@@ -93,9 +101,26 @@ pub(crate) fn decode<P: Projection>(mut item: ProjectedItem) -> crate::Result<P>
     P::decode(&mut item).map_err(|error| crate::Error::new(crate::ErrorKind::Decode(error)))
 }
 
+/// Fields Rentman adds to every selection by itself but does not accept in
+/// `fields=` (`RESOURCE_EXTRA_FIELDS` in the generator): next to other fields
+/// it drops them silently, and named alone it ignores the whole selection and
+/// returns full items (verified live on 2026-10-21).
+const ALWAYS_SENT: &[&str] = &["updateHash"];
+
 /// The `fields=` value of a projection, e.g. `id,firstname`.
+///
+/// Fields Rentman always sends are not requested; a projection of only such
+/// fields selects `id`, which Rentman accepts and adds them to.
 pub(crate) fn fields<P: Projection>() -> String {
-    P::FIELDS.join(",")
+    let selected = P::FIELDS
+        .iter()
+        .copied()
+        .filter(|field| !ALWAYS_SENT.contains(field))
+        .collect::<Vec<_>>();
+    if selected.is_empty() {
+        return "id".to_string();
+    }
+    selected.join(",")
 }
 
 /// Declares a struct whose fields are a selection of a resource's fields.
@@ -225,6 +250,42 @@ mod tests {
             assert!(cause.to_string().starts_with(message), "{cause}");
         }
         assert!(serde_json::from_str::<ProjectedItem>("[1]").is_err());
+    }
+
+    crate::projection! {
+        struct StatusRevision from TaskStatus { id, updateHash }
+    }
+
+    crate::projection! {
+        struct OnlyRevision from TaskStatus { updateHash }
+    }
+
+    #[test]
+    fn reads_the_revision_without_requesting_it() {
+        assert_eq!(StatusRevision::FIELDS, ["id", "updateHash"]);
+        assert_eq!(fields::<StatusRevision>(), "id");
+        assert_eq!(OnlyRevision::FIELDS, ["updateHash"]);
+        assert_eq!(fields::<OnlyRevision>(), "id");
+
+        let item = serde_json::from_str::<ProjectedItem>(
+            r#"{"id": 5, "modified": null, "updateHash": "d21b3fd9"}"#,
+        )
+        .unwrap();
+        let status: StatusRevision = decode(item).unwrap();
+        assert_eq!(status.id, TaskStatusId::new(5));
+        assert_eq!(status.updateHash.as_str(), "d21b3fd9");
+
+        for wire in [r#"{"id": 5}"#, r#"{"updateHash": ""}"#] {
+            let item = serde_json::from_str::<ProjectedItem>(wire).unwrap();
+            let error = decode::<OnlyRevision>(item).unwrap_err();
+            let ErrorKind::Decode(cause) = error.kind() else {
+                panic!("expected a decode error, got {error:?}");
+            };
+            assert!(
+                cause.to_string().starts_with("field `updateHash`"),
+                "{cause}"
+            );
+        }
     }
 
     crate::projection! {

@@ -16,6 +16,7 @@ mod id;
 mod ids;
 mod paging;
 mod projection;
+mod revision;
 #[cfg(test)]
 // Test helpers are not production code and do not count toward coverage.
 #[cfg_attr(coverage_nightly, coverage(off))]
@@ -36,6 +37,7 @@ pub use paging::PageSize;
 pub use projection::{Projection, ProjectionField};
 /// Re-export of the URL type used for client configuration.
 pub use reqwest::Url;
+pub use revision::{Changes, InvalidRevision, Revision, Revisioned, Revisions};
 
 /// Items used by the code `projection!` expands to; not a public API.
 #[doc(hidden)]
