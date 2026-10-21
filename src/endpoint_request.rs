@@ -68,8 +68,9 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     where
         E::Request: Serialize,
     {
-        let body = serde_json::to_value(body)
-            .map_err(|error| Error::invalid_request(InvalidRequest::Body(error)))?;
+        let body = serde_json::to_value(body).map_err(|error| {
+            Error::invalid_request(InvalidRequest::Body(error)).in_operation(E::SPEC.operation_id)
+        })?;
         self.body = Some(body);
         Ok(self)
     }
@@ -474,7 +475,6 @@ mod tests {
                 ("limit".to_string(), "5".to_string()),
             ]
         );
-
         let error = match client
             .endpoint::<GetAccessoryCollectionEndpoint>()
             .query(&nested)
@@ -587,9 +587,11 @@ mod tests {
             ErrorKind::InvalidRequest(InvalidRequest::Body(_))
         ));
         assert_eq!(error.outcome(), RequestOutcome::NotApplied);
+        assert_eq!(error.operation(), Some("customBody"));
         assert_eq!(
             error.to_string(),
-            "invalid Rentman API request: the body cannot be encoded as JSON: broken body"
+            "Rentman customBody failed: invalid Rentman API request: \
+             the body cannot be encoded as JSON: broken body"
         );
     }
 }
