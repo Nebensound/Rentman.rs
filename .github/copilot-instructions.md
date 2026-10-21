@@ -47,7 +47,7 @@ repositories.
   fields, enums, path/query parameters, request bodies, success responses,
   pagination metadata, and every documented error status. If a response code is
   documented, the library must know it through `EndpointErrorSpec`.
-- Refresh the OpenAPI fixture with `scripts/update_openapi.py`; do not edit
+- Refresh the OpenAPI fixture with `cargo xtask update-openapi`; do not edit
   `src/endpoint/generated.rs` or `src/model/generated.rs` by hand.
 - The generated OpenAPI contract files are reviewable contract data. If Rentman
   changes documented endpoints, fields, schemas, enum values, request bodies,

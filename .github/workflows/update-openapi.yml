@@ -33,7 +33,7 @@ jobs:
           toolchain: stable
           components: rustfmt
       - name: Refresh the OpenAPI contract
-        run: scripts/update_openapi.py
+        run: cargo xtask update-openapi
       - name: Compare with the existing update pull request
         id: compare
         env:
@@ -86,14 +86,14 @@ jobs:
             ## Solution
 
             <!-- What changes, and why this way? -->
-            Run `scripts/update_openapi.py` to refresh the OpenAPI fixture, typed
+            Run `cargo xtask update-openapi` to refresh the OpenAPI fixture, typed
             models, endpoints, and live API sweep. Reuse the same update branch
             until this pull request is merged.
 
             ## Test evidence
 
             <!-- New or changed tests, and the checks you ran locally. -->
-            - `scripts/update_openapi.py`: passed, including generation and `cargo fmt --all`.
+            - `cargo xtask update-openapi`: passed, including generation and `cargo fmt --all`.
             - Full Rust checks were not run by the update job; the CI workflow is
               dispatched explicitly for this branch after creating or updating the PR.
 

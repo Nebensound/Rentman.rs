@@ -148,12 +148,12 @@ fields; payloads without required fields implement `Default`.
 ## Update the API contract
 
 ```bash
-scripts/update_openapi.py
+cargo xtask update-openapi
 cargo test --workspace --locked
 ```
 
 The `Update OpenAPI` workflow runs daily at 05:37 UTC and can also be started
-manually in GitHub Actions. It runs `scripts/update_openapi.py` on the default
+manually in GitHub Actions. It runs `cargo xtask update-openapi` on the default
 branch and, when the contract changes, creates or updates a pull request from
 the fixed `automation/update-openapi` branch. An open update PR is reused;
 unchanged generated files do not cause another commit or CI run. Keep this
