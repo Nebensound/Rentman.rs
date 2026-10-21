@@ -14497,9 +14497,9 @@ pub struct Equipment {
     /// Item with price calculation per square meter (width x height). Dimensions can be entered for each project.
     pub surface_article: bool,
     /// Rentman API field `EquipmentResponse.shop_description_short`.
-    pub shop_description_short: String,
+    pub shop_description_short: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_description_long`.
-    pub shop_description_long: String,
+    pub shop_description_long: Option<String>,
     /// Rentman API field `EquipmentResponse.shop_seo_title`.
     pub shop_seo_title: String,
     /// Rentman API field `EquipmentResponse.shop_seo_keyword`.

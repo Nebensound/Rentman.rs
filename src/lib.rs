@@ -2,6 +2,7 @@
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
 pub mod endpoint;
+pub mod fields;
 pub mod model;
 pub mod resource;
 
@@ -11,6 +12,7 @@ mod config;
 mod endpoint_request;
 mod equipment;
 mod error;
+mod filter;
 mod id;
 mod ids;
 mod invoices;
@@ -30,6 +32,7 @@ pub use config::{
 pub use endpoint_request::RentmanEndpointRequest;
 pub use equipment::{EquipmentPricePayload, RentmanEquipment};
 pub use error::{Error, ErrorKind, InvalidRequest, RequestOutcome, ResourceRef, Result};
+pub use filter::{Field, Filter, FilterValue, Sort};
 pub use id::{Id, ItemId, LinkError, Resource};
 pub use ids::{InvoiceNumber, RentmanApiToken};
 pub use invoices::{
