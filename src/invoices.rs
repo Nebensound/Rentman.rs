@@ -3,10 +3,10 @@
 use crate::{
     RentmanAmount,
     client::{DEFAULT_PAGE_LIMIT, RentmanClient},
+    error::{Error, ErrorKind, Resource, Result},
     ids::{InvoiceId, InvoiceNumber, PaymentId},
     model,
 };
-use anyhow::{Context, Result};
 use chrono::{DateTime, FixedOffset, SecondsFormat};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
@@ -109,7 +109,11 @@ fn parse_invoice_reference(reference: &str) -> Result<InvoiceId> {
         .strip_prefix("/invoices/")
         .and_then(|id| id.parse::<u64>().ok())
         .map(InvoiceId::new)
-        .with_context(|| format!("Unexpected Rentman invoice reference: {reference}"))
+        .ok_or_else(|| {
+            Error::new(ErrorKind::UnexpectedResponse(format!(
+                "invoice reference {reference:?} is not an /invoices/{{id}} link"
+            )))
+        })
 }
 
 impl RentmanClient {
@@ -128,7 +132,7 @@ impl RentmanClient {
                 ])
                 .send_json()
                 .await
-                .context("Rentman invoice list lookup failed")?;
+                .map_err(|error| error.in_operation("getFactuurCollection"))?;
 
             let should_fallback_to_offset = response.next_page_url.is_none()
                 && response.item_count >= response.limit
@@ -163,7 +167,7 @@ impl RentmanClient {
                 ])
                 .send_json()
                 .await
-                .context("Rentman payment list lookup failed")?;
+                .map_err(|error| error.in_operation("getPaymentCollection"))?;
 
             let should_fallback_to_offset = response.next_page_url.is_none()
                 && response.item_count >= response.limit
@@ -172,7 +176,8 @@ impl RentmanClient {
             next_url = response.next_page_url;
 
             for item in response.data {
-                let invoice_id = parse_invoice_reference(&item.invoice)?;
+                let invoice_id = parse_invoice_reference(&item.invoice)
+                    .map_err(|error| error.in_operation("getPaymentCollection"))?;
                 result.entry(invoice_id).or_default().push(RentmanPayment {
                     id: item.id,
                     moment: item.moment,
@@ -205,16 +210,21 @@ impl RentmanClient {
             .json(payload)
             .send_unit()
             .await
-            .with_context(|| format!("Rentman payment update failed for payment {payment_id}"))
+            .map_err(|error| {
+                error
+                    .in_operation("updatePayment")
+                    .about(Resource::Payment(payment_id))
+            })
     }
 
     /// Creates a payment on a Rentman invoice.
     ///
     /// The request is sent exactly once, without retrying: creating a payment
     /// is not idempotent, and when only the response gets lost a retry would
-    /// book the payment twice. On an error the outcome is unknown; reconcile by
-    /// reading the invoice's payments with [`Self::all_payments_by_invoice`]
-    /// before creating it again.
+    /// book the payment twice. When [`Error::outcome`] is not
+    /// [`RequestOutcome::NotApplied`](crate::RequestOutcome::NotApplied),
+    /// reconcile by reading the invoice's payments with
+    /// [`Self::all_payments_by_invoice`] before creating it again.
     pub async fn create_payment(
         &self,
         invoice_id: InvoiceId,
@@ -224,7 +234,11 @@ impl RentmanClient {
             .json(payload)
             .send_unit_once()
             .await
-            .with_context(|| format!("Rentman payment create failed for invoice {invoice_id}"))
+            .map_err(|error| {
+                error
+                    .in_operation("createPayment")
+                    .about(Resource::Invoice(invoice_id))
+            })
     }
 }
 
@@ -235,11 +249,13 @@ impl RentmanClient {
 mod tests {
 
     use crate::test_support::*;
+    use crate::{ErrorKind, RequestOutcome, Resource};
     use crate::{
         InvoiceId, InvoiceNumber, InvoicePaymentStatus, PaymentId, PaymentImportSource,
         RentmanAmount, RentmanApiToken, RentmanClient, RentmanPaymentPayload, Url,
     };
     use chrono::DateTime;
+    use reqwest::StatusCode;
 
     use rust_decimal::Decimal;
 
@@ -256,7 +272,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let invoices = client.all_invoices().await.unwrap();
 
@@ -301,7 +318,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let invoices = client.all_invoices().await.unwrap();
 
@@ -330,15 +348,13 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_invoices().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman invoice list lookup failed")
-        );
+        assert_eq!(error.operation(), Some("getFactuurCollection"));
+        assert_eq!(error.resource(), None);
         assert_request(&server.next_request(), "GET", "/invoices");
     }
 
@@ -350,13 +366,14 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_invoices().await.unwrap_err();
 
-        let chain = format!("{error:#}");
-        assert!(chain.contains("Rentman invoice list lookup failed"));
-        assert!(chain.contains("Rentman API response body is invalid JSON"));
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)), "{error:?}");
+        assert_eq!(error.operation(), Some("getFactuurCollection"));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
         assert_request(&server.next_request(), "GET", "/invoices");
     }
 
@@ -368,7 +385,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let payments = client.all_payments_by_invoice().await.unwrap();
 
@@ -414,7 +432,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let payments = client.all_payments_by_invoice().await.unwrap();
 
@@ -443,15 +462,12 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_payments_by_invoice().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman payment list lookup failed")
-        );
+        assert_eq!(error.operation(), Some("getPaymentCollection"));
         assert_request(&server.next_request(), "GET", "/payments");
     }
 
@@ -463,13 +479,13 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_payments_by_invoice().await.unwrap_err();
 
-        let chain = format!("{error:#}");
-        assert!(chain.contains("Rentman payment list lookup failed"));
-        assert!(chain.contains("Rentman API response body is invalid JSON"));
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)), "{error:?}");
+        assert_eq!(error.operation(), Some("getPaymentCollection"));
         assert_request(&server.next_request(), "GET", "/payments");
     }
 
@@ -481,15 +497,19 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client.all_payments_by_invoice().await.unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Unexpected Rentman invoice reference: /broken/1")
+        let ErrorKind::UnexpectedResponse(message) = error.kind() else {
+            panic!("expected an unexpected response, got {error:?}");
+        };
+        assert_eq!(
+            message,
+            r#"invoice reference "/broken/1" is not an /invoices/{id} link"#
         );
+        assert_eq!(error.operation(), Some("getPaymentCollection"));
         assert_request(&server.next_request(), "GET", "/payments");
     }
 
@@ -499,7 +519,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         client
             .update_payment(PaymentId::new(10), &payment_payload())
@@ -525,13 +546,15 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .create_payment(InvoiceId::new(1), &payment_payload())
             .await
             .unwrap_err();
-        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_eq!(error.status(), Some(StatusCode::SERVICE_UNAVAILABLE));
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
         assert_request(&server.next_request(), "POST", "/invoices/1/payments");
 
         // Without a retry the second prepared response is still unused, so the
@@ -544,12 +567,62 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn reads_still_follow_redirects() {
+        let server = spawn_server(vec![
+            "HTTP/1.1 302 Found\r\nLocation: {base}/moved\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                .to_string(),
+            json_response(
+                r#"{"itemCount":1,"limit":1500,"next_page_url":null,"data":[{"id":1,"number":"RE-1","is_paid":true}]}"#,
+            ),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        )
+        .unwrap();
+
+        let invoices = client.all_invoices().await.unwrap();
+
+        assert_eq!(invoices.len(), 1);
+        assert_request(&server.next_request(), "GET", "/invoices");
+        assert_request(&server.next_request(), "GET", "/moved");
+    }
+
+    #[tokio::test]
+    async fn reports_a_redirected_payment_create_as_uncertain() {
+        // The POST may have been applied before Rentman answered with 303.
+        let server = spawn_server(vec![
+            "HTTP/1.1 303 See Other\r\nLocation: {base}/result\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                .to_string(),
+            text_response("HTTP/1.1 404 Not Found", "gone"),
+        ]);
+        let client = RentmanClient::with_base_url(
+            Url::parse(server.base_url()).unwrap(),
+            RentmanApiToken::new("token"),
+        )
+        .unwrap();
+
+        let error = client
+            .create_payment(InvoiceId::new(1), &payment_payload())
+            .await
+            .unwrap_err();
+
+        // The redirect is not followed, so a failing second hop cannot turn
+        // the result into "not applied".
+        assert_eq!(error.status(), Some(StatusCode::SEE_OTHER));
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
+        assert_request(&server.next_request(), "POST", "/invoices/1/payments");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn creates_missing_payment() {
         let server = spawn_server(vec![empty_response("HTTP/1.1 200 OK")]);
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         client
             .create_payment(InvoiceId::new(1), &payment_payload())
@@ -575,18 +648,23 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .update_payment(PaymentId::new(10), &payment_payload())
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman payment update failed for payment 10")
+        assert_eq!(error.operation(), Some("updatePayment"));
+        assert_eq!(
+            error.resource(),
+            Some(Resource::Payment(PaymentId::new(10)))
         );
+        // The first attempt got a 500 and may have been applied; the retries
+        // then found the server gone. The error must not claim "not applied".
+        assert!(matches!(error.kind(), ErrorKind::Transport(_)), "{error:?}");
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
         assert_request(&server.next_request(), "PUT", "/payments/10");
     }
 
@@ -599,17 +677,20 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .create_payment(InvoiceId::new(1), &payment_payload())
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman payment create failed for invoice 1")
+        assert_eq!(error.operation(), Some("createPayment"));
+        assert_eq!(error.resource(), Some(Resource::Invoice(InvoiceId::new(1))));
+        assert_eq!(
+            error.to_string(),
+            "Rentman createPayment failed for invoice 1: \
+             Rentman API returned 500 Internal Server Error: rentman broken"
         );
         assert_request(&server.next_request(), "POST", "/invoices/1/payments");
     }

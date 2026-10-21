@@ -1,9 +1,13 @@
 //! Typed requests for every documented Rentman API endpoint.
 
 use crate::{
-    RentmanClient, client::RentmanRequestBuilder, endpoint, model, transport::RetryPolicy,
+    RentmanClient,
+    client::RentmanRequestBuilder,
+    endpoint,
+    error::{Error, InvalidRequest, Result},
+    model,
+    transport::RetryPolicy,
 };
-use anyhow::{Context, Result, anyhow};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use reqwest::{Method, Url};
 use serde::{Serialize, de::DeserializeOwned};
@@ -40,8 +44,13 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     }
 
     /// Adds query parameters to the request.
+    ///
+    /// Fails with [`InvalidRequest::Query`] when the value cannot be encoded
+    /// as flat URL query parameters, e.g. for nested objects.
     pub fn query<T: Serialize + ?Sized>(mut self, query: &T) -> Result<Self> {
-        self.query_params.extend(serialize_query_params(query)?);
+        let params = serialize_query_params(query)
+            .map_err(|error| error.in_operation(E::SPEC.operation_id))?;
+        self.query_params.extend(params);
         Ok(self)
     }
 
@@ -59,8 +68,10 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     where
         E::Request: Serialize,
     {
-        self.body =
-            Some(serde_json::to_value(body).context("Rentman request body is invalid JSON value")?);
+        let body = serde_json::to_value(body).map_err(|error| {
+            Error::invalid_request(InvalidRequest::Body(error)).in_operation(E::SPEC.operation_id)
+        })?;
+        self.body = Some(body);
         Ok(self)
     }
 
@@ -87,7 +98,8 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     /// Use this for non-idempotent writes such as creating items: when only
     /// the response gets lost, a retry would write twice. On an error the
     /// outcome is unknown and the caller has to reconcile, e.g. by reading the
-    /// affected collection.
+    /// affected collection, unless [`Error::outcome`] says the request was not
+    /// applied.
     pub async fn send_once(self) -> Result<E::Response>
     where
         E: endpoint::ExecutableEndpoint,
@@ -121,10 +133,12 @@ async fn send_typed_endpoint<T: DeserializeOwned>(
     body: Option<Value>,
     retry_policy: RetryPolicy,
 ) -> Result<T> {
-    build_endpoint_request(client, spec, path_params, query_params, body)?
+    let request = build_endpoint_request(client, spec, path_params, query_params, body)
+        .map_err(|error| error.in_operation(spec.operation_id))?;
+    request
         .send_json_with(retry_policy)
         .await
-        .with_context(|| format!("Rentman endpoint {} failed", spec.operation_id))
+        .map_err(|error| error.in_operation(spec.operation_id))
 }
 
 fn build_endpoint_request(
@@ -143,19 +157,15 @@ fn build_endpoint_request(
     match (spec.request, body) {
         (endpoint::EndpointRequestSpec::None, None) => {}
         (endpoint::EndpointRequestSpec::None, Some(_)) => {
-            return Err(anyhow!(
-                "Rentman endpoint {} does not accept a JSON request body",
-                spec.operation_id
-            ));
+            return Err(Error::invalid_request(InvalidRequest::UnexpectedBody));
         }
         (endpoint::EndpointRequestSpec::Json(_), Some(body)) => {
             request = request.json(&body);
         }
         (endpoint::EndpointRequestSpec::Json(schema), None) => {
-            return Err(anyhow!(
-                "Rentman endpoint {} requires a {schema} JSON request body",
-                spec.operation_id
-            ));
+            return Err(Error::invalid_request(InvalidRequest::MissingBody {
+                schema,
+            }));
         }
     }
 
@@ -163,7 +173,8 @@ fn build_endpoint_request(
 }
 
 fn serialize_query_params<T: Serialize + ?Sized>(query: &T) -> Result<Vec<(String, String)>> {
-    let encoded = serde_urlencoded::to_string(query).context("Rentman query is invalid")?;
+    let encoded = serde_urlencoded::to_string(query)
+        .map_err(|error| Error::invalid_request(InvalidRequest::Query(error)))?;
     Ok(parse_query_params(&encoded))
 }
 
@@ -189,9 +200,8 @@ fn endpoint_url(
     for (name, value) in path_params {
         let placeholder = format!("{{{name}}}");
         if !path.contains(&placeholder) {
-            return Err(anyhow!(
-                "Rentman endpoint {} has no {{{name}}} path parameter",
-                spec.operation_id
+            return Err(Error::invalid_request(
+                InvalidRequest::UnknownPathParameter { name: name.clone() },
             ));
         }
         let encoded = utf8_percent_encode(value, NON_ALPHANUMERIC).to_string();
@@ -199,16 +209,16 @@ fn endpoint_url(
     }
 
     if path.contains('{') || path.contains('}') {
-        return Err(anyhow!(
-            "Rentman endpoint {} is missing path parameters for {}",
-            spec.operation_id,
-            spec.path
+        return Err(Error::invalid_request(
+            InvalidRequest::MissingPathParameters { path: spec.path },
         ));
     }
 
-    base_url
+    // The base URL was validated as an http(s) URL, which can be a base, and
+    // the path parameters are percent-encoded.
+    Ok(base_url
         .join(path.trim_start_matches('/'))
-        .context("generated Rentman endpoint path is valid")
+        .expect("percent-encoded API path can be joined onto the base URL"))
 }
 
 #[cfg(test)]
@@ -218,6 +228,7 @@ fn endpoint_url(
 mod tests {
 
     use crate::test_support::*;
+    use crate::{ErrorKind, InvalidRequest, RequestOutcome};
     use crate::{
         RentmanApiToken, RentmanClient, Url,
         endpoint::{
@@ -231,6 +242,7 @@ mod tests {
         },
     };
     use chrono::DateTime;
+    use reqwest::StatusCode;
 
     use rust_decimal::Decimal;
 
@@ -242,7 +254,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
         let payload = PaymentRequest {
             moment: DateTime::parse_from_rfc3339("2026-07-05T00:00:00+02:00").unwrap(),
             amount: Some(Decimal::new(425, 1)),
@@ -287,7 +300,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let response = client
             .endpoint::<DeleteAccessoryEndpoint>()
@@ -307,7 +321,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<CreatePaymentEndpoint>()
@@ -316,9 +331,19 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(error.to_string().contains(
-            "Rentman endpoint createPayment requires a PaymentRequest JSON request body"
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::MissingBody {
+                schema: "PaymentRequest"
+            })
         ));
+        assert_eq!(error.operation(), Some("createPayment"));
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
+        assert_eq!(
+            error.to_string(),
+            "Rentman createPayment failed: invalid Rentman API request: \
+             a PaymentRequest JSON request body is required"
+        );
     }
 
     #[tokio::test]
@@ -326,7 +351,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<DeleteAccessoryEndpoint>()
@@ -337,11 +363,11 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman endpoint deleteAccessory does not accept a JSON request body")
-        );
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::UnexpectedBody)
+        ));
+        assert_eq!(error.operation(), Some("deleteAccessory"));
     }
 
     #[tokio::test]
@@ -349,7 +375,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<GetAccessoryItemEndpoint>()
@@ -357,11 +384,13 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman endpoint getAccessoryItem is missing path parameters")
-        );
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::MissingPathParameters {
+                path: "/accessories/{id}"
+            })
+        ));
+        assert_eq!(error.operation(), Some("getAccessoryItem"));
     }
 
     #[tokio::test]
@@ -369,7 +398,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<DeleteAccessoryEndpoint>()
@@ -378,10 +408,15 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman endpoint deleteAccessory has no {unknown} path parameter")
+        let ErrorKind::InvalidRequest(InvalidRequest::UnknownPathParameter { name }) = error.kind()
+        else {
+            panic!("expected an unknown path parameter, got {error:?}");
+        };
+        assert_eq!(name, "unknown");
+        assert_eq!(
+            error.to_string(),
+            "Rentman deleteAccessory failed: invalid Rentman API request: \
+             the endpoint has no {unknown} path parameter"
         );
     }
 
@@ -394,7 +429,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<DeleteAccessoryEndpoint>()
@@ -402,7 +438,8 @@ mod tests {
             .send_once()
             .await
             .unwrap_err();
-        assert!(format!("{error:#}").contains("503"), "{error:#}");
+        assert_eq!(error.status(), Some(StatusCode::SERVICE_UNAVAILABLE));
+        assert_eq!(error.outcome(), RequestOutcome::Unknown);
         assert_request(&server.next_request(), "DELETE", "/accessories/10");
 
         // Without a retry the second prepared response is still unused.
@@ -420,7 +457,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
         // One query type for both outcomes: flat fields serialize, nested
         // objects cannot be expressed as URL query parameters.
         let flat = serde_json::json!({"limit": 5, "fields": "id,name"});
@@ -437,7 +475,6 @@ mod tests {
                 ("limit".to_string(), "5".to_string()),
             ]
         );
-
         let error = match client
             .endpoint::<GetAccessoryCollectionEndpoint>()
             .query(&nested)
@@ -445,7 +482,12 @@ mod tests {
             Ok(_) => panic!("nested query should fail"),
             Err(error) => error,
         };
-        assert!(error.to_string().contains("Rentman query is invalid"));
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::Query(_))
+        ));
+        assert_eq!(error.operation(), Some("getAccessoryCollection"));
+        assert!(std::error::Error::source(&error).is_some());
     }
 
     #[test]
@@ -466,18 +508,22 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse(server.base_url()).unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let error = client
             .endpoint::<GetAccessoryCollectionEndpoint>()
-            .send()
+            .send_once()
             .await
             .unwrap_err();
 
-        assert!(
-            error
-                .to_string()
-                .contains("Rentman endpoint getAccessoryCollection failed")
+        assert_eq!(error.operation(), Some("getAccessoryCollection"));
+        assert_eq!(error.resource(), None);
+        assert_eq!(error.status(), Some(StatusCode::INTERNAL_SERVER_ERROR));
+        assert_eq!(
+            error.to_string(),
+            "Rentman getAccessoryCollection failed: \
+             Rentman API returned 500 Internal Server Error: rentman broken"
         );
         assert_request(&server.next_request(), "GET", "/accessories");
     }
@@ -520,7 +566,8 @@ mod tests {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
-        );
+        )
+        .unwrap();
 
         let request = client
             .endpoint::<CustomBodyEndpoint>()
@@ -535,10 +582,16 @@ mod tests {
             Ok(_) => panic!("a failing serializer must be reported"),
             Err(error) => error,
         };
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::Body(_))
+        ));
+        assert_eq!(error.outcome(), RequestOutcome::NotApplied);
+        assert_eq!(error.operation(), Some("customBody"));
         assert_eq!(
             error.to_string(),
-            "Rentman request body is invalid JSON value"
+            "Rentman customBody failed: invalid Rentman API request: \
+             the body cannot be encoded as JSON: broken body"
         );
-        assert_eq!(error.root_cause().to_string(), "broken body");
     }
 }

@@ -51,7 +51,11 @@ Live API tests are optional and need a token; see the README section "Checks".
 
 - Keep pull requests small and focused; describe problem, solution, and test
   evidence (the pull request template asks for them).
-- The version is derived from commit messages: include `(MINOR)` for new
-  features and `(MAJOR)` for breaking changes in the pull request title, which
-  becomes the squash commit message. Everything else is a patch release.
+- The version is derived from commit messages: include `(MINOR)` in the pull
+  request title, which becomes the squash commit message, for new features and
+  for breaking changes. Everything else is a patch release.
+- The crate stays on `0.x` for now. Under Cargo's semver rules a `0.x` minor
+  bump is already breaking, so breaking changes use `(MINOR)` too. Do not use
+  `(MAJOR)`: it would release `1.0.0`, and the marker cannot be removed from
+  the branch history without rewriting it.
 - Every merge into `main` publishes a release to crates.io.

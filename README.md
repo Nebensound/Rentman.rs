@@ -193,9 +193,11 @@ The crate version in `Cargo.toml` is a placeholder. Every CI run starts with a
 `version` job that derives the semantic version from git history using
 [PaulHatch/semantic-version](https://github.com/PaulHatch/semantic-version):
 `v*` tags mark releases, and commit messages containing `(MAJOR)` or `(MINOR)`
-bump the respective component. All later jobs (tests, coverage, release) depend
-on this job and rewrite the `Cargo.toml` version before building, so published
-artifacts always carry the derived version.
+bump the respective component. The crate stays on `0.x` for now: breaking
+changes are marked `(MINOR)`, because a `0.x` minor bump is already breaking
+under Cargo's semver rules, and `(MAJOR)` is not used. All later jobs (tests,
+coverage, release) depend on this job and rewrite the `Cargo.toml` version
+before building, so published artifacts always carry the derived version.
 
 On pull request branches the `version` job also commits the derived version to
 `Cargo.toml` on the branch itself when it changed, and dispatches a follow-up
@@ -307,6 +309,9 @@ that hold by construction.
 ### Writes and retries
 
 Only idempotent requests (`GET`, `PUT`, `DELETE`) are retried automatically.
+Requests that change data do not follow redirects: a redirect answer to a
+write is reported as an error whose outcome is unknown, because the first
+server may already have applied it.
 Requests that create data (`POST`) are sent exactly once, and their
 documentation names the read method to reconcile with after an error. Every
 high-level write documents its retry behavior, and a test proves how many
