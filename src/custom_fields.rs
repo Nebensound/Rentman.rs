@@ -278,6 +278,9 @@ mod tests {
     #[test]
     fn rejects_duplicate_definitions_for_one_resource() {
         let definition = CustomFieldDefinition::new::<Equipment>(8, ExtraInputFieldType::Text);
+        let other = CustomFieldDefinition::new::<Equipment>(9, ExtraInputFieldType::Int);
+        let registry = CustomFieldRegistry::new([definition.clone(), other]).unwrap();
+        assert!(registry.has_fields("equipment"));
         assert_eq!(
             CustomFieldRegistry::new([definition.clone(), definition]),
             Err(CustomFieldError::DuplicateDefinition {
@@ -466,29 +469,42 @@ mod tests {
 
     #[test]
     fn custom_values_report_application_serialization_errors() {
-        struct FailsSerialization;
+        // One type for every outcome: llvm-cov counts `set` as covered only
+        // if a single instantiation runs all of its branches.
+        enum Probe {
+            Text,
+            FailsSerialization,
+            OutOfDecimalRange,
+        }
 
-        impl Serialize for FailsSerialization {
-            fn serialize<S>(&self, _serializer: S) -> std::result::Result<S::Ok, S::Error>
+        impl Serialize for Probe {
+            fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
             where
                 S: serde::Serializer,
             {
-                Err(serde::ser::Error::custom(
-                    "deliberate serialization failure",
-                ))
+                match self {
+                    Self::Text => serializer.serialize_str("ok"),
+                    Self::FailsSerialization => Err(serde::ser::Error::custom(
+                        "deliberate serialization failure",
+                    )),
+                    Self::OutOfDecimalRange => serializer.serialize_u128(u128::MAX),
+                }
             }
         }
 
         let mut fields = CustomFields::default();
+        fields.set(41, &Probe::Text).unwrap();
+        assert_eq!(fields.get::<String>(41).unwrap(), "ok");
         assert!(matches!(
-            fields.set(42, &FailsSerialization),
+            fields.set(42, &Probe::FailsSerialization),
             Err(CustomFieldValueError::Json(_))
         ));
-
         assert!(matches!(
-            fields.set(43, &u128::MAX),
+            fields.set(43, &Probe::OutOfDecimalRange),
             Err(CustomFieldValueError::Json(_))
         ));
+        assert!(!fields.0.contains_key("custom_42"));
+        assert!(!fields.0.contains_key("custom_43"));
 
         let raw = serde_json::value::RawValue::from_string("1e9999".to_string()).unwrap();
         assert!(matches!(
@@ -496,6 +512,11 @@ mod tests {
             Err(CustomFieldValueError::Json(_))
         ));
 
+        fields.set(45, &true).unwrap();
+        assert!(matches!(
+            fields.get::<String>(45),
+            Err(CustomFieldValueError::Json(_))
+        ));
         assert!(matches!(
             fields.get::<String>(99),
             Err(CustomFieldValueError::Missing { id: 99 })

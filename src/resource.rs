@@ -2286,6 +2286,117 @@ mod tests {
         server.assert_no_more_requests();
     }
 
+    // llvm-cov counts a generic function as covered only if one instantiation
+    // runs every branch, so these exercise the paths `Equipment` missed.
+    #[tokio::test]
+    async fn equipment_requests_report_http_and_page_size_errors() {
+        let server = spawn_server(vec![
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+            text_response("HTTP/1.1 400 Bad Request", "rejected"),
+        ]);
+        let client = client(&server);
+        let id = EquipmentId::new(5);
+        let payload = crate::model::EquipmentPayload::default();
+
+        let error = client.equipment().get(id).await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getEquipmentItem"));
+        assert_eq!(error.resource(), Some(ResourceRef::from(id)));
+        assert_request(&server.next_request(), "GET", "/equipment/5");
+
+        let error = client.equipment().create(&payload).await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("createEquipment"));
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let error = client.equipment().update(id, &payload).await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("updateEquipment"));
+        assert_eq!(error.resource(), Some(ResourceRef::from(id)));
+        assert_request(&server.next_request(), "PUT", "/equipment/5");
+
+        let error = client.equipment().list().all().await.unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        assert_eq!(error.operation(), Some("getEquipmentCollection"));
+        assert_request(&server.next_request(), "GET", "/equipment");
+
+        let error = client.equipment().list().first(0).await.unwrap_err();
+        assert!(matches!(
+            error.kind(),
+            ErrorKind::InvalidRequest(InvalidRequest::PageSize { requested: 0 })
+        ));
+        assert_eq!(error.operation(), Some("getEquipmentCollection"));
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn equipment_reads_and_writes_decode_complete_and_fallback_responses() {
+        let complete = complete_equipment_response(6, serde_json::Value::Null);
+        let server = spawn_server(vec![
+            item(r#"{"id":6,"updateHash":"h6"}"#),
+            item_value(complete.clone()),
+            item(r#"{"updateHash":"h7"}"#),
+            item(r#"{"id":5,"updateHash":"h5","name":"Mixer"}"#),
+            item(r#"{"id":5,"updateHash":"h5","name":"Desk"}"#),
+            json_response(
+                &serde_json::json!({"data":[complete],"itemCount":1,"limit":1}).to_string(),
+            ),
+            json_response(r#"{"data":[{"id":5,"name":"Mixer"}],"itemCount":1,"limit":300}"#),
+        ]);
+        let client = client(&server);
+        let payload = crate::model::EquipmentPayload::default();
+
+        let created = client.equipment().create(&payload).await.unwrap();
+        assert_eq!(created.id, EquipmentId::new(6));
+        assert_request(&server.next_request(), "POST", "/equipment");
+        assert_request(&server.next_request(), "GET", "/equipment/6");
+
+        let error = client.equipment().create(&payload).await.unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.outcome(), RequestOutcome::Applied);
+        assert_eq!(error.operation(), Some("createEquipment"));
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let created = client
+            .equipment()
+            .create_as::<EquipmentName>(&payload)
+            .await
+            .unwrap();
+        assert_eq!(created.id, EquipmentId::new(5));
+        assert_eq!(created.name, "Mixer");
+        assert_request(&server.next_request(), "POST", "/equipment");
+
+        let updated = client
+            .equipment()
+            .update_as::<EquipmentName>(EquipmentId::new(5), &payload)
+            .await
+            .unwrap();
+        assert_eq!(updated.name, "Desk");
+        assert_request(&server.next_request(), "PUT", "/equipment/5");
+
+        let first = client.equipment().list().first(1).await.unwrap();
+        assert_eq!(first.len(), 1);
+        assert_eq!(first[0].id, EquipmentId::new(6));
+        let request = server.next_request();
+        assert_request(&request, "GET", "/equipment");
+        assert_eq!(request.query_value("limit").as_deref(), Some("1"));
+
+        let names = client
+            .equipment()
+            .list()
+            .all_as::<EquipmentName>()
+            .await
+            .unwrap();
+        assert_eq!(names.len(), 1);
+        assert_eq!(names[0].name, "Mixer");
+        let request = server.next_request();
+        assert_request(&request, "GET", "/equipment");
+        assert_eq!(request.query_value("fields").as_deref(), Some("id,name"));
+        server.assert_no_more_requests();
+    }
+
     #[test]
     fn describes_collections_and_requests() {
         let client = RentmanClient::new(RentmanApiToken::new("token"));
