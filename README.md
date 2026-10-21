@@ -138,6 +138,16 @@ live tests remain ignored and regular `cargo test` does not call the API. The
 CI test workflow does not receive the token; live tests remain in the separate,
 non-blocking workflow below.
 
+The build script deliberately watches `.env` even when the file is absent.
+Cargo then reruns the build script on each invocation and may rebuild dependent
+targets unnecessarily, including in CI where tokens come from environment
+variables rather than a `.env` file. We accept this performance cost so that
+creating, changing, or removing `.env` refreshes live-test selection on the next
+Cargo invocation without a manual clean. This is an incremental-build cost,
+not a background file watcher or a change to which tests should run.
+A lowest-priority follow-up tracks an optimization that preserves automatic
+detection: [#61](https://github.com/Nebensound/Rentman.rs/issues/61).
+
 Live tests only read, with one opt-in exception: when
 `RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
 equipment item, a test writes its current price back unchanged through
