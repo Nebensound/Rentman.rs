@@ -50,6 +50,21 @@ local-server test per operation that checks method and path.
 contract test. `create` and actions are sent exactly once; `get`, `update`,
 `delete` and every list page are retried.
 
+Lists take typed filters and sorting built from the generated field
+constants in `fields` (`src/fields.rs`, one module per resource):
+`.filter(contact::COUNTRY.eq(ContactCountry::Gb))`,
+`.filter(contact::DISTANCE.lte(Decimal::from(300)))`,
+`.filter(contact::FOLDER.is_null(false))`, `.sort(contact::NAME.asc())`. A
+`Field<R, V>` only accepts values of type `V` and only filters lists of `R`
+(compile-fail doctests in `src/filter.rs`). Values are rendered as Rentman
+expects them (checked live on 2026-10-21): booleans as `1`/`0` (Rentman
+silently ignores `true`/`false`), IDs and links as the numeric ID, timestamps
+as RFC 3339, enums as their documented text. Fields marked `GENERATED FIELD`
+and the `custom` object get no constant; `fields::QUERYABLE_FIELDS` is
+compared with the OpenAPI document by a contract test. Rentman carries filters
+through `next_page_url`; with several sort fields only the first applies
+across pages.
+
 User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
 example is compile-checked by `cargo test --doc`. This README is the

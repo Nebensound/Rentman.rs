@@ -14,6 +14,7 @@ use crate::{
     RentmanClient,
     endpoint::EndpointSpec,
     error::Result,
+    filter::{Filter, Sort},
     id::{Id, Resource},
     model::ItemResponse,
     paging::{CollectionRequest, PageSize},
@@ -124,6 +125,8 @@ impl<M: List> Collection<M> {
             path: render_path(M::LIST.0, self.parent),
             operation: M::LIST.0.operation_id,
             page_size: PageSize::default(),
+            query: Vec::new(),
+            sort: Vec::new(),
             item: PhantomData,
         }
     }
@@ -242,6 +245,8 @@ pub struct ListRequest<T> {
     path: String,
     operation: &'static str,
     page_size: PageSize,
+    query: Vec<(String, String)>,
+    sort: Vec<String>,
     item: PhantomData<fn() -> T>,
 }
 
@@ -250,11 +255,34 @@ impl<T> fmt::Debug for ListRequest<T> {
         f.debug_struct("ListRequest")
             .field("path", &self.path)
             .field("page_size", &self.page_size)
+            .field("query", &self.query)
+            .field("sort", &self.sort)
             .finish()
     }
 }
 
 impl<T: DeserializeOwned> ListRequest<T> {
+    /// Keeps only items matching the filter; several filters all apply.
+    ///
+    /// Filters are built from the field constants in [`crate::fields`], e.g.
+    /// `fields::contact::COUNTRY.eq(model::ContactCountry::Gb)`. Rentman
+    /// carries them over to every page.
+    pub fn filter(mut self, filter: Filter<T>) -> Self {
+        self.query.push((filter.key, filter.value));
+        self
+    }
+
+    /// Sorts by a field; the first `sort` call has the highest priority.
+    ///
+    /// When Rentman pages a sorted collection, only the first sort field is
+    /// applied before paging, so items sorted by later fields can be ordered
+    /// differently across pages. [`Self::first`] reads a single page and is
+    /// not affected.
+    pub fn sort(mut self, sort: Sort<T>) -> Self {
+        self.sort.push(sort.term);
+        self
+    }
+
     /// Sets how many items each page holds (default 300, at most 1500).
     pub fn page_size(mut self, page_size: PageSize) -> Self {
         self.page_size = page_size;
@@ -266,10 +294,12 @@ impl<T: DeserializeOwned> ListRequest<T> {
     /// Follows Rentman's `next_page_url` until the collection is complete;
     /// each page is retried on transient failures.
     pub async fn all(self) -> Result<Vec<T>> {
+        let sort = self.sort.join(",");
+        let query = self.query_pairs(&sort);
         self.client
             .read_all(CollectionRequest {
                 path: &self.path,
-                query: &[],
+                query: &query,
                 page_size: self.page_size,
                 operation: self.operation,
             })
@@ -283,13 +313,29 @@ impl<T: DeserializeOwned> ListRequest<T> {
             .map_err(|error| error.in_operation(self.operation))?
             .get()
             .to_string();
+        let sort = self.sort.join(",");
+        let mut query = self.query_pairs(&sort);
+        query.push(("limit", &limit));
         self.client
             .request(Method::GET, &self.path)
-            .query(&[("limit", limit)])
+            .query(&query)
             .send_json::<crate::model::CollectionResponse<T>>()
             .await
             .map(|page| page.data)
             .map_err(|error| error.in_operation(self.operation))
+    }
+
+    /// Filters and the joined sort terms (`sort=+a,-b`) as query pairs.
+    fn query_pairs<'a>(&'a self, sort: &'a str) -> Vec<(&'a str, &'a str)> {
+        let mut pairs = self
+            .query
+            .iter()
+            .map(|(key, value)| (key.as_str(), value.as_str()))
+            .collect::<Vec<_>>();
+        if !sort.is_empty() {
+            pairs.push(("sort", sort));
+        }
+        pairs
     }
 }
 
@@ -369,6 +415,61 @@ mod tests {
             server.next_request().query_value("cursor").as_deref(),
             Some("2")
         );
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn sends_filters_and_sorting_and_keeps_them_across_pages() {
+        use crate::fields::task_status;
+        let server = spawn_server(vec![
+            json_response(&format!(
+                r#"{{"data":[{TASK_STATUS}],"itemCount":1,"limit":1,"next_page_url":"{{base}}/taskstatuses?type=done&order%5Bgte%5D=2&sort=%2Border%2C-name&cursor=2"}}"#
+            )),
+            json_response(r#"{"data":[],"itemCount":0,"limit":1,"next_page_url":null}"#),
+            json_response(&format!(
+                r#"{{"data":[{TASK_STATUS}],"itemCount":1,"limit":5}}"#
+            )),
+        ]);
+        let client = client(&server);
+
+        let statuses = client
+            .task_statuses()
+            .list()
+            .filter(task_status::TYPE.eq(TaskStatusType::Done))
+            .filter(task_status::ORDER.gte(2))
+            .sort(task_status::ORDER.asc())
+            .sort(task_status::NAME.desc())
+            .page_size(PageSize::new(1).unwrap())
+            .all()
+            .await
+            .unwrap();
+        assert_eq!(statuses.len(), 1);
+
+        let first = server.next_request();
+        assert_request(&first, "GET", "/taskstatuses");
+        assert_eq!(first.query_value("type").as_deref(), Some("done"));
+        assert_eq!(first.query_value("order[gte]").as_deref(), Some("2"));
+        assert_eq!(first.query_value("sort").as_deref(), Some("+order,-name"));
+        assert_eq!(first.query_value("limit").as_deref(), Some("1"));
+        // The cursor carries the filters; it is followed unchanged.
+        let second = server.next_request();
+        assert_eq!(second.query_value("cursor").as_deref(), Some("2"));
+        assert_eq!(second.query_value("type").as_deref(), Some("done"));
+        assert_eq!(second.query_value("order[gte]").as_deref(), Some("2"));
+
+        let top = client
+            .task_statuses()
+            .list()
+            .filter(task_status::COLOR.neq("red".to_string()))
+            .sort(task_status::ORDER.desc())
+            .first(5)
+            .await
+            .unwrap();
+        assert_eq!(top.len(), 1);
+        let request = server.next_request();
+        assert_eq!(request.query_value("color[neq]").as_deref(), Some("red"));
+        assert_eq!(request.query_value("sort").as_deref(), Some("-order"));
+        assert_eq!(request.query_value("limit").as_deref(), Some("5"));
         server.assert_no_more_requests();
     }
 
@@ -576,7 +677,7 @@ mod tests {
         let request = nested.list().page_size(PageSize::MAX);
         assert_eq!(
             format!("{request:?}"),
-            "ListRequest { path: \"/crew/3/appointments\", page_size: PageSize(1500) }"
+            "ListRequest { path: \"/crew/3/appointments\", page_size: PageSize(1500), query: [], sort: [] }"
         );
         assert_eq!(
             <TaskStatus as List>::LIST.operation_id(),

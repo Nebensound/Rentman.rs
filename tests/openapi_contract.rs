@@ -127,6 +127,41 @@ fn every_documented_operation_is_reachable_through_a_resource() {
 }
 
 #[test]
+fn field_constants_cover_every_queryable_field() {
+    let spec = openapi_spec();
+    let resources = RESOURCE_COLLECTIONS
+        .iter()
+        .map(|(rust_type, _)| *rust_type)
+        .collect::<BTreeSet<_>>();
+    let documented = SCHEMA_TYPES
+        .iter()
+        .filter(|(schema, rust_type)| schema.ends_with("Response") && resources.contains(rust_type))
+        .flat_map(|(schema_name, rust_type)| {
+            schema(&spec, schema_name)["properties"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .filter(|(_, property)| {
+                    !property["description"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .contains("GENERATED FIELD")
+                        && property["type"] != "object"
+                })
+                .map(move |(field, _)| (rust_type.to_string(), field.clone()))
+        })
+        .collect::<BTreeSet<_>>();
+    let generated = rentman_client::fields::QUERYABLE_FIELDS
+        .iter()
+        .map(|(rust_type, field)| (rust_type.to_string(), field.to_string()))
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        documented, generated,
+        "field constants drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+    );
+}
+
+#[test]
 fn every_link_targets_its_documented_collection() {
     let spec = openapi_spec();
     let documented = spec["components"]["schemas"]

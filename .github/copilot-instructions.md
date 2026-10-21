@@ -70,6 +70,8 @@ repositories.
   follows Rentman's `next_page_url` unchanged until it is `null`, keeps the
   offset fallback only for older responses, and rejects a repeated or
   foreign-origin `next_page_url`. Page sizes are a validated `PageSize`.
+- Filters and sorting are typed through the generated `fields` constants;
+  never add raw query strings to the public API. Booleans are sent as `1`/`0`.
 - Keep authentication, retry handling, and rate limiting inside the client.
 - Translate wire quirks at the boundary. For example, Rentman's invoice links
   such as `/invoices/14` become `InvoiceId` through the generated link

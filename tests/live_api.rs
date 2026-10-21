@@ -321,3 +321,37 @@ fn assert_prices_unchanged(before: &RentmanEquipment, after: &RentmanEquipment) 
         "subrental_costs changed"
     );
 }
+
+#[tokio::test]
+#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+async fn filters_survive_the_cursor_live() {
+    use rentman_client::{PageSize, fields::equipment};
+
+    let client = live_client();
+    let archived = || {
+        client
+            .equipment()
+            .list()
+            .filter(equipment::IN_ARCHIVE.eq(true))
+    };
+    // Small pages make the filter travel through several cursors.
+    let paged = archived()
+        .page_size(PageSize::new(100).unwrap())
+        .all()
+        .await
+        .unwrap();
+    let single = archived().first(1500).await.unwrap();
+
+    assert!(
+        paged.iter().all(|item| item.in_archive),
+        "an active item leaked through a cursor"
+    );
+    if single.len() < 1500 {
+        let ids = |items: &[rentman_client::model::Equipment]| {
+            let mut ids = items.iter().map(|item| item.id).collect::<Vec<_>>();
+            ids.sort();
+            ids
+        };
+        assert_eq!(ids(&paged), ids(&single));
+    }
+}
