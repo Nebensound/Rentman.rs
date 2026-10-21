@@ -37,7 +37,7 @@ pub struct GetAccessoryCollectionEndpoint;
 
 impl Endpoint for GetAccessoryCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AccessoryResponse>;
+    type Response = CollectionResponse<Accessory>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -139,7 +139,7 @@ pub struct GetAccessoryItemEndpoint;
 
 impl Endpoint for GetAccessoryItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<AccessoryResponse>;
+    type Response = ItemResponse<Accessory>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -190,8 +190,8 @@ const UPDATEACCESSORYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateAccessoryEndpoint;
 
 impl Endpoint for UpdateAccessoryEndpoint {
-    type Request = AccessoryRequest;
-    type Response = ItemResponse<AccessoryResponse>;
+    type Request = AccessoryPayload;
+    type Response = ItemResponse<Accessory>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -238,7 +238,7 @@ pub struct GetActualContentCollectionEndpoint;
 
 impl Endpoint for GetActualContentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ActualContentResponse>;
+    type Response = CollectionResponse<ActualContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -289,7 +289,7 @@ pub struct GetActualContentItemEndpoint;
 
 impl Endpoint for GetActualContentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ActualContentResponse>;
+    type Response = ItemResponse<ActualContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -336,7 +336,7 @@ pub struct GetAlternativeCollectionEndpoint;
 
 impl Endpoint for GetAlternativeCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AlternativeResponse>;
+    type Response = CollectionResponse<Alternative>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -438,7 +438,7 @@ pub struct GetAlternativeItemEndpoint;
 
 impl Endpoint for GetAlternativeItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<AlternativeResponse>;
+    type Response = ItemResponse<Alternative>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -489,8 +489,8 @@ const UPDATEALTERNATIVEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateAlternativeEndpoint;
 
 impl Endpoint for UpdateAlternativeEndpoint {
-    type Request = AlternativeRequest;
-    type Response = ItemResponse<AlternativeResponse>;
+    type Request = AlternativePayload;
+    type Response = ItemResponse<Alternative>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -537,7 +537,7 @@ pub struct GetAppointmentCrewCollectionEndpoint;
 
 impl Endpoint for GetAppointmentCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AppointmentCrewResponse>;
+    type Response = CollectionResponse<AppointmentCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -641,7 +641,7 @@ pub struct GetAppointmentCrewItemEndpoint;
 
 impl Endpoint for GetAppointmentCrewItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<AppointmentCrewResponse>;
+    type Response = ItemResponse<AppointmentCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -693,8 +693,8 @@ const UPDATEAPPOINTMENTCREWENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateAppointmentCrewEndpoint;
 
 impl Endpoint for UpdateAppointmentCrewEndpoint {
-    type Request = AppointmentCrewRequest;
-    type Response = ItemResponse<AppointmentCrewResponse>;
+    type Request = AppointmentCrewPayload;
+    type Response = ItemResponse<AppointmentCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -741,7 +741,7 @@ pub struct GetAppointmentCollectionEndpoint;
 
 impl Endpoint for GetAppointmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AppointmentResponse>;
+    type Response = CollectionResponse<Appointment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -785,8 +785,8 @@ const CREATEAPPOINTMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateAppointmentEndpoint;
 
 impl Endpoint for CreateAppointmentEndpoint {
-    type Request = AppointmentRequest;
-    type Response = ItemResponse<AppointmentResponse>;
+    type Request = AppointmentPayload;
+    type Response = ItemResponse<Appointment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -888,7 +888,7 @@ pub struct GetAppointmentItemEndpoint;
 
 impl Endpoint for GetAppointmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<AppointmentResponse>;
+    type Response = ItemResponse<Appointment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -939,8 +939,8 @@ const UPDATEAPPOINTMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateAppointmentEndpoint;
 
 impl Endpoint for UpdateAppointmentEndpoint {
-    type Request = AppointmentRequest;
-    type Response = ItemResponse<AppointmentResponse>;
+    type Request = AppointmentPayload;
+    type Response = ItemResponse<Appointment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -993,7 +993,7 @@ pub struct GetAppointmentAppointmentCrewCollectionEndpoint;
 
 impl Endpoint for GetAppointmentAppointmentCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AppointmentCrewResponse>;
+    type Response = CollectionResponse<AppointmentCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1045,8 +1045,8 @@ const CREATEAPPOINTMENTCREWENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateAppointmentCrewEndpoint;
 
 impl Endpoint for CreateAppointmentCrewEndpoint {
-    type Request = AppointmentCrewRequest;
-    type Response = ItemResponse<AppointmentCrewResponse>;
+    type Request = AppointmentCrewPayload;
+    type Response = ItemResponse<AppointmentCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -1093,7 +1093,7 @@ pub struct GetContactPersonCollectionEndpoint;
 
 impl Endpoint for GetContactPersonCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ContactPersonResponse>;
+    type Response = CollectionResponse<ContactPerson>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1196,7 +1196,7 @@ pub struct GetContactPersonItemEndpoint;
 
 impl Endpoint for GetContactPersonItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ContactPersonResponse>;
+    type Response = ItemResponse<ContactPerson>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1247,8 +1247,8 @@ const UPDATECONTACTPERSONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateContactPersonEndpoint;
 
 impl Endpoint for UpdateContactPersonEndpoint {
-    type Request = ContactPersonRequest;
-    type Response = ItemResponse<ContactPersonResponse>;
+    type Request = ContactPersonPayload;
+    type Response = ItemResponse<ContactPerson>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -1301,7 +1301,7 @@ pub struct GetContactPersonFileFolderCollectionEndpoint;
 
 impl Endpoint for GetContactPersonFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1354,7 +1354,7 @@ pub struct GetContactPersonFileCollectionEndpoint;
 
 impl Endpoint for GetContactPersonFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1407,7 +1407,7 @@ pub struct GetContactPersonTaskCollectionEndpoint;
 
 impl Endpoint for GetContactPersonTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1458,8 +1458,8 @@ const CREATETASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateTaskEndpoint;
 
 impl Endpoint for CreateTaskEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -1506,7 +1506,7 @@ pub struct GetContactCollectionEndpoint;
 
 impl Endpoint for GetContactCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ContactResponse>;
+    type Response = CollectionResponse<Contact>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1550,8 +1550,8 @@ const CREATECONTACTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateContactEndpoint;
 
 impl Endpoint for CreateContactEndpoint {
-    type Request = ContactRequest;
-    type Response = ItemResponse<ContactResponse>;
+    type Request = ContactPayload;
+    type Response = ItemResponse<Contact>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -1653,7 +1653,7 @@ pub struct GetContactItemEndpoint;
 
 impl Endpoint for GetContactItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ContactResponse>;
+    type Response = ItemResponse<Contact>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1704,8 +1704,8 @@ const UPDATECONTACTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateContactEndpoint;
 
 impl Endpoint for UpdateContactEndpoint {
-    type Request = ContactRequest;
-    type Response = ItemResponse<ContactResponse>;
+    type Request = ContactPayload;
+    type Response = ItemResponse<Contact>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -1758,7 +1758,7 @@ pub struct GetContactContactPersonCollectionEndpoint;
 
 impl Endpoint for GetContactContactPersonCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ContactPersonResponse>;
+    type Response = CollectionResponse<ContactPerson>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1809,8 +1809,8 @@ const CREATECONTACTPERSONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateContactPersonEndpoint;
 
 impl Endpoint for CreateContactPersonEndpoint {
-    type Request = ContactPersonRequest;
-    type Response = ItemResponse<ContactPersonResponse>;
+    type Request = ContactPersonPayload;
+    type Response = ItemResponse<ContactPerson>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -1863,7 +1863,7 @@ pub struct GetContactFileFolderCollectionEndpoint;
 
 impl Endpoint for GetContactFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1916,7 +1916,7 @@ pub struct GetContactFileCollectionEndpoint;
 
 impl Endpoint for GetContactFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -1969,7 +1969,7 @@ pub struct GetContactTaskCollectionEndpoint;
 
 impl Endpoint for GetContactTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2020,8 +2020,8 @@ const POSTCONTACTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostContactsIdTasksEndpoint;
 
 impl Endpoint for PostContactsIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -2068,7 +2068,7 @@ pub struct GetContractCollectionEndpoint;
 
 impl Endpoint for GetContractCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ContractResponse>;
+    type Response = CollectionResponse<Contract>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2118,7 +2118,7 @@ pub struct GetContractItemEndpoint;
 
 impl Endpoint for GetContractItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ContractResponse>;
+    type Response = ItemResponse<Contract>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2171,7 +2171,7 @@ pub struct GetContractFileCollectionEndpoint;
 
 impl Endpoint for GetContractFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2224,7 +2224,7 @@ pub struct GetContractInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetContractInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvoiceLineResponse>;
+    type Response = CollectionResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2277,7 +2277,7 @@ pub struct GetContractTaskCollectionEndpoint;
 
 impl Endpoint for GetContractTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2329,8 +2329,8 @@ const POSTCONTRACTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostContractsIdTasksEndpoint;
 
 impl Endpoint for PostContractsIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -2377,7 +2377,7 @@ pub struct GetProjectCostCollectionEndpoint;
 
 impl Endpoint for GetProjectCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCostResponse>;
+    type Response = CollectionResponse<ProjectCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2479,7 +2479,7 @@ pub struct GetProjectCostItemEndpoint;
 
 impl Endpoint for GetProjectCostItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectCostResponse>;
+    type Response = ItemResponse<ProjectCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2530,8 +2530,8 @@ const UPDATEPROJECTCOSTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateProjectCostEndpoint;
 
 impl Endpoint for UpdateProjectCostEndpoint {
-    type Request = ProjectCostRequest;
-    type Response = ItemResponse<ProjectCostResponse>;
+    type Request = ProjectCostPayload;
+    type Response = ItemResponse<ProjectCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -2578,7 +2578,7 @@ pub struct GetCrewCollectionEndpoint;
 
 impl Endpoint for GetCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewResponse>;
+    type Response = CollectionResponse<Crew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2628,7 +2628,7 @@ pub struct GetCrewItemEndpoint;
 
 impl Endpoint for GetCrewItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<CrewResponse>;
+    type Response = ItemResponse<Crew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2681,7 +2681,7 @@ pub struct GetCrewAppointmentCollectionEndpoint;
 
 impl Endpoint for GetCrewAppointmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AppointmentResponse>;
+    type Response = CollectionResponse<Appointment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2734,7 +2734,7 @@ pub struct GetCrewCrewAvailabilityCollectionEndpoint;
 
 impl Endpoint for GetCrewCrewAvailabilityCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewAvailabilityResponse>;
+    type Response = CollectionResponse<CrewAvailability>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2786,8 +2786,8 @@ const CREATECREWAVAILABILITYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateCrewAvailabilityEndpoint;
 
 impl Endpoint for CreateCrewAvailabilityEndpoint {
-    type Request = CrewAvailabilityRequest;
-    type Response = ItemResponse<CrewAvailabilityResponse>;
+    type Request = CrewAvailabilityPayload;
+    type Response = ItemResponse<CrewAvailability>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -2840,7 +2840,7 @@ pub struct GetCrewCrewRatesCollectionEndpoint;
 
 impl Endpoint for GetCrewCrewRatesCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewRatesResponse>;
+    type Response = CollectionResponse<CrewRate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2893,7 +2893,7 @@ pub struct GetCrewFileFolderCollectionEndpoint;
 
 impl Endpoint for GetCrewFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2946,7 +2946,7 @@ pub struct GetCrewFileCollectionEndpoint;
 
 impl Endpoint for GetCrewFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -2999,7 +2999,7 @@ pub struct GetCrewInvitationsCollectionEndpoint;
 
 impl Endpoint for GetCrewInvitationsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvitationsResponse>;
+    type Response = CollectionResponse<Invitation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3052,7 +3052,7 @@ pub struct GetCrewTaskCollectionEndpoint;
 
 impl Endpoint for GetCrewTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3103,8 +3103,8 @@ const POSTCREWIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostCrewIdTasksEndpoint;
 
 impl Endpoint for PostCrewIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -3151,7 +3151,7 @@ pub struct GetCrewAvailabilityCollectionEndpoint;
 
 impl Endpoint for GetCrewAvailabilityCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewAvailabilityResponse>;
+    type Response = CollectionResponse<CrewAvailability>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3255,7 +3255,7 @@ pub struct GetCrewAvailabilityItemEndpoint;
 
 impl Endpoint for GetCrewAvailabilityItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<CrewAvailabilityResponse>;
+    type Response = ItemResponse<CrewAvailability>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3307,8 +3307,8 @@ const UPDATECREWAVAILABILITYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateCrewAvailabilityEndpoint;
 
 impl Endpoint for UpdateCrewAvailabilityEndpoint {
-    type Request = CrewAvailabilityRequest;
-    type Response = ItemResponse<CrewAvailabilityResponse>;
+    type Request = CrewAvailabilityPayload;
+    type Response = ItemResponse<CrewAvailability>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -3355,7 +3355,7 @@ pub struct GetCrewRatesCollectionEndpoint;
 
 impl Endpoint for GetCrewRatesCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewRatesResponse>;
+    type Response = CollectionResponse<CrewRate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3405,7 +3405,7 @@ pub struct GetCrewRatesItemEndpoint;
 
 impl Endpoint for GetCrewRatesItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<CrewRatesResponse>;
+    type Response = ItemResponse<CrewRate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3452,7 +3452,7 @@ pub struct GetEquipmentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<EquipmentResponse>;
+    type Response = CollectionResponse<Equipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3496,8 +3496,8 @@ const CREATEEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateEquipmentEndpoint;
 
 impl Endpoint for CreateEquipmentEndpoint {
-    type Request = EquipmentRequest;
-    type Response = ItemResponse<EquipmentResponse>;
+    type Request = EquipmentPayload;
+    type Response = ItemResponse<Equipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -3547,7 +3547,7 @@ pub struct GetEquipmentItemEndpoint;
 
 impl Endpoint for GetEquipmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<EquipmentResponse>;
+    type Response = ItemResponse<Equipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3598,8 +3598,8 @@ const UPDATEEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateEquipmentEndpoint;
 
 impl Endpoint for UpdateEquipmentEndpoint {
-    type Request = EquipmentRequest;
-    type Response = ItemResponse<EquipmentResponse>;
+    type Request = EquipmentPayload;
+    type Response = ItemResponse<Equipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -3652,7 +3652,7 @@ pub struct GetEquipmentAccessoryCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAccessoryCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AccessoryResponse>;
+    type Response = CollectionResponse<Accessory>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3703,8 +3703,8 @@ const CREATEACCESSORYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateAccessoryEndpoint;
 
 impl Endpoint for CreateAccessoryEndpoint {
-    type Request = AccessoryRequest;
-    type Response = ItemResponse<AccessoryResponse>;
+    type Request = AccessoryPayload;
+    type Response = ItemResponse<Accessory>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -3757,7 +3757,7 @@ pub struct GetEquipmentAlternativeCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAlternativeCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<AlternativeResponse>;
+    type Response = CollectionResponse<Alternative>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3808,8 +3808,8 @@ const CREATEALTERNATIVEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateAlternativeEndpoint;
 
 impl Endpoint for CreateAlternativeEndpoint {
-    type Request = AlternativeRequest;
-    type Response = ItemResponse<AlternativeResponse>;
+    type Request = AlternativePayload;
+    type Response = ItemResponse<Alternative>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -3862,7 +3862,7 @@ pub struct GetEquipmentEquipmentSetContentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentEquipmentSetContentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<EquipmentSetContentResponse>;
+    type Response = CollectionResponse<EquipmentSetContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -3914,8 +3914,8 @@ const CREATEEQUIPMENTSETCONTENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateEquipmentSetContentEndpoint;
 
 impl Endpoint for CreateEquipmentSetContentEndpoint {
-    type Request = EquipmentSetContentRequest;
-    type Response = ItemResponse<EquipmentSetContentResponse>;
+    type Request = EquipmentSetContentPayload;
+    type Response = ItemResponse<EquipmentSetContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -3968,7 +3968,7 @@ pub struct GetEquipmentFileFolderCollectionEndpoint;
 
 impl Endpoint for GetEquipmentFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4021,7 +4021,7 @@ pub struct GetEquipmentFileCollectionEndpoint;
 
 impl Endpoint for GetEquipmentFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4074,7 +4074,7 @@ pub struct GetEquipmentRepairCollectionEndpoint;
 
 impl Endpoint for GetEquipmentRepairCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<RepairResponse>;
+    type Response = CollectionResponse<Repair>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4127,7 +4127,7 @@ pub struct GetEquipmentSerialNumberCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSerialNumberCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SerialNumberResponse>;
+    type Response = CollectionResponse<SerialNumber>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4178,8 +4178,8 @@ const CREATESERIALNUMBERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateSerialNumberEndpoint;
 
 impl Endpoint for CreateSerialNumberEndpoint {
-    type Request = SerialNumberRequest;
-    type Response = ItemResponse<SerialNumberResponse>;
+    type Request = SerialNumberPayload;
+    type Response = ItemResponse<SerialNumber>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -4232,7 +4232,7 @@ pub struct GetEquipmentStockMovementCollectionEndpoint;
 
 impl Endpoint for GetEquipmentStockMovementCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<StockMovementResponse>;
+    type Response = CollectionResponse<StockMovement>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4283,8 +4283,8 @@ const CREATESTOCKMOVEMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateStockMovementEndpoint;
 
 impl Endpoint for CreateStockMovementEndpoint {
-    type Request = StockMovementRequest;
-    type Response = ItemResponse<StockMovementResponse>;
+    type Request = StockMovementPayload;
+    type Response = ItemResponse<StockMovement>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -4337,7 +4337,7 @@ pub struct GetEquipmentSupplierCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSupplierCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SupplierResponse>;
+    type Response = CollectionResponse<Supplier>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4388,8 +4388,8 @@ const CREATESUPPLIERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateSupplierEndpoint;
 
 impl Endpoint for CreateSupplierEndpoint {
-    type Request = SupplierRequest;
-    type Response = ItemResponse<SupplierResponse>;
+    type Request = SupplierPayload;
+    type Response = ItemResponse<Supplier>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -4442,7 +4442,7 @@ pub struct GetEquipmentTaskCollectionEndpoint;
 
 impl Endpoint for GetEquipmentTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4494,8 +4494,8 @@ const POSTEQUIPMENTIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostEquipmentIdTasksEndpoint;
 
 impl Endpoint for PostEquipmentIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -4542,7 +4542,7 @@ pub struct GetEquipmentAssignedSerialsCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAssignedSerialsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<EquipmentAssignedSerialsResponse>;
+    type Response = CollectionResponse<EquipmentAssignedSerial>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4593,7 +4593,7 @@ pub struct GetEquipmentAssignedSerialsItemEndpoint;
 
 impl Endpoint for GetEquipmentAssignedSerialsItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<EquipmentAssignedSerialsResponse>;
+    type Response = ItemResponse<EquipmentAssignedSerial>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4640,7 +4640,7 @@ pub struct GetEquipmentSetContentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSetContentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<EquipmentSetContentResponse>;
+    type Response = CollectionResponse<EquipmentSetContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4744,7 +4744,7 @@ pub struct GetEquipmentSetContentItemEndpoint;
 
 impl Endpoint for GetEquipmentSetContentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<EquipmentSetContentResponse>;
+    type Response = ItemResponse<EquipmentSetContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4796,8 +4796,8 @@ const UPDATEEQUIPMENTSETCONTENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateEquipmentSetContentEndpoint;
 
 impl Endpoint for UpdateEquipmentSetContentEndpoint {
-    type Request = EquipmentSetContentRequest;
-    type Response = ItemResponse<EquipmentSetContentResponse>;
+    type Request = EquipmentSetContentPayload;
+    type Response = ItemResponse<EquipmentSetContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -4844,7 +4844,7 @@ pub struct GetExtraInputFieldCollectionEndpoint;
 
 impl Endpoint for GetExtraInputFieldCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ExtraInputFieldResponse>;
+    type Response = CollectionResponse<ExtraInputField>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4895,7 +4895,7 @@ pub struct GetExtraInputFieldItemEndpoint;
 
 impl Endpoint for GetExtraInputFieldItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ExtraInputFieldResponse>;
+    type Response = ItemResponse<ExtraInputField>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4942,7 +4942,7 @@ pub struct GetFactorGroupsCollectionEndpoint;
 
 impl Endpoint for GetFactorGroupsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FactorGroupsResponse>;
+    type Response = CollectionResponse<FactorGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -4992,7 +4992,7 @@ pub struct GetFactorGroupsItemEndpoint;
 
 impl Endpoint for GetFactorGroupsItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FactorGroupsResponse>;
+    type Response = ItemResponse<FactorGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5045,7 +5045,7 @@ pub struct GetFactorGroupsFactorsCollectionEndpoint;
 
 impl Endpoint for GetFactorGroupsFactorsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FactorsResponse>;
+    type Response = CollectionResponse<Factor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5092,7 +5092,7 @@ pub struct GetFactorsCollectionEndpoint;
 
 impl Endpoint for GetFactorsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FactorsResponse>;
+    type Response = CollectionResponse<Factor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5142,7 +5142,7 @@ pub struct GetFactorsItemEndpoint;
 
 impl Endpoint for GetFactorsItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FactorsResponse>;
+    type Response = ItemResponse<Factor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5189,7 +5189,7 @@ pub struct GetFileFolderCollectionEndpoint;
 
 impl Endpoint for GetFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5239,7 +5239,7 @@ pub struct GetFileFolderItemEndpoint;
 
 impl Endpoint for GetFileFolderItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FileFolderResponse>;
+    type Response = ItemResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5286,7 +5286,7 @@ pub struct GetFileCollectionEndpoint;
 
 impl Endpoint for GetFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5336,7 +5336,7 @@ pub struct GetFileItemEndpoint;
 
 impl Endpoint for GetFileItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FileResponse>;
+    type Response = ItemResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5383,7 +5383,7 @@ pub struct GetFolderCollectionEndpoint;
 
 impl Endpoint for GetFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FolderResponse>;
+    type Response = CollectionResponse<Folder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5427,8 +5427,8 @@ const CREATEFOLDERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateFolderEndpoint;
 
 impl Endpoint for CreateFolderEndpoint {
-    type Request = FolderRequest;
-    type Response = ItemResponse<FolderResponse>;
+    type Request = FolderPayload;
+    type Response = ItemResponse<Folder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -5478,7 +5478,7 @@ pub struct GetFolderItemEndpoint;
 
 impl Endpoint for GetFolderItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FolderResponse>;
+    type Response = ItemResponse<Folder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5529,8 +5529,8 @@ const UPDATEFOLDERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateFolderEndpoint;
 
 impl Endpoint for UpdateFolderEndpoint {
-    type Request = FolderRequest;
-    type Response = ItemResponse<FolderResponse>;
+    type Request = FolderPayload;
+    type Response = ItemResponse<Folder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -5577,7 +5577,7 @@ pub struct GetInvitationsCollectionEndpoint;
 
 impl Endpoint for GetInvitationsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvitationsResponse>;
+    type Response = CollectionResponse<Invitation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5627,7 +5627,7 @@ pub struct GetInvitationsItemEndpoint;
 
 impl Endpoint for GetInvitationsItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<InvitationsResponse>;
+    type Response = ItemResponse<Invitation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5674,7 +5674,7 @@ pub struct GetInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvoiceLineResponse>;
+    type Response = CollectionResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5724,7 +5724,7 @@ pub struct GetInvoiceLineItemEndpoint;
 
 impl Endpoint for GetInvoiceLineItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<InvoiceLineResponse>;
+    type Response = ItemResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5771,7 +5771,7 @@ pub struct GetFactuurCollectionEndpoint;
 
 impl Endpoint for GetFactuurCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FactuurResponse>;
+    type Response = CollectionResponse<Invoice>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5821,7 +5821,7 @@ pub struct GetFactuurItemEndpoint;
 
 impl Endpoint for GetFactuurItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<FactuurResponse>;
+    type Response = ItemResponse<Invoice>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5874,7 +5874,7 @@ pub struct GetFactuurFileCollectionEndpoint;
 
 impl Endpoint for GetFactuurFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5927,7 +5927,7 @@ pub struct GetFactuurInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetFactuurInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvoiceLineResponse>;
+    type Response = CollectionResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -5980,7 +5980,7 @@ pub struct GetFactuurPaymentCollectionEndpoint;
 
 impl Endpoint for GetFactuurPaymentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PaymentResponse>;
+    type Response = CollectionResponse<Payment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6031,8 +6031,8 @@ const CREATEPAYMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreatePaymentEndpoint;
 
 impl Endpoint for CreatePaymentEndpoint {
-    type Request = PaymentRequest;
-    type Response = ItemResponse<PaymentResponse>;
+    type Request = PaymentPayload;
+    type Response = ItemResponse<Payment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -6085,7 +6085,7 @@ pub struct GetFactuurTaskCollectionEndpoint;
 
 impl Endpoint for GetFactuurTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6136,8 +6136,8 @@ const POSTINVOICESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostInvoicesIdTasksEndpoint;
 
 impl Endpoint for PostInvoicesIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -6184,7 +6184,7 @@ pub struct GetLeaveMutationsCollectionEndpoint;
 
 impl Endpoint for GetLeaveMutationsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<LeaveMutationsResponse>;
+    type Response = CollectionResponse<LeaveMutation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6228,8 +6228,8 @@ const CREATELEAVEMUTATIONSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateLeaveMutationsEndpoint;
 
 impl Endpoint for CreateLeaveMutationsEndpoint {
-    type Request = LeaveMutationsRequest;
-    type Response = ItemResponse<LeaveMutationsResponse>;
+    type Request = LeaveMutationPayload;
+    type Response = ItemResponse<LeaveMutation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -6280,7 +6280,7 @@ pub struct GetLeaveMutationsItemEndpoint;
 
 impl Endpoint for GetLeaveMutationsItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<LeaveMutationsResponse>;
+    type Response = ItemResponse<LeaveMutation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6327,7 +6327,7 @@ pub struct GetLeaveRequestCollectionEndpoint;
 
 impl Endpoint for GetLeaveRequestCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<LeaveRequestResponse>;
+    type Response = CollectionResponse<LeaveRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6371,8 +6371,8 @@ const CREATELEAVEREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateLeaveRequestEndpoint;
 
 impl Endpoint for CreateLeaveRequestEndpoint {
-    type Request = LeaveRequestRequest;
-    type Response = ItemResponse<LeaveRequestResponse>;
+    type Request = LeaveRequestPayload;
+    type Response = ItemResponse<LeaveRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -6422,7 +6422,7 @@ pub struct GetLeaveRequestItemEndpoint;
 
 impl Endpoint for GetLeaveRequestItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<LeaveRequestResponse>;
+    type Response = ItemResponse<LeaveRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6473,8 +6473,8 @@ const UPDATELEAVEREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateLeaveRequestEndpoint;
 
 impl Endpoint for UpdateLeaveRequestEndpoint {
-    type Request = LeaveRequestRequest;
-    type Response = ItemResponse<LeaveRequestResponse>;
+    type Request = LeaveRequestPayload;
+    type Response = ItemResponse<LeaveRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -6527,7 +6527,7 @@ pub struct GetLeaveRequestTimeRegistrationCollectionEndpoint;
 
 impl Endpoint for GetLeaveRequestTimeRegistrationCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TimeRegistrationResponse>;
+    type Response = CollectionResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6579,8 +6579,8 @@ const CREATETIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateTimeRegistrationEndpoint;
 
 impl Endpoint for CreateTimeRegistrationEndpoint {
-    type Request = TimeRegistrationRequest;
-    type Response = ItemResponse<TimeRegistrationResponse>;
+    type Request = TimeRegistrationPayload;
+    type Response = ItemResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -6627,7 +6627,7 @@ pub struct GetLeaveTypesCollectionEndpoint;
 
 impl Endpoint for GetLeaveTypesCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<LeaveTypesResponse>;
+    type Response = CollectionResponse<LeaveType>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6677,7 +6677,7 @@ pub struct GetLeaveTypesItemEndpoint;
 
 impl Endpoint for GetLeaveTypesItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<LeaveTypesResponse>;
+    type Response = ItemResponse<LeaveType>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6724,7 +6724,7 @@ pub struct GetLedgerCollectionEndpoint;
 
 impl Endpoint for GetLedgerCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<LedgerResponse>;
+    type Response = CollectionResponse<LedgerCode>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6774,7 +6774,7 @@ pub struct GetLedgerItemEndpoint;
 
 impl Endpoint for GetLedgerItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<LedgerResponse>;
+    type Response = ItemResponse<LedgerCode>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6821,7 +6821,7 @@ pub struct GetPaymentCollectionEndpoint;
 
 impl Endpoint for GetPaymentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PaymentResponse>;
+    type Response = CollectionResponse<Payment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6871,7 +6871,7 @@ pub struct GetPaymentItemEndpoint;
 
 impl Endpoint for GetPaymentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<PaymentResponse>;
+    type Response = ItemResponse<Payment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -6922,8 +6922,8 @@ const UPDATEPAYMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdatePaymentEndpoint;
 
 impl Endpoint for UpdatePaymentEndpoint {
-    type Request = PaymentRequest;
-    type Response = ItemResponse<PaymentResponse>;
+    type Request = PaymentPayload;
+    type Response = ItemResponse<Payment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -6970,7 +6970,7 @@ pub struct GetProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCrewResponse>;
+    type Response = CollectionResponse<ProjectCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7020,7 +7020,7 @@ pub struct GetProjectCrewItemEndpoint;
 
 impl Endpoint for GetProjectCrewItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectCrewResponse>;
+    type Response = ItemResponse<ProjectCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7067,7 +7067,7 @@ pub struct GetProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentResponse>;
+    type Response = CollectionResponse<ProjectEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7118,7 +7118,7 @@ pub struct GetProjectEquipmentItemEndpoint;
 
 impl Endpoint for GetProjectEquipmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectEquipmentResponse>;
+    type Response = ItemResponse<ProjectEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7165,7 +7165,7 @@ pub struct GetProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentGroupResponse>;
+    type Response = CollectionResponse<ProjectEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7216,7 +7216,7 @@ pub struct GetProjectEquipmentGroupItemEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectEquipmentGroupResponse>;
+    type Response = ItemResponse<ProjectEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7269,7 +7269,7 @@ pub struct GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentResponse>;
+    type Response = CollectionResponse<ProjectEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7316,7 +7316,7 @@ pub struct GetProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionGroupResponse>;
+    type Response = CollectionResponse<ProjectFunctionGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7367,7 +7367,7 @@ pub struct GetProjectFunctionGroupItemEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectFunctionGroupResponse>;
+    type Response = ItemResponse<ProjectFunctionGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7420,7 +7420,7 @@ pub struct GetProjectFunctionGroupProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionResponse>;
+    type Response = CollectionResponse<ProjectFunction>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7467,7 +7467,7 @@ pub struct GetProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionResponse>;
+    type Response = CollectionResponse<ProjectFunction>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7518,7 +7518,7 @@ pub struct GetProjectFunctionItemEndpoint;
 
 impl Endpoint for GetProjectFunctionItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectFunctionResponse>;
+    type Response = ItemResponse<ProjectFunction>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7571,7 +7571,7 @@ pub struct GetProjectFunctionProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionProjectCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCrewResponse>;
+    type Response = CollectionResponse<ProjectCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7624,7 +7624,7 @@ pub struct GetProjectFunctionProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectVehicleResponse>;
+    type Response = CollectionResponse<ProjectVehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7671,7 +7671,7 @@ pub struct GetProjectRequestEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectRequestEquipmentResponse>;
+    type Response = CollectionResponse<ProjectRequestEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7775,7 +7775,7 @@ pub struct GetProjectRequestEquipmentItemEndpoint;
 
 impl Endpoint for GetProjectRequestEquipmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectRequestEquipmentResponse>;
+    type Response = ItemResponse<ProjectRequestEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7827,8 +7827,8 @@ const UPDATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateProjectRequestEquipmentEndpoint;
 
 impl Endpoint for UpdateProjectRequestEquipmentEndpoint {
-    type Request = ProjectRequestEquipmentRequest;
-    type Response = ItemResponse<ProjectRequestEquipmentResponse>;
+    type Request = ProjectRequestEquipmentPayload;
+    type Response = ItemResponse<ProjectRequestEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -7875,7 +7875,7 @@ pub struct GetProjectRequestCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectRequestResponse>;
+    type Response = CollectionResponse<ProjectRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -7919,8 +7919,8 @@ const CREATEPROJECTREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectRequestEndpoint;
 
 impl Endpoint for CreateProjectRequestEndpoint {
-    type Request = ProjectRequestRequest;
-    type Response = ItemResponse<ProjectRequestResponse>;
+    type Request = ProjectRequestPayload;
+    type Response = ItemResponse<ProjectRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8024,7 +8024,7 @@ pub struct GetProjectRequestItemEndpoint;
 
 impl Endpoint for GetProjectRequestItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectRequestResponse>;
+    type Response = ItemResponse<ProjectRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8076,8 +8076,8 @@ const UPDATEPROJECTREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateProjectRequestEndpoint;
 
 impl Endpoint for UpdateProjectRequestEndpoint {
-    type Request = ProjectRequestRequest;
-    type Response = ItemResponse<ProjectRequestResponse>;
+    type Request = ProjectRequestPayload;
+    type Response = ItemResponse<ProjectRequest>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -8130,7 +8130,7 @@ pub struct GetProjectRequestProjectRequestEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectRequestEquipmentResponse>;
+    type Response = CollectionResponse<ProjectRequestEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8182,8 +8182,8 @@ const CREATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectRequestEquipmentEndpoint;
 
 impl Endpoint for CreateProjectRequestEquipmentEndpoint {
-    type Request = ProjectRequestEquipmentRequest;
-    type Response = ItemResponse<ProjectRequestEquipmentResponse>;
+    type Request = ProjectRequestEquipmentPayload;
+    type Response = ItemResponse<ProjectRequestEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8230,7 +8230,7 @@ pub struct GetProjectCollectionEndpoint;
 
 impl Endpoint for GetProjectCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectResponse>;
+    type Response = CollectionResponse<Project>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8274,8 +8274,8 @@ const CREATEPROJECTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectEndpoint;
 
 impl Endpoint for CreateProjectEndpoint {
-    type Request = ProjectRequest;
-    type Response = ItemResponse<ProjectResponse>;
+    type Request = ProjectPayload;
+    type Response = ItemResponse<Project>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8319,8 +8319,8 @@ const CREATEFROMTEMPLATEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateFromTemplateEndpoint;
 
 impl Endpoint for CreateFromTemplateEndpoint {
-    type Request = ProjectsCreateFromTemplateRequest;
-    type Response = ItemResponse<ProjectReferenceResponse>;
+    type Request = ProjectsCreateFromTemplatePayload;
+    type Response = ItemResponse<ProjectReference>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8370,7 +8370,7 @@ pub struct GetProjectItemEndpoint;
 
 impl Endpoint for GetProjectItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectResponse>;
+    type Response = ItemResponse<Project>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8423,7 +8423,7 @@ pub struct GetProjectContractCollectionEndpoint;
 
 impl Endpoint for GetProjectContractCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ContractResponse>;
+    type Response = CollectionResponse<Contract>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8476,7 +8476,7 @@ pub struct GetProjectProjectCostCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCostResponse>;
+    type Response = CollectionResponse<ProjectCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8527,8 +8527,8 @@ const CREATEPROJECTCOSTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectCostEndpoint;
 
 impl Endpoint for CreateProjectCostEndpoint {
-    type Request = ProjectCostRequest;
-    type Response = ItemResponse<ProjectCostResponse>;
+    type Request = ProjectCostPayload;
+    type Response = ItemResponse<ProjectCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8581,7 +8581,7 @@ pub struct GetProjectFileFolderCollectionEndpoint;
 
 impl Endpoint for GetProjectFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8634,7 +8634,7 @@ pub struct GetProjectFileCollectionEndpoint;
 
 impl Endpoint for GetProjectFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8687,7 +8687,7 @@ pub struct GetProjectProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCrewResponse>;
+    type Response = CollectionResponse<ProjectCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8740,7 +8740,7 @@ pub struct GetProjectProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentResponse>;
+    type Response = CollectionResponse<ProjectEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8793,7 +8793,7 @@ pub struct GetProjectProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentGroupResponse>;
+    type Response = CollectionResponse<ProjectEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8846,7 +8846,7 @@ pub struct GetProjectProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionGroupResponse>;
+    type Response = CollectionResponse<ProjectFunctionGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -8898,8 +8898,8 @@ const CREATEPROJECTFUNCTIONGROUPENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectFunctionGroupEndpoint;
 
 impl Endpoint for CreateProjectFunctionGroupEndpoint {
-    type Request = ProjectFunctionGroupRequest;
-    type Response = ItemResponse<ProjectFunctionGroupResponse>;
+    type Request = ProjectFunctionGroupPayload;
+    type Response = ItemResponse<ProjectFunctionGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -8952,7 +8952,7 @@ pub struct GetProjectProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionResponse>;
+    type Response = CollectionResponse<ProjectFunction>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9004,8 +9004,8 @@ const CREATEPROJECTFUNCTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateProjectFunctionEndpoint;
 
 impl Endpoint for CreateProjectFunctionEndpoint {
-    type Request = ProjectFunctionRequest;
-    type Response = ItemResponse<ProjectFunctionResponse>;
+    type Request = ProjectFunctionPayload;
+    type Response = ItemResponse<ProjectFunction>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -9058,7 +9058,7 @@ pub struct GetProjectProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectVehicleResponse>;
+    type Response = CollectionResponse<ProjectVehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9111,7 +9111,7 @@ pub struct GetProjectQuotationCollectionEndpoint;
 
 impl Endpoint for GetProjectQuotationCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<QuotationResponse>;
+    type Response = CollectionResponse<Quote>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9164,7 +9164,7 @@ pub struct GetProjectSubprojectCollectionEndpoint;
 
 impl Endpoint for GetProjectSubprojectCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubprojectResponse>;
+    type Response = CollectionResponse<Subproject>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9215,8 +9215,8 @@ const CREATESUBPROJECTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateSubprojectEndpoint;
 
 impl Endpoint for CreateSubprojectEndpoint {
-    type Request = SubprojectRequest;
-    type Response = ItemResponse<SubprojectResponse>;
+    type Request = SubprojectPayload;
+    type Response = ItemResponse<Subproject>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -9269,7 +9269,7 @@ pub struct GetProjectTaskCollectionEndpoint;
 
 impl Endpoint for GetProjectTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9320,8 +9320,8 @@ const POSTPROJECTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostProjectsIdTasksEndpoint;
 
 impl Endpoint for PostProjectsIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -9368,7 +9368,7 @@ pub struct GetProjectStatusCollectionEndpoint;
 
 impl Endpoint for GetProjectStatusCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectStatusResponse>;
+    type Response = CollectionResponse<ProjectStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9419,7 +9419,7 @@ pub struct GetProjectStatusItemEndpoint;
 
 impl Endpoint for GetProjectStatusItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectStatusResponse>;
+    type Response = ItemResponse<ProjectStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9466,7 +9466,7 @@ pub struct GetProjectTemplateCollectionEndpoint;
 
 impl Endpoint for GetProjectTemplateCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectTemplateResponse>;
+    type Response = CollectionResponse<ProjectTemplate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9517,7 +9517,7 @@ pub struct GetProjectTemplateItemEndpoint;
 
 impl Endpoint for GetProjectTemplateItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectTemplateResponse>;
+    type Response = ItemResponse<ProjectTemplate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9564,7 +9564,7 @@ pub struct GetProjectTypeCollectionEndpoint;
 
 impl Endpoint for GetProjectTypeCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectTypeResponse>;
+    type Response = CollectionResponse<ProjectType>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9614,7 +9614,7 @@ pub struct GetProjectTypeItemEndpoint;
 
 impl Endpoint for GetProjectTypeItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectTypeResponse>;
+    type Response = ItemResponse<ProjectType>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9661,7 +9661,7 @@ pub struct GetProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectVehicleResponse>;
+    type Response = CollectionResponse<ProjectVehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9712,7 +9712,7 @@ pub struct GetProjectVehicleItemEndpoint;
 
 impl Endpoint for GetProjectVehicleItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<ProjectVehicleResponse>;
+    type Response = ItemResponse<ProjectVehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9759,7 +9759,7 @@ pub struct GetPurchaseOrderCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PurchaseOrderCostResponse>;
+    type Response = CollectionResponse<PurchaseOrderCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9810,7 +9810,7 @@ pub struct GetPurchaseOrderCostItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderCostItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<PurchaseOrderCostResponse>;
+    type Response = ItemResponse<PurchaseOrderCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9857,7 +9857,7 @@ pub struct GetPurchaseOrderGlobalCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderGlobalCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PurchaseOrderGlobalCostResponse>;
+    type Response = CollectionResponse<PurchaseOrderGlobalCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9908,7 +9908,7 @@ pub struct GetPurchaseOrderGlobalCostItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderGlobalCostItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<PurchaseOrderGlobalCostResponse>;
+    type Response = ItemResponse<PurchaseOrderGlobalCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -9955,7 +9955,7 @@ pub struct GetPurchaseOrderCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PurchaseOrderResponse>;
+    type Response = CollectionResponse<PurchaseOrder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10006,7 +10006,7 @@ pub struct GetPurchaseOrderItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<PurchaseOrderResponse>;
+    type Response = ItemResponse<PurchaseOrder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10059,7 +10059,7 @@ pub struct GetPurchaseOrderFileFolderCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10112,7 +10112,7 @@ pub struct GetPurchaseOrderFileCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10165,7 +10165,7 @@ pub struct GetPurchaseOrderInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvoiceLineResponse>;
+    type Response = CollectionResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10218,7 +10218,7 @@ pub struct GetPurchaseOrderPurchaseOrderCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PurchaseOrderCostResponse>;
+    type Response = CollectionResponse<PurchaseOrderCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10271,7 +10271,7 @@ pub struct GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<PurchaseOrderGlobalCostResponse>;
+    type Response = CollectionResponse<PurchaseOrderGlobalCost>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10324,7 +10324,7 @@ pub struct GetPurchaseOrderTaskCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10376,8 +10376,8 @@ const POSTPURCHASEORDERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostPurchaseordersIdTasksEndpoint;
 
 impl Endpoint for PostPurchaseordersIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -10424,7 +10424,7 @@ pub struct GetQuotationCollectionEndpoint;
 
 impl Endpoint for GetQuotationCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<QuotationResponse>;
+    type Response = CollectionResponse<Quote>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10474,7 +10474,7 @@ pub struct GetQuotationItemEndpoint;
 
 impl Endpoint for GetQuotationItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<QuotationResponse>;
+    type Response = ItemResponse<Quote>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10527,7 +10527,7 @@ pub struct GetQuotationFileCollectionEndpoint;
 
 impl Endpoint for GetQuotationFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10580,7 +10580,7 @@ pub struct GetQuotationInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetQuotationInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<InvoiceLineResponse>;
+    type Response = CollectionResponse<InvoiceLine>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10633,7 +10633,7 @@ pub struct GetQuotationTaskCollectionEndpoint;
 
 impl Endpoint for GetQuotationTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10684,8 +10684,8 @@ const POSTQUOTESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostQuotesIdTasksEndpoint;
 
 impl Endpoint for PostQuotesIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -10732,7 +10732,7 @@ pub struct GetCrewRateFactorCollectionEndpoint;
 
 impl Endpoint for GetCrewRateFactorCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewRateFactorResponse>;
+    type Response = CollectionResponse<RateFactor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10783,7 +10783,7 @@ pub struct GetCrewRateFactorItemEndpoint;
 
 impl Endpoint for GetCrewRateFactorItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<CrewRateFactorResponse>;
+    type Response = ItemResponse<RateFactor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10830,7 +10830,7 @@ pub struct GetCrewRateCollectionEndpoint;
 
 impl Endpoint for GetCrewRateCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewRateResponse>;
+    type Response = CollectionResponse<Rate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10880,7 +10880,7 @@ pub struct GetCrewRateItemEndpoint;
 
 impl Endpoint for GetCrewRateItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<CrewRateResponse>;
+    type Response = ItemResponse<Rate>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10933,7 +10933,7 @@ pub struct GetCrewRateCrewRateFactorCollectionEndpoint;
 
 impl Endpoint for GetCrewRateCrewRateFactorCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<CrewRateFactorResponse>;
+    type Response = CollectionResponse<RateFactor>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -10980,7 +10980,7 @@ pub struct GetRepairCollectionEndpoint;
 
 impl Endpoint for GetRepairCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<RepairResponse>;
+    type Response = CollectionResponse<Repair>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11030,7 +11030,7 @@ pub struct GetRepairItemEndpoint;
 
 impl Endpoint for GetRepairItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<RepairResponse>;
+    type Response = ItemResponse<Repair>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11083,7 +11083,7 @@ pub struct GetRepairFileFolderCollectionEndpoint;
 
 impl Endpoint for GetRepairFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11136,7 +11136,7 @@ pub struct GetRepairFileCollectionEndpoint;
 
 impl Endpoint for GetRepairFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11189,7 +11189,7 @@ pub struct GetRepairTaskCollectionEndpoint;
 
 impl Endpoint for GetRepairTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11240,8 +11240,8 @@ const POSTREPAIRSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostRepairsIdTasksEndpoint;
 
 impl Endpoint for PostRepairsIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -11288,7 +11288,7 @@ pub struct GetSerialNumberCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SerialNumberResponse>;
+    type Response = CollectionResponse<SerialNumber>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11390,7 +11390,7 @@ pub struct GetSerialNumberItemEndpoint;
 
 impl Endpoint for GetSerialNumberItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SerialNumberResponse>;
+    type Response = ItemResponse<SerialNumber>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11441,8 +11441,8 @@ const UPDATESERIALNUMBERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateSerialNumberEndpoint;
 
 impl Endpoint for UpdateSerialNumberEndpoint {
-    type Request = SerialNumberRequest;
-    type Response = ItemResponse<SerialNumberResponse>;
+    type Request = SerialNumberPayload;
+    type Response = ItemResponse<SerialNumber>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -11495,7 +11495,7 @@ pub struct GetSerialNumberActualContentCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberActualContentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ActualContentResponse>;
+    type Response = CollectionResponse<ActualContent>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11548,7 +11548,7 @@ pub struct GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<EquipmentAssignedSerialsResponse>;
+    type Response = CollectionResponse<EquipmentAssignedSerial>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11601,7 +11601,7 @@ pub struct GetSerialNumberFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11654,7 +11654,7 @@ pub struct GetSerialNumberFileCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11707,7 +11707,7 @@ pub struct GetSerialNumberTaskCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11759,8 +11759,8 @@ const POSTSERIALNUMBERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostSerialnumbersIdTasksEndpoint;
 
 impl Endpoint for PostSerialnumbersIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -11807,7 +11807,7 @@ pub struct GetStatusCollectionEndpoint;
 
 impl Endpoint for GetStatusCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<StatusResponse>;
+    type Response = CollectionResponse<Status>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11857,7 +11857,7 @@ pub struct GetStatusItemEndpoint;
 
 impl Endpoint for GetStatusItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<StatusResponse>;
+    type Response = ItemResponse<Status>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11904,7 +11904,7 @@ pub struct GetStockLocationCollectionEndpoint;
 
 impl Endpoint for GetStockLocationCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<StockLocationResponse>;
+    type Response = CollectionResponse<StockLocation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -11955,7 +11955,7 @@ pub struct GetStockLocationItemEndpoint;
 
 impl Endpoint for GetStockLocationItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<StockLocationResponse>;
+    type Response = ItemResponse<StockLocation>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12008,7 +12008,7 @@ pub struct GetStockLocationVehicleCollectionEndpoint;
 
 impl Endpoint for GetStockLocationVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<VehicleResponse>;
+    type Response = CollectionResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12059,8 +12059,8 @@ const CREATEVEHICLEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateVehicleEndpoint;
 
 impl Endpoint for CreateVehicleEndpoint {
-    type Request = VehicleRequest;
-    type Response = ItemResponse<VehicleResponse>;
+    type Request = VehiclePayload;
+    type Response = ItemResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -12107,7 +12107,7 @@ pub struct GetStockMovementCollectionEndpoint;
 
 impl Endpoint for GetStockMovementCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<StockMovementResponse>;
+    type Response = CollectionResponse<StockMovement>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12210,7 +12210,7 @@ pub struct GetStockMovementItemEndpoint;
 
 impl Endpoint for GetStockMovementItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<StockMovementResponse>;
+    type Response = ItemResponse<StockMovement>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12261,8 +12261,8 @@ const UPDATESTOCKMOVEMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateStockMovementEndpoint;
 
 impl Endpoint for UpdateStockMovementEndpoint {
-    type Request = StockMovementRequest;
-    type Response = ItemResponse<StockMovementResponse>;
+    type Request = StockMovementPayload;
+    type Response = ItemResponse<StockMovement>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -12309,7 +12309,7 @@ pub struct GetSubprojectCollectionEndpoint;
 
 impl Endpoint for GetSubprojectCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubprojectResponse>;
+    type Response = CollectionResponse<Subproject>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12359,7 +12359,7 @@ pub struct GetSubprojectItemEndpoint;
 
 impl Endpoint for GetSubprojectItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SubprojectResponse>;
+    type Response = ItemResponse<Subproject>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12412,7 +12412,7 @@ pub struct GetSubprojectFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSubprojectFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12465,7 +12465,7 @@ pub struct GetSubprojectProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectCrewCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectCrewResponse>;
+    type Response = CollectionResponse<ProjectCrew>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12518,7 +12518,7 @@ pub struct GetSubprojectProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentResponse>;
+    type Response = CollectionResponse<ProjectEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12571,7 +12571,7 @@ pub struct GetSubprojectProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectEquipmentGroupResponse>;
+    type Response = CollectionResponse<ProjectEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12624,7 +12624,7 @@ pub struct GetSubprojectProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectFunctionGroupResponse>;
+    type Response = CollectionResponse<ProjectFunctionGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12677,7 +12677,7 @@ pub struct GetSubprojectProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<ProjectVehicleResponse>;
+    type Response = CollectionResponse<ProjectVehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12724,7 +12724,7 @@ pub struct GetSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalEquipmentResponse>;
+    type Response = CollectionResponse<SubrentalEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12775,7 +12775,7 @@ pub struct GetSubrentalEquipmentItemEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SubrentalEquipmentResponse>;
+    type Response = ItemResponse<SubrentalEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12822,7 +12822,7 @@ pub struct GetSubrentalEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalEquipmentGroupResponse>;
+    type Response = CollectionResponse<SubrentalEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12873,7 +12873,7 @@ pub struct GetSubrentalEquipmentGroupItemEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SubrentalEquipmentGroupResponse>;
+    type Response = ItemResponse<SubrentalEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12927,7 +12927,7 @@ pub struct GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalEquipmentResponse>;
+    type Response = CollectionResponse<SubrentalEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -12974,7 +12974,7 @@ pub struct GetSubrentalCollectionEndpoint;
 
 impl Endpoint for GetSubrentalCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalResponse>;
+    type Response = CollectionResponse<Subrental>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13024,7 +13024,7 @@ pub struct GetSubrentalItemEndpoint;
 
 impl Endpoint for GetSubrentalItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SubrentalResponse>;
+    type Response = ItemResponse<Subrental>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13077,7 +13077,7 @@ pub struct GetSubrentalFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSubrentalFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13130,7 +13130,7 @@ pub struct GetSubrentalFileCollectionEndpoint;
 
 impl Endpoint for GetSubrentalFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13183,7 +13183,7 @@ pub struct GetSubrentalSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalEquipmentResponse>;
+    type Response = CollectionResponse<SubrentalEquipment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13236,7 +13236,7 @@ pub struct GetSubrentalSubrentalEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubrentalEquipmentGroupResponse>;
+    type Response = CollectionResponse<SubrentalEquipmentGroup>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13289,7 +13289,7 @@ pub struct GetSubrentalTaskCollectionEndpoint;
 
 impl Endpoint for GetSubrentalTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13341,8 +13341,8 @@ const POSTSUBRENTALSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostSubrentalsIdTasksEndpoint;
 
 impl Endpoint for PostSubrentalsIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -13389,7 +13389,7 @@ pub struct GetSubtaskCollectionEndpoint;
 
 impl Endpoint for GetSubtaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubtaskResponse>;
+    type Response = CollectionResponse<Subtask>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13491,7 +13491,7 @@ pub struct GetSubtaskItemEndpoint;
 
 impl Endpoint for GetSubtaskItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SubtaskResponse>;
+    type Response = ItemResponse<Subtask>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13542,8 +13542,8 @@ const UPDATESUBTASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateSubtaskEndpoint;
 
 impl Endpoint for UpdateSubtaskEndpoint {
-    type Request = SubtaskRequest;
-    type Response = ItemResponse<SubtaskResponse>;
+    type Request = SubtaskPayload;
+    type Response = ItemResponse<Subtask>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -13590,7 +13590,7 @@ pub struct GetSupplierCollectionEndpoint;
 
 impl Endpoint for GetSupplierCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SupplierResponse>;
+    type Response = CollectionResponse<Supplier>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13692,7 +13692,7 @@ pub struct GetSupplierItemEndpoint;
 
 impl Endpoint for GetSupplierItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<SupplierResponse>;
+    type Response = ItemResponse<Supplier>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13743,8 +13743,8 @@ const UPDATESUPPLIERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateSupplierEndpoint;
 
 impl Endpoint for UpdateSupplierEndpoint {
-    type Request = SupplierRequest;
-    type Response = ItemResponse<SupplierResponse>;
+    type Request = SupplierPayload;
+    type Response = ItemResponse<Supplier>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -13797,7 +13797,7 @@ pub struct GetSupplierFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSupplierFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13850,7 +13850,7 @@ pub struct GetSupplierFileCollectionEndpoint;
 
 impl Endpoint for GetSupplierFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13903,7 +13903,7 @@ pub struct GetSupplierTaskCollectionEndpoint;
 
 impl Endpoint for GetSupplierTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -13955,8 +13955,8 @@ const POSTSUPPLIERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostSuppliersIdTasksEndpoint;
 
 impl Endpoint for PostSuppliersIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -14003,7 +14003,7 @@ pub struct GetTaskAssignmentCollectionEndpoint;
 
 impl Endpoint for GetTaskAssignmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskAssignmentResponse>;
+    type Response = CollectionResponse<TaskAssignment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14107,7 +14107,7 @@ pub struct GetTaskAssignmentItemEndpoint;
 
 impl Endpoint for GetTaskAssignmentItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TaskAssignmentResponse>;
+    type Response = ItemResponse<TaskAssignment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14159,8 +14159,8 @@ const UPDATETASKASSIGNMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateTaskAssignmentEndpoint;
 
 impl Endpoint for UpdateTaskAssignmentEndpoint {
-    type Request = TaskAssignmentRequest;
-    type Response = ItemResponse<TaskAssignmentResponse>;
+    type Request = TaskAssignmentPayload;
+    type Response = ItemResponse<TaskAssignment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -14207,7 +14207,7 @@ pub struct GetTaskCollectionEndpoint;
 
 impl Endpoint for GetTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14251,8 +14251,8 @@ const POSTTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostTasksEndpoint;
 
 impl Endpoint for PostTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -14354,7 +14354,7 @@ pub struct GetTaskItemEndpoint;
 
 impl Endpoint for GetTaskItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14405,8 +14405,8 @@ const UPDATETASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateTaskEndpoint;
 
 impl Endpoint for UpdateTaskEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -14459,7 +14459,7 @@ pub struct GetTaskFileFolderCollectionEndpoint;
 
 impl Endpoint for GetTaskFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14512,7 +14512,7 @@ pub struct GetTaskFileCollectionEndpoint;
 
 impl Endpoint for GetTaskFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14565,7 +14565,7 @@ pub struct GetTaskSubtaskCollectionEndpoint;
 
 impl Endpoint for GetTaskSubtaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<SubtaskResponse>;
+    type Response = CollectionResponse<Subtask>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14616,8 +14616,8 @@ const CREATESUBTASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateSubtaskEndpoint;
 
 impl Endpoint for CreateSubtaskEndpoint {
-    type Request = SubtaskRequest;
-    type Response = ItemResponse<SubtaskResponse>;
+    type Request = SubtaskPayload;
+    type Response = ItemResponse<Subtask>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -14670,7 +14670,7 @@ pub struct GetTaskTaskAssignmentCollectionEndpoint;
 
 impl Endpoint for GetTaskTaskAssignmentCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskAssignmentResponse>;
+    type Response = CollectionResponse<TaskAssignment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14722,8 +14722,8 @@ const CREATETASKASSIGNMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateTaskAssignmentEndpoint;
 
 impl Endpoint for CreateTaskAssignmentEndpoint {
-    type Request = TaskAssignmentRequest;
-    type Response = ItemResponse<TaskAssignmentResponse>;
+    type Request = TaskAssignmentPayload;
+    type Response = ItemResponse<TaskAssignment>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -14770,7 +14770,7 @@ pub struct GetTaskStatusCollectionEndpoint;
 
 impl Endpoint for GetTaskStatusCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskStatusResponse>;
+    type Response = CollectionResponse<TaskStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14814,8 +14814,8 @@ const CREATETASKSTATUSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct CreateTaskStatusEndpoint;
 
 impl Endpoint for CreateTaskStatusEndpoint {
-    type Request = TaskStatusRequest;
-    type Response = ItemResponse<TaskStatusResponse>;
+    type Request = TaskStatusPayload;
+    type Response = ItemResponse<TaskStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -14917,7 +14917,7 @@ pub struct GetTaskStatusItemEndpoint;
 
 impl Endpoint for GetTaskStatusItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TaskStatusResponse>;
+    type Response = ItemResponse<TaskStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -14968,8 +14968,8 @@ const UPDATETASKSTATUSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateTaskStatusEndpoint;
 
 impl Endpoint for UpdateTaskStatusEndpoint {
-    type Request = TaskStatusRequest;
-    type Response = ItemResponse<TaskStatusResponse>;
+    type Request = TaskStatusPayload;
+    type Response = ItemResponse<TaskStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -15016,7 +15016,7 @@ pub struct GetTaxClassCollectionEndpoint;
 
 impl Endpoint for GetTaxClassCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaxClassResponse>;
+    type Response = CollectionResponse<TaxClass>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15066,7 +15066,7 @@ pub struct GetTaxClassItemEndpoint;
 
 impl Endpoint for GetTaxClassItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TaxClassResponse>;
+    type Response = ItemResponse<TaxClass>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15113,7 +15113,7 @@ pub struct GetTimeRegistrationCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TimeRegistrationResponse>;
+    type Response = CollectionResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15157,8 +15157,8 @@ const POSTTIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostTimeregistrationEndpoint;
 
 impl Endpoint for PostTimeregistrationEndpoint {
-    type Request = TimeRegistrationRequest;
-    type Response = ItemResponse<TimeRegistrationResponse>;
+    type Request = TimeRegistrationPayload;
+    type Response = ItemResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -15262,7 +15262,7 @@ pub struct GetTimeRegistrationItemEndpoint;
 
 impl Endpoint for GetTimeRegistrationItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TimeRegistrationResponse>;
+    type Response = ItemResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15314,8 +15314,8 @@ const UPDATETIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateTimeRegistrationEndpoint;
 
 impl Endpoint for UpdateTimeRegistrationEndpoint {
-    type Request = TimeRegistrationRequest;
-    type Response = ItemResponse<TimeRegistrationResponse>;
+    type Request = TimeRegistrationPayload;
+    type Response = ItemResponse<TimeRegistration>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -15368,7 +15368,7 @@ pub struct GetTimeRegistrationFileCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15422,7 +15422,7 @@ pub struct GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TimeRegistrationActivityResponse>;
+    type Response = CollectionResponse<TimeRegistrationActivity>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15469,7 +15469,7 @@ pub struct GetTimeRegistrationActivityCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationActivityCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TimeRegistrationActivityResponse>;
+    type Response = CollectionResponse<TimeRegistrationActivity>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15520,7 +15520,7 @@ pub struct GetTimeRegistrationActivityItemEndpoint;
 
 impl Endpoint for GetTimeRegistrationActivityItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<TimeRegistrationActivityResponse>;
+    type Response = ItemResponse<TimeRegistrationActivity>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15567,7 +15567,7 @@ pub struct GetVehicleCollectionEndpoint;
 
 impl Endpoint for GetVehicleCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<VehicleResponse>;
+    type Response = CollectionResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15611,8 +15611,8 @@ const POSTVEHICLESENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostVehiclesEndpoint;
 
 impl Endpoint for PostVehiclesEndpoint {
-    type Request = VehicleRequest;
-    type Response = ItemResponse<VehicleResponse>;
+    type Request = VehiclePayload;
+    type Response = ItemResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -15714,7 +15714,7 @@ pub struct GetVehicleItemEndpoint;
 
 impl Endpoint for GetVehicleItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<VehicleResponse>;
+    type Response = ItemResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15765,8 +15765,8 @@ const UPDATEVEHICLEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct UpdateVehicleEndpoint;
 
 impl Endpoint for UpdateVehicleEndpoint {
-    type Request = VehicleRequest;
-    type Response = ItemResponse<VehicleResponse>;
+    type Request = VehiclePayload;
+    type Response = ItemResponse<Vehicle>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "PUT",
@@ -15819,7 +15819,7 @@ pub struct GetVehicleFileFolderCollectionEndpoint;
 
 impl Endpoint for GetVehicleFileFolderCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileFolderResponse>;
+    type Response = CollectionResponse<FileFolder>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15872,7 +15872,7 @@ pub struct GetVehicleFileCollectionEndpoint;
 
 impl Endpoint for GetVehicleFileCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<FileResponse>;
+    type Response = CollectionResponse<File>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15925,7 +15925,7 @@ pub struct GetVehicleTaskCollectionEndpoint;
 
 impl Endpoint for GetVehicleTaskCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<TaskResponse>;
+    type Response = CollectionResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -15976,8 +15976,8 @@ const POSTVEHICLESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 pub struct PostVehiclesIdTasksEndpoint;
 
 impl Endpoint for PostVehiclesIdTasksEndpoint {
-    type Request = TaskRequest;
-    type Response = ItemResponse<TaskResponse>;
+    type Request = TaskPayload;
+    type Response = ItemResponse<Task>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "POST",
@@ -16024,7 +16024,7 @@ pub struct GetWarehouseStatusCollectionEndpoint;
 
 impl Endpoint for GetWarehouseStatusCollectionEndpoint {
     type Request = NoRequest;
-    type Response = CollectionResponse<WarehouseStatusResponse>;
+    type Response = CollectionResponse<WarehouseStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",
@@ -16075,7 +16075,7 @@ pub struct GetWarehouseStatusItemEndpoint;
 
 impl Endpoint for GetWarehouseStatusItemEndpoint {
     type Request = NoRequest;
-    type Response = ItemResponse<WarehouseStatusResponse>;
+    type Response = ItemResponse<WarehouseStatus>;
 
     const SPEC: EndpointSpec = EndpointSpec {
         method: "GET",

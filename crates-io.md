@@ -35,13 +35,13 @@ use rentman_client::{RentmanApiToken, RentmanClient, endpoint, model};
 # async fn example() -> rentman_client::Result<()> {
 let client = RentmanClient::new(RentmanApiToken::new("token"));
 
-let response: model::CollectionResponse<model::FactuurResponse> = client
+let response: model::CollectionResponse<model::Invoice> = client
     .endpoint::<endpoint::GetFactuurCollectionEndpoint>()
     .query(&[("limit", "1500")])?
     .send()
     .await?;
 
-let response: model::ItemResponse<model::AccessoryResponse> = client
+let response: model::ItemResponse<model::Accessory> = client
     .endpoint::<endpoint::GetAccessoryItemEndpoint>()
     .id(model::RentmanId(42))
     .send()

@@ -145,6 +145,43 @@ RESPONSE_OPTIONAL_FIELDS = {
 }
 
 
+# Rust type names for schemas whose name is not "resource + Response/Request".
+# Every other schema drops `Response` (`CrewResponse` -> `Crew`) or replaces
+# `Request` with `Payload` (`CrewRequest` -> `CrewPayload`). Names follow the
+# collection the schema belongs to.
+RESOURCE_NAMES = {
+    "Factuur": "Invoice",  # /invoices
+    "Invitations": "Invitation",  # /invitations
+    "Factors": "Factor",  # /factors
+    "FactorGroups": "FactorGroup",  # /factorgroups
+    "LeaveTypes": "LeaveType",  # /leavetypes
+    "LeaveMutations": "LeaveMutation",  # /leavemutation
+    "EquipmentAssignedSerials": "EquipmentAssignedSerial",  # /equipmentassignedserials
+    "CrewRate": "Rate",  # /rates
+    "CrewRates": "CrewRate",  # /crewrates
+    "CrewRateFactor": "RateFactor",  # /ratefactors
+    "Quotation": "Quote",  # /quotes
+    "Ledger": "LedgerCode",  # /ledgercodes
+}
+# Schemas that are not a resource or a payload keep their own name.
+TYPE_NAME_OVERRIDES = {
+    # Paging metadata of every response envelope, not a resource.
+    "ApiResponse": "ApiResponse",
+}
+
+
+def rust_type_name(schema_name_value: str) -> str:
+    """Rust type for an OpenAPI schema: the resource name for responses and
+    the resource name plus `Payload` for request bodies."""
+    if schema_name_value in TYPE_NAME_OVERRIDES:
+        return TYPE_NAME_OVERRIDES[schema_name_value]
+    for suffix, replacement in (("Response", ""), ("Request", "Payload")):
+        if schema_name_value.endswith(suffix):
+            resource = schema_name_value[: -len(suffix)]
+            return RESOURCE_NAMES.get(resource, resource) + replacement
+    raise ValueError(f"schema {schema_name_value} is neither a Response nor a Request")
+
+
 def escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
 
@@ -195,7 +232,7 @@ def openapi_type(schema: dict) -> tuple[str | None, bool]:
 
 
 def enum_type_name(schema: str, field: str) -> str:
-    return f"{schema}{rust_ident(field)}"
+    return f"{rust_type_name(schema)}{rust_ident(field)}"
 
 
 def enum_variant_name(value: object, used: set[str]) -> str:
@@ -640,7 +677,7 @@ def generate_wire(spec: dict) -> None:
         )
         lines.append(f"/// {description}")
         lines.append("#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]")
-        lines.append(f"pub struct {schema_name_value} {{")
+        lines.append(f"pub struct {rust_type_name(schema_name_value)} {{")
         required = effective_required(schema_name_value, schema)
         for field, field_schema in (schema.get("properties") or {}).items():
             rust_name = rust_field(field)
@@ -662,10 +699,26 @@ def generate_wire(spec: dict) -> None:
         lines.append("}")
         lines.append("")
 
-    lines.append("/// All Rentman API component schemas represented by this module.")
-    lines.append("pub const ALL_SCHEMAS: &[&str] = &[")
+    type_names = [rust_type_name(name) for name in schemas]
+    enum_names = [
+        enum_type_name(name, field)
+        for name, schema in schemas.items()
+        for field, field_schema in (schema.get("properties") or {}).items()
+        if "enum" in field_schema
+    ]
+    fixed_names = [
+        "NoRequest", "NoContent", "CollectionResponse", "ItemResponse", "RentmanId",
+        "ResourceReference", "EmailAddress", "CustomFields", "CustomFieldValue",
+    ]
+    all_names = type_names + enum_names + fixed_names
+    duplicates = sorted({name for name in all_names if all_names.count(name) > 1})
+    if duplicates:
+        raise ValueError(f"generated type names collide: {duplicates}")
+
+    lines.append("/// Every Rentman API component schema and the Rust type that represents it.")
+    lines.append("pub const SCHEMA_TYPES: &[(&str, &str)] = &[")
     for name in sorted(schemas):
-        lines.append(f'    "{escape(name)}",')
+        lines.append(f'    ("{escape(name)}", "{rust_type_name(name)}"),')
     lines.append("];")
     lines.append("")
 
@@ -710,17 +763,17 @@ def generate_endpoints(operations: list[dict]) -> None:
         lines.append("];")
         lines.append("")
 
-        request_type = operation["request"] or "NoRequest"
+        request_type = rust_type_name(operation["request"]) if operation["request"] else "NoRequest"
         if operation["response_kind"] == "NoContent":
             response_type = "NoContent"
             response_spec = "EndpointResponseSpec::NoContent"
         elif operation["response_kind"] == "Collection":
-            response_type = f"CollectionResponse<{operation['response_schema']}>"
+            response_type = f"CollectionResponse<{rust_type_name(operation['response_schema'])}>"
             response_spec = (
                 f'EndpointResponseSpec::Collection("{escape(operation["response_schema"])}")'
             )
         else:
-            response_type = f"ItemResponse<{operation['response_schema']}>"
+            response_type = f"ItemResponse<{rust_type_name(operation['response_schema'])}>"
             response_spec = f'EndpointResponseSpec::Item("{escape(operation["response_schema"])}")'
 
         request_spec = (

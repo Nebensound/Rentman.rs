@@ -57,6 +57,18 @@ When Rentman adds, removes, or renames endpoints, fields, schemas, enum values,
 request bodies, response types, or error status codes, the contract tests fail
 until the generated contract is updated and reviewed.
 
+Generated models carry resource names, not schema names: a response schema
+drops its suffix (`CrewResponse` → `Crew`) and a request schema becomes a
+write payload (`CrewRequest` → `CrewPayload`); generated enums follow the new
+type name (`CrewCountry`). Schemas whose name does not match their collection
+are mapped in the `RESOURCE_NAMES` table of the generator (`FactuurResponse` →
+`Invoice`, `CrewRateResponse` → `Rate` for `/rates`, `CrewRatesResponse` →
+`CrewRate` for `/crewrates`, `QuotationResponse` → `Quote`, `LedgerResponse`
+→ `LedgerCode`, ...). `model::SCHEMA_TYPES` lists every schema with its Rust
+type; the contract tests require exactly one type per schema. Endpoint
+metadata (`EndpointRequestSpec`, `EndpointResponseSpec`) and the override
+tables keep the OpenAPI schema names.
+
 Where live API payloads contradict the documented schema, the generator applies
 deliberate, documented overrides for response models (see the `RESPONSE_*`
 tables in `scripts/generate_endpoint_manifest.py`) — for example fields that

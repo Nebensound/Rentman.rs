@@ -110,90 +110,81 @@ pub(crate) const RESPONSE_ENUM_FIELDS: &[(&str, &str)] = &[
 
 #[test]
 fn appointment_response_recurrence_interval_unit() {
-    assert_documented_values_are_named::<model::AppointmentResponseRecurrenceIntervalUnit>(
+    assert_documented_values_are_named::<model::AppointmentRecurrenceIntervalUnit>(
         "AppointmentResponse",
         "recurrence_interval_unit",
-        |value| {
-            matches!(
-                value,
-                model::AppointmentResponseRecurrenceIntervalUnit::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::AppointmentRecurrenceIntervalUnit::Unknown(_)),
     );
 }
 
 #[test]
 fn contact_person_response_country() {
-    assert_documented_values_are_named::<model::ContactPersonResponseCountry>(
+    assert_documented_values_are_named::<model::ContactPersonCountry>(
         "ContactPersonResponse",
         "country",
-        |value| matches!(value, model::ContactPersonResponseCountry::Unknown(_)),
+        |value| matches!(value, model::ContactPersonCountry::Unknown(_)),
     );
 }
 
 #[test]
 fn contact_response_type() {
-    assert_documented_values_are_named::<model::ContactResponseType>(
-        "ContactResponse",
-        "type",
-        |value| matches!(value, model::ContactResponseType::Unknown(_)),
-    );
+    assert_documented_values_are_named::<model::ContactType>("ContactResponse", "type", |value| {
+        matches!(value, model::ContactType::Unknown(_))
+    });
 }
 
 #[test]
 fn contact_response_mailing_country() {
-    assert_documented_values_are_named::<model::ContactResponseMailingCountry>(
+    assert_documented_values_are_named::<model::ContactMailingCountry>(
         "ContactResponse",
         "mailing_country",
-        |value| matches!(value, model::ContactResponseMailingCountry::Unknown(_)),
+        |value| matches!(value, model::ContactMailingCountry::Unknown(_)),
     );
 }
 
 #[test]
 fn contact_response_country() {
-    assert_documented_values_are_named::<model::ContactResponseCountry>(
+    assert_documented_values_are_named::<model::ContactCountry>(
         "ContactResponse",
         "country",
-        |value| matches!(value, model::ContactResponseCountry::Unknown(_)),
+        |value| matches!(value, model::ContactCountry::Unknown(_)),
     );
 }
 
 #[test]
 fn contact_response_invoice_country() {
-    assert_documented_values_are_named::<model::ContactResponseInvoiceCountry>(
+    assert_documented_values_are_named::<model::ContactInvoiceCountry>(
         "ContactResponse",
         "invoice_country",
-        |value| matches!(value, model::ContactResponseInvoiceCountry::Unknown(_)),
+        |value| matches!(value, model::ContactInvoiceCountry::Unknown(_)),
     );
 }
 
 #[test]
 fn crew_response_country() {
-    assert_documented_values_are_named::<model::CrewResponseCountry>(
-        "CrewResponse",
-        "country",
-        |value| matches!(value, model::CrewResponseCountry::Unknown(_)),
-    );
+    assert_documented_values_are_named::<model::CrewCountry>("CrewResponse", "country", |value| {
+        matches!(value, model::CrewCountry::Unknown(_))
+    });
 }
 
 #[test]
 fn crew_availability_response_status() {
-    assert_documented_values_are_named::<model::CrewAvailabilityResponseStatus>(
+    assert_documented_values_are_named::<model::CrewAvailabilityStatus>(
         "CrewAvailabilityResponse",
         "status",
-        |value| matches!(value, model::CrewAvailabilityResponseStatus::Unknown(_)),
+        |value| matches!(value, model::CrewAvailabilityStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn crew_availability_response_recurrence_interval_unit() {
-    assert_documented_values_are_named::<model::CrewAvailabilityResponseRecurrenceIntervalUnit>(
+    assert_documented_values_are_named::<model::CrewAvailabilityRecurrenceIntervalUnit>(
         "CrewAvailabilityResponse",
         "recurrence_interval_unit",
         |value| {
             matches!(
                 value,
-                model::CrewAvailabilityResponseRecurrenceIntervalUnit::Unknown(_)
+                model::CrewAvailabilityRecurrenceIntervalUnit::Unknown(_)
             )
         },
     );
@@ -201,81 +192,76 @@ fn crew_availability_response_recurrence_interval_unit() {
 
 #[test]
 fn equipment_response_type() {
-    assert_documented_values_are_named::<model::EquipmentResponseType>(
+    assert_documented_values_are_named::<model::EquipmentType>(
         "EquipmentResponse",
         "type",
-        |value| matches!(value, model::EquipmentResponseType::Unknown(_)),
+        |value| matches!(value, model::EquipmentType::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_response_rental_sales() {
-    assert_documented_values_are_named::<model::EquipmentResponseRentalSales>(
+    assert_documented_values_are_named::<model::EquipmentRentalSales>(
         "EquipmentResponse",
         "rental_sales",
-        |value| matches!(value, model::EquipmentResponseRentalSales::Unknown(_)),
+        |value| matches!(value, model::EquipmentRentalSales::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_response_stock_management() {
-    assert_documented_values_are_named::<model::EquipmentResponseStockManagement>(
+    assert_documented_values_are_named::<model::EquipmentStockManagement>(
         "EquipmentResponse",
         "stock_management",
-        |value| matches!(value, model::EquipmentResponseStockManagement::Unknown(_)),
+        |value| matches!(value, model::EquipmentStockManagement::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_response_country_of_origin() {
-    assert_documented_values_are_named::<model::EquipmentResponseCountryOfOrigin>(
+    assert_documented_values_are_named::<model::EquipmentCountryOfOrigin>(
         "EquipmentResponse",
         "country_of_origin",
-        |value| matches!(value, model::EquipmentResponseCountryOfOrigin::Unknown(_)),
+        |value| matches!(value, model::EquipmentCountryOfOrigin::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_response_is_physical() {
-    assert_documented_values_are_named::<model::EquipmentResponseIsPhysical>(
+    assert_documented_values_are_named::<model::EquipmentIsPhysical>(
         "EquipmentResponse",
         "is_physical",
-        |value| matches!(value, model::EquipmentResponseIsPhysical::Unknown(_)),
+        |value| matches!(value, model::EquipmentIsPhysical::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_response_strict_container_content() {
-    assert_documented_values_are_named::<model::EquipmentResponseStrictContainerContent>(
+    assert_documented_values_are_named::<model::EquipmentStrictContainerContent>(
         "EquipmentResponse",
         "strict_container_content",
-        |value| {
-            matches!(
-                value,
-                model::EquipmentResponseStrictContainerContent::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::EquipmentStrictContainerContent::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_set_content_response_is_fixed() {
-    assert_documented_values_are_named::<model::EquipmentSetContentResponseIsFixed>(
+    assert_documented_values_are_named::<model::EquipmentSetContentIsFixed>(
         "EquipmentSetContentResponse",
         "is_fixed",
-        |value| matches!(value, model::EquipmentSetContentResponseIsFixed::Unknown(_)),
+        |value| matches!(value, model::EquipmentSetContentIsFixed::Unknown(_)),
     );
 }
 
 #[test]
 fn equipment_set_content_response_is_physically_connected() {
-    assert_documented_values_are_named::<model::EquipmentSetContentResponseIsPhysicallyConnected>(
+    assert_documented_values_are_named::<model::EquipmentSetContentIsPhysicallyConnected>(
         "EquipmentSetContentResponse",
         "is_physically_connected",
         |value| {
             matches!(
                 value,
-                model::EquipmentSetContentResponseIsPhysicallyConnected::Unknown(_)
+                model::EquipmentSetContentIsPhysicallyConnected::Unknown(_)
             )
         },
     );
@@ -283,164 +269,157 @@ fn equipment_set_content_response_is_physically_connected() {
 
 #[test]
 fn extra_input_field_response_itemtype() {
-    assert_documented_values_are_named::<model::ExtraInputFieldResponseItemtype>(
+    assert_documented_values_are_named::<model::ExtraInputFieldItemtype>(
         "ExtraInputFieldResponse",
         "itemtype",
-        |value| matches!(value, model::ExtraInputFieldResponseItemtype::Unknown(_)),
+        |value| matches!(value, model::ExtraInputFieldItemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn extra_input_field_response_linked_item_type() {
-    assert_documented_values_are_named::<model::ExtraInputFieldResponseLinkedItemType>(
+    assert_documented_values_are_named::<model::ExtraInputFieldLinkedItemType>(
         "ExtraInputFieldResponse",
         "linkedItemType",
-        |value| {
-            matches!(
-                value,
-                model::ExtraInputFieldResponseLinkedItemType::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::ExtraInputFieldLinkedItemType::Unknown(_)),
     );
 }
 
 #[test]
 fn extra_input_field_response_type() {
-    assert_documented_values_are_named::<model::ExtraInputFieldResponseType>(
+    assert_documented_values_are_named::<model::ExtraInputFieldType>(
         "ExtraInputFieldResponse",
         "type",
-        |value| matches!(value, model::ExtraInputFieldResponseType::Unknown(_)),
+        |value| matches!(value, model::ExtraInputFieldType::Unknown(_)),
     );
 }
 
 #[test]
 fn file_folder_response_itemtype() {
-    assert_documented_values_are_named::<model::FileFolderResponseItemtype>(
+    assert_documented_values_are_named::<model::FileFolderItemtype>(
         "FileFolderResponse",
         "itemtype",
-        |value| matches!(value, model::FileFolderResponseItemtype::Unknown(_)),
+        |value| matches!(value, model::FileFolderItemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn file_response_itemtype() {
-    assert_documented_values_are_named::<model::FileResponseItemtype>(
+    assert_documented_values_are_named::<model::FileItemtype>(
         "FileResponse",
         "itemtype",
-        |value| matches!(value, model::FileResponseItemtype::Unknown(_)),
+        |value| matches!(value, model::FileItemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn file_response_previewstatus() {
-    assert_documented_values_are_named::<model::FileResponsePreviewstatus>(
+    assert_documented_values_are_named::<model::FilePreviewstatus>(
         "FileResponse",
         "previewstatus",
-        |value| matches!(value, model::FileResponsePreviewstatus::Unknown(_)),
+        |value| matches!(value, model::FilePreviewstatus::Unknown(_)),
     );
 }
 
 #[test]
 fn folder_response_itemtype() {
-    assert_documented_values_are_named::<model::FolderResponseItemtype>(
+    assert_documented_values_are_named::<model::FolderItemtype>(
         "FolderResponse",
         "itemtype",
-        |value| matches!(value, model::FolderResponseItemtype::Unknown(_)),
+        |value| matches!(value, model::FolderItemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn invitations_response_type() {
-    assert_documented_values_are_named::<model::InvitationsResponseType>(
+    assert_documented_values_are_named::<model::InvitationType>(
         "InvitationsResponse",
         "type",
-        |value| matches!(value, model::InvitationsResponseType::Unknown(_)),
+        |value| matches!(value, model::InvitationType::Unknown(_)),
     );
 }
 
 #[test]
 fn invitations_response_emailstatus() {
-    assert_documented_values_are_named::<model::InvitationsResponseEmailstatus>(
+    assert_documented_values_are_named::<model::InvitationEmailstatus>(
         "InvitationsResponse",
         "emailstatus",
-        |value| matches!(value, model::InvitationsResponseEmailstatus::Unknown(_)),
+        |value| matches!(value, model::InvitationEmailstatus::Unknown(_)),
     );
 }
 
 #[test]
 fn factuur_response_invoicetype() {
-    assert_documented_values_are_named::<model::FactuurResponseInvoicetype>(
+    assert_documented_values_are_named::<model::InvoiceInvoicetype>(
         "FactuurResponse",
         "invoicetype",
-        |value| matches!(value, model::FactuurResponseInvoicetype::Unknown(_)),
+        |value| matches!(value, model::InvoiceInvoicetype::Unknown(_)),
     );
 }
 
 #[test]
 fn leave_request_response_approval_status() {
-    assert_documented_values_are_named::<model::LeaveRequestResponseApprovalStatus>(
+    assert_documented_values_are_named::<model::LeaveRequestApprovalStatus>(
         "LeaveRequestResponse",
         "approval_status",
-        |value| matches!(value, model::LeaveRequestResponseApprovalStatus::Unknown(_)),
+        |value| matches!(value, model::LeaveRequestApprovalStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn leave_types_response_type() {
-    assert_documented_values_are_named::<model::LeaveTypesResponseType>(
+    assert_documented_values_are_named::<model::LeaveTypeType>(
         "LeaveTypesResponse",
         "type",
-        |value| matches!(value, model::LeaveTypesResponseType::Unknown(_)),
+        |value| matches!(value, model::LeaveTypeType::Unknown(_)),
     );
 }
 
 #[test]
 fn leave_types_response_is_labor() {
-    assert_documented_values_are_named::<model::LeaveTypesResponseIsLabor>(
+    assert_documented_values_are_named::<model::LeaveTypeIsLabor>(
         "LeaveTypesResponse",
         "is_labor",
-        |value| matches!(value, model::LeaveTypesResponseIsLabor::Unknown(_)),
+        |value| matches!(value, model::LeaveTypeIsLabor::Unknown(_)),
     );
 }
 
 #[test]
 fn payment_response_payment_import_source() {
-    assert_documented_values_are_named::<model::PaymentResponsePaymentImportSource>(
+    assert_documented_values_are_named::<model::PaymentPaymentImportSource>(
         "PaymentResponse",
         "payment_import_source",
-        |value| matches!(value, model::PaymentResponsePaymentImportSource::Unknown(_)),
+        |value| matches!(value, model::PaymentPaymentImportSource::Unknown(_)),
     );
 }
 
 #[test]
 fn project_crew_response_transport() {
-    assert_documented_values_are_named::<model::ProjectCrewResponseTransport>(
+    assert_documented_values_are_named::<model::ProjectCrewTransport>(
         "ProjectCrewResponse",
         "transport",
-        |value| matches!(value, model::ProjectCrewResponseTransport::Unknown(_)),
+        |value| matches!(value, model::ProjectCrewTransport::Unknown(_)),
     );
 }
 
 #[test]
 fn project_crew_response_activity_status() {
-    assert_documented_values_are_named::<model::ProjectCrewResponseActivityStatus>(
+    assert_documented_values_are_named::<model::ProjectCrewActivityStatus>(
         "ProjectCrewResponse",
         "activity_status",
-        |value| matches!(value, model::ProjectCrewResponseActivityStatus::Unknown(_)),
+        |value| matches!(value, model::ProjectCrewActivityStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn project_function_group_response_planperiod_start_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionGroupPlanperiodStartScheduleIsStart>(
         "ProjectFunctionGroupResponse",
         "planperiod_start_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionGroupResponsePlanperiodStartScheduleIsStart::Unknown(_)
+                model::ProjectFunctionGroupPlanperiodStartScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -448,15 +427,13 @@ fn project_function_group_response_planperiod_start_schedule_is_start() {
 
 #[test]
 fn project_function_group_response_usageperiod_start_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionGroupUsageperiodStartScheduleIsStart>(
         "ProjectFunctionGroupResponse",
         "usageperiod_start_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionGroupResponseUsageperiodStartScheduleIsStart::Unknown(_)
+                model::ProjectFunctionGroupUsageperiodStartScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -464,15 +441,13 @@ fn project_function_group_response_usageperiod_start_schedule_is_start() {
 
 #[test]
 fn project_function_group_response_planperiod_end_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionGroupPlanperiodEndScheduleIsStart>(
         "ProjectFunctionGroupResponse",
         "planperiod_end_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionGroupResponsePlanperiodEndScheduleIsStart::Unknown(_)
+                model::ProjectFunctionGroupPlanperiodEndScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -480,15 +455,13 @@ fn project_function_group_response_planperiod_end_schedule_is_start() {
 
 #[test]
 fn project_function_group_response_usageperiod_end_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionGroupUsageperiodEndScheduleIsStart>(
         "ProjectFunctionGroupResponse",
         "usageperiod_end_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionGroupResponseUsageperiodEndScheduleIsStart::Unknown(_)
+                model::ProjectFunctionGroupUsageperiodEndScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -496,15 +469,13 @@ fn project_function_group_response_usageperiod_end_schedule_is_start() {
 
 #[test]
 fn project_function_response_planperiod_start_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionResponsePlanperiodStartScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionPlanperiodStartScheduleIsStart>(
         "ProjectFunctionResponse",
         "planperiod_start_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionResponsePlanperiodStartScheduleIsStart::Unknown(_)
+                model::ProjectFunctionPlanperiodStartScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -512,15 +483,13 @@ fn project_function_response_planperiod_start_schedule_is_start() {
 
 #[test]
 fn project_function_response_usageperiod_start_schedule_is_start() {
-    assert_documented_values_are_named::<
-        model::ProjectFunctionResponseUsageperiodStartScheduleIsStart,
-    >(
+    assert_documented_values_are_named::<model::ProjectFunctionUsageperiodStartScheduleIsStart>(
         "ProjectFunctionResponse",
         "usageperiod_start_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionResponseUsageperiodStartScheduleIsStart::Unknown(_)
+                model::ProjectFunctionUsageperiodStartScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -528,13 +497,13 @@ fn project_function_response_usageperiod_start_schedule_is_start() {
 
 #[test]
 fn project_function_response_planperiod_end_schedule_is_start() {
-    assert_documented_values_are_named::<model::ProjectFunctionResponsePlanperiodEndScheduleIsStart>(
+    assert_documented_values_are_named::<model::ProjectFunctionPlanperiodEndScheduleIsStart>(
         "ProjectFunctionResponse",
         "planperiod_end_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionResponsePlanperiodEndScheduleIsStart::Unknown(_)
+                model::ProjectFunctionPlanperiodEndScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -542,13 +511,13 @@ fn project_function_response_planperiod_end_schedule_is_start() {
 
 #[test]
 fn project_function_response_usageperiod_end_schedule_is_start() {
-    assert_documented_values_are_named::<model::ProjectFunctionResponseUsageperiodEndScheduleIsStart>(
+    assert_documented_values_are_named::<model::ProjectFunctionUsageperiodEndScheduleIsStart>(
         "ProjectFunctionResponse",
         "usageperiod_end_schedule_is_start",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionResponseUsageperiodEndScheduleIsStart::Unknown(_)
+                model::ProjectFunctionUsageperiodEndScheduleIsStart::Unknown(_)
             )
         },
     );
@@ -556,22 +525,22 @@ fn project_function_response_usageperiod_end_schedule_is_start() {
 
 #[test]
 fn project_function_response_type() {
-    assert_documented_values_are_named::<model::ProjectFunctionResponseType>(
+    assert_documented_values_are_named::<model::ProjectFunctionType>(
         "ProjectFunctionResponse",
         "type",
-        |value| matches!(value, model::ProjectFunctionResponseType::Unknown(_)),
+        |value| matches!(value, model::ProjectFunctionType::Unknown(_)),
     );
 }
 
 #[test]
 fn project_function_response_recurrence_interval_unit() {
-    assert_documented_values_are_named::<model::ProjectFunctionResponseRecurrenceIntervalUnit>(
+    assert_documented_values_are_named::<model::ProjectFunctionRecurrenceIntervalUnit>(
         "ProjectFunctionResponse",
         "recurrence_interval_unit",
         |value| {
             matches!(
                 value,
-                model::ProjectFunctionResponseRecurrenceIntervalUnit::Unknown(_)
+                model::ProjectFunctionRecurrenceIntervalUnit::Unknown(_)
             )
         },
     );
@@ -579,245 +548,218 @@ fn project_function_response_recurrence_interval_unit() {
 
 #[test]
 fn project_request_response_source() {
-    assert_documented_values_are_named::<model::ProjectRequestResponseSource>(
+    assert_documented_values_are_named::<model::ProjectRequestSource>(
         "ProjectRequestResponse",
         "source",
-        |value| matches!(value, model::ProjectRequestResponseSource::Unknown(_)),
+        |value| matches!(value, model::ProjectRequestSource::Unknown(_)),
     );
 }
 
 #[test]
 fn project_request_response_status() {
-    assert_documented_values_are_named::<model::ProjectRequestResponseStatus>(
+    assert_documented_values_are_named::<model::ProjectRequestStatus>(
         "ProjectRequestResponse",
         "status",
-        |value| matches!(value, model::ProjectRequestResponseStatus::Unknown(_)),
+        |value| matches!(value, model::ProjectRequestStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn project_response_deposit_status() {
-    assert_documented_values_are_named::<model::ProjectResponseDepositStatus>(
+    assert_documented_values_are_named::<model::ProjectDepositStatus>(
         "ProjectResponse",
         "deposit_status",
-        |value| matches!(value, model::ProjectResponseDepositStatus::Unknown(_)),
+        |value| matches!(value, model::ProjectDepositStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn project_type_response_type() {
-    assert_documented_values_are_named::<model::ProjectTypeResponseType>(
+    assert_documented_values_are_named::<model::ProjectTypeType>(
         "ProjectTypeResponse",
         "type",
-        |value| matches!(value, model::ProjectTypeResponseType::Unknown(_)),
+        |value| matches!(value, model::ProjectTypeType::Unknown(_)),
     );
 }
 
 #[test]
 fn project_vehicle_response_transport() {
-    assert_documented_values_are_named::<model::ProjectVehicleResponseTransport>(
+    assert_documented_values_are_named::<model::ProjectVehicleTransport>(
         "ProjectVehicleResponse",
         "transport",
-        |value| matches!(value, model::ProjectVehicleResponseTransport::Unknown(_)),
+        |value| matches!(value, model::ProjectVehicleTransport::Unknown(_)),
     );
 }
 
 #[test]
 fn purchase_order_cost_response_costitemtype() {
-    assert_documented_values_are_named::<model::PurchaseOrderCostResponseCostitemtype>(
+    assert_documented_values_are_named::<model::PurchaseOrderCostCostitemtype>(
         "PurchaseOrderCostResponse",
         "costitemtype",
-        |value| {
-            matches!(
-                value,
-                model::PurchaseOrderCostResponseCostitemtype::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::PurchaseOrderCostCostitemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn purchase_order_response_approval_status() {
-    assert_documented_values_are_named::<model::PurchaseOrderResponseApprovalStatus>(
+    assert_documented_values_are_named::<model::PurchaseOrderApprovalStatus>(
         "PurchaseOrderResponse",
         "approval_status",
-        |value| {
-            matches!(
-                value,
-                model::PurchaseOrderResponseApprovalStatus::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::PurchaseOrderApprovalStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn purchase_order_response_previous_status() {
-    assert_documented_values_are_named::<model::PurchaseOrderResponsePreviousStatus>(
+    assert_documented_values_are_named::<model::PurchaseOrderPreviousStatus>(
         "PurchaseOrderResponse",
         "previous_status",
-        |value| {
-            matches!(
-                value,
-                model::PurchaseOrderResponsePreviousStatus::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::PurchaseOrderPreviousStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn purchase_order_response_delivery_type() {
-    assert_documented_values_are_named::<model::PurchaseOrderResponseDeliveryType>(
+    assert_documented_values_are_named::<model::PurchaseOrderDeliveryType>(
         "PurchaseOrderResponse",
         "delivery_type",
-        |value| matches!(value, model::PurchaseOrderResponseDeliveryType::Unknown(_)),
+        |value| matches!(value, model::PurchaseOrderDeliveryType::Unknown(_)),
     );
 }
 
 #[test]
 fn purchase_order_response_export_status() {
-    assert_documented_values_are_named::<model::PurchaseOrderResponseExportStatus>(
+    assert_documented_values_are_named::<model::PurchaseOrderExportStatus>(
         "PurchaseOrderResponse",
         "export_status",
-        |value| matches!(value, model::PurchaseOrderResponseExportStatus::Unknown(_)),
+        |value| matches!(value, model::PurchaseOrderExportStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn crew_rate_response_type() {
-    assert_documented_values_are_named::<model::CrewRateResponseType>(
-        "CrewRateResponse",
-        "type",
-        |value| matches!(value, model::CrewRateResponseType::Unknown(_)),
-    );
+    assert_documented_values_are_named::<model::RateType>("CrewRateResponse", "type", |value| {
+        matches!(value, model::RateType::Unknown(_))
+    });
 }
 
 #[test]
 fn crew_rate_response_subtype() {
-    assert_documented_values_are_named::<model::CrewRateResponseSubtype>(
+    assert_documented_values_are_named::<model::RateSubtype>(
         "CrewRateResponse",
         "subtype",
-        |value| matches!(value, model::CrewRateResponseSubtype::Unknown(_)),
+        |value| matches!(value, model::RateSubtype::Unknown(_)),
     );
 }
 
 #[test]
 fn repair_response_is_usable() {
-    assert_documented_values_are_named::<model::RepairResponseIsUsable>(
+    assert_documented_values_are_named::<model::RepairIsUsable>(
         "RepairResponse",
         "is_usable",
-        |value| matches!(value, model::RepairResponseIsUsable::Unknown(_)),
+        |value| matches!(value, model::RepairIsUsable::Unknown(_)),
     );
 }
 
 #[test]
 fn repair_response_repair_status() {
-    assert_documented_values_are_named::<model::RepairResponseRepairStatus>(
+    assert_documented_values_are_named::<model::RepairRepairStatus>(
         "RepairResponse",
         "repair_status",
-        |value| matches!(value, model::RepairResponseRepairStatus::Unknown(_)),
+        |value| matches!(value, model::RepairRepairStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn stock_location_response_country() {
-    assert_documented_values_are_named::<model::StockLocationResponseCountry>(
+    assert_documented_values_are_named::<model::StockLocationCountry>(
         "StockLocationResponse",
         "country",
-        |value| matches!(value, model::StockLocationResponseCountry::Unknown(_)),
+        |value| matches!(value, model::StockLocationCountry::Unknown(_)),
     );
 }
 
 #[test]
 fn stock_location_response_type() {
-    assert_documented_values_are_named::<model::StockLocationResponseType>(
+    assert_documented_values_are_named::<model::StockLocationType>(
         "StockLocationResponse",
         "type",
-        |value| matches!(value, model::StockLocationResponseType::Unknown(_)),
+        |value| matches!(value, model::StockLocationType::Unknown(_)),
     );
 }
 
 #[test]
 fn stock_movement_response_type() {
-    assert_documented_values_are_named::<model::StockMovementResponseType>(
+    assert_documented_values_are_named::<model::StockMovementType>(
         "StockMovementResponse",
         "type",
-        |value| matches!(value, model::StockMovementResponseType::Unknown(_)),
+        |value| matches!(value, model::StockMovementType::Unknown(_)),
     );
 }
 
 #[test]
 fn subrental_response_type() {
-    assert_documented_values_are_named::<model::SubrentalResponseType>(
+    assert_documented_values_are_named::<model::SubrentalType>(
         "SubrentalResponse",
         "type",
-        |value| matches!(value, model::SubrentalResponseType::Unknown(_)),
+        |value| matches!(value, model::SubrentalType::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_recurhoe() {
-    assert_documented_values_are_named::<model::TaskResponseRecurhoe>(
+    assert_documented_values_are_named::<model::TaskRecurhoe>(
         "TaskResponse",
         "recurhoe",
-        |value| matches!(value, model::TaskResponseRecurhoe::Unknown(_)),
+        |value| matches!(value, model::TaskRecurhoe::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_priority() {
-    assert_documented_values_are_named::<model::TaskResponsePriority>(
+    assert_documented_values_are_named::<model::TaskPriority>(
         "TaskResponse",
         "priority",
-        |value| matches!(value, model::TaskResponsePriority::Unknown(_)),
+        |value| matches!(value, model::TaskPriority::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_deadline_type() {
-    assert_documented_values_are_named::<model::TaskResponseDeadlineType>(
+    assert_documented_values_are_named::<model::TaskDeadlineType>(
         "TaskResponse",
         "deadline_type",
-        |value| matches!(value, model::TaskResponseDeadlineType::Unknown(_)),
+        |value| matches!(value, model::TaskDeadlineType::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_deadline_relative_offset_base() {
-    assert_documented_values_are_named::<model::TaskResponseDeadlineRelativeOffsetBase>(
+    assert_documented_values_are_named::<model::TaskDeadlineRelativeOffsetBase>(
         "TaskResponse",
         "deadline_relative_offset_base",
-        |value| {
-            matches!(
-                value,
-                model::TaskResponseDeadlineRelativeOffsetBase::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::TaskDeadlineRelativeOffsetBase::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_deadline_relative_offset_unit() {
-    assert_documented_values_are_named::<model::TaskResponseDeadlineRelativeOffsetUnit>(
+    assert_documented_values_are_named::<model::TaskDeadlineRelativeOffsetUnit>(
         "TaskResponse",
         "deadline_relative_offset_unit",
-        |value| {
-            matches!(
-                value,
-                model::TaskResponseDeadlineRelativeOffsetUnit::Unknown(_)
-            )
-        },
+        |value| matches!(value, model::TaskDeadlineRelativeOffsetUnit::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_deadline_relative_offset_direction() {
-    assert_documented_values_are_named::<model::TaskResponseDeadlineRelativeOffsetDirection>(
+    assert_documented_values_are_named::<model::TaskDeadlineRelativeOffsetDirection>(
         "TaskResponse",
         "deadline_relative_offset_direction",
         |value| {
             matches!(
                 value,
-                model::TaskResponseDeadlineRelativeOffsetDirection::Unknown(_)
+                model::TaskDeadlineRelativeOffsetDirection::Unknown(_)
             )
         },
     );
@@ -825,63 +767,61 @@ fn task_response_deadline_relative_offset_direction() {
 
 #[test]
 fn task_response_itemtype() {
-    assert_documented_values_are_named::<model::TaskResponseItemtype>(
+    assert_documented_values_are_named::<model::TaskItemtype>(
         "TaskResponse",
         "itemtype",
-        |value| matches!(value, model::TaskResponseItemtype::Unknown(_)),
+        |value| matches!(value, model::TaskItemtype::Unknown(_)),
     );
 }
 
 #[test]
 fn task_response_public() {
-    assert_documented_values_are_named::<model::TaskResponsePublic>(
-        "TaskResponse",
-        "public",
-        |value| matches!(value, model::TaskResponsePublic::Unknown(_)),
-    );
+    assert_documented_values_are_named::<model::TaskPublic>("TaskResponse", "public", |value| {
+        matches!(value, model::TaskPublic::Unknown(_))
+    });
 }
 
 #[test]
 fn task_response_assignment_type() {
-    assert_documented_values_are_named::<model::TaskResponseAssignmentType>(
+    assert_documented_values_are_named::<model::TaskAssignmentType>(
         "TaskResponse",
         "assignment_type",
-        |value| matches!(value, model::TaskResponseAssignmentType::Unknown(_)),
+        |value| matches!(value, model::TaskAssignmentType::Unknown(_)),
     );
 }
 
 #[test]
 fn task_status_response_type() {
-    assert_documented_values_are_named::<model::TaskStatusResponseType>(
+    assert_documented_values_are_named::<model::TaskStatusType>(
         "TaskStatusResponse",
         "type",
-        |value| matches!(value, model::TaskStatusResponseType::Unknown(_)),
+        |value| matches!(value, model::TaskStatusType::Unknown(_)),
     );
 }
 
 #[test]
 fn tax_class_response_type() {
-    assert_documented_values_are_named::<model::TaxClassResponseType>(
+    assert_documented_values_are_named::<model::TaxClassType>(
         "TaxClassResponse",
         "type",
-        |value| matches!(value, model::TaxClassResponseType::Unknown(_)),
+        |value| matches!(value, model::TaxClassType::Unknown(_)),
     );
 }
 
 #[test]
 fn time_registration_response_status() {
-    assert_documented_values_are_named::<model::TimeRegistrationResponseStatus>(
+    assert_documented_values_are_named::<model::TimeRegistrationStatus>(
         "TimeRegistrationResponse",
         "status",
-        |value| matches!(value, model::TimeRegistrationResponseStatus::Unknown(_)),
+        |value| matches!(value, model::TimeRegistrationStatus::Unknown(_)),
     );
 }
 
 #[test]
 fn vehicle_response_multiple() {
-    assert_documented_values_are_named::<model::VehicleResponseMultiple>(
+    assert_documented_values_are_named::<model::VehicleMultiple>(
         "VehicleResponse",
         "multiple",
-        |value| matches!(value, model::VehicleResponseMultiple::Unknown(_)),
+        |value| matches!(value, model::VehicleMultiple::Unknown(_)),
     );
 }
