@@ -42,11 +42,11 @@
 //! ```
 
 use crate::{
+    RentmanAmount,
     id::{Id, ItemId},
     model::EmailAddress,
 };
 use chrono::{DateTime, FixedOffset};
-use rust_decimal::Decimal;
 use serde::Serialize;
 use std::{fmt, marker::PhantomData};
 
@@ -199,9 +199,10 @@ impl FilterValue for i64 {
     }
 }
 
-impl FilterValue for Decimal {
+/// Amounts filter by their exact decimal text.
+impl FilterValue for RentmanAmount {
     fn filter_value(&self) -> String {
-        self.to_string()
+        self.as_decimal().to_string()
     }
 }
 
@@ -244,7 +245,7 @@ impl FilterValue for ItemId {
 mod tests {
     use crate::fields::{accessory, contact, contact_person, file};
     use crate::model::{ContactCountry, CrewId};
-    use crate::{ItemId, model::EmailAddress};
+    use crate::{ItemId, RentmanAmount, model::EmailAddress};
     use chrono::DateTime;
     use rust_decimal::Decimal;
 
@@ -258,7 +259,7 @@ mod tests {
 
     #[test]
     fn renders_every_operator_in_the_documented_syntax() {
-        let distance = Decimal::new(300, 0);
+        let distance = RentmanAmount::new(Decimal::new(300, 0));
         assert_eq!(
             pair(contact::DISTANCE.eq(distance)),
             owned("distance", "300")
@@ -316,7 +317,7 @@ mod tests {
             owned("quantity[gte]", "-2")
         );
         assert_eq!(
-            pair(contact::DISTANCE.lte(Decimal::new(12505, 2))),
+            pair(contact::DISTANCE.lte(RentmanAmount::new(Decimal::new(12505, 2)))),
             owned("distance[lte]", "125.05")
         );
         assert_eq!(
@@ -347,7 +348,10 @@ mod tests {
         assert_eq!(format!("{:?}", field.clone()), "Field(name)");
         assert_eq!(format!("{copy:?}"), "Field(name)");
         assert_eq!(
-            format!("{:?}", contact::DISTANCE.lte(Decimal::new(300, 0))),
+            format!(
+                "{:?}",
+                contact::DISTANCE.lte(RentmanAmount::new(Decimal::new(300, 0)))
+            ),
             "Filter(distance[lte]=300)"
         );
         assert_eq!(format!("{:?}", contact::NAME.desc()), "Sort(-name)");

@@ -5,6 +5,17 @@
 //! [`Collection`] only offers the operations Rentman documents for it: the
 //! methods come from the [`List`], [`Get`], [`Create`], [`Update`] and
 //! [`Delete`] traits, which the generated code implements per collection.
+//!
+//! The resources are the only way to Rentman data: the endpoint layer below
+//! them and the response envelopes are internal.
+//!
+//! ```compile_fail
+//! use rentman_client::endpoint::GetCrewCollectionEndpoint;
+//! ```
+//!
+//! ```compile_fail
+//! use rentman_client::model::CollectionResponse;
+//! ```
 
 mod generated;
 

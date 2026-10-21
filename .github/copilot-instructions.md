@@ -33,9 +33,10 @@ repositories.
 - Treat the OpenAPI document as the minimum contract, not as the maximum
   strictness. If a field has clear semantics, model that semantics even when
   the OpenAPI type is only `string` or `integer`.
-- Keep generated or documentation-derived data behind a hand-written facade.
-  The public user-facing modules are `model` and `endpoint`; do not expose
-  `openapi` as part of the ergonomic main public API.
+- The resource layer is the only public API for Rentman data. The public
+  modules are `resource`, `model`, `fields`, and `projection_fields`; the
+  endpoint layer and the response envelopes are crate-internal. Do not add
+  hand-written per-endpoint methods or expose `openapi` or `endpoint`.
 - Add abstractions only when they remove real duplication or make API boundaries
   safer.
 
@@ -54,13 +55,13 @@ repositories.
 - Every endpoint must have a meaningful Rust request type and response type.
   Use `NoRequest` or `NoContent` only when the OpenAPI operation actually has
   no JSON request or response body.
-- Every documented endpoint must be executable through `RentmanClient` with a
+- Every documented operation must be reachable through a resource, and the
+  internal endpoint for it must be executable with a
   typed request model and typed response model. The generator must keep the
   compile-time executability assertion in sync with every endpoint type.
-- Every documented path/query parameter must be represented through
-  `EndpointParameterSpec`. When a parameter has clear semantics, expose a typed
-  builder helper such as `id(Id<R>)` instead of making users pass raw
-  strings.
+- Every documented path/query parameter must be represented through the
+  internal `EndpointParameterSpec`. Path parameters are typed in the resource
+  methods (`get(Id<R>)`), never raw strings.
 - Response enums are open (`Unknown(String)` keeps an undocumented value as
   sent); request enums stay closed. Every documented value must still be a
   named variant.
@@ -113,7 +114,7 @@ repositories.
 - Assert error behavior on typed error variants, not on error message
   substrings.
 - Do not require real Rentman credentials for default tests.
-- When adding a high-level client method, add both:
+- When changing the resource layer, add both:
   - a behavior test using the local test server, and
   - an OpenAPI contract assertion for the documented operation and schema fields.
 
@@ -149,7 +150,7 @@ repositories.
 - Requests that create data (`POST`) are sent exactly once. Their docs state
   that the caller has to reconcile after an error, and which read method to use
   for it.
-- Every high-level write method documents its retry behavior, and a test proves
+- Every write method of the resource layer documents its retry behavior, and a test proves
   how many requests reach the server on a transient failure.
 
 ## Toolchain And CI

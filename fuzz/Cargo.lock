@@ -1254,17 +1254,15 @@ dependencies = [
 
 [[package]]
 name = "rentman-client"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "backon",
  "chrono",
  "governor",
- "percent-encoding",
  "reqwest",
  "rust_decimal",
  "serde",
  "serde_json",
- "serde_urlencoded",
  "thiserror",
  "tokio",
  "tracing",

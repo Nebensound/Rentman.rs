@@ -1,7 +1,7 @@
 use super::{
     Endpoint, EndpointErrorSpec, EndpointParameterLocation, EndpointParameterSpec,
     EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
-    EndpointWithId, ExecutableEndpoint,
+    ExecutableEndpoint,
 };
 use crate::model::*;
 use crate::model::{CollectionResponse, ItemResponse, NoContent, NoRequest};
@@ -33,7 +33,7 @@ const GETACCESSORYCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /accessories`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAccessoryCollectionEndpoint;
+pub(crate) struct GetAccessoryCollectionEndpoint;
 
 impl Endpoint for GetAccessoryCollectionEndpoint {
     type Request = NoRequest;
@@ -83,7 +83,7 @@ const DELETEACCESSORYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /accessories/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteAccessoryEndpoint;
+pub(crate) struct DeleteAccessoryEndpoint;
 
 impl Endpoint for DeleteAccessoryEndpoint {
     type Request = NoRequest;
@@ -99,10 +99,6 @@ impl Endpoint for DeleteAccessoryEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEACCESSORYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteAccessoryEndpoint {
-    type Resource = Accessory;
 }
 
 const GETACCESSORYITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -137,7 +133,7 @@ const GETACCESSORYITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /accessories/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAccessoryItemEndpoint;
+pub(crate) struct GetAccessoryItemEndpoint;
 
 impl Endpoint for GetAccessoryItemEndpoint {
     type Request = NoRequest;
@@ -153,10 +149,6 @@ impl Endpoint for GetAccessoryItemEndpoint {
         response: EndpointResponseSpec::Item("AccessoryResponse"),
         errors: GETACCESSORYITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetAccessoryItemEndpoint {
-    type Resource = Accessory;
 }
 
 const UPDATEACCESSORYENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -191,7 +183,7 @@ const UPDATEACCESSORYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /accessories/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateAccessoryEndpoint;
+pub(crate) struct UpdateAccessoryEndpoint;
 
 impl Endpoint for UpdateAccessoryEndpoint {
     type Request = AccessoryPayload;
@@ -207,10 +199,6 @@ impl Endpoint for UpdateAccessoryEndpoint {
         response: EndpointResponseSpec::Item("AccessoryResponse"),
         errors: UPDATEACCESSORYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateAccessoryEndpoint {
-    type Resource = Accessory;
 }
 
 const GETACTUALCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -240,7 +228,7 @@ const GETACTUALCONTENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /actualcontent`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetActualContentCollectionEndpoint;
+pub(crate) struct GetActualContentCollectionEndpoint;
 
 impl Endpoint for GetActualContentCollectionEndpoint {
     type Request = NoRequest;
@@ -291,7 +279,7 @@ const GETACTUALCONTENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /actualcontent/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetActualContentItemEndpoint;
+pub(crate) struct GetActualContentItemEndpoint;
 
 impl Endpoint for GetActualContentItemEndpoint {
     type Request = NoRequest;
@@ -307,10 +295,6 @@ impl Endpoint for GetActualContentItemEndpoint {
         response: EndpointResponseSpec::Item("ActualContentResponse"),
         errors: GETACTUALCONTENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetActualContentItemEndpoint {
-    type Resource = ActualContent;
 }
 
 const GETALTERNATIVECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -340,7 +324,7 @@ const GETALTERNATIVECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /alternatives`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAlternativeCollectionEndpoint;
+pub(crate) struct GetAlternativeCollectionEndpoint;
 
 impl Endpoint for GetAlternativeCollectionEndpoint {
     type Request = NoRequest;
@@ -390,7 +374,7 @@ const DELETEALTERNATIVEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /alternatives/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteAlternativeEndpoint;
+pub(crate) struct DeleteAlternativeEndpoint;
 
 impl Endpoint for DeleteAlternativeEndpoint {
     type Request = NoRequest;
@@ -406,10 +390,6 @@ impl Endpoint for DeleteAlternativeEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEALTERNATIVEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteAlternativeEndpoint {
-    type Resource = Alternative;
 }
 
 const GETALTERNATIVEITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -444,7 +424,7 @@ const GETALTERNATIVEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /alternatives/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAlternativeItemEndpoint;
+pub(crate) struct GetAlternativeItemEndpoint;
 
 impl Endpoint for GetAlternativeItemEndpoint {
     type Request = NoRequest;
@@ -460,10 +440,6 @@ impl Endpoint for GetAlternativeItemEndpoint {
         response: EndpointResponseSpec::Item("AlternativeResponse"),
         errors: GETALTERNATIVEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetAlternativeItemEndpoint {
-    type Resource = Alternative;
 }
 
 const UPDATEALTERNATIVEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -498,7 +474,7 @@ const UPDATEALTERNATIVEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /alternatives/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateAlternativeEndpoint;
+pub(crate) struct UpdateAlternativeEndpoint;
 
 impl Endpoint for UpdateAlternativeEndpoint {
     type Request = AlternativePayload;
@@ -514,10 +490,6 @@ impl Endpoint for UpdateAlternativeEndpoint {
         response: EndpointResponseSpec::Item("AlternativeResponse"),
         errors: UPDATEALTERNATIVEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateAlternativeEndpoint {
-    type Resource = Alternative;
 }
 
 const GETAPPOINTMENTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -547,7 +519,7 @@ const GETAPPOINTMENTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /appointmentcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAppointmentCrewCollectionEndpoint;
+pub(crate) struct GetAppointmentCrewCollectionEndpoint;
 
 impl Endpoint for GetAppointmentCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -598,7 +570,7 @@ const DELETEAPPOINTMENTCREWENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /appointmentcrew/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteAppointmentCrewEndpoint;
+pub(crate) struct DeleteAppointmentCrewEndpoint;
 
 impl Endpoint for DeleteAppointmentCrewEndpoint {
     type Request = NoRequest;
@@ -614,10 +586,6 @@ impl Endpoint for DeleteAppointmentCrewEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEAPPOINTMENTCREWENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteAppointmentCrewEndpoint {
-    type Resource = AppointmentCrew;
 }
 
 const GETAPPOINTMENTCREWITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -653,7 +621,7 @@ const GETAPPOINTMENTCREWITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /appointmentcrew/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAppointmentCrewItemEndpoint;
+pub(crate) struct GetAppointmentCrewItemEndpoint;
 
 impl Endpoint for GetAppointmentCrewItemEndpoint {
     type Request = NoRequest;
@@ -669,10 +637,6 @@ impl Endpoint for GetAppointmentCrewItemEndpoint {
         response: EndpointResponseSpec::Item("AppointmentCrewResponse"),
         errors: GETAPPOINTMENTCREWITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetAppointmentCrewItemEndpoint {
-    type Resource = AppointmentCrew;
 }
 
 const UPDATEAPPOINTMENTCREWENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -708,7 +672,7 @@ const UPDATEAPPOINTMENTCREWENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /appointmentcrew/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateAppointmentCrewEndpoint;
+pub(crate) struct UpdateAppointmentCrewEndpoint;
 
 impl Endpoint for UpdateAppointmentCrewEndpoint {
     type Request = AppointmentCrewPayload;
@@ -724,10 +688,6 @@ impl Endpoint for UpdateAppointmentCrewEndpoint {
         response: EndpointResponseSpec::Item("AppointmentCrewResponse"),
         errors: UPDATEAPPOINTMENTCREWENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateAppointmentCrewEndpoint {
-    type Resource = AppointmentCrew;
 }
 
 const GETAPPOINTMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -757,7 +717,7 @@ const GETAPPOINTMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /appointments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAppointmentCollectionEndpoint;
+pub(crate) struct GetAppointmentCollectionEndpoint;
 
 impl Endpoint for GetAppointmentCollectionEndpoint {
     type Request = NoRequest;
@@ -802,7 +762,7 @@ const CREATEAPPOINTMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /appointments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateAppointmentEndpoint;
+pub(crate) struct CreateAppointmentEndpoint;
 
 impl Endpoint for CreateAppointmentEndpoint {
     type Request = AppointmentPayload;
@@ -852,7 +812,7 @@ const DELETEAPPOINTMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /appointments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteAppointmentEndpoint;
+pub(crate) struct DeleteAppointmentEndpoint;
 
 impl Endpoint for DeleteAppointmentEndpoint {
     type Request = NoRequest;
@@ -868,10 +828,6 @@ impl Endpoint for DeleteAppointmentEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEAPPOINTMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteAppointmentEndpoint {
-    type Resource = Appointment;
 }
 
 const GETAPPOINTMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -906,7 +862,7 @@ const GETAPPOINTMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /appointments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAppointmentItemEndpoint;
+pub(crate) struct GetAppointmentItemEndpoint;
 
 impl Endpoint for GetAppointmentItemEndpoint {
     type Request = NoRequest;
@@ -922,10 +878,6 @@ impl Endpoint for GetAppointmentItemEndpoint {
         response: EndpointResponseSpec::Item("AppointmentResponse"),
         errors: GETAPPOINTMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetAppointmentItemEndpoint {
-    type Resource = Appointment;
 }
 
 const UPDATEAPPOINTMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -960,7 +912,7 @@ const UPDATEAPPOINTMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /appointments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateAppointmentEndpoint;
+pub(crate) struct UpdateAppointmentEndpoint;
 
 impl Endpoint for UpdateAppointmentEndpoint {
     type Request = AppointmentPayload;
@@ -976,10 +928,6 @@ impl Endpoint for UpdateAppointmentEndpoint {
         response: EndpointResponseSpec::Item("AppointmentResponse"),
         errors: UPDATEAPPOINTMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateAppointmentEndpoint {
-    type Resource = Appointment;
 }
 
 const GETAPPOINTMENTAPPOINTMENTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1015,7 +963,7 @@ const GETAPPOINTMENTAPPOINTMENTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpe
 
 /// Typed endpoint for `GET /appointments/{id}/appointmentcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetAppointmentAppointmentCrewCollectionEndpoint;
+pub(crate) struct GetAppointmentAppointmentCrewCollectionEndpoint;
 
 impl Endpoint for GetAppointmentAppointmentCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -1031,10 +979,6 @@ impl Endpoint for GetAppointmentAppointmentCrewCollectionEndpoint {
         response: EndpointResponseSpec::Collection("AppointmentCrewResponse"),
         errors: GETAPPOINTMENTAPPOINTMENTCREWCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetAppointmentAppointmentCrewCollectionEndpoint {
-    type Resource = Appointment;
 }
 
 const CREATEAPPOINTMENTCREWENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1070,7 +1014,7 @@ const CREATEAPPOINTMENTCREWENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /appointments/{id}/appointmentcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateAppointmentCrewEndpoint;
+pub(crate) struct CreateAppointmentCrewEndpoint;
 
 impl Endpoint for CreateAppointmentCrewEndpoint {
     type Request = AppointmentCrewPayload;
@@ -1086,10 +1030,6 @@ impl Endpoint for CreateAppointmentCrewEndpoint {
         response: EndpointResponseSpec::Item("AppointmentCrewResponse"),
         errors: CREATEAPPOINTMENTCREWENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateAppointmentCrewEndpoint {
-    type Resource = Appointment;
 }
 
 const GETCONTACTPERSONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -1119,7 +1059,7 @@ const GETCONTACTPERSONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contactpersons`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactPersonCollectionEndpoint;
+pub(crate) struct GetContactPersonCollectionEndpoint;
 
 impl Endpoint for GetContactPersonCollectionEndpoint {
     type Request = NoRequest;
@@ -1169,7 +1109,7 @@ const DELETECONTACTPERSONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /contactpersons/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteContactPersonEndpoint;
+pub(crate) struct DeleteContactPersonEndpoint;
 
 impl Endpoint for DeleteContactPersonEndpoint {
     type Request = NoRequest;
@@ -1185,10 +1125,6 @@ impl Endpoint for DeleteContactPersonEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETECONTACTPERSONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteContactPersonEndpoint {
-    type Resource = ContactPerson;
 }
 
 const GETCONTACTPERSONITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1224,7 +1160,7 @@ const GETCONTACTPERSONITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contactpersons/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactPersonItemEndpoint;
+pub(crate) struct GetContactPersonItemEndpoint;
 
 impl Endpoint for GetContactPersonItemEndpoint {
     type Request = NoRequest;
@@ -1240,10 +1176,6 @@ impl Endpoint for GetContactPersonItemEndpoint {
         response: EndpointResponseSpec::Item("ContactPersonResponse"),
         errors: GETCONTACTPERSONITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactPersonItemEndpoint {
-    type Resource = ContactPerson;
 }
 
 const UPDATECONTACTPERSONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -1278,7 +1210,7 @@ const UPDATECONTACTPERSONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /contactpersons/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateContactPersonEndpoint;
+pub(crate) struct UpdateContactPersonEndpoint;
 
 impl Endpoint for UpdateContactPersonEndpoint {
     type Request = ContactPersonPayload;
@@ -1294,10 +1226,6 @@ impl Endpoint for UpdateContactPersonEndpoint {
         response: EndpointResponseSpec::Item("ContactPersonResponse"),
         errors: UPDATECONTACTPERSONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateContactPersonEndpoint {
-    type Resource = ContactPerson;
 }
 
 const GETCONTACTPERSONFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1333,7 +1261,7 @@ const GETCONTACTPERSONFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /contactpersons/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactPersonFileFolderCollectionEndpoint;
+pub(crate) struct GetContactPersonFileFolderCollectionEndpoint;
 
 impl Endpoint for GetContactPersonFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -1349,10 +1277,6 @@ impl Endpoint for GetContactPersonFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETCONTACTPERSONFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactPersonFileFolderCollectionEndpoint {
-    type Resource = ContactPerson;
 }
 
 const GETCONTACTPERSONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1388,7 +1312,7 @@ const GETCONTACTPERSONFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contactpersons/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactPersonFileCollectionEndpoint;
+pub(crate) struct GetContactPersonFileCollectionEndpoint;
 
 impl Endpoint for GetContactPersonFileCollectionEndpoint {
     type Request = NoRequest;
@@ -1404,10 +1328,6 @@ impl Endpoint for GetContactPersonFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETCONTACTPERSONFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactPersonFileCollectionEndpoint {
-    type Resource = ContactPerson;
 }
 
 const GETCONTACTPERSONTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1443,7 +1363,7 @@ const GETCONTACTPERSONTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contactpersons/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactPersonTaskCollectionEndpoint;
+pub(crate) struct GetContactPersonTaskCollectionEndpoint;
 
 impl Endpoint for GetContactPersonTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -1459,10 +1379,6 @@ impl Endpoint for GetContactPersonTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETCONTACTPERSONTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactPersonTaskCollectionEndpoint {
-    type Resource = ContactPerson;
 }
 
 const CREATETASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -1497,7 +1413,7 @@ const CREATETASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /contactpersons/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateTaskEndpoint;
+pub(crate) struct CreateTaskEndpoint;
 
 impl Endpoint for CreateTaskEndpoint {
     type Request = TaskPayload;
@@ -1513,10 +1429,6 @@ impl Endpoint for CreateTaskEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: CREATETASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateTaskEndpoint {
-    type Resource = ContactPerson;
 }
 
 const GETCONTACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -1546,7 +1458,7 @@ const GETCONTACTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contacts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactCollectionEndpoint;
+pub(crate) struct GetContactCollectionEndpoint;
 
 impl Endpoint for GetContactCollectionEndpoint {
     type Request = NoRequest;
@@ -1591,7 +1503,7 @@ const CREATECONTACTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /contacts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateContactEndpoint;
+pub(crate) struct CreateContactEndpoint;
 
 impl Endpoint for CreateContactEndpoint {
     type Request = ContactPayload;
@@ -1641,7 +1553,7 @@ const DELETECONTACTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /contacts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteContactEndpoint;
+pub(crate) struct DeleteContactEndpoint;
 
 impl Endpoint for DeleteContactEndpoint {
     type Request = NoRequest;
@@ -1657,10 +1569,6 @@ impl Endpoint for DeleteContactEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETECONTACTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteContactEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTACTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -1695,7 +1603,7 @@ const GETCONTACTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contacts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactItemEndpoint;
+pub(crate) struct GetContactItemEndpoint;
 
 impl Endpoint for GetContactItemEndpoint {
     type Request = NoRequest;
@@ -1711,10 +1619,6 @@ impl Endpoint for GetContactItemEndpoint {
         response: EndpointResponseSpec::Item("ContactResponse"),
         errors: GETCONTACTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactItemEndpoint {
-    type Resource = Contact;
 }
 
 const UPDATECONTACTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -1749,7 +1653,7 @@ const UPDATECONTACTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /contacts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateContactEndpoint;
+pub(crate) struct UpdateContactEndpoint;
 
 impl Endpoint for UpdateContactEndpoint {
     type Request = ContactPayload;
@@ -1765,10 +1669,6 @@ impl Endpoint for UpdateContactEndpoint {
         response: EndpointResponseSpec::Item("ContactResponse"),
         errors: UPDATECONTACTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateContactEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTACTCONTACTPERSONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1804,7 +1704,7 @@ const GETCONTACTCONTACTPERSONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /contacts/{id}/contactpersons`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactContactPersonCollectionEndpoint;
+pub(crate) struct GetContactContactPersonCollectionEndpoint;
 
 impl Endpoint for GetContactContactPersonCollectionEndpoint {
     type Request = NoRequest;
@@ -1820,10 +1720,6 @@ impl Endpoint for GetContactContactPersonCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ContactPersonResponse"),
         errors: GETCONTACTCONTACTPERSONCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactContactPersonCollectionEndpoint {
-    type Resource = Contact;
 }
 
 const CREATECONTACTPERSONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -1858,7 +1754,7 @@ const CREATECONTACTPERSONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /contacts/{id}/contactpersons`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateContactPersonEndpoint;
+pub(crate) struct CreateContactPersonEndpoint;
 
 impl Endpoint for CreateContactPersonEndpoint {
     type Request = ContactPersonPayload;
@@ -1874,10 +1770,6 @@ impl Endpoint for CreateContactPersonEndpoint {
         response: EndpointResponseSpec::Item("ContactPersonResponse"),
         errors: CREATECONTACTPERSONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateContactPersonEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTACTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1913,7 +1805,7 @@ const GETCONTACTFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contacts/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactFileFolderCollectionEndpoint;
+pub(crate) struct GetContactFileFolderCollectionEndpoint;
 
 impl Endpoint for GetContactFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -1929,10 +1821,6 @@ impl Endpoint for GetContactFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETCONTACTFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactFileFolderCollectionEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTACTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -1968,7 +1856,7 @@ const GETCONTACTFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contacts/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactFileCollectionEndpoint;
+pub(crate) struct GetContactFileCollectionEndpoint;
 
 impl Endpoint for GetContactFileCollectionEndpoint {
     type Request = NoRequest;
@@ -1984,10 +1872,6 @@ impl Endpoint for GetContactFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETCONTACTFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactFileCollectionEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTACTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2023,7 +1907,7 @@ const GETCONTACTTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contacts/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContactTaskCollectionEndpoint;
+pub(crate) struct GetContactTaskCollectionEndpoint;
 
 impl Endpoint for GetContactTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -2039,10 +1923,6 @@ impl Endpoint for GetContactTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETCONTACTTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContactTaskCollectionEndpoint {
-    type Resource = Contact;
 }
 
 const POSTCONTACTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -2077,7 +1957,7 @@ const POSTCONTACTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /contacts/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostContactsIdTasksEndpoint;
+pub(crate) struct PostContactsIdTasksEndpoint;
 
 impl Endpoint for PostContactsIdTasksEndpoint {
     type Request = TaskPayload;
@@ -2093,10 +1973,6 @@ impl Endpoint for PostContactsIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTCONTACTSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostContactsIdTasksEndpoint {
-    type Resource = Contact;
 }
 
 const GETCONTRACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -2126,7 +2002,7 @@ const GETCONTRACTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contracts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContractCollectionEndpoint;
+pub(crate) struct GetContractCollectionEndpoint;
 
 impl Endpoint for GetContractCollectionEndpoint {
     type Request = NoRequest;
@@ -2176,7 +2052,7 @@ const GETCONTRACTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contracts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContractItemEndpoint;
+pub(crate) struct GetContractItemEndpoint;
 
 impl Endpoint for GetContractItemEndpoint {
     type Request = NoRequest;
@@ -2192,10 +2068,6 @@ impl Endpoint for GetContractItemEndpoint {
         response: EndpointResponseSpec::Item("ContractResponse"),
         errors: GETCONTRACTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContractItemEndpoint {
-    type Resource = Contract;
 }
 
 const GETCONTRACTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2231,7 +2103,7 @@ const GETCONTRACTFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contracts/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContractFileCollectionEndpoint;
+pub(crate) struct GetContractFileCollectionEndpoint;
 
 impl Endpoint for GetContractFileCollectionEndpoint {
     type Request = NoRequest;
@@ -2247,10 +2119,6 @@ impl Endpoint for GetContractFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETCONTRACTFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContractFileCollectionEndpoint {
-    type Resource = Contract;
 }
 
 const GETCONTRACTINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2286,7 +2154,7 @@ const GETCONTRACTINVOICELINECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contracts/{id}/invoicelines`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContractInvoiceLineCollectionEndpoint;
+pub(crate) struct GetContractInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetContractInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
@@ -2302,10 +2170,6 @@ impl Endpoint for GetContractInvoiceLineCollectionEndpoint {
         response: EndpointResponseSpec::Collection("InvoiceLineResponse"),
         errors: GETCONTRACTINVOICELINECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContractInvoiceLineCollectionEndpoint {
-    type Resource = Contract;
 }
 
 const GETCONTRACTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2341,7 +2205,7 @@ const GETCONTRACTTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /contracts/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetContractTaskCollectionEndpoint;
+pub(crate) struct GetContractTaskCollectionEndpoint;
 
 impl Endpoint for GetContractTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -2357,10 +2221,6 @@ impl Endpoint for GetContractTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETCONTRACTTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetContractTaskCollectionEndpoint {
-    type Resource = Contract;
 }
 
 const POSTCONTRACTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2396,7 +2256,7 @@ const POSTCONTRACTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /contracts/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostContractsIdTasksEndpoint;
+pub(crate) struct PostContractsIdTasksEndpoint;
 
 impl Endpoint for PostContractsIdTasksEndpoint {
     type Request = TaskPayload;
@@ -2412,10 +2272,6 @@ impl Endpoint for PostContractsIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTCONTRACTSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostContractsIdTasksEndpoint {
-    type Resource = Contract;
 }
 
 const GETPROJECTCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -2445,7 +2301,7 @@ const GETPROJECTCOSTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /costs`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectCostCollectionEndpoint;
+pub(crate) struct GetProjectCostCollectionEndpoint;
 
 impl Endpoint for GetProjectCostCollectionEndpoint {
     type Request = NoRequest;
@@ -2495,7 +2351,7 @@ const DELETEPROJECTCOSTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /costs/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteProjectCostEndpoint;
+pub(crate) struct DeleteProjectCostEndpoint;
 
 impl Endpoint for DeleteProjectCostEndpoint {
     type Request = NoRequest;
@@ -2511,10 +2367,6 @@ impl Endpoint for DeleteProjectCostEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEPROJECTCOSTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteProjectCostEndpoint {
-    type Resource = ProjectCost;
 }
 
 const GETPROJECTCOSTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -2549,7 +2401,7 @@ const GETPROJECTCOSTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /costs/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectCostItemEndpoint;
+pub(crate) struct GetProjectCostItemEndpoint;
 
 impl Endpoint for GetProjectCostItemEndpoint {
     type Request = NoRequest;
@@ -2565,10 +2417,6 @@ impl Endpoint for GetProjectCostItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectCostResponse"),
         errors: GETPROJECTCOSTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectCostItemEndpoint {
-    type Resource = ProjectCost;
 }
 
 const UPDATEPROJECTCOSTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -2603,7 +2451,7 @@ const UPDATEPROJECTCOSTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /costs/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateProjectCostEndpoint;
+pub(crate) struct UpdateProjectCostEndpoint;
 
 impl Endpoint for UpdateProjectCostEndpoint {
     type Request = ProjectCostPayload;
@@ -2619,10 +2467,6 @@ impl Endpoint for UpdateProjectCostEndpoint {
         response: EndpointResponseSpec::Item("ProjectCostResponse"),
         errors: UPDATEPROJECTCOSTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateProjectCostEndpoint {
-    type Resource = ProjectCost;
 }
 
 const GETCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -2652,7 +2496,7 @@ const GETCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewCollectionEndpoint;
+pub(crate) struct GetCrewCollectionEndpoint;
 
 impl Endpoint for GetCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -2702,7 +2546,7 @@ const GETCREWITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewItemEndpoint;
+pub(crate) struct GetCrewItemEndpoint;
 
 impl Endpoint for GetCrewItemEndpoint {
     type Request = NoRequest;
@@ -2718,10 +2562,6 @@ impl Endpoint for GetCrewItemEndpoint {
         response: EndpointResponseSpec::Item("CrewResponse"),
         errors: GETCREWITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewItemEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWAPPOINTMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2757,7 +2597,7 @@ const GETCREWAPPOINTMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/appointments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewAppointmentCollectionEndpoint;
+pub(crate) struct GetCrewAppointmentCollectionEndpoint;
 
 impl Endpoint for GetCrewAppointmentCollectionEndpoint {
     type Request = NoRequest;
@@ -2773,10 +2613,6 @@ impl Endpoint for GetCrewAppointmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("AppointmentResponse"),
         errors: GETCREWAPPOINTMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewAppointmentCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWCREWAVAILABILITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2812,7 +2648,7 @@ const GETCREWCREWAVAILABILITYCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /crew/{id}/crewavailability`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewCrewAvailabilityCollectionEndpoint;
+pub(crate) struct GetCrewCrewAvailabilityCollectionEndpoint;
 
 impl Endpoint for GetCrewCrewAvailabilityCollectionEndpoint {
     type Request = NoRequest;
@@ -2828,10 +2664,6 @@ impl Endpoint for GetCrewCrewAvailabilityCollectionEndpoint {
         response: EndpointResponseSpec::Collection("CrewAvailabilityResponse"),
         errors: GETCREWCREWAVAILABILITYCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewCrewAvailabilityCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const CREATECREWAVAILABILITYENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2867,7 +2699,7 @@ const CREATECREWAVAILABILITYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /crew/{id}/crewavailability`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateCrewAvailabilityEndpoint;
+pub(crate) struct CreateCrewAvailabilityEndpoint;
 
 impl Endpoint for CreateCrewAvailabilityEndpoint {
     type Request = CrewAvailabilityPayload;
@@ -2883,10 +2715,6 @@ impl Endpoint for CreateCrewAvailabilityEndpoint {
         response: EndpointResponseSpec::Item("CrewAvailabilityResponse"),
         errors: CREATECREWAVAILABILITYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateCrewAvailabilityEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWCREWRATESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2922,7 +2750,7 @@ const GETCREWCREWRATESCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/crewrates`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewCrewRatesCollectionEndpoint;
+pub(crate) struct GetCrewCrewRatesCollectionEndpoint;
 
 impl Endpoint for GetCrewCrewRatesCollectionEndpoint {
     type Request = NoRequest;
@@ -2938,10 +2766,6 @@ impl Endpoint for GetCrewCrewRatesCollectionEndpoint {
         response: EndpointResponseSpec::Collection("CrewRatesResponse"),
         errors: GETCREWCREWRATESCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewCrewRatesCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -2977,7 +2801,7 @@ const GETCREWFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewFileFolderCollectionEndpoint;
+pub(crate) struct GetCrewFileFolderCollectionEndpoint;
 
 impl Endpoint for GetCrewFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -2993,10 +2817,6 @@ impl Endpoint for GetCrewFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETCREWFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewFileFolderCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3032,7 +2852,7 @@ const GETCREWFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewFileCollectionEndpoint;
+pub(crate) struct GetCrewFileCollectionEndpoint;
 
 impl Endpoint for GetCrewFileCollectionEndpoint {
     type Request = NoRequest;
@@ -3048,10 +2868,6 @@ impl Endpoint for GetCrewFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETCREWFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewFileCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWINVITATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3087,7 +2903,7 @@ const GETCREWINVITATIONSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/invitations`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewInvitationsCollectionEndpoint;
+pub(crate) struct GetCrewInvitationsCollectionEndpoint;
 
 impl Endpoint for GetCrewInvitationsCollectionEndpoint {
     type Request = NoRequest;
@@ -3103,10 +2919,6 @@ impl Endpoint for GetCrewInvitationsCollectionEndpoint {
         response: EndpointResponseSpec::Collection("InvitationsResponse"),
         errors: GETCREWINVITATIONSCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewInvitationsCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3142,7 +2954,7 @@ const GETCREWTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crew/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewTaskCollectionEndpoint;
+pub(crate) struct GetCrewTaskCollectionEndpoint;
 
 impl Endpoint for GetCrewTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -3158,10 +2970,6 @@ impl Endpoint for GetCrewTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETCREWTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewTaskCollectionEndpoint {
-    type Resource = Crew;
 }
 
 const POSTCREWIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -3196,7 +3004,7 @@ const POSTCREWIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /crew/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostCrewIdTasksEndpoint;
+pub(crate) struct PostCrewIdTasksEndpoint;
 
 impl Endpoint for PostCrewIdTasksEndpoint {
     type Request = TaskPayload;
@@ -3212,10 +3020,6 @@ impl Endpoint for PostCrewIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTCREWIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostCrewIdTasksEndpoint {
-    type Resource = Crew;
 }
 
 const GETCREWAVAILABILITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -3245,7 +3049,7 @@ const GETCREWAVAILABILITYCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crewavailability`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewAvailabilityCollectionEndpoint;
+pub(crate) struct GetCrewAvailabilityCollectionEndpoint;
 
 impl Endpoint for GetCrewAvailabilityCollectionEndpoint {
     type Request = NoRequest;
@@ -3296,7 +3100,7 @@ const DELETECREWAVAILABILITYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /crewavailability/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteCrewAvailabilityEndpoint;
+pub(crate) struct DeleteCrewAvailabilityEndpoint;
 
 impl Endpoint for DeleteCrewAvailabilityEndpoint {
     type Request = NoRequest;
@@ -3312,10 +3116,6 @@ impl Endpoint for DeleteCrewAvailabilityEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETECREWAVAILABILITYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteCrewAvailabilityEndpoint {
-    type Resource = CrewAvailability;
 }
 
 const GETCREWAVAILABILITYITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3351,7 +3151,7 @@ const GETCREWAVAILABILITYITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crewavailability/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewAvailabilityItemEndpoint;
+pub(crate) struct GetCrewAvailabilityItemEndpoint;
 
 impl Endpoint for GetCrewAvailabilityItemEndpoint {
     type Request = NoRequest;
@@ -3367,10 +3167,6 @@ impl Endpoint for GetCrewAvailabilityItemEndpoint {
         response: EndpointResponseSpec::Item("CrewAvailabilityResponse"),
         errors: GETCREWAVAILABILITYITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewAvailabilityItemEndpoint {
-    type Resource = CrewAvailability;
 }
 
 const UPDATECREWAVAILABILITYENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3406,7 +3202,7 @@ const UPDATECREWAVAILABILITYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /crewavailability/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateCrewAvailabilityEndpoint;
+pub(crate) struct UpdateCrewAvailabilityEndpoint;
 
 impl Endpoint for UpdateCrewAvailabilityEndpoint {
     type Request = CrewAvailabilityPayload;
@@ -3422,10 +3218,6 @@ impl Endpoint for UpdateCrewAvailabilityEndpoint {
         response: EndpointResponseSpec::Item("CrewAvailabilityResponse"),
         errors: UPDATECREWAVAILABILITYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateCrewAvailabilityEndpoint {
-    type Resource = CrewAvailability;
 }
 
 const GETCREWRATESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -3455,7 +3247,7 @@ const GETCREWRATESCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crewrates`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRatesCollectionEndpoint;
+pub(crate) struct GetCrewRatesCollectionEndpoint;
 
 impl Endpoint for GetCrewRatesCollectionEndpoint {
     type Request = NoRequest;
@@ -3505,7 +3297,7 @@ const GETCREWRATESITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /crewrates/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRatesItemEndpoint;
+pub(crate) struct GetCrewRatesItemEndpoint;
 
 impl Endpoint for GetCrewRatesItemEndpoint {
     type Request = NoRequest;
@@ -3521,10 +3313,6 @@ impl Endpoint for GetCrewRatesItemEndpoint {
         response: EndpointResponseSpec::Item("CrewRatesResponse"),
         errors: GETCREWRATESITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewRatesItemEndpoint {
-    type Resource = CrewRate;
 }
 
 const GETEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -3554,7 +3342,7 @@ const GETEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentCollectionEndpoint;
+pub(crate) struct GetEquipmentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -3599,7 +3387,7 @@ const CREATEEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateEquipmentEndpoint;
+pub(crate) struct CreateEquipmentEndpoint;
 
 impl Endpoint for CreateEquipmentEndpoint {
     type Request = EquipmentPayload;
@@ -3649,7 +3437,7 @@ const GETEQUIPMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentItemEndpoint;
+pub(crate) struct GetEquipmentItemEndpoint;
 
 impl Endpoint for GetEquipmentItemEndpoint {
     type Request = NoRequest;
@@ -3665,10 +3453,6 @@ impl Endpoint for GetEquipmentItemEndpoint {
         response: EndpointResponseSpec::Item("EquipmentResponse"),
         errors: GETEQUIPMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentItemEndpoint {
-    type Resource = Equipment;
 }
 
 const UPDATEEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -3703,7 +3487,7 @@ const UPDATEEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /equipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateEquipmentEndpoint;
+pub(crate) struct UpdateEquipmentEndpoint;
 
 impl Endpoint for UpdateEquipmentEndpoint {
     type Request = EquipmentPayload;
@@ -3719,10 +3503,6 @@ impl Endpoint for UpdateEquipmentEndpoint {
         response: EndpointResponseSpec::Item("EquipmentResponse"),
         errors: UPDATEEQUIPMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateEquipmentEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTACCESSORYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3758,7 +3538,7 @@ const GETEQUIPMENTACCESSORYCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/accessories`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentAccessoryCollectionEndpoint;
+pub(crate) struct GetEquipmentAccessoryCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAccessoryCollectionEndpoint {
     type Request = NoRequest;
@@ -3774,10 +3554,6 @@ impl Endpoint for GetEquipmentAccessoryCollectionEndpoint {
         response: EndpointResponseSpec::Collection("AccessoryResponse"),
         errors: GETEQUIPMENTACCESSORYCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentAccessoryCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATEACCESSORYENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -3812,7 +3588,7 @@ const CREATEACCESSORYENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/accessories`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateAccessoryEndpoint;
+pub(crate) struct CreateAccessoryEndpoint;
 
 impl Endpoint for CreateAccessoryEndpoint {
     type Request = AccessoryPayload;
@@ -3828,10 +3604,6 @@ impl Endpoint for CreateAccessoryEndpoint {
         response: EndpointResponseSpec::Item("AccessoryResponse"),
         errors: CREATEACCESSORYENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateAccessoryEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTALTERNATIVECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3867,7 +3639,7 @@ const GETEQUIPMENTALTERNATIVECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /equipment/{id}/alternatives`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentAlternativeCollectionEndpoint;
+pub(crate) struct GetEquipmentAlternativeCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAlternativeCollectionEndpoint {
     type Request = NoRequest;
@@ -3883,10 +3655,6 @@ impl Endpoint for GetEquipmentAlternativeCollectionEndpoint {
         response: EndpointResponseSpec::Collection("AlternativeResponse"),
         errors: GETEQUIPMENTALTERNATIVECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentAlternativeCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATEALTERNATIVEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -3921,7 +3689,7 @@ const CREATEALTERNATIVEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/alternatives`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateAlternativeEndpoint;
+pub(crate) struct CreateAlternativeEndpoint;
 
 impl Endpoint for CreateAlternativeEndpoint {
     type Request = AlternativePayload;
@@ -3937,10 +3705,6 @@ impl Endpoint for CreateAlternativeEndpoint {
         response: EndpointResponseSpec::Item("AlternativeResponse"),
         errors: CREATEALTERNATIVEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateAlternativeEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -3976,7 +3740,7 @@ const GETEQUIPMENTEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorS
 
 /// Typed endpoint for `GET /equipment/{id}/equipmentsetscontent`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentEquipmentSetContentCollectionEndpoint;
+pub(crate) struct GetEquipmentEquipmentSetContentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentEquipmentSetContentCollectionEndpoint {
     type Request = NoRequest;
@@ -3992,10 +3756,6 @@ impl Endpoint for GetEquipmentEquipmentSetContentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("EquipmentSetContentResponse"),
         errors: GETEQUIPMENTEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentEquipmentSetContentCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATEEQUIPMENTSETCONTENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4031,7 +3791,7 @@ const CREATEEQUIPMENTSETCONTENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/equipmentsetscontent`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateEquipmentSetContentEndpoint;
+pub(crate) struct CreateEquipmentSetContentEndpoint;
 
 impl Endpoint for CreateEquipmentSetContentEndpoint {
     type Request = EquipmentSetContentPayload;
@@ -4047,10 +3807,6 @@ impl Endpoint for CreateEquipmentSetContentEndpoint {
         response: EndpointResponseSpec::Item("EquipmentSetContentResponse"),
         errors: CREATEEQUIPMENTSETCONTENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateEquipmentSetContentEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4086,7 +3842,7 @@ const GETEQUIPMENTFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentFileFolderCollectionEndpoint;
+pub(crate) struct GetEquipmentFileFolderCollectionEndpoint;
 
 impl Endpoint for GetEquipmentFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -4102,10 +3858,6 @@ impl Endpoint for GetEquipmentFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETEQUIPMENTFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentFileFolderCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4141,7 +3893,7 @@ const GETEQUIPMENTFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentFileCollectionEndpoint;
+pub(crate) struct GetEquipmentFileCollectionEndpoint;
 
 impl Endpoint for GetEquipmentFileCollectionEndpoint {
     type Request = NoRequest;
@@ -4157,10 +3909,6 @@ impl Endpoint for GetEquipmentFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETEQUIPMENTFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentFileCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTREPAIRCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4196,7 +3944,7 @@ const GETEQUIPMENTREPAIRCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/repairs`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentRepairCollectionEndpoint;
+pub(crate) struct GetEquipmentRepairCollectionEndpoint;
 
 impl Endpoint for GetEquipmentRepairCollectionEndpoint {
     type Request = NoRequest;
@@ -4212,10 +3960,6 @@ impl Endpoint for GetEquipmentRepairCollectionEndpoint {
         response: EndpointResponseSpec::Collection("RepairResponse"),
         errors: GETEQUIPMENTREPAIRCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentRepairCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTSERIALNUMBERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4251,7 +3995,7 @@ const GETEQUIPMENTSERIALNUMBERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = 
 
 /// Typed endpoint for `GET /equipment/{id}/serialnumbers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentSerialNumberCollectionEndpoint;
+pub(crate) struct GetEquipmentSerialNumberCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSerialNumberCollectionEndpoint {
     type Request = NoRequest;
@@ -4267,10 +4011,6 @@ impl Endpoint for GetEquipmentSerialNumberCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SerialNumberResponse"),
         errors: GETEQUIPMENTSERIALNUMBERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentSerialNumberCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATESERIALNUMBERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -4305,7 +4045,7 @@ const CREATESERIALNUMBERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/serialnumbers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateSerialNumberEndpoint;
+pub(crate) struct CreateSerialNumberEndpoint;
 
 impl Endpoint for CreateSerialNumberEndpoint {
     type Request = SerialNumberPayload;
@@ -4321,10 +4061,6 @@ impl Endpoint for CreateSerialNumberEndpoint {
         response: EndpointResponseSpec::Item("SerialNumberResponse"),
         errors: CREATESERIALNUMBERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateSerialNumberEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTSTOCKMOVEMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4360,7 +4096,7 @@ const GETEQUIPMENTSTOCKMOVEMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] =
 
 /// Typed endpoint for `GET /equipment/{id}/stockmovements`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentStockMovementCollectionEndpoint;
+pub(crate) struct GetEquipmentStockMovementCollectionEndpoint;
 
 impl Endpoint for GetEquipmentStockMovementCollectionEndpoint {
     type Request = NoRequest;
@@ -4376,10 +4112,6 @@ impl Endpoint for GetEquipmentStockMovementCollectionEndpoint {
         response: EndpointResponseSpec::Collection("StockMovementResponse"),
         errors: GETEQUIPMENTSTOCKMOVEMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentStockMovementCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATESTOCKMOVEMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -4414,7 +4146,7 @@ const CREATESTOCKMOVEMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/stockmovements`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateStockMovementEndpoint;
+pub(crate) struct CreateStockMovementEndpoint;
 
 impl Endpoint for CreateStockMovementEndpoint {
     type Request = StockMovementPayload;
@@ -4430,10 +4162,6 @@ impl Endpoint for CreateStockMovementEndpoint {
         response: EndpointResponseSpec::Item("StockMovementResponse"),
         errors: CREATESTOCKMOVEMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateStockMovementEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTSUPPLIERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4469,7 +4197,7 @@ const GETEQUIPMENTSUPPLIERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/suppliers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentSupplierCollectionEndpoint;
+pub(crate) struct GetEquipmentSupplierCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSupplierCollectionEndpoint {
     type Request = NoRequest;
@@ -4485,10 +4213,6 @@ impl Endpoint for GetEquipmentSupplierCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SupplierResponse"),
         errors: GETEQUIPMENTSUPPLIERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentSupplierCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const CREATESUPPLIERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -4523,7 +4247,7 @@ const CREATESUPPLIERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/suppliers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateSupplierEndpoint;
+pub(crate) struct CreateSupplierEndpoint;
 
 impl Endpoint for CreateSupplierEndpoint {
     type Request = SupplierPayload;
@@ -4539,10 +4263,6 @@ impl Endpoint for CreateSupplierEndpoint {
         response: EndpointResponseSpec::Item("SupplierResponse"),
         errors: CREATESUPPLIERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateSupplierEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4578,7 +4298,7 @@ const GETEQUIPMENTTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipment/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentTaskCollectionEndpoint;
+pub(crate) struct GetEquipmentTaskCollectionEndpoint;
 
 impl Endpoint for GetEquipmentTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -4594,10 +4314,6 @@ impl Endpoint for GetEquipmentTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETEQUIPMENTTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentTaskCollectionEndpoint {
-    type Resource = Equipment;
 }
 
 const POSTEQUIPMENTIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4633,7 +4349,7 @@ const POSTEQUIPMENTIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /equipment/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostEquipmentIdTasksEndpoint;
+pub(crate) struct PostEquipmentIdTasksEndpoint;
 
 impl Endpoint for PostEquipmentIdTasksEndpoint {
     type Request = TaskPayload;
@@ -4649,10 +4365,6 @@ impl Endpoint for PostEquipmentIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTEQUIPMENTIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostEquipmentIdTasksEndpoint {
-    type Resource = Equipment;
 }
 
 const GETEQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -4682,7 +4394,7 @@ const GETEQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec]
 
 /// Typed endpoint for `GET /equipmentassignedserials`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentAssignedSerialsCollectionEndpoint;
+pub(crate) struct GetEquipmentAssignedSerialsCollectionEndpoint;
 
 impl Endpoint for GetEquipmentAssignedSerialsCollectionEndpoint {
     type Request = NoRequest;
@@ -4733,7 +4445,7 @@ const GETEQUIPMENTASSIGNEDSERIALSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipmentassignedserials/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentAssignedSerialsItemEndpoint;
+pub(crate) struct GetEquipmentAssignedSerialsItemEndpoint;
 
 impl Endpoint for GetEquipmentAssignedSerialsItemEndpoint {
     type Request = NoRequest;
@@ -4749,10 +4461,6 @@ impl Endpoint for GetEquipmentAssignedSerialsItemEndpoint {
         response: EndpointResponseSpec::Item("EquipmentAssignedSerialsResponse"),
         errors: GETEQUIPMENTASSIGNEDSERIALSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentAssignedSerialsItemEndpoint {
-    type Resource = EquipmentAssignedSerial;
 }
 
 const GETEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -4782,7 +4490,7 @@ const GETEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipmentsetscontent`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentSetContentCollectionEndpoint;
+pub(crate) struct GetEquipmentSetContentCollectionEndpoint;
 
 impl Endpoint for GetEquipmentSetContentCollectionEndpoint {
     type Request = NoRequest;
@@ -4833,7 +4541,7 @@ const DELETEEQUIPMENTSETCONTENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /equipmentsetscontent/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteEquipmentSetContentEndpoint;
+pub(crate) struct DeleteEquipmentSetContentEndpoint;
 
 impl Endpoint for DeleteEquipmentSetContentEndpoint {
     type Request = NoRequest;
@@ -4849,10 +4557,6 @@ impl Endpoint for DeleteEquipmentSetContentEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEEQUIPMENTSETCONTENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteEquipmentSetContentEndpoint {
-    type Resource = EquipmentSetContent;
 }
 
 const GETEQUIPMENTSETCONTENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4888,7 +4592,7 @@ const GETEQUIPMENTSETCONTENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /equipmentsetscontent/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetEquipmentSetContentItemEndpoint;
+pub(crate) struct GetEquipmentSetContentItemEndpoint;
 
 impl Endpoint for GetEquipmentSetContentItemEndpoint {
     type Request = NoRequest;
@@ -4904,10 +4608,6 @@ impl Endpoint for GetEquipmentSetContentItemEndpoint {
         response: EndpointResponseSpec::Item("EquipmentSetContentResponse"),
         errors: GETEQUIPMENTSETCONTENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetEquipmentSetContentItemEndpoint {
-    type Resource = EquipmentSetContent;
 }
 
 const UPDATEEQUIPMENTSETCONTENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -4943,7 +4643,7 @@ const UPDATEEQUIPMENTSETCONTENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /equipmentsetscontent/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateEquipmentSetContentEndpoint;
+pub(crate) struct UpdateEquipmentSetContentEndpoint;
 
 impl Endpoint for UpdateEquipmentSetContentEndpoint {
     type Request = EquipmentSetContentPayload;
@@ -4959,10 +4659,6 @@ impl Endpoint for UpdateEquipmentSetContentEndpoint {
         response: EndpointResponseSpec::Item("EquipmentSetContentResponse"),
         errors: UPDATEEQUIPMENTSETCONTENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateEquipmentSetContentEndpoint {
-    type Resource = EquipmentSetContent;
 }
 
 const GETEXTRAINPUTFIELDCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -4992,7 +4688,7 @@ const GETEXTRAINPUTFIELDCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /extrainputfields`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetExtraInputFieldCollectionEndpoint;
+pub(crate) struct GetExtraInputFieldCollectionEndpoint;
 
 impl Endpoint for GetExtraInputFieldCollectionEndpoint {
     type Request = NoRequest;
@@ -5043,7 +4739,7 @@ const GETEXTRAINPUTFIELDITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /extrainputfields/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetExtraInputFieldItemEndpoint;
+pub(crate) struct GetExtraInputFieldItemEndpoint;
 
 impl Endpoint for GetExtraInputFieldItemEndpoint {
     type Request = NoRequest;
@@ -5059,10 +4755,6 @@ impl Endpoint for GetExtraInputFieldItemEndpoint {
         response: EndpointResponseSpec::Item("ExtraInputFieldResponse"),
         errors: GETEXTRAINPUTFIELDITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetExtraInputFieldItemEndpoint {
-    type Resource = ExtraInputField;
 }
 
 const GETFACTORGROUPSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5092,7 +4784,7 @@ const GETFACTORGROUPSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /factorgroups`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactorGroupsCollectionEndpoint;
+pub(crate) struct GetFactorGroupsCollectionEndpoint;
 
 impl Endpoint for GetFactorGroupsCollectionEndpoint {
     type Request = NoRequest;
@@ -5142,7 +4834,7 @@ const GETFACTORGROUPSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /factorgroups/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactorGroupsItemEndpoint;
+pub(crate) struct GetFactorGroupsItemEndpoint;
 
 impl Endpoint for GetFactorGroupsItemEndpoint {
     type Request = NoRequest;
@@ -5158,10 +4850,6 @@ impl Endpoint for GetFactorGroupsItemEndpoint {
         response: EndpointResponseSpec::Item("FactorGroupsResponse"),
         errors: GETFACTORGROUPSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactorGroupsItemEndpoint {
-    type Resource = FactorGroup;
 }
 
 const GETFACTORGROUPSFACTORSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -5197,7 +4885,7 @@ const GETFACTORGROUPSFACTORSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /factorgroups/{id}/factors`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactorGroupsFactorsCollectionEndpoint;
+pub(crate) struct GetFactorGroupsFactorsCollectionEndpoint;
 
 impl Endpoint for GetFactorGroupsFactorsCollectionEndpoint {
     type Request = NoRequest;
@@ -5213,10 +4901,6 @@ impl Endpoint for GetFactorGroupsFactorsCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FactorsResponse"),
         errors: GETFACTORGROUPSFACTORSCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactorGroupsFactorsCollectionEndpoint {
-    type Resource = FactorGroup;
 }
 
 const GETFACTORSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5246,7 +4930,7 @@ const GETFACTORSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /factors`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactorsCollectionEndpoint;
+pub(crate) struct GetFactorsCollectionEndpoint;
 
 impl Endpoint for GetFactorsCollectionEndpoint {
     type Request = NoRequest;
@@ -5296,7 +4980,7 @@ const GETFACTORSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /factors/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactorsItemEndpoint;
+pub(crate) struct GetFactorsItemEndpoint;
 
 impl Endpoint for GetFactorsItemEndpoint {
     type Request = NoRequest;
@@ -5312,10 +4996,6 @@ impl Endpoint for GetFactorsItemEndpoint {
         response: EndpointResponseSpec::Item("FactorsResponse"),
         errors: GETFACTORSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactorsItemEndpoint {
-    type Resource = Factor;
 }
 
 const GETFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5345,7 +5025,7 @@ const GETFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFileFolderCollectionEndpoint;
+pub(crate) struct GetFileFolderCollectionEndpoint;
 
 impl Endpoint for GetFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -5395,7 +5075,7 @@ const GETFILEFOLDERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /file_folders/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFileFolderItemEndpoint;
+pub(crate) struct GetFileFolderItemEndpoint;
 
 impl Endpoint for GetFileFolderItemEndpoint {
     type Request = NoRequest;
@@ -5411,10 +5091,6 @@ impl Endpoint for GetFileFolderItemEndpoint {
         response: EndpointResponseSpec::Item("FileFolderResponse"),
         errors: GETFILEFOLDERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFileFolderItemEndpoint {
-    type Resource = FileFolder;
 }
 
 const GETFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5444,7 +5120,7 @@ const GETFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFileCollectionEndpoint;
+pub(crate) struct GetFileCollectionEndpoint;
 
 impl Endpoint for GetFileCollectionEndpoint {
     type Request = NoRequest;
@@ -5494,7 +5170,7 @@ const GETFILEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /files/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFileItemEndpoint;
+pub(crate) struct GetFileItemEndpoint;
 
 impl Endpoint for GetFileItemEndpoint {
     type Request = NoRequest;
@@ -5510,10 +5186,6 @@ impl Endpoint for GetFileItemEndpoint {
         response: EndpointResponseSpec::Item("FileResponse"),
         errors: GETFILEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFileItemEndpoint {
-    type Resource = File;
 }
 
 const GETFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5543,7 +5215,7 @@ const GETFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFolderCollectionEndpoint;
+pub(crate) struct GetFolderCollectionEndpoint;
 
 impl Endpoint for GetFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -5588,7 +5260,7 @@ const CREATEFOLDERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateFolderEndpoint;
+pub(crate) struct CreateFolderEndpoint;
 
 impl Endpoint for CreateFolderEndpoint {
     type Request = FolderPayload;
@@ -5638,7 +5310,7 @@ const GETFOLDERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /folders/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFolderItemEndpoint;
+pub(crate) struct GetFolderItemEndpoint;
 
 impl Endpoint for GetFolderItemEndpoint {
     type Request = NoRequest;
@@ -5654,10 +5326,6 @@ impl Endpoint for GetFolderItemEndpoint {
         response: EndpointResponseSpec::Item("FolderResponse"),
         errors: GETFOLDERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFolderItemEndpoint {
-    type Resource = Folder;
 }
 
 const UPDATEFOLDERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -5692,7 +5360,7 @@ const UPDATEFOLDERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /folders/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateFolderEndpoint;
+pub(crate) struct UpdateFolderEndpoint;
 
 impl Endpoint for UpdateFolderEndpoint {
     type Request = FolderPayload;
@@ -5708,10 +5376,6 @@ impl Endpoint for UpdateFolderEndpoint {
         response: EndpointResponseSpec::Item("FolderResponse"),
         errors: UPDATEFOLDERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateFolderEndpoint {
-    type Resource = Folder;
 }
 
 const GETINVITATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5741,7 +5405,7 @@ const GETINVITATIONSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invitations`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetInvitationsCollectionEndpoint;
+pub(crate) struct GetInvitationsCollectionEndpoint;
 
 impl Endpoint for GetInvitationsCollectionEndpoint {
     type Request = NoRequest;
@@ -5791,7 +5455,7 @@ const GETINVITATIONSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invitations/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetInvitationsItemEndpoint;
+pub(crate) struct GetInvitationsItemEndpoint;
 
 impl Endpoint for GetInvitationsItemEndpoint {
     type Request = NoRequest;
@@ -5807,10 +5471,6 @@ impl Endpoint for GetInvitationsItemEndpoint {
         response: EndpointResponseSpec::Item("InvitationsResponse"),
         errors: GETINVITATIONSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetInvitationsItemEndpoint {
-    type Resource = Invitation;
 }
 
 const GETINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5840,7 +5500,7 @@ const GETINVOICELINECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoicelines`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetInvoiceLineCollectionEndpoint;
+pub(crate) struct GetInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
@@ -5890,7 +5550,7 @@ const GETINVOICELINEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoicelines/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetInvoiceLineItemEndpoint;
+pub(crate) struct GetInvoiceLineItemEndpoint;
 
 impl Endpoint for GetInvoiceLineItemEndpoint {
     type Request = NoRequest;
@@ -5906,10 +5566,6 @@ impl Endpoint for GetInvoiceLineItemEndpoint {
         response: EndpointResponseSpec::Item("InvoiceLineResponse"),
         errors: GETINVOICELINEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetInvoiceLineItemEndpoint {
-    type Resource = InvoiceLine;
 }
 
 const GETFACTUURCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -5939,7 +5595,7 @@ const GETFACTUURCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurCollectionEndpoint;
+pub(crate) struct GetFactuurCollectionEndpoint;
 
 impl Endpoint for GetFactuurCollectionEndpoint {
     type Request = NoRequest;
@@ -5989,7 +5645,7 @@ const GETFACTUURITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurItemEndpoint;
+pub(crate) struct GetFactuurItemEndpoint;
 
 impl Endpoint for GetFactuurItemEndpoint {
     type Request = NoRequest;
@@ -6005,10 +5661,6 @@ impl Endpoint for GetFactuurItemEndpoint {
         response: EndpointResponseSpec::Item("FactuurResponse"),
         errors: GETFACTUURITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactuurItemEndpoint {
-    type Resource = Invoice;
 }
 
 const GETFACTUURFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6044,7 +5696,7 @@ const GETFACTUURFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurFileCollectionEndpoint;
+pub(crate) struct GetFactuurFileCollectionEndpoint;
 
 impl Endpoint for GetFactuurFileCollectionEndpoint {
     type Request = NoRequest;
@@ -6060,10 +5712,6 @@ impl Endpoint for GetFactuurFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETFACTUURFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactuurFileCollectionEndpoint {
-    type Resource = Invoice;
 }
 
 const GETFACTUURINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6099,7 +5747,7 @@ const GETFACTUURINVOICELINECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices/{id}/invoicelines`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurInvoiceLineCollectionEndpoint;
+pub(crate) struct GetFactuurInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetFactuurInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
@@ -6115,10 +5763,6 @@ impl Endpoint for GetFactuurInvoiceLineCollectionEndpoint {
         response: EndpointResponseSpec::Collection("InvoiceLineResponse"),
         errors: GETFACTUURINVOICELINECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactuurInvoiceLineCollectionEndpoint {
-    type Resource = Invoice;
 }
 
 const GETFACTUURPAYMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6154,7 +5798,7 @@ const GETFACTUURPAYMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices/{id}/payments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurPaymentCollectionEndpoint;
+pub(crate) struct GetFactuurPaymentCollectionEndpoint;
 
 impl Endpoint for GetFactuurPaymentCollectionEndpoint {
     type Request = NoRequest;
@@ -6170,10 +5814,6 @@ impl Endpoint for GetFactuurPaymentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("PaymentResponse"),
         errors: GETFACTUURPAYMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactuurPaymentCollectionEndpoint {
-    type Resource = Invoice;
 }
 
 const CREATEPAYMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -6208,7 +5848,7 @@ const CREATEPAYMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /invoices/{id}/payments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreatePaymentEndpoint;
+pub(crate) struct CreatePaymentEndpoint;
 
 impl Endpoint for CreatePaymentEndpoint {
     type Request = PaymentPayload;
@@ -6224,10 +5864,6 @@ impl Endpoint for CreatePaymentEndpoint {
         response: EndpointResponseSpec::Item("PaymentResponse"),
         errors: CREATEPAYMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreatePaymentEndpoint {
-    type Resource = Invoice;
 }
 
 const GETFACTUURTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6263,7 +5899,7 @@ const GETFACTUURTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /invoices/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetFactuurTaskCollectionEndpoint;
+pub(crate) struct GetFactuurTaskCollectionEndpoint;
 
 impl Endpoint for GetFactuurTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -6279,10 +5915,6 @@ impl Endpoint for GetFactuurTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETFACTUURTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetFactuurTaskCollectionEndpoint {
-    type Resource = Invoice;
 }
 
 const POSTINVOICESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -6317,7 +5949,7 @@ const POSTINVOICESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /invoices/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostInvoicesIdTasksEndpoint;
+pub(crate) struct PostInvoicesIdTasksEndpoint;
 
 impl Endpoint for PostInvoicesIdTasksEndpoint {
     type Request = TaskPayload;
@@ -6333,10 +5965,6 @@ impl Endpoint for PostInvoicesIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTINVOICESIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostInvoicesIdTasksEndpoint {
-    type Resource = Invoice;
 }
 
 const GETLEAVEMUTATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -6366,7 +5994,7 @@ const GETLEAVEMUTATIONSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leavemutation`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveMutationsCollectionEndpoint;
+pub(crate) struct GetLeaveMutationsCollectionEndpoint;
 
 impl Endpoint for GetLeaveMutationsCollectionEndpoint {
     type Request = NoRequest;
@@ -6411,7 +6039,7 @@ const CREATELEAVEMUTATIONSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /leavemutation`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateLeaveMutationsEndpoint;
+pub(crate) struct CreateLeaveMutationsEndpoint;
 
 impl Endpoint for CreateLeaveMutationsEndpoint {
     type Request = LeaveMutationPayload;
@@ -6462,7 +6090,7 @@ const GETLEAVEMUTATIONSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leavemutation/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveMutationsItemEndpoint;
+pub(crate) struct GetLeaveMutationsItemEndpoint;
 
 impl Endpoint for GetLeaveMutationsItemEndpoint {
     type Request = NoRequest;
@@ -6478,10 +6106,6 @@ impl Endpoint for GetLeaveMutationsItemEndpoint {
         response: EndpointResponseSpec::Item("LeaveMutationsResponse"),
         errors: GETLEAVEMUTATIONSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetLeaveMutationsItemEndpoint {
-    type Resource = LeaveMutation;
 }
 
 const GETLEAVEREQUESTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -6511,7 +6135,7 @@ const GETLEAVEREQUESTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leaverequest`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveRequestCollectionEndpoint;
+pub(crate) struct GetLeaveRequestCollectionEndpoint;
 
 impl Endpoint for GetLeaveRequestCollectionEndpoint {
     type Request = NoRequest;
@@ -6556,7 +6180,7 @@ const CREATELEAVEREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /leaverequest`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateLeaveRequestEndpoint;
+pub(crate) struct CreateLeaveRequestEndpoint;
 
 impl Endpoint for CreateLeaveRequestEndpoint {
     type Request = LeaveRequestPayload;
@@ -6606,7 +6230,7 @@ const GETLEAVEREQUESTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leaverequest/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveRequestItemEndpoint;
+pub(crate) struct GetLeaveRequestItemEndpoint;
 
 impl Endpoint for GetLeaveRequestItemEndpoint {
     type Request = NoRequest;
@@ -6622,10 +6246,6 @@ impl Endpoint for GetLeaveRequestItemEndpoint {
         response: EndpointResponseSpec::Item("LeaveRequestResponse"),
         errors: GETLEAVEREQUESTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetLeaveRequestItemEndpoint {
-    type Resource = LeaveRequest;
 }
 
 const UPDATELEAVEREQUESTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -6660,7 +6280,7 @@ const UPDATELEAVEREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /leaverequest/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateLeaveRequestEndpoint;
+pub(crate) struct UpdateLeaveRequestEndpoint;
 
 impl Endpoint for UpdateLeaveRequestEndpoint {
     type Request = LeaveRequestPayload;
@@ -6676,10 +6296,6 @@ impl Endpoint for UpdateLeaveRequestEndpoint {
         response: EndpointResponseSpec::Item("LeaveRequestResponse"),
         errors: UPDATELEAVEREQUESTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateLeaveRequestEndpoint {
-    type Resource = LeaveRequest;
 }
 
 const GETLEAVEREQUESTTIMEREGISTRATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6715,7 +6331,7 @@ const GETLEAVEREQUESTTIMEREGISTRATIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorS
 
 /// Typed endpoint for `GET /leaverequest/{id}/timeregistration`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveRequestTimeRegistrationCollectionEndpoint;
+pub(crate) struct GetLeaveRequestTimeRegistrationCollectionEndpoint;
 
 impl Endpoint for GetLeaveRequestTimeRegistrationCollectionEndpoint {
     type Request = NoRequest;
@@ -6731,10 +6347,6 @@ impl Endpoint for GetLeaveRequestTimeRegistrationCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TimeRegistrationResponse"),
         errors: GETLEAVEREQUESTTIMEREGISTRATIONCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetLeaveRequestTimeRegistrationCollectionEndpoint {
-    type Resource = LeaveRequest;
 }
 
 const CREATETIMEREGISTRATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -6770,7 +6382,7 @@ const CREATETIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /leaverequest/{id}/timeregistration`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateTimeRegistrationEndpoint;
+pub(crate) struct CreateTimeRegistrationEndpoint;
 
 impl Endpoint for CreateTimeRegistrationEndpoint {
     type Request = TimeRegistrationPayload;
@@ -6786,10 +6398,6 @@ impl Endpoint for CreateTimeRegistrationEndpoint {
         response: EndpointResponseSpec::Item("TimeRegistrationResponse"),
         errors: CREATETIMEREGISTRATIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateTimeRegistrationEndpoint {
-    type Resource = LeaveRequest;
 }
 
 const GETLEAVETYPESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -6819,7 +6427,7 @@ const GETLEAVETYPESCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leavetypes`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveTypesCollectionEndpoint;
+pub(crate) struct GetLeaveTypesCollectionEndpoint;
 
 impl Endpoint for GetLeaveTypesCollectionEndpoint {
     type Request = NoRequest;
@@ -6869,7 +6477,7 @@ const GETLEAVETYPESITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /leavetypes/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLeaveTypesItemEndpoint;
+pub(crate) struct GetLeaveTypesItemEndpoint;
 
 impl Endpoint for GetLeaveTypesItemEndpoint {
     type Request = NoRequest;
@@ -6885,10 +6493,6 @@ impl Endpoint for GetLeaveTypesItemEndpoint {
         response: EndpointResponseSpec::Item("LeaveTypesResponse"),
         errors: GETLEAVETYPESITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetLeaveTypesItemEndpoint {
-    type Resource = LeaveType;
 }
 
 const GETLEDGERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -6918,7 +6522,7 @@ const GETLEDGERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /ledgercodes`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLedgerCollectionEndpoint;
+pub(crate) struct GetLedgerCollectionEndpoint;
 
 impl Endpoint for GetLedgerCollectionEndpoint {
     type Request = NoRequest;
@@ -6968,7 +6572,7 @@ const GETLEDGERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /ledgercodes/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetLedgerItemEndpoint;
+pub(crate) struct GetLedgerItemEndpoint;
 
 impl Endpoint for GetLedgerItemEndpoint {
     type Request = NoRequest;
@@ -6984,10 +6588,6 @@ impl Endpoint for GetLedgerItemEndpoint {
         response: EndpointResponseSpec::Item("LedgerResponse"),
         errors: GETLEDGERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetLedgerItemEndpoint {
-    type Resource = LedgerCode;
 }
 
 const GETPAYMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7017,7 +6617,7 @@ const GETPAYMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /payments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPaymentCollectionEndpoint;
+pub(crate) struct GetPaymentCollectionEndpoint;
 
 impl Endpoint for GetPaymentCollectionEndpoint {
     type Request = NoRequest;
@@ -7067,7 +6667,7 @@ const GETPAYMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /payments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPaymentItemEndpoint;
+pub(crate) struct GetPaymentItemEndpoint;
 
 impl Endpoint for GetPaymentItemEndpoint {
     type Request = NoRequest;
@@ -7083,10 +6683,6 @@ impl Endpoint for GetPaymentItemEndpoint {
         response: EndpointResponseSpec::Item("PaymentResponse"),
         errors: GETPAYMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPaymentItemEndpoint {
-    type Resource = Payment;
 }
 
 const UPDATEPAYMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -7121,7 +6717,7 @@ const UPDATEPAYMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /payments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdatePaymentEndpoint;
+pub(crate) struct UpdatePaymentEndpoint;
 
 impl Endpoint for UpdatePaymentEndpoint {
     type Request = PaymentPayload;
@@ -7137,10 +6733,6 @@ impl Endpoint for UpdatePaymentEndpoint {
         response: EndpointResponseSpec::Item("PaymentResponse"),
         errors: UPDATEPAYMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdatePaymentEndpoint {
-    type Resource = Payment;
 }
 
 const GETPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7170,7 +6762,7 @@ const GETPROJECTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectCrewCollectionEndpoint;
+pub(crate) struct GetProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -7220,7 +6812,7 @@ const GETPROJECTCREWITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectcrew/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectCrewItemEndpoint;
+pub(crate) struct GetProjectCrewItemEndpoint;
 
 impl Endpoint for GetProjectCrewItemEndpoint {
     type Request = NoRequest;
@@ -7236,10 +6828,6 @@ impl Endpoint for GetProjectCrewItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectCrewResponse"),
         errors: GETPROJECTCREWITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectCrewItemEndpoint {
-    type Resource = ProjectCrew;
 }
 
 const GETPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7269,7 +6857,7 @@ const GETPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectEquipmentCollectionEndpoint;
+pub(crate) struct GetProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -7320,7 +6908,7 @@ const GETPROJECTEQUIPMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectequipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectEquipmentItemEndpoint;
+pub(crate) struct GetProjectEquipmentItemEndpoint;
 
 impl Endpoint for GetProjectEquipmentItemEndpoint {
     type Request = NoRequest;
@@ -7336,10 +6924,6 @@ impl Endpoint for GetProjectEquipmentItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectEquipmentResponse"),
         errors: GETPROJECTEQUIPMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectEquipmentItemEndpoint {
-    type Resource = ProjectEquipment;
 }
 
 const GETPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7369,7 +6953,7 @@ const GETPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = 
 
 /// Typed endpoint for `GET /projectequipmentgroup`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectEquipmentGroupCollectionEndpoint;
+pub(crate) struct GetProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -7420,7 +7004,7 @@ const GETPROJECTEQUIPMENTGROUPITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectequipmentgroup/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectEquipmentGroupItemEndpoint;
+pub(crate) struct GetProjectEquipmentGroupItemEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupItemEndpoint {
     type Request = NoRequest;
@@ -7436,10 +7020,6 @@ impl Endpoint for GetProjectEquipmentGroupItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectEquipmentGroupResponse"),
         errors: GETPROJECTEQUIPMENTGROUPITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectEquipmentGroupItemEndpoint {
-    type Resource = ProjectEquipmentGroup;
 }
 
 const GETPROJECTEQUIPMENTGROUPPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
@@ -7475,7 +7055,7 @@ const GETPROJECTEQUIPMENTGROUPPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[Endpo
 
 /// Typed endpoint for `GET /projectequipmentgroup/{id}/projectequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint;
+pub(crate) struct GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -7491,10 +7071,6 @@ impl Endpoint for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectEquipmentResponse"),
         errors: GETPROJECTEQUIPMENTGROUPPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
-    type Resource = ProjectEquipmentGroup;
 }
 
 const GETPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7524,7 +7100,7 @@ const GETPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /projectfunctiongroups`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionGroupCollectionEndpoint;
+pub(crate) struct GetProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -7575,7 +7151,7 @@ const GETPROJECTFUNCTIONGROUPITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectfunctiongroups/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionGroupItemEndpoint;
+pub(crate) struct GetProjectFunctionGroupItemEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupItemEndpoint {
     type Request = NoRequest;
@@ -7591,10 +7167,6 @@ impl Endpoint for GetProjectFunctionGroupItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectFunctionGroupResponse"),
         errors: GETPROJECTFUNCTIONGROUPITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFunctionGroupItemEndpoint {
-    type Resource = ProjectFunctionGroup;
 }
 
 const GETPROJECTFUNCTIONGROUPPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS:
@@ -7630,7 +7202,7 @@ const GETPROJECTFUNCTIONGROUPPROJECTFUNCTIONCOLLECTIONENDPOINT_ERRORS: &[Endpoin
 
 /// Typed endpoint for `GET /projectfunctiongroups/{id}/projectfunctions`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionGroupProjectFunctionCollectionEndpoint;
+pub(crate) struct GetProjectFunctionGroupProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
@@ -7646,10 +7218,6 @@ impl Endpoint for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectFunctionResponse"),
         errors: GETPROJECTFUNCTIONGROUPPROJECTFUNCTIONCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
-    type Resource = ProjectFunctionGroup;
 }
 
 const GETPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7679,7 +7247,7 @@ const GETPROJECTFUNCTIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectfunctions`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionCollectionEndpoint;
+pub(crate) struct GetProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
@@ -7730,7 +7298,7 @@ const GETPROJECTFUNCTIONITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectfunctions/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionItemEndpoint;
+pub(crate) struct GetProjectFunctionItemEndpoint;
 
 impl Endpoint for GetProjectFunctionItemEndpoint {
     type Request = NoRequest;
@@ -7746,10 +7314,6 @@ impl Endpoint for GetProjectFunctionItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectFunctionResponse"),
         errors: GETPROJECTFUNCTIONITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFunctionItemEndpoint {
-    type Resource = ProjectFunction;
 }
 
 const GETPROJECTFUNCTIONPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -7785,7 +7349,7 @@ const GETPROJECTFUNCTIONPROJECTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpe
 
 /// Typed endpoint for `GET /projectfunctions/{id}/projectcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionProjectCrewCollectionEndpoint;
+pub(crate) struct GetProjectFunctionProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionProjectCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -7801,10 +7365,6 @@ impl Endpoint for GetProjectFunctionProjectCrewCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectCrewResponse"),
         errors: GETPROJECTFUNCTIONPROJECTCREWCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFunctionProjectCrewCollectionEndpoint {
-    type Resource = ProjectFunction;
 }
 
 const GETPROJECTFUNCTIONPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -7840,7 +7400,7 @@ const GETPROJECTFUNCTIONPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointError
 
 /// Typed endpoint for `GET /projectfunctions/{id}/projectvehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFunctionProjectVehicleCollectionEndpoint;
+pub(crate) struct GetProjectFunctionProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectFunctionProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -7856,10 +7416,6 @@ impl Endpoint for GetProjectFunctionProjectVehicleCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectVehicleResponse"),
         errors: GETPROJECTFUNCTIONPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFunctionProjectVehicleCollectionEndpoint {
-    type Resource = ProjectFunction;
 }
 
 const GETPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -7889,7 +7445,7 @@ const GETPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /projectrequestequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectRequestEquipmentCollectionEndpoint;
+pub(crate) struct GetProjectRequestEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -7940,7 +7496,7 @@ const DELETEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /projectrequestequipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteProjectRequestEquipmentEndpoint;
+pub(crate) struct DeleteProjectRequestEquipmentEndpoint;
 
 impl Endpoint for DeleteProjectRequestEquipmentEndpoint {
     type Request = NoRequest;
@@ -7956,10 +7512,6 @@ impl Endpoint for DeleteProjectRequestEquipmentEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteProjectRequestEquipmentEndpoint {
-    type Resource = ProjectRequestEquipment;
 }
 
 const GETPROJECTREQUESTEQUIPMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -7995,7 +7547,7 @@ const GETPROJECTREQUESTEQUIPMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectrequestequipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectRequestEquipmentItemEndpoint;
+pub(crate) struct GetProjectRequestEquipmentItemEndpoint;
 
 impl Endpoint for GetProjectRequestEquipmentItemEndpoint {
     type Request = NoRequest;
@@ -8011,10 +7563,6 @@ impl Endpoint for GetProjectRequestEquipmentItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectRequestEquipmentResponse"),
         errors: GETPROJECTREQUESTEQUIPMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectRequestEquipmentItemEndpoint {
-    type Resource = ProjectRequestEquipment;
 }
 
 const UPDATEPROJECTREQUESTEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8050,7 +7598,7 @@ const UPDATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /projectrequestequipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateProjectRequestEquipmentEndpoint;
+pub(crate) struct UpdateProjectRequestEquipmentEndpoint;
 
 impl Endpoint for UpdateProjectRequestEquipmentEndpoint {
     type Request = ProjectRequestEquipmentPayload;
@@ -8066,10 +7614,6 @@ impl Endpoint for UpdateProjectRequestEquipmentEndpoint {
         response: EndpointResponseSpec::Item("ProjectRequestEquipmentResponse"),
         errors: UPDATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateProjectRequestEquipmentEndpoint {
-    type Resource = ProjectRequestEquipment;
 }
 
 const GETPROJECTREQUESTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -8099,7 +7643,7 @@ const GETPROJECTREQUESTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectrequests`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectRequestCollectionEndpoint;
+pub(crate) struct GetProjectRequestCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestCollectionEndpoint {
     type Request = NoRequest;
@@ -8144,7 +7688,7 @@ const CREATEPROJECTREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projectrequests`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectRequestEndpoint;
+pub(crate) struct CreateProjectRequestEndpoint;
 
 impl Endpoint for CreateProjectRequestEndpoint {
     type Request = ProjectRequestPayload;
@@ -8195,7 +7739,7 @@ const DELETEPROJECTREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /projectrequests/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteProjectRequestEndpoint;
+pub(crate) struct DeleteProjectRequestEndpoint;
 
 impl Endpoint for DeleteProjectRequestEndpoint {
     type Request = NoRequest;
@@ -8211,10 +7755,6 @@ impl Endpoint for DeleteProjectRequestEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEPROJECTREQUESTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteProjectRequestEndpoint {
-    type Resource = ProjectRequest;
 }
 
 const GETPROJECTREQUESTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8250,7 +7790,7 @@ const GETPROJECTREQUESTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectrequests/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectRequestItemEndpoint;
+pub(crate) struct GetProjectRequestItemEndpoint;
 
 impl Endpoint for GetProjectRequestItemEndpoint {
     type Request = NoRequest;
@@ -8266,10 +7806,6 @@ impl Endpoint for GetProjectRequestItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectRequestResponse"),
         errors: GETPROJECTREQUESTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectRequestItemEndpoint {
-    type Resource = ProjectRequest;
 }
 
 const UPDATEPROJECTREQUESTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8305,7 +7841,7 @@ const UPDATEPROJECTREQUESTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /projectrequests/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateProjectRequestEndpoint;
+pub(crate) struct UpdateProjectRequestEndpoint;
 
 impl Endpoint for UpdateProjectRequestEndpoint {
     type Request = ProjectRequestPayload;
@@ -8321,10 +7857,6 @@ impl Endpoint for UpdateProjectRequestEndpoint {
         response: EndpointResponseSpec::Item("ProjectRequestResponse"),
         errors: UPDATEPROJECTREQUESTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateProjectRequestEndpoint {
-    type Resource = ProjectRequest;
 }
 
 const GETPROJECTREQUESTPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
@@ -8360,7 +7892,7 @@ const GETPROJECTREQUESTPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[Endpo
 
 /// Typed endpoint for `GET /projectrequests/{id}/projectrequestequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectRequestProjectRequestEquipmentCollectionEndpoint;
+pub(crate) struct GetProjectRequestProjectRequestEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -8376,10 +7908,6 @@ impl Endpoint for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectRequestEquipmentResponse"),
         errors: GETPROJECTREQUESTPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
-    type Resource = ProjectRequest;
 }
 
 const CREATEPROJECTREQUESTEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8415,7 +7943,7 @@ const CREATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projectrequests/{id}/projectrequestequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectRequestEquipmentEndpoint;
+pub(crate) struct CreateProjectRequestEquipmentEndpoint;
 
 impl Endpoint for CreateProjectRequestEquipmentEndpoint {
     type Request = ProjectRequestEquipmentPayload;
@@ -8431,10 +7959,6 @@ impl Endpoint for CreateProjectRequestEquipmentEndpoint {
         response: EndpointResponseSpec::Item("ProjectRequestEquipmentResponse"),
         errors: CREATEPROJECTREQUESTEQUIPMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateProjectRequestEquipmentEndpoint {
-    type Resource = ProjectRequest;
 }
 
 const GETPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -8464,7 +7988,7 @@ const GETPROJECTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectCollectionEndpoint;
+pub(crate) struct GetProjectCollectionEndpoint;
 
 impl Endpoint for GetProjectCollectionEndpoint {
     type Request = NoRequest;
@@ -8509,7 +8033,7 @@ const CREATEPROJECTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectEndpoint;
+pub(crate) struct CreateProjectEndpoint;
 
 impl Endpoint for CreateProjectEndpoint {
     type Request = ProjectPayload;
@@ -8554,7 +8078,7 @@ const CREATEFROMTEMPLATEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/:createFromTemplate`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateFromTemplateEndpoint;
+pub(crate) struct CreateFromTemplateEndpoint;
 
 impl Endpoint for CreateFromTemplateEndpoint {
     type Request = ProjectsCreateFromTemplatePayload;
@@ -8604,7 +8128,7 @@ const GETPROJECTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectItemEndpoint;
+pub(crate) struct GetProjectItemEndpoint;
 
 impl Endpoint for GetProjectItemEndpoint {
     type Request = NoRequest;
@@ -8620,10 +8144,6 @@ impl Endpoint for GetProjectItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectResponse"),
         errors: GETPROJECTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectItemEndpoint {
-    type Resource = Project;
 }
 
 const SETCLIENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -8658,7 +8178,7 @@ const SETCLIENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/:setClient`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SetClientEndpoint;
+pub(crate) struct SetClientEndpoint;
 
 impl Endpoint for SetClientEndpoint {
     type Request = ProjectsSetClientPayload;
@@ -8674,10 +8194,6 @@ impl Endpoint for SetClientEndpoint {
         response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
         errors: SETCLIENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for SetClientEndpoint {
-    type Resource = Project;
 }
 
 const SETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -8712,7 +8228,7 @@ const SETLOCATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/:setLocation`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SetLocationEndpoint;
+pub(crate) struct SetLocationEndpoint;
 
 impl Endpoint for SetLocationEndpoint {
     type Request = ProjectsSetLocationPayload;
@@ -8728,10 +8244,6 @@ impl Endpoint for SetLocationEndpoint {
         response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
         errors: SETLOCATIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for SetLocationEndpoint {
-    type Resource = Project;
 }
 
 const SETTYPEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -8766,7 +8278,7 @@ const SETTYPEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/:setType`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SetTypeEndpoint;
+pub(crate) struct SetTypeEndpoint;
 
 impl Endpoint for SetTypeEndpoint {
     type Request = ProjectsSetTypePayload;
@@ -8782,10 +8294,6 @@ impl Endpoint for SetTypeEndpoint {
         response: EndpointResponseSpec::Item("ProjectReferenceResponse"),
         errors: SETTYPEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for SetTypeEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTCONTRACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8821,7 +8329,7 @@ const GETPROJECTCONTRACTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/contracts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectContractCollectionEndpoint;
+pub(crate) struct GetProjectContractCollectionEndpoint;
 
 impl Endpoint for GetProjectContractCollectionEndpoint {
     type Request = NoRequest;
@@ -8837,10 +8345,6 @@ impl Endpoint for GetProjectContractCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ContractResponse"),
         errors: GETPROJECTCONTRACTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectContractCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8876,7 +8380,7 @@ const GETPROJECTPROJECTCOSTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/costs`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectCostCollectionEndpoint;
+pub(crate) struct GetProjectProjectCostCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectCostCollectionEndpoint {
     type Request = NoRequest;
@@ -8892,10 +8396,6 @@ impl Endpoint for GetProjectProjectCostCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectCostResponse"),
         errors: GETPROJECTPROJECTCOSTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectCostCollectionEndpoint {
-    type Resource = Project;
 }
 
 const CREATEPROJECTCOSTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -8930,7 +8430,7 @@ const CREATEPROJECTCOSTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/costs`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectCostEndpoint;
+pub(crate) struct CreateProjectCostEndpoint;
 
 impl Endpoint for CreateProjectCostEndpoint {
     type Request = ProjectCostPayload;
@@ -8946,10 +8446,6 @@ impl Endpoint for CreateProjectCostEndpoint {
         response: EndpointResponseSpec::Item("ProjectCostResponse"),
         errors: CREATEPROJECTCOSTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateProjectCostEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -8985,7 +8481,7 @@ const GETPROJECTFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFileFolderCollectionEndpoint;
+pub(crate) struct GetProjectFileFolderCollectionEndpoint;
 
 impl Endpoint for GetProjectFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -9001,10 +8497,6 @@ impl Endpoint for GetProjectFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETPROJECTFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFileFolderCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9040,7 +8532,7 @@ const GETPROJECTFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectFileCollectionEndpoint;
+pub(crate) struct GetProjectFileCollectionEndpoint;
 
 impl Endpoint for GetProjectFileCollectionEndpoint {
     type Request = NoRequest;
@@ -9056,10 +8548,6 @@ impl Endpoint for GetProjectFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETPROJECTFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectFileCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9095,7 +8583,7 @@ const GETPROJECTPROJECTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/projectcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectCrewCollectionEndpoint;
+pub(crate) struct GetProjectProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -9111,10 +8599,6 @@ impl Endpoint for GetProjectProjectCrewCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectCrewResponse"),
         errors: GETPROJECTPROJECTCREWCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectCrewCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9150,7 +8634,7 @@ const GETPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /projects/{id}/projectequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectEquipmentCollectionEndpoint;
+pub(crate) struct GetProjectProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -9166,10 +8650,6 @@ impl Endpoint for GetProjectProjectEquipmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectEquipmentResponse"),
         errors: GETPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectEquipmentCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9205,7 +8685,7 @@ const GETPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorS
 
 /// Typed endpoint for `GET /projects/{id}/projectequipmentgroup`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectEquipmentGroupCollectionEndpoint;
+pub(crate) struct GetProjectProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -9221,10 +8701,6 @@ impl Endpoint for GetProjectProjectEquipmentGroupCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectEquipmentGroupResponse"),
         errors: GETPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectEquipmentGroupCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9260,7 +8736,7 @@ const GETPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSp
 
 /// Typed endpoint for `GET /projects/{id}/projectfunctiongroups`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectFunctionGroupCollectionEndpoint;
+pub(crate) struct GetProjectProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -9276,10 +8752,6 @@ impl Endpoint for GetProjectProjectFunctionGroupCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectFunctionGroupResponse"),
         errors: GETPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectFunctionGroupCollectionEndpoint {
-    type Resource = Project;
 }
 
 const CREATEPROJECTFUNCTIONGROUPENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9315,7 +8787,7 @@ const CREATEPROJECTFUNCTIONGROUPENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/projectfunctiongroups`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectFunctionGroupEndpoint;
+pub(crate) struct CreateProjectFunctionGroupEndpoint;
 
 impl Endpoint for CreateProjectFunctionGroupEndpoint {
     type Request = ProjectFunctionGroupPayload;
@@ -9331,10 +8803,6 @@ impl Endpoint for CreateProjectFunctionGroupEndpoint {
         response: EndpointResponseSpec::Item("ProjectFunctionGroupResponse"),
         errors: CREATEPROJECTFUNCTIONGROUPENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateProjectFunctionGroupEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9370,7 +8838,7 @@ const GETPROJECTPROJECTFUNCTIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] =
 
 /// Typed endpoint for `GET /projects/{id}/projectfunctions`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectFunctionCollectionEndpoint;
+pub(crate) struct GetProjectProjectFunctionCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectFunctionCollectionEndpoint {
     type Request = NoRequest;
@@ -9386,10 +8854,6 @@ impl Endpoint for GetProjectProjectFunctionCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectFunctionResponse"),
         errors: GETPROJECTPROJECTFUNCTIONCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectFunctionCollectionEndpoint {
-    type Resource = Project;
 }
 
 const CREATEPROJECTFUNCTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9425,7 +8889,7 @@ const CREATEPROJECTFUNCTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/projectfunctions`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateProjectFunctionEndpoint;
+pub(crate) struct CreateProjectFunctionEndpoint;
 
 impl Endpoint for CreateProjectFunctionEndpoint {
     type Request = ProjectFunctionPayload;
@@ -9441,10 +8905,6 @@ impl Endpoint for CreateProjectFunctionEndpoint {
         response: EndpointResponseSpec::Item("ProjectFunctionResponse"),
         errors: CREATEPROJECTFUNCTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateProjectFunctionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9480,7 +8940,7 @@ const GETPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = 
 
 /// Typed endpoint for `GET /projects/{id}/projectvehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectProjectVehicleCollectionEndpoint;
+pub(crate) struct GetProjectProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -9496,10 +8956,6 @@ impl Endpoint for GetProjectProjectVehicleCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectVehicleResponse"),
         errors: GETPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectProjectVehicleCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTQUOTATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9535,7 +8991,7 @@ const GETPROJECTQUOTATIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/quotes`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectQuotationCollectionEndpoint;
+pub(crate) struct GetProjectQuotationCollectionEndpoint;
 
 impl Endpoint for GetProjectQuotationCollectionEndpoint {
     type Request = NoRequest;
@@ -9551,10 +9007,6 @@ impl Endpoint for GetProjectQuotationCollectionEndpoint {
         response: EndpointResponseSpec::Collection("QuotationResponse"),
         errors: GETPROJECTQUOTATIONCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectQuotationCollectionEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTSUBPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9590,7 +9042,7 @@ const GETPROJECTSUBPROJECTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/subprojects`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectSubprojectCollectionEndpoint;
+pub(crate) struct GetProjectSubprojectCollectionEndpoint;
 
 impl Endpoint for GetProjectSubprojectCollectionEndpoint {
     type Request = NoRequest;
@@ -9606,10 +9058,6 @@ impl Endpoint for GetProjectSubprojectCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SubprojectResponse"),
         errors: GETPROJECTSUBPROJECTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectSubprojectCollectionEndpoint {
-    type Resource = Project;
 }
 
 const CREATESUBPROJECTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -9644,7 +9092,7 @@ const CREATESUBPROJECTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/subprojects`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateSubprojectEndpoint;
+pub(crate) struct CreateSubprojectEndpoint;
 
 impl Endpoint for CreateSubprojectEndpoint {
     type Request = SubprojectPayload;
@@ -9660,10 +9108,6 @@ impl Endpoint for CreateSubprojectEndpoint {
         response: EndpointResponseSpec::Item("SubprojectResponse"),
         errors: CREATESUBPROJECTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateSubprojectEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -9699,7 +9143,7 @@ const GETPROJECTTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projects/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectTaskCollectionEndpoint;
+pub(crate) struct GetProjectTaskCollectionEndpoint;
 
 impl Endpoint for GetProjectTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -9715,10 +9159,6 @@ impl Endpoint for GetProjectTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETPROJECTTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectTaskCollectionEndpoint {
-    type Resource = Project;
 }
 
 const POSTPROJECTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -9753,7 +9193,7 @@ const POSTPROJECTSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /projects/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostProjectsIdTasksEndpoint;
+pub(crate) struct PostProjectsIdTasksEndpoint;
 
 impl Endpoint for PostProjectsIdTasksEndpoint {
     type Request = TaskPayload;
@@ -9769,10 +9209,6 @@ impl Endpoint for PostProjectsIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTPROJECTSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostProjectsIdTasksEndpoint {
-    type Resource = Project;
 }
 
 const GETPROJECTSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -9802,7 +9238,7 @@ const GETPROJECTSTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectstatuses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectStatusCollectionEndpoint;
+pub(crate) struct GetProjectStatusCollectionEndpoint;
 
 impl Endpoint for GetProjectStatusCollectionEndpoint {
     type Request = NoRequest;
@@ -9853,7 +9289,7 @@ const GETPROJECTSTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectstatuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectStatusItemEndpoint;
+pub(crate) struct GetProjectStatusItemEndpoint;
 
 impl Endpoint for GetProjectStatusItemEndpoint {
     type Request = NoRequest;
@@ -9869,10 +9305,6 @@ impl Endpoint for GetProjectStatusItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectStatusResponse"),
         errors: GETPROJECTSTATUSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectStatusItemEndpoint {
-    type Resource = ProjectStatus;
 }
 
 const GETPROJECTTEMPLATECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -9902,7 +9334,7 @@ const GETPROJECTTEMPLATECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projecttemplates`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectTemplateCollectionEndpoint;
+pub(crate) struct GetProjectTemplateCollectionEndpoint;
 
 impl Endpoint for GetProjectTemplateCollectionEndpoint {
     type Request = NoRequest;
@@ -9953,7 +9385,7 @@ const GETPROJECTTEMPLATEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projecttemplates/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectTemplateItemEndpoint;
+pub(crate) struct GetProjectTemplateItemEndpoint;
 
 impl Endpoint for GetProjectTemplateItemEndpoint {
     type Request = NoRequest;
@@ -9969,10 +9401,6 @@ impl Endpoint for GetProjectTemplateItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectTemplateResponse"),
         errors: GETPROJECTTEMPLATEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectTemplateItemEndpoint {
-    type Resource = ProjectTemplate;
 }
 
 const GETPROJECTTYPECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10002,7 +9430,7 @@ const GETPROJECTTYPECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projecttypes`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectTypeCollectionEndpoint;
+pub(crate) struct GetProjectTypeCollectionEndpoint;
 
 impl Endpoint for GetProjectTypeCollectionEndpoint {
     type Request = NoRequest;
@@ -10052,7 +9480,7 @@ const GETPROJECTTYPEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projecttypes/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectTypeItemEndpoint;
+pub(crate) struct GetProjectTypeItemEndpoint;
 
 impl Endpoint for GetProjectTypeItemEndpoint {
     type Request = NoRequest;
@@ -10068,10 +9496,6 @@ impl Endpoint for GetProjectTypeItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectTypeResponse"),
         errors: GETPROJECTTYPEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectTypeItemEndpoint {
-    type Resource = ProjectType;
 }
 
 const GETPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10101,7 +9525,7 @@ const GETPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectvehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectVehicleCollectionEndpoint;
+pub(crate) struct GetProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -10152,7 +9576,7 @@ const GETPROJECTVEHICLEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /projectvehicles/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetProjectVehicleItemEndpoint;
+pub(crate) struct GetProjectVehicleItemEndpoint;
 
 impl Endpoint for GetProjectVehicleItemEndpoint {
     type Request = NoRequest;
@@ -10168,10 +9592,6 @@ impl Endpoint for GetProjectVehicleItemEndpoint {
         response: EndpointResponseSpec::Item("ProjectVehicleResponse"),
         errors: GETPROJECTVEHICLEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetProjectVehicleItemEndpoint {
-    type Resource = ProjectVehicle;
 }
 
 const GETPURCHASEORDERCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10201,7 +9621,7 @@ const GETPURCHASEORDERCOSTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseordercosts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderCostCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderCostCollectionEndpoint {
     type Request = NoRequest;
@@ -10252,7 +9672,7 @@ const GETPURCHASEORDERCOSTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseordercosts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderCostItemEndpoint;
+pub(crate) struct GetPurchaseOrderCostItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderCostItemEndpoint {
     type Request = NoRequest;
@@ -10268,10 +9688,6 @@ impl Endpoint for GetPurchaseOrderCostItemEndpoint {
         response: EndpointResponseSpec::Item("PurchaseOrderCostResponse"),
         errors: GETPURCHASEORDERCOSTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderCostItemEndpoint {
-    type Resource = PurchaseOrderCost;
 }
 
 const GETPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10301,7 +9717,7 @@ const GETPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /purchaseorderglobalcosts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderGlobalCostCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderGlobalCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderGlobalCostCollectionEndpoint {
     type Request = NoRequest;
@@ -10352,7 +9768,7 @@ const GETPURCHASEORDERGLOBALCOSTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseorderglobalcosts/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderGlobalCostItemEndpoint;
+pub(crate) struct GetPurchaseOrderGlobalCostItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderGlobalCostItemEndpoint {
     type Request = NoRequest;
@@ -10368,10 +9784,6 @@ impl Endpoint for GetPurchaseOrderGlobalCostItemEndpoint {
         response: EndpointResponseSpec::Item("PurchaseOrderGlobalCostResponse"),
         errors: GETPURCHASEORDERGLOBALCOSTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderGlobalCostItemEndpoint {
-    type Resource = PurchaseOrderGlobalCost;
 }
 
 const GETPURCHASEORDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10401,7 +9813,7 @@ const GETPURCHASEORDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseorders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderCollectionEndpoint {
     type Request = NoRequest;
@@ -10452,7 +9864,7 @@ const GETPURCHASEORDERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseorders/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderItemEndpoint;
+pub(crate) struct GetPurchaseOrderItemEndpoint;
 
 impl Endpoint for GetPurchaseOrderItemEndpoint {
     type Request = NoRequest;
@@ -10468,10 +9880,6 @@ impl Endpoint for GetPurchaseOrderItemEndpoint {
         response: EndpointResponseSpec::Item("PurchaseOrderResponse"),
         errors: GETPURCHASEORDERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderItemEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10507,7 +9915,7 @@ const GETPURCHASEORDERFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /purchaseorders/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderFileFolderCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderFileFolderCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -10523,10 +9931,6 @@ impl Endpoint for GetPurchaseOrderFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETPURCHASEORDERFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderFileFolderCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10562,7 +9966,7 @@ const GETPURCHASEORDERFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseorders/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderFileCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderFileCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderFileCollectionEndpoint {
     type Request = NoRequest;
@@ -10578,10 +9982,6 @@ impl Endpoint for GetPurchaseOrderFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETPURCHASEORDERFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderFileCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10617,7 +10017,7 @@ const GETPURCHASEORDERINVOICELINECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec]
 
 /// Typed endpoint for `GET /purchaseorders/{id}/invoicelines`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderInvoiceLineCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
@@ -10633,10 +10033,6 @@ impl Endpoint for GetPurchaseOrderInvoiceLineCollectionEndpoint {
         response: EndpointResponseSpec::Collection("InvoiceLineResponse"),
         errors: GETPURCHASEORDERINVOICELINECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderInvoiceLineCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERPURCHASEORDERCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10672,7 +10068,7 @@ const GETPURCHASEORDERPURCHASEORDERCOSTCOLLECTIONENDPOINT_ERRORS: &[EndpointErro
 
 /// Typed endpoint for `GET /purchaseorders/{id}/purchaseordercosts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderPurchaseOrderCostCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderPurchaseOrderCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
     type Request = NoRequest;
@@ -10688,10 +10084,6 @@ impl Endpoint for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
         response: EndpointResponseSpec::Collection("PurchaseOrderCostResponse"),
         errors: GETPURCHASEORDERPURCHASEORDERCOSTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_PARAMETERS:
@@ -10727,7 +10119,7 @@ const GETPURCHASEORDERPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_ERRORS: &[Endpoi
 
 /// Typed endpoint for `GET /purchaseorders/{id}/purchaseorderglobalcosts`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
     type Request = NoRequest;
@@ -10743,10 +10135,6 @@ impl Endpoint for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
         response: EndpointResponseSpec::Collection("PurchaseOrderGlobalCostResponse"),
         errors: GETPURCHASEORDERPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETPURCHASEORDERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10782,7 +10170,7 @@ const GETPURCHASEORDERTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /purchaseorders/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetPurchaseOrderTaskCollectionEndpoint;
+pub(crate) struct GetPurchaseOrderTaskCollectionEndpoint;
 
 impl Endpoint for GetPurchaseOrderTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -10798,10 +10186,6 @@ impl Endpoint for GetPurchaseOrderTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETPURCHASEORDERTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetPurchaseOrderTaskCollectionEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const POSTPURCHASEORDERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10837,7 +10221,7 @@ const POSTPURCHASEORDERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /purchaseorders/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostPurchaseordersIdTasksEndpoint;
+pub(crate) struct PostPurchaseordersIdTasksEndpoint;
 
 impl Endpoint for PostPurchaseordersIdTasksEndpoint {
     type Request = TaskPayload;
@@ -10853,10 +10237,6 @@ impl Endpoint for PostPurchaseordersIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTPURCHASEORDERSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostPurchaseordersIdTasksEndpoint {
-    type Resource = PurchaseOrder;
 }
 
 const GETQUOTATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -10886,7 +10266,7 @@ const GETQUOTATIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /quotes`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetQuotationCollectionEndpoint;
+pub(crate) struct GetQuotationCollectionEndpoint;
 
 impl Endpoint for GetQuotationCollectionEndpoint {
     type Request = NoRequest;
@@ -10936,7 +10316,7 @@ const GETQUOTATIONITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /quotes/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetQuotationItemEndpoint;
+pub(crate) struct GetQuotationItemEndpoint;
 
 impl Endpoint for GetQuotationItemEndpoint {
     type Request = NoRequest;
@@ -10952,10 +10332,6 @@ impl Endpoint for GetQuotationItemEndpoint {
         response: EndpointResponseSpec::Item("QuotationResponse"),
         errors: GETQUOTATIONITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetQuotationItemEndpoint {
-    type Resource = Quote;
 }
 
 const GETQUOTATIONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -10991,7 +10367,7 @@ const GETQUOTATIONFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /quotes/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetQuotationFileCollectionEndpoint;
+pub(crate) struct GetQuotationFileCollectionEndpoint;
 
 impl Endpoint for GetQuotationFileCollectionEndpoint {
     type Request = NoRequest;
@@ -11007,10 +10383,6 @@ impl Endpoint for GetQuotationFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETQUOTATIONFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetQuotationFileCollectionEndpoint {
-    type Resource = Quote;
 }
 
 const GETQUOTATIONINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11046,7 +10418,7 @@ const GETQUOTATIONINVOICELINECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /quotes/{id}/invoicelines`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetQuotationInvoiceLineCollectionEndpoint;
+pub(crate) struct GetQuotationInvoiceLineCollectionEndpoint;
 
 impl Endpoint for GetQuotationInvoiceLineCollectionEndpoint {
     type Request = NoRequest;
@@ -11062,10 +10434,6 @@ impl Endpoint for GetQuotationInvoiceLineCollectionEndpoint {
         response: EndpointResponseSpec::Collection("InvoiceLineResponse"),
         errors: GETQUOTATIONINVOICELINECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetQuotationInvoiceLineCollectionEndpoint {
-    type Resource = Quote;
 }
 
 const GETQUOTATIONTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11101,7 +10469,7 @@ const GETQUOTATIONTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /quotes/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetQuotationTaskCollectionEndpoint;
+pub(crate) struct GetQuotationTaskCollectionEndpoint;
 
 impl Endpoint for GetQuotationTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -11117,10 +10485,6 @@ impl Endpoint for GetQuotationTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETQUOTATIONTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetQuotationTaskCollectionEndpoint {
-    type Resource = Quote;
 }
 
 const POSTQUOTESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -11155,7 +10519,7 @@ const POSTQUOTESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /quotes/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostQuotesIdTasksEndpoint;
+pub(crate) struct PostQuotesIdTasksEndpoint;
 
 impl Endpoint for PostQuotesIdTasksEndpoint {
     type Request = TaskPayload;
@@ -11171,10 +10535,6 @@ impl Endpoint for PostQuotesIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTQUOTESIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostQuotesIdTasksEndpoint {
-    type Resource = Quote;
 }
 
 const GETCREWRATEFACTORCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -11204,7 +10564,7 @@ const GETCREWRATEFACTORCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /ratefactors`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRateFactorCollectionEndpoint;
+pub(crate) struct GetCrewRateFactorCollectionEndpoint;
 
 impl Endpoint for GetCrewRateFactorCollectionEndpoint {
     type Request = NoRequest;
@@ -11255,7 +10615,7 @@ const GETCREWRATEFACTORITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /ratefactors/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRateFactorItemEndpoint;
+pub(crate) struct GetCrewRateFactorItemEndpoint;
 
 impl Endpoint for GetCrewRateFactorItemEndpoint {
     type Request = NoRequest;
@@ -11271,10 +10631,6 @@ impl Endpoint for GetCrewRateFactorItemEndpoint {
         response: EndpointResponseSpec::Item("CrewRateFactorResponse"),
         errors: GETCREWRATEFACTORITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewRateFactorItemEndpoint {
-    type Resource = RateFactor;
 }
 
 const GETCREWRATECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -11304,7 +10660,7 @@ const GETCREWRATECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /rates`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRateCollectionEndpoint;
+pub(crate) struct GetCrewRateCollectionEndpoint;
 
 impl Endpoint for GetCrewRateCollectionEndpoint {
     type Request = NoRequest;
@@ -11354,7 +10710,7 @@ const GETCREWRATEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /rates/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRateItemEndpoint;
+pub(crate) struct GetCrewRateItemEndpoint;
 
 impl Endpoint for GetCrewRateItemEndpoint {
     type Request = NoRequest;
@@ -11370,10 +10726,6 @@ impl Endpoint for GetCrewRateItemEndpoint {
         response: EndpointResponseSpec::Item("CrewRateResponse"),
         errors: GETCREWRATEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewRateItemEndpoint {
-    type Resource = Rate;
 }
 
 const GETCREWRATECREWRATEFACTORCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11409,7 +10761,7 @@ const GETCREWRATECREWRATEFACTORCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] =
 
 /// Typed endpoint for `GET /rates/{id}/ratefactors`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetCrewRateCrewRateFactorCollectionEndpoint;
+pub(crate) struct GetCrewRateCrewRateFactorCollectionEndpoint;
 
 impl Endpoint for GetCrewRateCrewRateFactorCollectionEndpoint {
     type Request = NoRequest;
@@ -11425,10 +10777,6 @@ impl Endpoint for GetCrewRateCrewRateFactorCollectionEndpoint {
         response: EndpointResponseSpec::Collection("CrewRateFactorResponse"),
         errors: GETCREWRATECREWRATEFACTORCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetCrewRateCrewRateFactorCollectionEndpoint {
-    type Resource = Rate;
 }
 
 const GETREPAIRCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -11458,7 +10806,7 @@ const GETREPAIRCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /repairs`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetRepairCollectionEndpoint;
+pub(crate) struct GetRepairCollectionEndpoint;
 
 impl Endpoint for GetRepairCollectionEndpoint {
     type Request = NoRequest;
@@ -11508,7 +10856,7 @@ const GETREPAIRITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /repairs/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetRepairItemEndpoint;
+pub(crate) struct GetRepairItemEndpoint;
 
 impl Endpoint for GetRepairItemEndpoint {
     type Request = NoRequest;
@@ -11524,10 +10872,6 @@ impl Endpoint for GetRepairItemEndpoint {
         response: EndpointResponseSpec::Item("RepairResponse"),
         errors: GETREPAIRITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetRepairItemEndpoint {
-    type Resource = Repair;
 }
 
 const GETREPAIRFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11563,7 +10907,7 @@ const GETREPAIRFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /repairs/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetRepairFileFolderCollectionEndpoint;
+pub(crate) struct GetRepairFileFolderCollectionEndpoint;
 
 impl Endpoint for GetRepairFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -11579,10 +10923,6 @@ impl Endpoint for GetRepairFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETREPAIRFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetRepairFileFolderCollectionEndpoint {
-    type Resource = Repair;
 }
 
 const GETREPAIRFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11618,7 +10958,7 @@ const GETREPAIRFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /repairs/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetRepairFileCollectionEndpoint;
+pub(crate) struct GetRepairFileCollectionEndpoint;
 
 impl Endpoint for GetRepairFileCollectionEndpoint {
     type Request = NoRequest;
@@ -11634,10 +10974,6 @@ impl Endpoint for GetRepairFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETREPAIRFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetRepairFileCollectionEndpoint {
-    type Resource = Repair;
 }
 
 const GETREPAIRTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11673,7 +11009,7 @@ const GETREPAIRTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /repairs/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetRepairTaskCollectionEndpoint;
+pub(crate) struct GetRepairTaskCollectionEndpoint;
 
 impl Endpoint for GetRepairTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -11689,10 +11025,6 @@ impl Endpoint for GetRepairTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETREPAIRTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetRepairTaskCollectionEndpoint {
-    type Resource = Repair;
 }
 
 const POSTREPAIRSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -11727,7 +11059,7 @@ const POSTREPAIRSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /repairs/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostRepairsIdTasksEndpoint;
+pub(crate) struct PostRepairsIdTasksEndpoint;
 
 impl Endpoint for PostRepairsIdTasksEndpoint {
     type Request = TaskPayload;
@@ -11743,10 +11075,6 @@ impl Endpoint for PostRepairsIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTREPAIRSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostRepairsIdTasksEndpoint {
-    type Resource = Repair;
 }
 
 const GETSERIALNUMBERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -11776,7 +11104,7 @@ const GETSERIALNUMBERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /serialnumbers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberCollectionEndpoint;
+pub(crate) struct GetSerialNumberCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberCollectionEndpoint {
     type Request = NoRequest;
@@ -11826,7 +11154,7 @@ const DELETESERIALNUMBERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /serialnumbers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteSerialNumberEndpoint;
+pub(crate) struct DeleteSerialNumberEndpoint;
 
 impl Endpoint for DeleteSerialNumberEndpoint {
     type Request = NoRequest;
@@ -11842,10 +11170,6 @@ impl Endpoint for DeleteSerialNumberEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETESERIALNUMBERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteSerialNumberEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBERITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -11880,7 +11204,7 @@ const GETSERIALNUMBERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /serialnumbers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberItemEndpoint;
+pub(crate) struct GetSerialNumberItemEndpoint;
 
 impl Endpoint for GetSerialNumberItemEndpoint {
     type Request = NoRequest;
@@ -11896,10 +11220,6 @@ impl Endpoint for GetSerialNumberItemEndpoint {
         response: EndpointResponseSpec::Item("SerialNumberResponse"),
         errors: GETSERIALNUMBERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberItemEndpoint {
-    type Resource = SerialNumber;
 }
 
 const UPDATESERIALNUMBERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -11934,7 +11254,7 @@ const UPDATESERIALNUMBERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /serialnumbers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateSerialNumberEndpoint;
+pub(crate) struct UpdateSerialNumberEndpoint;
 
 impl Endpoint for UpdateSerialNumberEndpoint {
     type Request = SerialNumberPayload;
@@ -11950,10 +11270,6 @@ impl Endpoint for UpdateSerialNumberEndpoint {
         response: EndpointResponseSpec::Item("SerialNumberResponse"),
         errors: UPDATESERIALNUMBERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateSerialNumberEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBERACTUALCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -11989,7 +11305,7 @@ const GETSERIALNUMBERACTUALCONTENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec
 
 /// Typed endpoint for `GET /serialnumbers/{id}/actualcontent`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberActualContentCollectionEndpoint;
+pub(crate) struct GetSerialNumberActualContentCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberActualContentCollectionEndpoint {
     type Request = NoRequest;
@@ -12005,10 +11321,6 @@ impl Endpoint for GetSerialNumberActualContentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ActualContentResponse"),
         errors: GETSERIALNUMBERACTUALCONTENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberActualContentCollectionEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBEREQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_PARAMETERS:
@@ -12044,7 +11356,7 @@ const GETSERIALNUMBEREQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_ERRORS: &[Endpoi
 
 /// Typed endpoint for `GET /serialnumbers/{id}/equipmentassignedserials`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint;
+pub(crate) struct GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
     type Request = NoRequest;
@@ -12060,10 +11372,6 @@ impl Endpoint for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
         response: EndpointResponseSpec::Collection("EquipmentAssignedSerialsResponse"),
         errors: GETSERIALNUMBEREQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12099,7 +11407,7 @@ const GETSERIALNUMBERFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] =
 
 /// Typed endpoint for `GET /serialnumbers/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberFileFolderCollectionEndpoint;
+pub(crate) struct GetSerialNumberFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -12115,10 +11423,6 @@ impl Endpoint for GetSerialNumberFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETSERIALNUMBERFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberFileFolderCollectionEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12154,7 +11458,7 @@ const GETSERIALNUMBERFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /serialnumbers/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberFileCollectionEndpoint;
+pub(crate) struct GetSerialNumberFileCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberFileCollectionEndpoint {
     type Request = NoRequest;
@@ -12170,10 +11474,6 @@ impl Endpoint for GetSerialNumberFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETSERIALNUMBERFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberFileCollectionEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSERIALNUMBERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12209,7 +11509,7 @@ const GETSERIALNUMBERTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /serialnumbers/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSerialNumberTaskCollectionEndpoint;
+pub(crate) struct GetSerialNumberTaskCollectionEndpoint;
 
 impl Endpoint for GetSerialNumberTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -12225,10 +11525,6 @@ impl Endpoint for GetSerialNumberTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETSERIALNUMBERTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSerialNumberTaskCollectionEndpoint {
-    type Resource = SerialNumber;
 }
 
 const POSTSERIALNUMBERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12264,7 +11560,7 @@ const POSTSERIALNUMBERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /serialnumbers/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostSerialnumbersIdTasksEndpoint;
+pub(crate) struct PostSerialnumbersIdTasksEndpoint;
 
 impl Endpoint for PostSerialnumbersIdTasksEndpoint {
     type Request = TaskPayload;
@@ -12280,10 +11576,6 @@ impl Endpoint for PostSerialnumbersIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTSERIALNUMBERSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostSerialnumbersIdTasksEndpoint {
-    type Resource = SerialNumber;
 }
 
 const GETSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -12313,7 +11605,7 @@ const GETSTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /statuses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStatusCollectionEndpoint;
+pub(crate) struct GetStatusCollectionEndpoint;
 
 impl Endpoint for GetStatusCollectionEndpoint {
     type Request = NoRequest;
@@ -12363,7 +11655,7 @@ const GETSTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /statuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStatusItemEndpoint;
+pub(crate) struct GetStatusItemEndpoint;
 
 impl Endpoint for GetStatusItemEndpoint {
     type Request = NoRequest;
@@ -12379,10 +11671,6 @@ impl Endpoint for GetStatusItemEndpoint {
         response: EndpointResponseSpec::Item("StatusResponse"),
         errors: GETSTATUSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetStatusItemEndpoint {
-    type Resource = Status;
 }
 
 const GETSTOCKLOCATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -12412,7 +11700,7 @@ const GETSTOCKLOCATIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /stocklocations`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStockLocationCollectionEndpoint;
+pub(crate) struct GetStockLocationCollectionEndpoint;
 
 impl Endpoint for GetStockLocationCollectionEndpoint {
     type Request = NoRequest;
@@ -12463,7 +11751,7 @@ const GETSTOCKLOCATIONITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /stocklocations/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStockLocationItemEndpoint;
+pub(crate) struct GetStockLocationItemEndpoint;
 
 impl Endpoint for GetStockLocationItemEndpoint {
     type Request = NoRequest;
@@ -12479,10 +11767,6 @@ impl Endpoint for GetStockLocationItemEndpoint {
         response: EndpointResponseSpec::Item("StockLocationResponse"),
         errors: GETSTOCKLOCATIONITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetStockLocationItemEndpoint {
-    type Resource = StockLocation;
 }
 
 const GETSTOCKLOCATIONVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12518,7 +11802,7 @@ const GETSTOCKLOCATIONVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /stocklocations/{id}/vehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStockLocationVehicleCollectionEndpoint;
+pub(crate) struct GetStockLocationVehicleCollectionEndpoint;
 
 impl Endpoint for GetStockLocationVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -12534,10 +11818,6 @@ impl Endpoint for GetStockLocationVehicleCollectionEndpoint {
         response: EndpointResponseSpec::Collection("VehicleResponse"),
         errors: GETSTOCKLOCATIONVEHICLECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetStockLocationVehicleCollectionEndpoint {
-    type Resource = StockLocation;
 }
 
 const CREATEVEHICLEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -12572,7 +11852,7 @@ const CREATEVEHICLEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /stocklocations/{id}/vehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateVehicleEndpoint;
+pub(crate) struct CreateVehicleEndpoint;
 
 impl Endpoint for CreateVehicleEndpoint {
     type Request = VehiclePayload;
@@ -12588,10 +11868,6 @@ impl Endpoint for CreateVehicleEndpoint {
         response: EndpointResponseSpec::Item("VehicleResponse"),
         errors: CREATEVEHICLEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateVehicleEndpoint {
-    type Resource = StockLocation;
 }
 
 const GETSTOCKMOVEMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -12621,7 +11897,7 @@ const GETSTOCKMOVEMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /stockmovements`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStockMovementCollectionEndpoint;
+pub(crate) struct GetStockMovementCollectionEndpoint;
 
 impl Endpoint for GetStockMovementCollectionEndpoint {
     type Request = NoRequest;
@@ -12671,7 +11947,7 @@ const DELETESTOCKMOVEMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /stockmovements/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteStockMovementEndpoint;
+pub(crate) struct DeleteStockMovementEndpoint;
 
 impl Endpoint for DeleteStockMovementEndpoint {
     type Request = NoRequest;
@@ -12687,10 +11963,6 @@ impl Endpoint for DeleteStockMovementEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETESTOCKMOVEMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteStockMovementEndpoint {
-    type Resource = StockMovement;
 }
 
 const GETSTOCKMOVEMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12726,7 +11998,7 @@ const GETSTOCKMOVEMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /stockmovements/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetStockMovementItemEndpoint;
+pub(crate) struct GetStockMovementItemEndpoint;
 
 impl Endpoint for GetStockMovementItemEndpoint {
     type Request = NoRequest;
@@ -12742,10 +12014,6 @@ impl Endpoint for GetStockMovementItemEndpoint {
         response: EndpointResponseSpec::Item("StockMovementResponse"),
         errors: GETSTOCKMOVEMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetStockMovementItemEndpoint {
-    type Resource = StockMovement;
 }
 
 const UPDATESTOCKMOVEMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -12780,7 +12048,7 @@ const UPDATESTOCKMOVEMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /stockmovements/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateStockMovementEndpoint;
+pub(crate) struct UpdateStockMovementEndpoint;
 
 impl Endpoint for UpdateStockMovementEndpoint {
     type Request = StockMovementPayload;
@@ -12796,10 +12064,6 @@ impl Endpoint for UpdateStockMovementEndpoint {
         response: EndpointResponseSpec::Item("StockMovementResponse"),
         errors: UPDATESTOCKMOVEMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateStockMovementEndpoint {
-    type Resource = StockMovement;
 }
 
 const GETSUBPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -12829,7 +12093,7 @@ const GETSUBPROJECTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subprojects`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectCollectionEndpoint;
+pub(crate) struct GetSubprojectCollectionEndpoint;
 
 impl Endpoint for GetSubprojectCollectionEndpoint {
     type Request = NoRequest;
@@ -12879,7 +12143,7 @@ const GETSUBPROJECTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subprojects/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectItemEndpoint;
+pub(crate) struct GetSubprojectItemEndpoint;
 
 impl Endpoint for GetSubprojectItemEndpoint {
     type Request = NoRequest;
@@ -12895,10 +12159,6 @@ impl Endpoint for GetSubprojectItemEndpoint {
         response: EndpointResponseSpec::Item("SubprojectResponse"),
         errors: GETSUBPROJECTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectItemEndpoint {
-    type Resource = Subproject;
 }
 
 const POSTSUBPROJECTSIDSETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12934,7 +12194,7 @@ const POSTSUBPROJECTSIDSETLOCATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /subprojects/{id}/:setLocation`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostSubprojectsIdSetLocationEndpoint;
+pub(crate) struct PostSubprojectsIdSetLocationEndpoint;
 
 impl Endpoint for PostSubprojectsIdSetLocationEndpoint {
     type Request = SubprojectsSetLocationPayload;
@@ -12950,10 +12210,6 @@ impl Endpoint for PostSubprojectsIdSetLocationEndpoint {
         response: EndpointResponseSpec::Item("SubprojectReferenceResponse"),
         errors: POSTSUBPROJECTSIDSETLOCATIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostSubprojectsIdSetLocationEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -12989,7 +12245,7 @@ const GETSUBPROJECTFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /subprojects/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectFileFolderCollectionEndpoint;
+pub(crate) struct GetSubprojectFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSubprojectFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -13005,10 +12261,6 @@ impl Endpoint for GetSubprojectFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETSUBPROJECTFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectFileFolderCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13044,7 +12296,7 @@ const GETSUBPROJECTPROJECTCREWCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = 
 
 /// Typed endpoint for `GET /subprojects/{id}/projectcrew`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectProjectCrewCollectionEndpoint;
+pub(crate) struct GetSubprojectProjectCrewCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectCrewCollectionEndpoint {
     type Request = NoRequest;
@@ -13060,10 +12312,6 @@ impl Endpoint for GetSubprojectProjectCrewCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectCrewResponse"),
         errors: GETSUBPROJECTPROJECTCREWCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectProjectCrewCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13099,7 +12347,7 @@ const GETSUBPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpe
 
 /// Typed endpoint for `GET /subprojects/{id}/projectequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectProjectEquipmentCollectionEndpoint;
+pub(crate) struct GetSubprojectProjectEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -13115,10 +12363,6 @@ impl Endpoint for GetSubprojectProjectEquipmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectEquipmentResponse"),
         errors: GETSUBPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectProjectEquipmentCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13154,7 +12398,7 @@ const GETSUBPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErr
 
 /// Typed endpoint for `GET /subprojects/{id}/projectequipmentgroup`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectProjectEquipmentGroupCollectionEndpoint;
+pub(crate) struct GetSubprojectProjectEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -13170,10 +12414,6 @@ impl Endpoint for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectEquipmentGroupResponse"),
         errors: GETSUBPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13209,7 +12449,7 @@ const GETSUBPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErro
 
 /// Typed endpoint for `GET /subprojects/{id}/projectfunctiongroups`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectProjectFunctionGroupCollectionEndpoint;
+pub(crate) struct GetSubprojectProjectFunctionGroupCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectFunctionGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -13225,10 +12465,6 @@ impl Endpoint for GetSubprojectProjectFunctionGroupCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectFunctionGroupResponse"),
         errors: GETSUBPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectProjectFunctionGroupCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13264,7 +12500,7 @@ const GETSUBPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec]
 
 /// Typed endpoint for `GET /subprojects/{id}/projectvehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubprojectProjectVehicleCollectionEndpoint;
+pub(crate) struct GetSubprojectProjectVehicleCollectionEndpoint;
 
 impl Endpoint for GetSubprojectProjectVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -13280,10 +12516,6 @@ impl Endpoint for GetSubprojectProjectVehicleCollectionEndpoint {
         response: EndpointResponseSpec::Collection("ProjectVehicleResponse"),
         errors: GETSUBPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubprojectProjectVehicleCollectionEndpoint {
-    type Resource = Subproject;
 }
 
 const GETSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -13313,7 +12545,7 @@ const GETSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentalequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalEquipmentCollectionEndpoint;
+pub(crate) struct GetSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -13364,7 +12596,7 @@ const GETSUBRENTALEQUIPMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentalequipment/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalEquipmentItemEndpoint;
+pub(crate) struct GetSubrentalEquipmentItemEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentItemEndpoint {
     type Request = NoRequest;
@@ -13380,10 +12612,6 @@ impl Endpoint for GetSubrentalEquipmentItemEndpoint {
         response: EndpointResponseSpec::Item("SubrentalEquipmentResponse"),
         errors: GETSUBRENTALEQUIPMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalEquipmentItemEndpoint {
-    type Resource = SubrentalEquipment;
 }
 
 const GETSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -13413,7 +12641,7 @@ const GETSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] 
 
 /// Typed endpoint for `GET /subrentalequipmentgroup`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalEquipmentGroupCollectionEndpoint;
+pub(crate) struct GetSubrentalEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -13464,7 +12692,7 @@ const GETSUBRENTALEQUIPMENTGROUPITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentalequipmentgroup/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalEquipmentGroupItemEndpoint;
+pub(crate) struct GetSubrentalEquipmentGroupItemEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupItemEndpoint {
     type Request = NoRequest;
@@ -13480,10 +12708,6 @@ impl Endpoint for GetSubrentalEquipmentGroupItemEndpoint {
         response: EndpointResponseSpec::Item("SubrentalEquipmentGroupResponse"),
         errors: GETSUBRENTALEQUIPMENTGROUPITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalEquipmentGroupItemEndpoint {
-    type Resource = SubrentalEquipmentGroup;
 }
 
 const GETSUBRENTALEQUIPMENTGROUPSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
@@ -13520,7 +12744,7 @@ const GETSUBRENTALEQUIPMENTGROUPSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_ERRORS:
 
 /// Typed endpoint for `GET /subrentalequipmentgroup/{id}/subrentalequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint;
+pub(crate) struct GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -13536,10 +12760,6 @@ impl Endpoint for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint
         response: EndpointResponseSpec::Collection("SubrentalEquipmentResponse"),
         errors: GETSUBRENTALEQUIPMENTGROUPSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint {
-    type Resource = SubrentalEquipmentGroup;
 }
 
 const GETSUBRENTALCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -13569,7 +12789,7 @@ const GETSUBRENTALCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentals`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalCollectionEndpoint;
+pub(crate) struct GetSubrentalCollectionEndpoint;
 
 impl Endpoint for GetSubrentalCollectionEndpoint {
     type Request = NoRequest;
@@ -13619,7 +12839,7 @@ const GETSUBRENTALITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentals/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalItemEndpoint;
+pub(crate) struct GetSubrentalItemEndpoint;
 
 impl Endpoint for GetSubrentalItemEndpoint {
     type Request = NoRequest;
@@ -13635,10 +12855,6 @@ impl Endpoint for GetSubrentalItemEndpoint {
         response: EndpointResponseSpec::Item("SubrentalResponse"),
         errors: GETSUBRENTALITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalItemEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBRENTALFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13674,7 +12890,7 @@ const GETSUBRENTALFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentals/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalFileFolderCollectionEndpoint;
+pub(crate) struct GetSubrentalFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSubrentalFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -13690,10 +12906,6 @@ impl Endpoint for GetSubrentalFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETSUBRENTALFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalFileFolderCollectionEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBRENTALFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13729,7 +12941,7 @@ const GETSUBRENTALFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentals/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalFileCollectionEndpoint;
+pub(crate) struct GetSubrentalFileCollectionEndpoint;
 
 impl Endpoint for GetSubrentalFileCollectionEndpoint {
     type Request = NoRequest;
@@ -13745,10 +12957,6 @@ impl Endpoint for GetSubrentalFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETSUBRENTALFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalFileCollectionEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBRENTALSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13784,7 +12992,7 @@ const GETSUBRENTALSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSp
 
 /// Typed endpoint for `GET /subrentals/{id}/subrentalequipment`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalSubrentalEquipmentCollectionEndpoint;
+pub(crate) struct GetSubrentalSubrentalEquipmentCollectionEndpoint;
 
 impl Endpoint for GetSubrentalSubrentalEquipmentCollectionEndpoint {
     type Request = NoRequest;
@@ -13800,10 +13008,6 @@ impl Endpoint for GetSubrentalSubrentalEquipmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SubrentalEquipmentResponse"),
         errors: GETSUBRENTALSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalSubrentalEquipmentCollectionEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBRENTALSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13839,7 +13043,7 @@ const GETSUBRENTALSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS: &[EndpointEr
 
 /// Typed endpoint for `GET /subrentals/{id}/subrentalequipmentgroup`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalSubrentalEquipmentGroupCollectionEndpoint;
+pub(crate) struct GetSubrentalSubrentalEquipmentGroupCollectionEndpoint;
 
 impl Endpoint for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
     type Request = NoRequest;
@@ -13855,10 +13059,6 @@ impl Endpoint for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SubrentalEquipmentGroupResponse"),
         errors: GETSUBRENTALSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBRENTALTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13894,7 +13094,7 @@ const GETSUBRENTALTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subrentals/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubrentalTaskCollectionEndpoint;
+pub(crate) struct GetSubrentalTaskCollectionEndpoint;
 
 impl Endpoint for GetSubrentalTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -13910,10 +13110,6 @@ impl Endpoint for GetSubrentalTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETSUBRENTALTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubrentalTaskCollectionEndpoint {
-    type Resource = Subrental;
 }
 
 const POSTSUBRENTALSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -13949,7 +13145,7 @@ const POSTSUBRENTALSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /subrentals/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostSubrentalsIdTasksEndpoint;
+pub(crate) struct PostSubrentalsIdTasksEndpoint;
 
 impl Endpoint for PostSubrentalsIdTasksEndpoint {
     type Request = TaskPayload;
@@ -13965,10 +13161,6 @@ impl Endpoint for PostSubrentalsIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTSUBRENTALSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostSubrentalsIdTasksEndpoint {
-    type Resource = Subrental;
 }
 
 const GETSUBTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -13998,7 +13190,7 @@ const GETSUBTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subtasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubtaskCollectionEndpoint;
+pub(crate) struct GetSubtaskCollectionEndpoint;
 
 impl Endpoint for GetSubtaskCollectionEndpoint {
     type Request = NoRequest;
@@ -14048,7 +13240,7 @@ const DELETESUBTASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /subtasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteSubtaskEndpoint;
+pub(crate) struct DeleteSubtaskEndpoint;
 
 impl Endpoint for DeleteSubtaskEndpoint {
     type Request = NoRequest;
@@ -14064,10 +13256,6 @@ impl Endpoint for DeleteSubtaskEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETESUBTASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteSubtaskEndpoint {
-    type Resource = Subtask;
 }
 
 const GETSUBTASKITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -14102,7 +13290,7 @@ const GETSUBTASKITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /subtasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSubtaskItemEndpoint;
+pub(crate) struct GetSubtaskItemEndpoint;
 
 impl Endpoint for GetSubtaskItemEndpoint {
     type Request = NoRequest;
@@ -14118,10 +13306,6 @@ impl Endpoint for GetSubtaskItemEndpoint {
         response: EndpointResponseSpec::Item("SubtaskResponse"),
         errors: GETSUBTASKITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSubtaskItemEndpoint {
-    type Resource = Subtask;
 }
 
 const UPDATESUBTASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -14156,7 +13340,7 @@ const UPDATESUBTASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /subtasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateSubtaskEndpoint;
+pub(crate) struct UpdateSubtaskEndpoint;
 
 impl Endpoint for UpdateSubtaskEndpoint {
     type Request = SubtaskPayload;
@@ -14172,10 +13356,6 @@ impl Endpoint for UpdateSubtaskEndpoint {
         response: EndpointResponseSpec::Item("SubtaskResponse"),
         errors: UPDATESUBTASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateSubtaskEndpoint {
-    type Resource = Subtask;
 }
 
 const GETSUPPLIERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -14205,7 +13385,7 @@ const GETSUPPLIERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /suppliers`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSupplierCollectionEndpoint;
+pub(crate) struct GetSupplierCollectionEndpoint;
 
 impl Endpoint for GetSupplierCollectionEndpoint {
     type Request = NoRequest;
@@ -14255,7 +13435,7 @@ const DELETESUPPLIERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /suppliers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteSupplierEndpoint;
+pub(crate) struct DeleteSupplierEndpoint;
 
 impl Endpoint for DeleteSupplierEndpoint {
     type Request = NoRequest;
@@ -14271,10 +13451,6 @@ impl Endpoint for DeleteSupplierEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETESUPPLIERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteSupplierEndpoint {
-    type Resource = Supplier;
 }
 
 const GETSUPPLIERITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -14309,7 +13485,7 @@ const GETSUPPLIERITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /suppliers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSupplierItemEndpoint;
+pub(crate) struct GetSupplierItemEndpoint;
 
 impl Endpoint for GetSupplierItemEndpoint {
     type Request = NoRequest;
@@ -14325,10 +13501,6 @@ impl Endpoint for GetSupplierItemEndpoint {
         response: EndpointResponseSpec::Item("SupplierResponse"),
         errors: GETSUPPLIERITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSupplierItemEndpoint {
-    type Resource = Supplier;
 }
 
 const UPDATESUPPLIERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -14363,7 +13535,7 @@ const UPDATESUPPLIERENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /suppliers/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateSupplierEndpoint;
+pub(crate) struct UpdateSupplierEndpoint;
 
 impl Endpoint for UpdateSupplierEndpoint {
     type Request = SupplierPayload;
@@ -14379,10 +13551,6 @@ impl Endpoint for UpdateSupplierEndpoint {
         response: EndpointResponseSpec::Item("SupplierResponse"),
         errors: UPDATESUPPLIERENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateSupplierEndpoint {
-    type Resource = Supplier;
 }
 
 const GETSUPPLIERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14418,7 +13586,7 @@ const GETSUPPLIERFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /suppliers/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSupplierFileFolderCollectionEndpoint;
+pub(crate) struct GetSupplierFileFolderCollectionEndpoint;
 
 impl Endpoint for GetSupplierFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -14434,10 +13602,6 @@ impl Endpoint for GetSupplierFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETSUPPLIERFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSupplierFileFolderCollectionEndpoint {
-    type Resource = Supplier;
 }
 
 const GETSUPPLIERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14473,7 +13637,7 @@ const GETSUPPLIERFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /suppliers/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSupplierFileCollectionEndpoint;
+pub(crate) struct GetSupplierFileCollectionEndpoint;
 
 impl Endpoint for GetSupplierFileCollectionEndpoint {
     type Request = NoRequest;
@@ -14489,10 +13653,6 @@ impl Endpoint for GetSupplierFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETSUPPLIERFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSupplierFileCollectionEndpoint {
-    type Resource = Supplier;
 }
 
 const GETSUPPLIERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14528,7 +13688,7 @@ const GETSUPPLIERTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /suppliers/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetSupplierTaskCollectionEndpoint;
+pub(crate) struct GetSupplierTaskCollectionEndpoint;
 
 impl Endpoint for GetSupplierTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -14544,10 +13704,6 @@ impl Endpoint for GetSupplierTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETSUPPLIERTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetSupplierTaskCollectionEndpoint {
-    type Resource = Supplier;
 }
 
 const POSTSUPPLIERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14583,7 +13739,7 @@ const POSTSUPPLIERSIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /suppliers/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostSuppliersIdTasksEndpoint;
+pub(crate) struct PostSuppliersIdTasksEndpoint;
 
 impl Endpoint for PostSuppliersIdTasksEndpoint {
     type Request = TaskPayload;
@@ -14599,10 +13755,6 @@ impl Endpoint for PostSuppliersIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTSUPPLIERSIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostSuppliersIdTasksEndpoint {
-    type Resource = Supplier;
 }
 
 const GETTASKASSIGNMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -14632,7 +13784,7 @@ const GETTASKASSIGNMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taskassignments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskAssignmentCollectionEndpoint;
+pub(crate) struct GetTaskAssignmentCollectionEndpoint;
 
 impl Endpoint for GetTaskAssignmentCollectionEndpoint {
     type Request = NoRequest;
@@ -14683,7 +13835,7 @@ const DELETETASKASSIGNMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /taskassignments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteTaskAssignmentEndpoint;
+pub(crate) struct DeleteTaskAssignmentEndpoint;
 
 impl Endpoint for DeleteTaskAssignmentEndpoint {
     type Request = NoRequest;
@@ -14699,10 +13851,6 @@ impl Endpoint for DeleteTaskAssignmentEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETETASKASSIGNMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteTaskAssignmentEndpoint {
-    type Resource = TaskAssignment;
 }
 
 const GETTASKASSIGNMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14738,7 +13886,7 @@ const GETTASKASSIGNMENTITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taskassignments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskAssignmentItemEndpoint;
+pub(crate) struct GetTaskAssignmentItemEndpoint;
 
 impl Endpoint for GetTaskAssignmentItemEndpoint {
     type Request = NoRequest;
@@ -14754,10 +13902,6 @@ impl Endpoint for GetTaskAssignmentItemEndpoint {
         response: EndpointResponseSpec::Item("TaskAssignmentResponse"),
         errors: GETTASKASSIGNMENTITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskAssignmentItemEndpoint {
-    type Resource = TaskAssignment;
 }
 
 const UPDATETASKASSIGNMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -14793,7 +13937,7 @@ const UPDATETASKASSIGNMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /taskassignments/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateTaskAssignmentEndpoint;
+pub(crate) struct UpdateTaskAssignmentEndpoint;
 
 impl Endpoint for UpdateTaskAssignmentEndpoint {
     type Request = TaskAssignmentPayload;
@@ -14809,10 +13953,6 @@ impl Endpoint for UpdateTaskAssignmentEndpoint {
         response: EndpointResponseSpec::Item("TaskAssignmentResponse"),
         errors: UPDATETASKASSIGNMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateTaskAssignmentEndpoint {
-    type Resource = TaskAssignment;
 }
 
 const GETTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -14842,7 +13982,7 @@ const GETTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskCollectionEndpoint;
+pub(crate) struct GetTaskCollectionEndpoint;
 
 impl Endpoint for GetTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -14887,7 +14027,7 @@ const POSTTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostTasksEndpoint;
+pub(crate) struct PostTasksEndpoint;
 
 impl Endpoint for PostTasksEndpoint {
     type Request = TaskPayload;
@@ -14937,7 +14077,7 @@ const DELETETASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /tasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteTaskEndpoint;
+pub(crate) struct DeleteTaskEndpoint;
 
 impl Endpoint for DeleteTaskEndpoint {
     type Request = NoRequest;
@@ -14953,10 +14093,6 @@ impl Endpoint for DeleteTaskEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETETASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteTaskEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -14991,7 +14127,7 @@ const GETTASKITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskItemEndpoint;
+pub(crate) struct GetTaskItemEndpoint;
 
 impl Endpoint for GetTaskItemEndpoint {
     type Request = NoRequest;
@@ -15007,10 +14143,6 @@ impl Endpoint for GetTaskItemEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: GETTASKITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskItemEndpoint {
-    type Resource = Task;
 }
 
 const UPDATETASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -15045,7 +14177,7 @@ const UPDATETASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /tasks/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateTaskEndpoint;
+pub(crate) struct UpdateTaskEndpoint;
 
 impl Endpoint for UpdateTaskEndpoint {
     type Request = TaskPayload;
@@ -15061,10 +14193,6 @@ impl Endpoint for UpdateTaskEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: UPDATETASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateTaskEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15100,7 +14228,7 @@ const GETTASKFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskFileFolderCollectionEndpoint;
+pub(crate) struct GetTaskFileFolderCollectionEndpoint;
 
 impl Endpoint for GetTaskFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -15116,10 +14244,6 @@ impl Endpoint for GetTaskFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETTASKFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskFileFolderCollectionEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15155,7 +14279,7 @@ const GETTASKFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskFileCollectionEndpoint;
+pub(crate) struct GetTaskFileCollectionEndpoint;
 
 impl Endpoint for GetTaskFileCollectionEndpoint {
     type Request = NoRequest;
@@ -15171,10 +14295,6 @@ impl Endpoint for GetTaskFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETTASKFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskFileCollectionEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKSUBTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15210,7 +14330,7 @@ const GETTASKSUBTASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks/{id}/subtasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskSubtaskCollectionEndpoint;
+pub(crate) struct GetTaskSubtaskCollectionEndpoint;
 
 impl Endpoint for GetTaskSubtaskCollectionEndpoint {
     type Request = NoRequest;
@@ -15226,10 +14346,6 @@ impl Endpoint for GetTaskSubtaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("SubtaskResponse"),
         errors: GETTASKSUBTASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskSubtaskCollectionEndpoint {
-    type Resource = Task;
 }
 
 const CREATESUBTASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -15264,7 +14380,7 @@ const CREATESUBTASKENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /tasks/{id}/subtasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateSubtaskEndpoint;
+pub(crate) struct CreateSubtaskEndpoint;
 
 impl Endpoint for CreateSubtaskEndpoint {
     type Request = SubtaskPayload;
@@ -15280,10 +14396,6 @@ impl Endpoint for CreateSubtaskEndpoint {
         response: EndpointResponseSpec::Item("SubtaskResponse"),
         errors: CREATESUBTASKENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateSubtaskEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKTASKASSIGNMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15319,7 +14431,7 @@ const GETTASKTASKASSIGNMENTCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /tasks/{id}/taskassignments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskTaskAssignmentCollectionEndpoint;
+pub(crate) struct GetTaskTaskAssignmentCollectionEndpoint;
 
 impl Endpoint for GetTaskTaskAssignmentCollectionEndpoint {
     type Request = NoRequest;
@@ -15335,10 +14447,6 @@ impl Endpoint for GetTaskTaskAssignmentCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskAssignmentResponse"),
         errors: GETTASKTASKASSIGNMENTCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskTaskAssignmentCollectionEndpoint {
-    type Resource = Task;
 }
 
 const CREATETASKASSIGNMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15374,7 +14482,7 @@ const CREATETASKASSIGNMENTENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /tasks/{id}/taskassignments`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateTaskAssignmentEndpoint;
+pub(crate) struct CreateTaskAssignmentEndpoint;
 
 impl Endpoint for CreateTaskAssignmentEndpoint {
     type Request = TaskAssignmentPayload;
@@ -15390,10 +14498,6 @@ impl Endpoint for CreateTaskAssignmentEndpoint {
         response: EndpointResponseSpec::Item("TaskAssignmentResponse"),
         errors: CREATETASKASSIGNMENTENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for CreateTaskAssignmentEndpoint {
-    type Resource = Task;
 }
 
 const GETTASKSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -15423,7 +14527,7 @@ const GETTASKSTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taskstatuses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskStatusCollectionEndpoint;
+pub(crate) struct GetTaskStatusCollectionEndpoint;
 
 impl Endpoint for GetTaskStatusCollectionEndpoint {
     type Request = NoRequest;
@@ -15468,7 +14572,7 @@ const CREATETASKSTATUSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /taskstatuses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CreateTaskStatusEndpoint;
+pub(crate) struct CreateTaskStatusEndpoint;
 
 impl Endpoint for CreateTaskStatusEndpoint {
     type Request = TaskStatusPayload;
@@ -15518,7 +14622,7 @@ const DELETETASKSTATUSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /taskstatuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteTaskStatusEndpoint;
+pub(crate) struct DeleteTaskStatusEndpoint;
 
 impl Endpoint for DeleteTaskStatusEndpoint {
     type Request = NoRequest;
@@ -15534,10 +14638,6 @@ impl Endpoint for DeleteTaskStatusEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETETASKSTATUSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteTaskStatusEndpoint {
-    type Resource = TaskStatus;
 }
 
 const GETTASKSTATUSITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -15572,7 +14672,7 @@ const GETTASKSTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taskstatuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaskStatusItemEndpoint;
+pub(crate) struct GetTaskStatusItemEndpoint;
 
 impl Endpoint for GetTaskStatusItemEndpoint {
     type Request = NoRequest;
@@ -15588,10 +14688,6 @@ impl Endpoint for GetTaskStatusItemEndpoint {
         response: EndpointResponseSpec::Item("TaskStatusResponse"),
         errors: GETTASKSTATUSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaskStatusItemEndpoint {
-    type Resource = TaskStatus;
 }
 
 const UPDATETASKSTATUSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -15626,7 +14722,7 @@ const UPDATETASKSTATUSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /taskstatuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateTaskStatusEndpoint;
+pub(crate) struct UpdateTaskStatusEndpoint;
 
 impl Endpoint for UpdateTaskStatusEndpoint {
     type Request = TaskStatusPayload;
@@ -15642,10 +14738,6 @@ impl Endpoint for UpdateTaskStatusEndpoint {
         response: EndpointResponseSpec::Item("TaskStatusResponse"),
         errors: UPDATETASKSTATUSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateTaskStatusEndpoint {
-    type Resource = TaskStatus;
 }
 
 const GETTAXCLASSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -15675,7 +14767,7 @@ const GETTAXCLASSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taxclasses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaxClassCollectionEndpoint;
+pub(crate) struct GetTaxClassCollectionEndpoint;
 
 impl Endpoint for GetTaxClassCollectionEndpoint {
     type Request = NoRequest;
@@ -15725,7 +14817,7 @@ const GETTAXCLASSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /taxclasses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTaxClassItemEndpoint;
+pub(crate) struct GetTaxClassItemEndpoint;
 
 impl Endpoint for GetTaxClassItemEndpoint {
     type Request = NoRequest;
@@ -15741,10 +14833,6 @@ impl Endpoint for GetTaxClassItemEndpoint {
         response: EndpointResponseSpec::Item("TaxClassResponse"),
         errors: GETTAXCLASSITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTaxClassItemEndpoint {
-    type Resource = TaxClass;
 }
 
 const GETTIMEREGISTRATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -15774,7 +14862,7 @@ const GETTIMEREGISTRATIONCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /timeregistration`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationCollectionEndpoint;
+pub(crate) struct GetTimeRegistrationCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationCollectionEndpoint {
     type Request = NoRequest;
@@ -15819,7 +14907,7 @@ const POSTTIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /timeregistration`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostTimeregistrationEndpoint;
+pub(crate) struct PostTimeregistrationEndpoint;
 
 impl Endpoint for PostTimeregistrationEndpoint {
     type Request = TimeRegistrationPayload;
@@ -15870,7 +14958,7 @@ const DELETETIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /timeregistration/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteTimeRegistrationEndpoint;
+pub(crate) struct DeleteTimeRegistrationEndpoint;
 
 impl Endpoint for DeleteTimeRegistrationEndpoint {
     type Request = NoRequest;
@@ -15886,10 +14974,6 @@ impl Endpoint for DeleteTimeRegistrationEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETETIMEREGISTRATIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteTimeRegistrationEndpoint {
-    type Resource = TimeRegistration;
 }
 
 const GETTIMEREGISTRATIONITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15925,7 +15009,7 @@ const GETTIMEREGISTRATIONITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /timeregistration/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationItemEndpoint;
+pub(crate) struct GetTimeRegistrationItemEndpoint;
 
 impl Endpoint for GetTimeRegistrationItemEndpoint {
     type Request = NoRequest;
@@ -15941,10 +15025,6 @@ impl Endpoint for GetTimeRegistrationItemEndpoint {
         response: EndpointResponseSpec::Item("TimeRegistrationResponse"),
         errors: GETTIMEREGISTRATIONITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTimeRegistrationItemEndpoint {
-    type Resource = TimeRegistration;
 }
 
 const UPDATETIMEREGISTRATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -15980,7 +15060,7 @@ const UPDATETIMEREGISTRATIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /timeregistration/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateTimeRegistrationEndpoint;
+pub(crate) struct UpdateTimeRegistrationEndpoint;
 
 impl Endpoint for UpdateTimeRegistrationEndpoint {
     type Request = TimeRegistrationPayload;
@@ -15996,10 +15076,6 @@ impl Endpoint for UpdateTimeRegistrationEndpoint {
         response: EndpointResponseSpec::Item("TimeRegistrationResponse"),
         errors: UPDATETIMEREGISTRATIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateTimeRegistrationEndpoint {
-    type Resource = TimeRegistration;
 }
 
 const GETTIMEREGISTRATIONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -16035,7 +15111,7 @@ const GETTIMEREGISTRATIONFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &
 
 /// Typed endpoint for `GET /timeregistration/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationFileCollectionEndpoint;
+pub(crate) struct GetTimeRegistrationFileCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationFileCollectionEndpoint {
     type Request = NoRequest;
@@ -16051,10 +15127,6 @@ impl Endpoint for GetTimeRegistrationFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETTIMEREGISTRATIONFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTimeRegistrationFileCollectionEndpoint {
-    type Resource = TimeRegistration;
 }
 
 const GETTIMEREGISTRATIONTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_PARAMETERS:
@@ -16091,7 +15163,7 @@ const GETTIMEREGISTRATIONTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_ERRORS: &[En
 
 /// Typed endpoint for `GET /timeregistration/{id}/timeregistrationactivities`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint;
+pub(crate) struct GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint {
     type Request = NoRequest;
@@ -16107,10 +15179,6 @@ impl Endpoint for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint 
         response: EndpointResponseSpec::Collection("TimeRegistrationActivityResponse"),
         errors: GETTIMEREGISTRATIONTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint {
-    type Resource = TimeRegistration;
 }
 
 const GETTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -16140,7 +15208,7 @@ const GETTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec]
 
 /// Typed endpoint for `GET /timeregistrationactivities`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationActivityCollectionEndpoint;
+pub(crate) struct GetTimeRegistrationActivityCollectionEndpoint;
 
 impl Endpoint for GetTimeRegistrationActivityCollectionEndpoint {
     type Request = NoRequest;
@@ -16191,7 +15259,7 @@ const GETTIMEREGISTRATIONACTIVITYITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /timeregistrationactivities/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetTimeRegistrationActivityItemEndpoint;
+pub(crate) struct GetTimeRegistrationActivityItemEndpoint;
 
 impl Endpoint for GetTimeRegistrationActivityItemEndpoint {
     type Request = NoRequest;
@@ -16207,10 +15275,6 @@ impl Endpoint for GetTimeRegistrationActivityItemEndpoint {
         response: EndpointResponseSpec::Item("TimeRegistrationActivityResponse"),
         errors: GETTIMEREGISTRATIONACTIVITYITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetTimeRegistrationActivityItemEndpoint {
-    type Resource = TimeRegistrationActivity;
 }
 
 const GETVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -16240,7 +15304,7 @@ const GETVEHICLECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /vehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetVehicleCollectionEndpoint;
+pub(crate) struct GetVehicleCollectionEndpoint;
 
 impl Endpoint for GetVehicleCollectionEndpoint {
     type Request = NoRequest;
@@ -16285,7 +15349,7 @@ const POSTVEHICLESENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /vehicles`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostVehiclesEndpoint;
+pub(crate) struct PostVehiclesEndpoint;
 
 impl Endpoint for PostVehiclesEndpoint {
     type Request = VehiclePayload;
@@ -16335,7 +15399,7 @@ const DELETEVEHICLEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `DELETE /vehicles/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct DeleteVehicleEndpoint;
+pub(crate) struct DeleteVehicleEndpoint;
 
 impl Endpoint for DeleteVehicleEndpoint {
     type Request = NoRequest;
@@ -16351,10 +15415,6 @@ impl Endpoint for DeleteVehicleEndpoint {
         response: EndpointResponseSpec::NoContent,
         errors: DELETEVEHICLEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for DeleteVehicleEndpoint {
-    type Resource = Vehicle;
 }
 
 const GETVEHICLEITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -16389,7 +15449,7 @@ const GETVEHICLEITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /vehicles/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetVehicleItemEndpoint;
+pub(crate) struct GetVehicleItemEndpoint;
 
 impl Endpoint for GetVehicleItemEndpoint {
     type Request = NoRequest;
@@ -16405,10 +15465,6 @@ impl Endpoint for GetVehicleItemEndpoint {
         response: EndpointResponseSpec::Item("VehicleResponse"),
         errors: GETVEHICLEITEMENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetVehicleItemEndpoint {
-    type Resource = Vehicle;
 }
 
 const UPDATEVEHICLEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -16443,7 +15499,7 @@ const UPDATEVEHICLEENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `PUT /vehicles/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct UpdateVehicleEndpoint;
+pub(crate) struct UpdateVehicleEndpoint;
 
 impl Endpoint for UpdateVehicleEndpoint {
     type Request = VehiclePayload;
@@ -16459,10 +15515,6 @@ impl Endpoint for UpdateVehicleEndpoint {
         response: EndpointResponseSpec::Item("VehicleResponse"),
         errors: UPDATEVEHICLEENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for UpdateVehicleEndpoint {
-    type Resource = Vehicle;
 }
 
 const GETVEHICLEFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -16498,7 +15550,7 @@ const GETVEHICLEFILEFOLDERCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /vehicles/{id}/file_folders`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetVehicleFileFolderCollectionEndpoint;
+pub(crate) struct GetVehicleFileFolderCollectionEndpoint;
 
 impl Endpoint for GetVehicleFileFolderCollectionEndpoint {
     type Request = NoRequest;
@@ -16514,10 +15566,6 @@ impl Endpoint for GetVehicleFileFolderCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileFolderResponse"),
         errors: GETVEHICLEFILEFOLDERCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetVehicleFileFolderCollectionEndpoint {
-    type Resource = Vehicle;
 }
 
 const GETVEHICLEFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -16553,7 +15601,7 @@ const GETVEHICLEFILECOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /vehicles/{id}/files`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetVehicleFileCollectionEndpoint;
+pub(crate) struct GetVehicleFileCollectionEndpoint;
 
 impl Endpoint for GetVehicleFileCollectionEndpoint {
     type Request = NoRequest;
@@ -16569,10 +15617,6 @@ impl Endpoint for GetVehicleFileCollectionEndpoint {
         response: EndpointResponseSpec::Collection("FileResponse"),
         errors: GETVEHICLEFILECOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetVehicleFileCollectionEndpoint {
-    type Resource = Vehicle;
 }
 
 const GETVEHICLETASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
@@ -16608,7 +15652,7 @@ const GETVEHICLETASKCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /vehicles/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetVehicleTaskCollectionEndpoint;
+pub(crate) struct GetVehicleTaskCollectionEndpoint;
 
 impl Endpoint for GetVehicleTaskCollectionEndpoint {
     type Request = NoRequest;
@@ -16624,10 +15668,6 @@ impl Endpoint for GetVehicleTaskCollectionEndpoint {
         response: EndpointResponseSpec::Collection("TaskResponse"),
         errors: GETVEHICLETASKCOLLECTIONENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for GetVehicleTaskCollectionEndpoint {
-    type Resource = Vehicle;
 }
 
 const POSTVEHICLESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -16662,7 +15702,7 @@ const POSTVEHICLESIDTASKSENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `POST /vehicles/{id}/tasks`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PostVehiclesIdTasksEndpoint;
+pub(crate) struct PostVehiclesIdTasksEndpoint;
 
 impl Endpoint for PostVehiclesIdTasksEndpoint {
     type Request = TaskPayload;
@@ -16678,10 +15718,6 @@ impl Endpoint for PostVehiclesIdTasksEndpoint {
         response: EndpointResponseSpec::Item("TaskResponse"),
         errors: POSTVEHICLESIDTASKSENDPOINT_ERRORS,
     };
-}
-
-impl EndpointWithId for PostVehiclesIdTasksEndpoint {
-    type Resource = Vehicle;
 }
 
 const GETWAREHOUSESTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
@@ -16711,7 +15747,7 @@ const GETWAREHOUSESTATUSCOLLECTIONENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /warehousestatuses`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetWarehouseStatusCollectionEndpoint;
+pub(crate) struct GetWarehouseStatusCollectionEndpoint;
 
 impl Endpoint for GetWarehouseStatusCollectionEndpoint {
     type Request = NoRequest;
@@ -16762,7 +15798,7 @@ const GETWAREHOUSESTATUSITEMENDPOINT_ERRORS: &[EndpointErrorSpec] = &[
 
 /// Typed endpoint for `GET /warehousestatuses/{id}`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct GetWarehouseStatusItemEndpoint;
+pub(crate) struct GetWarehouseStatusItemEndpoint;
 
 impl Endpoint for GetWarehouseStatusItemEndpoint {
     type Request = NoRequest;
@@ -16780,12 +15816,8 @@ impl Endpoint for GetWarehouseStatusItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetWarehouseStatusItemEndpoint {
-    type Resource = WarehouseStatus;
-}
-
 /// All operations in the checked-in Rentman API document.
-pub const ALL_ENDPOINTS: &[EndpointSpec] = &[
+pub(crate) const ALL_ENDPOINTS: &[EndpointSpec] = &[
     <GetAccessoryCollectionEndpoint as Endpoint>::SPEC,
     <DeleteAccessoryEndpoint as Endpoint>::SPEC,
     <GetAccessoryItemEndpoint as Endpoint>::SPEC,

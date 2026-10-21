@@ -4,6 +4,7 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::RentmanAmount;
 use crate::id::{Id, ItemId, Resource};
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use rust_decimal::Decimal;
@@ -13,15 +14,15 @@ use url::Url;
 
 /// Marker type for endpoints without a JSON request body.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NoRequest;
+pub(crate) struct NoRequest;
 
 /// Marker type for endpoints without a JSON response body.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct NoContent;
+pub(crate) struct NoContent;
 
 /// Rentman collection response wrapper.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct CollectionResponse<T> {
+pub(crate) struct CollectionResponse<T> {
     /// Returned collection items.
     pub data: Vec<T>,
     /// Number of items in this response.
@@ -39,7 +40,7 @@ pub struct CollectionResponse<T> {
 
 /// Rentman item response wrapper.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct ItemResponse<T> {
+pub(crate) struct ItemResponse<T> {
     /// Returned item.
     pub data: T,
     /// Number of items in this response.
@@ -13365,10 +13366,10 @@ pub struct ContactPayload {
     pub firstname: Option<String>,
     /// Distance from warehouse to visiting address.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub distance: Option<Decimal>,
+    pub distance: Option<RentmanAmount>,
     /// Travel time (in minutes) from warehouse to visiting address.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub travel_time: Option<Decimal>,
+    pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `ContactRequest.surfix`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub surfix: Option<String>,
@@ -13377,10 +13378,10 @@ pub struct ContactPayload {
     pub surname: Option<String>,
     /// Rentman API field `ContactRequest.longitude`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub longitude: Option<Decimal>,
+    pub longitude: Option<RentmanAmount>,
     /// Rentman API field `ContactRequest.latitude`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub latitude: Option<Decimal>,
+    pub latitude: Option<RentmanAmount>,
     /// Automatically generated if left empty.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
@@ -13526,19 +13527,19 @@ pub struct ContactPayload {
     pub admin_contactperson: Option<Id<ContactPerson>>,
     /// Discount applied to the 'crew' category upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_crew: Option<Decimal>,
+    pub discount_crew: Option<RentmanAmount>,
     /// Discount applied to the 'transport' category upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_transport: Option<Decimal>,
+    pub discount_transport: Option<RentmanAmount>,
     /// Discount applied to the 'rental' category upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_rental: Option<Decimal>,
+    pub discount_rental: Option<RentmanAmount>,
     /// Discount applied to the 'sales' category upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_sale: Option<Decimal>,
+    pub discount_sale: Option<RentmanAmount>,
     /// Discount applied to the total (sub)project upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_total: Option<Decimal>,
+    pub discount_total: Option<RentmanAmount>,
     /// This remark is automatically added to projects upon selecting this contact as client or location.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub projectnote: Option<String>,
@@ -13550,7 +13551,7 @@ pub struct ContactPayload {
     pub contact_warning: Option<String>,
     /// Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount_subrent: Option<Decimal>,
+    pub discount_subrent: Option<RentmanAmount>,
     /// Rentman API field `ContactRequest.image`.
     #[serde(
         default,
@@ -13588,17 +13589,17 @@ pub struct Contact {
     /// Rentman API field `ContactResponse.firstname`.
     pub firstname: String,
     /// Distance from warehouse to visiting address.
-    pub distance: Decimal,
+    pub distance: RentmanAmount,
     /// Travel time (in minutes) from warehouse to visiting address.
-    pub travel_time: Option<Decimal>,
+    pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `ContactResponse.surfix`.
     pub surfix: String,
     /// Rentman API field `ContactResponse.surname`.
     pub surname: String,
     /// Rentman API field `ContactResponse.longitude`.
-    pub longitude: Decimal,
+    pub longitude: RentmanAmount,
     /// Rentman API field `ContactResponse.latitude`.
-    pub latitude: Decimal,
+    pub latitude: RentmanAmount,
     /// Automatically generated if left empty.
     pub code: String,
     /// External identifier used for integrations with accounting software.
@@ -13693,15 +13694,15 @@ pub struct Contact {
     #[serde(default, with = "crate::id::optional_link")]
     pub admin_contactperson: Option<Id<ContactPerson>>,
     /// Discount applied to the 'crew' category upon selecting this contact as a client in a project.
-    pub discount_crew: Decimal,
+    pub discount_crew: RentmanAmount,
     /// Discount applied to the 'transport' category upon selecting this contact as a client in a project.
-    pub discount_transport: Decimal,
+    pub discount_transport: RentmanAmount,
     /// Discount applied to the 'rental' category upon selecting this contact as a client in a project.
-    pub discount_rental: Decimal,
+    pub discount_rental: RentmanAmount,
     /// Discount applied to the 'sales' category upon selecting this contact as a client in a project.
-    pub discount_sale: Decimal,
+    pub discount_sale: RentmanAmount,
     /// Discount applied to the total (sub)project upon selecting this contact as a client in a project.
-    pub discount_total: Decimal,
+    pub discount_total: RentmanAmount,
     /// This remark is automatically added to projects upon selecting this contact as client or location.
     pub projectnote: String,
     /// This remark is automatically added to projects upon selecting this contact as client or location.
@@ -13709,7 +13710,7 @@ pub struct Contact {
     /// This warning is shown when this contact is selected as a client in a project.
     pub contact_warning: String,
     /// Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
-    pub discount_subrent: Decimal,
+    pub discount_subrent: RentmanAmount,
     /// Rentman API field `ContactResponse.image`.
     #[serde(default, with = "crate::id::optional_link")]
     pub image: Option<Id<File>>,
@@ -13798,37 +13799,37 @@ pub struct Contract {
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price: Option<Decimal>,
+    pub project_total_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price_cancelled: Option<Decimal>,
+    pub project_total_price_cancelled: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_rental_price: Option<Decimal>,
+    pub project_rental_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_sale_price: Option<Decimal>,
+    pub project_sale_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_crew_price: Option<Decimal>,
+    pub project_crew_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_transport_price: Option<Decimal>,
+    pub project_transport_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_other_price: Option<Decimal>,
+    pub project_other_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_insurance_price: Option<Decimal>,
+    pub project_insurance_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_services_price: Option<Decimal>,
+    pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// GENERATED FIELD.
-    pub price_invat: Decimal,
+    pub price_invat: RentmanAmount,
     /// GENERATED FIELD.
-    pub vat_amount: Decimal,
+    pub vat_amount: RentmanAmount,
 }
 
 /// Rentman API schema `ProjectCostRequest`.
@@ -13845,7 +13846,7 @@ pub struct ProjectCostPayload {
     pub quantity: Option<i64>,
     /// Rentman API field `ProjectCostRequest.discount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount: Option<Decimal>,
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectCostRequest.subproject`.
     #[serde(with = "crate::id::link")]
     pub subproject: Id<Subproject>,
@@ -13875,10 +13876,10 @@ pub struct ProjectCostPayload {
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostRequest.sale_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub sale_price: Option<Decimal>,
+    pub sale_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectCostRequest.purchase_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub purchase_price: Option<Decimal>,
+    pub purchase_price: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -13929,7 +13930,7 @@ pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.quantity`.
     pub quantity: i64,
     /// Rentman API field `ProjectCostResponse.discount`.
-    pub discount: Decimal,
+    pub discount: RentmanAmount,
     /// Rentman API field `ProjectCostResponse.order`.
     pub order: i64,
     /// Rentman API field `ProjectCostResponse.subproject`.
@@ -13947,9 +13948,9 @@ pub struct ProjectCost {
     #[serde(default, with = "crate::id::optional_link")]
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostResponse.sale_price`.
-    pub sale_price: Decimal,
+    pub sale_price: RentmanAmount,
     /// Rentman API field `ProjectCostResponse.purchase_price`.
-    pub purchase_price: Decimal,
+    pub purchase_price: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
@@ -14356,10 +14357,10 @@ pub struct EquipmentPayload {
     pub shop_featured: Option<bool>,
     /// Rentman API field `EquipmentRequest.price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price: Option<Decimal>,
+    pub price: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.subrental_costs`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub subrental_costs: Option<Decimal>,
+    pub subrental_costs: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.critical_stock_level`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub critical_stock_level: Option<i64>,
@@ -14390,34 +14391,34 @@ pub struct EquipmentPayload {
     pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `EquipmentRequest.list_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub list_price: Option<Decimal>,
+    pub list_price: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.volume`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub volume: Option<Decimal>,
+    pub volume: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.packed_per`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub packed_per: Option<i64>,
     /// Rentman API field `EquipmentRequest.height`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub height: Option<Decimal>,
+    pub height: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.width`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub width: Option<Decimal>,
+    pub width: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.length`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub length: Option<Decimal>,
+    pub length: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.weight`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub weight: Option<Decimal>,
+    pub weight: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.empty_weight`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub empty_weight: Option<Decimal>,
+    pub empty_weight: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.power`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub power: Option<Decimal>,
+    pub power: Option<RentmanAmount>,
     /// Rentman API field `EquipmentRequest.current`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub current: Option<Decimal>,
+    pub current: Option<RentmanAmount>,
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub country_of_origin: Option<EquipmentPayloadCountryOfOrigin>,
@@ -14509,9 +14510,9 @@ pub struct Equipment {
     /// Rentman API field `EquipmentResponse.shop_featured`.
     pub shop_featured: bool,
     /// Rentman API field `EquipmentResponse.price`.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// Rentman API field `EquipmentResponse.subrental_costs`.
-    pub subrental_costs: Decimal,
+    pub subrental_costs: RentmanAmount,
     /// Rentman API field `EquipmentResponse.critical_stock_level`.
     pub critical_stock_level: i64,
     /// Rentman API field `EquipmentResponse.type`.
@@ -14531,25 +14532,25 @@ pub struct Equipment {
     #[serde(default, with = "crate::id::optional_link")]
     pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `EquipmentResponse.list_price`.
-    pub list_price: Decimal,
+    pub list_price: RentmanAmount,
     /// Rentman API field `EquipmentResponse.volume`.
-    pub volume: Decimal,
+    pub volume: RentmanAmount,
     /// Rentman API field `EquipmentResponse.packed_per`.
     pub packed_per: i64,
     /// Rentman API field `EquipmentResponse.height`.
-    pub height: Decimal,
+    pub height: RentmanAmount,
     /// Rentman API field `EquipmentResponse.width`.
-    pub width: Decimal,
+    pub width: RentmanAmount,
     /// Rentman API field `EquipmentResponse.length`.
-    pub length: Decimal,
+    pub length: RentmanAmount,
     /// Rentman API field `EquipmentResponse.weight`.
-    pub weight: Decimal,
+    pub weight: RentmanAmount,
     /// Rentman API field `EquipmentResponse.empty_weight`.
-    pub empty_weight: Decimal,
+    pub empty_weight: RentmanAmount,
     /// Rentman API field `EquipmentResponse.power`.
-    pub power: Decimal,
+    pub power: RentmanAmount,
     /// Rentman API field `EquipmentResponse.current`.
-    pub current: Decimal,
+    pub current: RentmanAmount,
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
     pub country_of_origin: EquipmentCountryOfOrigin,
     /// Rentman API field `EquipmentResponse.image`.
@@ -14844,7 +14845,7 @@ pub struct Factor {
     /// Rentman API field `FactorsResponse.to_days`.
     pub to_days: i64,
     /// Rentman API field `FactorsResponse.factor`.
-    pub factor: Decimal,
+    pub factor: RentmanAmount,
     /// Rentman API field `FactorsResponse.factor_group`.
     #[serde(with = "crate::id::link")]
     pub factor_group: Id<FactorGroup>,
@@ -15201,7 +15202,7 @@ pub struct InvoiceLinePayload {
     pub item: Option<ItemId>,
     /// Rentman API field `InvoiceLineRequest.base`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub base: Option<Decimal>,
+    pub base: Option<RentmanAmount>,
     /// Rentman API field `InvoiceLineRequest.ledger`.
     #[serde(
         default,
@@ -15228,16 +15229,16 @@ pub struct InvoiceLine {
     /// Numeric ID of the linked item (plain integer, not a path).
     pub item: Option<ItemId>,
     /// Rentman API field `InvoiceLineResponse.base`.
-    pub base: Decimal,
+    pub base: RentmanAmount,
     /// Rentman API field `InvoiceLineResponse.ledger`.
     #[serde(with = "crate::id::link")]
     pub ledger: Id<LedgerCode>,
     /// GENERATED FIELD.
-    pub vatrate: Decimal,
+    pub vatrate: RentmanAmount,
     /// GENERATED FIELD.
-    pub vatamount: Decimal,
+    pub vatamount: RentmanAmount,
     /// GENERATED FIELD.
-    pub priceincl: Decimal,
+    pub priceincl: RentmanAmount,
     /// GENERATED FIELD.
     pub ledgercode: String,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -15280,7 +15281,7 @@ pub struct InvoicePayload {
     pub number: Option<String>,
     /// Rentman API field `FactuurRequest.procent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub procent: Option<Decimal>,
+    pub procent: Option<RentmanAmount>,
     /// Rentman API field `FactuurRequest.from_project`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from_project: Option<bool>,
@@ -15335,7 +15336,7 @@ pub struct Invoice {
     /// Rentman API field `FactuurResponse.number`.
     pub number: String,
     /// Rentman API field `FactuurResponse.procent`.
-    pub procent: Decimal,
+    pub procent: RentmanAmount,
     /// Rentman API field `FactuurResponse.from_project`.
     pub from_project: bool,
     /// Rentman API field `FactuurResponse.subject`.
@@ -15351,45 +15352,45 @@ pub struct Invoice {
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price: Option<Decimal>,
+    pub project_total_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price_cancelled: Option<Decimal>,
+    pub project_total_price_cancelled: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_rental_price: Option<Decimal>,
+    pub project_rental_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_sale_price: Option<Decimal>,
+    pub project_sale_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_crew_price: Option<Decimal>,
+    pub project_crew_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_transport_price: Option<Decimal>,
+    pub project_transport_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_other_price: Option<Decimal>,
+    pub project_other_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_insurance_price: Option<Decimal>,
+    pub project_insurance_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_services_price: Option<Decimal>,
+    pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub sum_factuurregels: Decimal,
+    pub sum_factuurregels: RentmanAmount,
     /// GENERATED FIELD.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// GENERATED FIELD.
-    pub price_invat: Decimal,
+    pub price_invat: RentmanAmount,
     /// GENERATED FIELD.
-    pub vat_amount: Decimal,
+    pub vat_amount: RentmanAmount,
     /// GENERATED FIELD.
     pub invoicetype: InvoiceInvoicetype,
     /// GENERATED FIELD.
-    pub outstanding_balance: Decimal,
+    pub outstanding_balance: RentmanAmount,
     /// GENERATED FIELD.
-    pub total_paid: Decimal,
+    pub total_paid: RentmanAmount,
     /// GENERATED FIELD.
     pub is_paid: bool,
     /// GENERATED FIELD.
@@ -15414,7 +15415,7 @@ pub struct LeaveMutationPayload {
     pub description: Option<String>,
     /// Rentman API field `LeaveMutationsRequest.duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `LeaveMutationsRequest.crewmember`.
     #[serde(with = "crate::id::link")]
     pub crewmember: Id<Crew>,
@@ -15457,7 +15458,7 @@ pub struct LeaveMutation {
     /// Rentman API field `LeaveMutationsResponse.description`.
     pub description: String,
     /// Rentman API field `LeaveMutationsResponse.duration`.
-    pub duration: Decimal,
+    pub duration: RentmanAmount,
     /// Rentman API field `LeaveMutationsResponse.crewmember`.
     #[serde(with = "crate::id::link")]
     pub crewmember: Id<Crew>,
@@ -15656,7 +15657,7 @@ pub struct PaymentPayload {
     pub moment: DateTime<FixedOffset>,
     /// Rentman API field `PaymentRequest.amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub amount: Option<Decimal>,
+    pub amount: Option<RentmanAmount>,
     /// Rentman API field `PaymentRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -15698,7 +15699,7 @@ pub struct Payment {
     /// Rentman API field `PaymentResponse.moment`.
     pub moment: DateTime<FixedOffset>,
     /// Rentman API field `PaymentResponse.amount`.
-    pub amount: Decimal,
+    pub amount: RentmanAmount,
     /// Rentman API field `PaymentResponse.description`.
     pub description: String,
     /// Accounting software this payment was imported from.
@@ -15718,16 +15719,16 @@ pub struct ProjectCrewPayload {
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectCrewRequest.cost_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_accommodation: Option<Decimal>,
+    pub cost_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewRequest.cost_catering`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_catering: Option<Decimal>,
+    pub cost_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewRequest.cost_travel`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_travel: Option<Decimal>,
+    pub cost_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewRequest.cost_other`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_other: Option<Decimal>,
+    pub cost_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectCrewRequest.crewmember`.
     #[serde(with = "crate::id::link")]
     pub crewmember: Id<Crew>,
@@ -15806,13 +15807,13 @@ pub struct ProjectCrew {
     #[serde(default, with = "crate::id::optional_link")]
     pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectCrewResponse.cost_accommodation`.
-    pub cost_accommodation: Decimal,
+    pub cost_accommodation: RentmanAmount,
     /// Rentman API field `ProjectCrewResponse.cost_catering`.
-    pub cost_catering: Decimal,
+    pub cost_catering: RentmanAmount,
     /// Rentman API field `ProjectCrewResponse.cost_travel`.
-    pub cost_travel: Decimal,
+    pub cost_travel: RentmanAmount,
     /// Rentman API field `ProjectCrewResponse.cost_other`.
-    pub cost_other: Decimal,
+    pub cost_other: RentmanAmount,
     /// Rentman API field `ProjectCrewResponse.function`.
     #[serde(with = "crate::id::link")]
     pub function: Id<ProjectFunction>,
@@ -15838,19 +15839,19 @@ pub struct ProjectCrew {
     /// Rentman API field `ProjectCrewResponse.is_visible_on_dashboard`.
     pub is_visible_on_dashboard: bool,
     /// GENERATED FIELD.
-    pub costs: Decimal,
+    pub costs: RentmanAmount,
     /// GENERATED FIELD. Costs for this activity based on the chosen rate and the registered hours of the scheduled crew member.
-    pub cost_actual: Decimal,
+    pub cost_actual: RentmanAmount,
     /// GENERATED FIELD. Sum of the number of registered hours linked to this activity.
-    pub hours_registered: Option<Decimal>,
+    pub hours_registered: Option<RentmanAmount>,
     /// GENERATED FIELD. Duration of the activity minus the break defined in the function.
-    pub hours_planned: Option<Decimal>,
+    pub hours_planned: Option<RentmanAmount>,
     /// GENERATED FIELD. Costs for this activity are based on the chosen rate and the duration of the scheduled crew member.
-    pub cost_planned: Decimal,
+    pub cost_planned: RentmanAmount,
     /// GENERATED FIELD.
-    pub diff_cost: Decimal,
+    pub diff_cost: RentmanAmount,
     /// GENERATED FIELD.
-    pub diff_hours: Option<Decimal>,
+    pub diff_hours: Option<RentmanAmount>,
     /// GENERATED FIELD.
     pub activity_status: ProjectCrewActivityStatus,
     /// The object containing all custom defined fields.
@@ -15896,7 +15897,7 @@ pub struct ProjectEquipmentPayload {
     pub quantity_total: Option<i64>,
     /// Rentman API field `ProjectEquipmentRequest.discount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount: Option<Decimal>,
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentRequest.is_option`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_option: Option<bool>,
@@ -15908,7 +15909,7 @@ pub struct ProjectEquipmentPayload {
     pub order: Option<String>,
     /// Rentman API field `ProjectEquipmentRequest.unit_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unit_price: Option<Decimal>,
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -15923,7 +15924,7 @@ pub struct ProjectEquipmentPayload {
     pub delay_notified: Option<bool>,
     /// Rentman API field `ProjectEquipmentRequest.duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentRequest.is_delayed`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_delayed: Option<bool>,
@@ -15966,15 +15967,15 @@ pub struct ProjectEquipment {
     #[serde(with = "crate::id::link")]
     pub equipment_group: Id<ProjectEquipmentGroup>,
     /// Rentman API field `ProjectEquipmentResponse.discount`.
-    pub discount: Decimal,
+    pub discount: RentmanAmount,
     /// Rentman API field `ProjectEquipmentResponse.is_option`.
     pub is_option: bool,
     /// Rentman API field `ProjectEquipmentResponse.factor`.
-    pub factor: Decimal,
+    pub factor: RentmanAmount,
     /// Rentman API field `ProjectEquipmentResponse.order`.
     pub order: i64,
     /// Rentman API field `ProjectEquipmentResponse.unit_price`.
-    pub unit_price: Decimal,
+    pub unit_price: RentmanAmount,
     /// Rentman API field `ProjectEquipmentResponse.name`.
     pub name: String,
     /// Note on financial documents.
@@ -15984,7 +15985,7 @@ pub struct ProjectEquipment {
     /// Rentman API field `ProjectEquipmentResponse.delay_notified`.
     pub delay_notified: bool,
     /// Rentman API field `ProjectEquipmentResponse.duration`.
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentResponse.is_delayed`.
     pub is_delayed: bool,
     /// GENERATED FIELD.
@@ -16027,7 +16028,7 @@ pub struct ProjectEquipmentGroupPayload {
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupRequest.duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentGroupRequest.planperiod_start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
@@ -16098,7 +16099,7 @@ pub struct ProjectEquipmentGroup {
     /// Rentman API field `ProjectEquipmentGroupResponse.usageperiod_end`.
     pub usageperiod_end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.duration`.
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectEquipmentGroupResponse.planperiod_start`.
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectEquipmentGroupResponse.planperiod_end`.
@@ -16112,15 +16113,15 @@ pub struct ProjectEquipmentGroup {
     /// Rentman API field `ProjectEquipmentGroupResponse.remark`.
     pub remark: String,
     /// GENERATED FIELD.
-    pub weight: Decimal,
+    pub weight: RentmanAmount,
     /// GENERATED FIELD.
-    pub power: Decimal,
+    pub power: RentmanAmount,
     /// GENERATED FIELD.
-    pub current: Decimal,
+    pub current: RentmanAmount,
     /// GENERATED FIELD.
-    pub volume: Decimal,
+    pub volume: RentmanAmount,
     /// GENERATED FIELD.
-    pub total_new_price: Decimal,
+    pub total_new_price: RentmanAmount,
 }
 
 /// Rentman API schema `ProjectFunctionGroupRequest`.
@@ -16188,7 +16189,7 @@ pub struct ProjectFunctionGroup {
     #[serde(with = "crate::id::link")]
     pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectFunctionGroupResponse.duration`.
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
     pub planperiod_start_schedule_is_start: ProjectFunctionGroupPlanperiodStartScheduleIsStart,
     /// Rentman API field `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`.
@@ -16217,31 +16218,31 @@ pub struct ProjectFunctionPayload {
     pub cost_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionRequest.cost_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_accommodation: Option<Decimal>,
+    pub cost_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.cost_catering`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_catering: Option<Decimal>,
+    pub cost_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.cost_travel`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_travel: Option<Decimal>,
+    pub cost_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.cost_other`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_other: Option<Decimal>,
+    pub cost_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.price_rate`.
     #[serde(with = "crate::id::link")]
     pub price_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionRequest.price_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price_accommodation: Option<Decimal>,
+    pub price_accommodation: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.price_catering`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price_catering: Option<Decimal>,
+    pub price_catering: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.price_travel`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price_travel: Option<Decimal>,
+    pub price_travel: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.price_other`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price_other: Option<Decimal>,
+    pub price_other: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionRequest.subproject`.
     #[serde(with = "crate::id::link")]
     pub subproject: Id<Subproject>,
@@ -16333,24 +16334,24 @@ pub struct ProjectFunction {
     #[serde(with = "crate::id::link")]
     pub cost_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionResponse.cost_accommodation`.
-    pub cost_accommodation: Decimal,
+    pub cost_accommodation: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.cost_catering`.
-    pub cost_catering: Decimal,
+    pub cost_catering: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.cost_travel`.
-    pub cost_travel: Decimal,
+    pub cost_travel: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.cost_other`.
-    pub cost_other: Decimal,
+    pub cost_other: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.price_rate`.
     #[serde(with = "crate::id::link")]
     pub price_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionResponse.price_accommodation`.
-    pub price_accommodation: Decimal,
+    pub price_accommodation: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.price_catering`.
-    pub price_catering: Decimal,
+    pub price_catering: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.price_travel`.
-    pub price_travel: Decimal,
+    pub price_travel: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.price_other`.
-    pub price_other: Decimal,
+    pub price_other: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.project`.
     #[serde(with = "crate::id::link")]
     pub project: Id<Project>,
@@ -16367,9 +16368,9 @@ pub struct ProjectFunction {
     /// Name on packing lists.
     pub name: String,
     /// Rentman API field `ProjectFunctionResponse.travel_time_before`.
-    pub travel_time_before: Option<Decimal>,
+    pub travel_time_before: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.travel_time_after`.
-    pub travel_time_after: Option<Decimal>,
+    pub travel_time_after: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.use_travel_time_from_location`.
     pub use_travel_time_from_location: bool,
     /// Rentman API field `ProjectFunctionResponse.use_distance_from_location`.
@@ -16394,14 +16395,14 @@ pub struct ProjectFunction {
     #[serde(rename = "type")]
     pub type_: ProjectFunctionType,
     /// Rentman API field `ProjectFunctionResponse.duration`.
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.amount`.
     pub amount: i64,
     /// Rentman API field `ProjectFunctionResponse.break`.
     #[serde(rename = "break")]
-    pub break_: Option<Decimal>,
+    pub break_: Option<RentmanAmount>,
     /// Rentman API field `ProjectFunctionResponse.distance`.
-    pub distance: Decimal,
+    pub distance: RentmanAmount,
     /// Rentman API field `ProjectFunctionResponse.twoway`.
     pub twoway: bool,
     /// Rentman API field `ProjectFunctionResponse.taxclass`.
@@ -16438,17 +16439,17 @@ pub struct ProjectFunction {
     /// GENERATED FIELD. Use the integers: 0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 4 = Friday, 5 = Saturday, 6 = Sunday.
     pub recurrence_weekdays: Option<String>,
     /// GENERATED FIELD.
-    pub price_fixed: Decimal,
+    pub price_fixed: RentmanAmount,
     /// GENERATED FIELD.
-    pub price_variable: Decimal,
+    pub price_variable: RentmanAmount,
     /// GENERATED FIELD.
-    pub costs_fixed: Decimal,
+    pub costs_fixed: RentmanAmount,
     /// GENERATED FIELD.
-    pub costs_variable: Decimal,
+    pub costs_variable: RentmanAmount,
     /// GENERATED FIELD. Total price based on duration and selected price rate.
-    pub price_total: Decimal,
+    pub price_total: RentmanAmount,
     /// GENERATED FIELD. Total costs based on duration and chosen cost rate.
-    pub costs_total: Decimal,
+    pub costs_total: RentmanAmount,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// The object containing all custom defined fields.
@@ -16472,7 +16473,7 @@ pub struct ProjectRequestEquipmentPayload {
     pub is_kit: Option<bool>,
     /// Rentman API field `ProjectRequestEquipmentRequest.discount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount: Option<Decimal>,
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestEquipmentRequest.linked_equipment`.
     #[serde(
         default,
@@ -16495,7 +16496,7 @@ pub struct ProjectRequestEquipmentPayload {
     pub parent: Option<Id<ProjectRequestEquipment>>,
     /// Rentman API field `ProjectRequestEquipmentRequest.unit_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unit_price: Option<Decimal>,
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `ProjectRequestEquipmentRequest.factor`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub factor: Option<String>,
@@ -16527,7 +16528,7 @@ pub struct ProjectRequestEquipment {
     /// Rentman API field `ProjectRequestEquipmentResponse.is_kit`.
     pub is_kit: bool,
     /// Rentman API field `ProjectRequestEquipmentResponse.discount`.
-    pub discount: Decimal,
+    pub discount: RentmanAmount,
     /// Rentman API field `ProjectRequestEquipmentResponse.linked_equipment`.
     #[serde(default, with = "crate::id::optional_link")]
     pub linked_equipment: Option<Id<Equipment>>,
@@ -16539,12 +16540,12 @@ pub struct ProjectRequestEquipment {
     #[serde(default, with = "crate::id::optional_link")]
     pub parent: Option<Id<ProjectRequestEquipment>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.unit_price`.
-    pub unit_price: Decimal,
+    pub unit_price: RentmanAmount,
     /// Rentman API field `ProjectRequestEquipmentResponse.project_request`.
     #[serde(with = "crate::id::link")]
     pub project_request: Id<ProjectRequest>,
     /// Rentman API field `ProjectRequestEquipmentResponse.factor`.
-    pub factor: Decimal,
+    pub factor: RentmanAmount,
     /// Rentman API field `ProjectRequestEquipmentResponse.order`.
     pub order: i64,
 }
@@ -16646,7 +16647,7 @@ pub struct ProjectRequestPayload {
     pub planperiod_start: DateTime<FixedOffset>,
     /// Rentman API field `ProjectRequestRequest.price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price: Option<Decimal>,
+    pub price: Option<RentmanAmount>,
 }
 
 impl ProjectRequestPayload {
@@ -16775,7 +16776,7 @@ pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.planperiod_start`.
     pub planperiod_start: DateTime<FixedOffset>,
     /// Rentman API field `ProjectRequestResponse.price`.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// Rentman API field `ProjectRequestResponse.linked_project`.
     #[serde(default, with = "crate::id::optional_link")]
     pub linked_project: Option<Id<Project>>,
@@ -16820,7 +16821,7 @@ pub struct Project {
     #[serde(default, with = "crate::id::optional_link")]
     pub location: Option<Id<Contact>>,
     /// Rentman API field `ProjectResponse.refundabledeposit`.
-    pub refundabledeposit: Decimal,
+    pub refundabledeposit: RentmanAmount,
     /// Rentman API field `ProjectResponse.deposit_status`.
     pub deposit_status: ProjectDepositStatus,
     /// Rentman API field `ProjectResponse.customer`.
@@ -16850,42 +16851,42 @@ pub struct Project {
     pub conditions: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price: Option<Decimal>,
+    pub project_total_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price_cancelled: Option<Decimal>,
+    pub project_total_price_cancelled: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_rental_price: Option<Decimal>,
+    pub project_rental_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_sale_price: Option<Decimal>,
+    pub project_sale_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_crew_price: Option<Decimal>,
+    pub project_crew_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_transport_price: Option<Decimal>,
+    pub project_transport_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_other_price: Option<Decimal>,
+    pub project_other_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_insurance_price: Option<Decimal>,
+    pub project_insurance_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_services_price: Option<Decimal>,
+    pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub estimated_cost: Option<Decimal>,
+    pub estimated_cost: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub planned_cost: Option<Decimal>,
+    pub planned_cost: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub actual_cost: Option<Decimal>,
+    pub actual_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub already_invoiced: Decimal,
+    pub already_invoiced: RentmanAmount,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD.
@@ -16897,19 +16898,19 @@ pub struct Project {
     /// GENERATED FIELD.
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub weight: Decimal,
+    pub weight: RentmanAmount,
     /// GENERATED FIELD.
-    pub power: Decimal,
+    pub power: RentmanAmount,
     /// GENERATED FIELD.
-    pub current: Decimal,
+    pub current: RentmanAmount,
     /// GENERATED FIELD.
     pub equipment_period_from: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
     pub equipment_period_to: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub purchasecosts: Decimal,
+    pub purchasecosts: RentmanAmount,
     /// GENERATED FIELD.
-    pub volume: Decimal,
+    pub volume: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
@@ -17087,7 +17088,7 @@ pub struct ProjectVehicle {
     /// Rentman API field `ProjectVehicleResponse.remark_planner`.
     pub remark_planner: String,
     /// GENERATED FIELD.
-    pub costs: Decimal,
+    pub costs: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
@@ -17103,7 +17104,7 @@ pub struct PurchaseOrderCostPayload {
     pub costitemtype: Option<PurchaseOrderCostPayloadCostitemtype>,
     /// Rentman API field `PurchaseOrderCostRequest.approved_amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approved_amount: Option<Decimal>,
+    pub approved_amount: Option<RentmanAmount>,
 }
 
 /// Rentman API schema `PurchaseOrderCostResponse`.
@@ -17128,15 +17129,15 @@ pub struct PurchaseOrderCost {
     /// Rentman API field `PurchaseOrderCostResponse.costitemtype`.
     pub costitemtype: PurchaseOrderCostCostitemtype,
     /// Rentman API field `PurchaseOrderCostResponse.approved_amount`.
-    pub approved_amount: Decimal,
+    pub approved_amount: RentmanAmount,
     /// GENERATED FIELD.
     pub project: String,
     /// GENERATED FIELD.
-    pub underlying_cost_amount: Decimal,
+    pub underlying_cost_amount: RentmanAmount,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_tax: Decimal,
+    pub underlying_cost_amount_tax: RentmanAmount,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_with_tax: Decimal,
+    pub underlying_cost_amount_with_tax: RentmanAmount,
     /// GENERATED FIELD.
     pub quantity: i64,
 }
@@ -17149,7 +17150,7 @@ pub struct PurchaseOrderGlobalCostPayload {
     pub name: Option<String>,
     /// Rentman API field `PurchaseOrderGlobalCostRequest.unit_purchase_cost`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unit_purchase_cost: Option<Decimal>,
+    pub unit_purchase_cost: Option<RentmanAmount>,
     /// Rentman API field `PurchaseOrderGlobalCostRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<i64>,
@@ -17182,7 +17183,7 @@ pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.name`.
     pub name: String,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.unit_purchase_cost`.
-    pub unit_purchase_cost: Decimal,
+    pub unit_purchase_cost: RentmanAmount,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.quantity`.
     pub quantity: i64,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.taxclass`.
@@ -17225,7 +17226,7 @@ pub struct PurchaseOrderPayload {
     pub previous_status: PurchaseOrderPayloadPreviousStatus,
     /// Rentman API field `PurchaseOrderRequest.approved_amount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub approved_amount: Option<Decimal>,
+    pub approved_amount: Option<RentmanAmount>,
     /// Rentman API field `PurchaseOrderRequest.supplier`.
     #[serde(
         default,
@@ -17346,7 +17347,7 @@ pub struct PurchaseOrder {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub previous_status: Option<PurchaseOrderPreviousStatus>,
     /// Rentman API field `PurchaseOrderResponse.approved_amount`.
-    pub approved_amount: Decimal,
+    pub approved_amount: RentmanAmount,
     /// Rentman API field `PurchaseOrderResponse.supplier`.
     #[serde(default, with = "crate::id::optional_link")]
     pub supplier: Option<Id<Contact>>,
@@ -17375,11 +17376,11 @@ pub struct PurchaseOrder {
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD.
-    pub underlying_cost_amount: Decimal,
+    pub underlying_cost_amount: RentmanAmount,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_tax: Decimal,
+    pub underlying_cost_amount_tax: RentmanAmount,
     /// GENERATED FIELD.
-    pub underlying_cost_amount_with_tax: Decimal,
+    pub underlying_cost_amount_with_tax: RentmanAmount,
     /// GENERATED FIELD.
     #[serde(default, with = "crate::id::optional_link")]
     pub approved_by: Option<Id<Crew>>,
@@ -17470,37 +17471,37 @@ pub struct Quote {
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price: Option<Decimal>,
+    pub project_total_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price_cancelled: Option<Decimal>,
+    pub project_total_price_cancelled: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_rental_price: Option<Decimal>,
+    pub project_rental_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_sale_price: Option<Decimal>,
+    pub project_sale_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_crew_price: Option<Decimal>,
+    pub project_crew_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_transport_price: Option<Decimal>,
+    pub project_transport_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_other_price: Option<Decimal>,
+    pub project_other_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_insurance_price: Option<Decimal>,
+    pub project_insurance_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_services_price: Option<Decimal>,
+    pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// GENERATED FIELD.
-    pub price_invat: Decimal,
+    pub price_invat: RentmanAmount,
     /// GENERATED FIELD.
-    pub vat_amount: Decimal,
+    pub vat_amount: RentmanAmount,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
 }
@@ -17510,16 +17511,16 @@ pub struct Quote {
 pub struct RateFactorPayload {
     /// Rentman API field `CrewRateFactorRequest.from`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub from: Option<Decimal>,
+    pub from: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorRequest.to`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub to: Option<Decimal>,
+    pub to: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorRequest.variable`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub variable: Option<Decimal>,
+    pub variable: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorRequest.fixed`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub fixed: Option<Decimal>,
+    pub fixed: Option<RentmanAmount>,
 }
 
 /// Rentman API schema `CrewRateFactorResponse`.
@@ -17540,13 +17541,13 @@ pub struct RateFactor {
     #[serde(with = "crate::id::link")]
     pub rate_id: Id<Rate>,
     /// Rentman API field `CrewRateFactorResponse.from`.
-    pub from: Option<Decimal>,
+    pub from: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorResponse.to`.
-    pub to: Option<Decimal>,
+    pub to: Option<RentmanAmount>,
     /// Rentman API field `CrewRateFactorResponse.variable`.
-    pub variable: Decimal,
+    pub variable: RentmanAmount,
     /// Rentman API field `CrewRateFactorResponse.fixed`.
-    pub fixed: Decimal,
+    pub fixed: RentmanAmount,
 }
 
 /// Rentman API schema `CrewRateRequest`.
@@ -17642,7 +17643,7 @@ pub struct RepairPayload {
     pub remark: Option<String>,
     /// Rentman API field `RepairRequest.repair_costs`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub repair_costs: Option<Decimal>,
+    pub repair_costs: Option<RentmanAmount>,
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_usable: Option<RepairPayloadIsUsable>,
@@ -17724,7 +17725,7 @@ pub struct Repair {
     /// Rentman API field `RepairResponse.remark`.
     pub remark: String,
     /// Rentman API field `RepairResponse.repair_costs`.
-    pub repair_costs: Decimal,
+    pub repair_costs: RentmanAmount,
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     pub is_usable: RepairIsUsable,
     /// Rentman API field `RepairResponse.costs_charged_to_customer`.
@@ -17758,16 +17759,16 @@ pub struct SerialNumberPayload {
     pub purchasedate: Option<String>,
     /// Rentman API field `SerialNumberRequest.depreciation_monthly`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub depreciation_monthly: Option<Decimal>,
+    pub depreciation_monthly: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberRequest.book_value`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub book_value: Option<Decimal>,
+    pub book_value: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberRequest.residual_value`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub residual_value: Option<Decimal>,
+    pub residual_value: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberRequest.purchase_costs`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub purchase_costs: Option<Decimal>,
+    pub purchase_costs: Option<RentmanAmount>,
     /// Rentman API field `SerialNumberRequest.active`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active: Option<bool>,
@@ -17818,13 +17819,13 @@ pub struct SerialNumber {
     /// Rentman API field `SerialNumberResponse.purchasedate`.
     pub purchasedate: Option<String>,
     /// Rentman API field `SerialNumberResponse.depreciation_monthly`.
-    pub depreciation_monthly: Decimal,
+    pub depreciation_monthly: RentmanAmount,
     /// Rentman API field `SerialNumberResponse.book_value`.
-    pub book_value: Decimal,
+    pub book_value: RentmanAmount,
     /// Rentman API field `SerialNumberResponse.residual_value`.
-    pub residual_value: Decimal,
+    pub residual_value: RentmanAmount,
     /// Rentman API field `SerialNumberResponse.purchase_costs`.
-    pub purchase_costs: Decimal,
+    pub purchase_costs: RentmanAmount,
     /// Rentman API field `SerialNumberResponse.active`.
     pub active: bool,
     /// Rentman API field `SerialNumberResponse.remark`.
@@ -17839,7 +17840,7 @@ pub struct SerialNumber {
     #[serde(default, with = "crate::id::optional_link")]
     pub image: Option<Id<File>>,
     /// GENERATED FIELD.
-    pub current_book_value: Decimal,
+    pub current_book_value: RentmanAmount,
     /// GENERATED FIELD.
     pub next_inspection: Option<String>,
     /// GENERATED FIELD.
@@ -18089,25 +18090,25 @@ pub struct Subproject {
     #[serde(default, with = "crate::id::optional_link")]
     pub loc_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubprojectResponse.insurance_rate`.
-    pub insurance_rate: Decimal,
+    pub insurance_rate: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_rental`.
-    pub discount_rental: Decimal,
+    pub discount_rental: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_sale`.
-    pub discount_sale: Decimal,
+    pub discount_sale: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_crew`.
-    pub discount_crew: Decimal,
+    pub discount_crew: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_transport`.
-    pub discount_transport: Decimal,
+    pub discount_transport: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_additional_costs`.
-    pub discount_additional_costs: Decimal,
+    pub discount_additional_costs: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_services`.
-    pub discount_services: Decimal,
+    pub discount_services: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_subproject`.
-    pub discount_subproject: Decimal,
+    pub discount_subproject: RentmanAmount,
     /// Rentman API field `SubprojectResponse.discount_fixed`.
     pub discount_fixed: bool,
     /// Rentman API field `SubprojectResponse.discount_fixed_amount`.
-    pub discount_fixed_amount: Decimal,
+    pub discount_fixed_amount: RentmanAmount,
     /// Rentman API field `SubprojectResponse.fixed_price`.
     pub fixed_price: bool,
     /// Rentman API field `SubprojectResponse.in_planning`.
@@ -18119,42 +18120,42 @@ pub struct Subproject {
     pub asset_location_from: Option<Id<StockLocation>>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price: Option<Decimal>,
+    pub project_total_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total cancelled projects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_total_price_cancelled: Option<Decimal>,
+    pub project_total_price_cancelled: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price rental equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_rental_price: Option<Decimal>,
+    pub project_rental_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price sales equipment. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_sale_price: Option<Decimal>,
+    pub project_sale_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price crew. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_crew_price: Option<Decimal>,
+    pub project_crew_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price transport. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_transport_price: Option<Decimal>,
+    pub project_transport_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price other costs. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_other_price: Option<Decimal>,
+    pub project_other_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price insurance. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_insurance_price: Option<Decimal>,
+    pub project_insurance_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Total price services. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_services_price: Option<Decimal>,
+    pub project_services_price: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub estimated_cost: Option<Decimal>,
+    pub estimated_cost: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub planned_cost: Option<Decimal>,
+    pub planned_cost: Option<RentmanAmount>,
     /// GENERATED FIELD. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub actual_cost: Option<Decimal>,
+    pub actual_cost: Option<RentmanAmount>,
     /// GENERATED FIELD.
-    pub already_invoiced: Decimal,
+    pub already_invoiced: RentmanAmount,
     /// GENERATED FIELD.
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
@@ -18164,15 +18165,15 @@ pub struct Subproject {
     /// GENERATED FIELD.
     pub planperiod_end: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
-    pub weight: Decimal,
+    pub weight: RentmanAmount,
     /// GENERATED FIELD.
-    pub power: Decimal,
+    pub power: RentmanAmount,
     /// GENERATED FIELD.
-    pub current: Decimal,
+    pub current: RentmanAmount,
     /// GENERATED FIELD.
-    pub purchasecosts: Decimal,
+    pub purchasecosts: RentmanAmount,
     /// GENERATED FIELD.
-    pub volume: Decimal,
+    pub volume: RentmanAmount,
     /// GENERATED FIELD.
     pub equipment_period_from: Option<DateTime<FixedOffset>>,
     /// GENERATED FIELD.
@@ -18215,10 +18216,10 @@ pub struct SubrentalEquipmentPayload {
     pub quantity_total: Option<i64>,
     /// Rentman API field `SubrentalEquipmentRequest.unit_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unit_price: Option<Decimal>,
+    pub unit_price: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentRequest.discount`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub discount: Option<Decimal>,
+    pub discount: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentRequest.factor`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub factor: Option<String>,
@@ -18230,7 +18231,7 @@ pub struct SubrentalEquipmentPayload {
     pub remark: Option<String>,
     /// Rentman API field `SubrentalEquipmentRequest.lineprice`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub lineprice: Option<Decimal>,
+    pub lineprice: Option<RentmanAmount>,
     /// Rentman API field `SubrentalEquipmentRequest.supplier_planningmateriaal`.
     #[serde(
         default,
@@ -18274,17 +18275,17 @@ pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.quantity_total`.
     pub quantity_total: i64,
     /// Rentman API field `SubrentalEquipmentResponse.unit_price`.
-    pub unit_price: Decimal,
+    pub unit_price: RentmanAmount,
     /// Rentman API field `SubrentalEquipmentResponse.discount`.
-    pub discount: Decimal,
+    pub discount: RentmanAmount,
     /// Rentman API field `SubrentalEquipmentResponse.factor`.
-    pub factor: Decimal,
+    pub factor: RentmanAmount,
     /// Rentman API field `SubrentalEquipmentResponse.order`.
     pub order: i64,
     /// Rentman API field `SubrentalEquipmentResponse.remark`.
     pub remark: String,
     /// Rentman API field `SubrentalEquipmentResponse.lineprice`.
-    pub lineprice: Decimal,
+    pub lineprice: RentmanAmount,
     /// Rentman API field `SubrentalEquipmentResponse.supplier_planningmateriaal`.
     #[serde(default, with = "crate::id::optional_link")]
     pub supplier_planningmateriaal: Option<Id<ProjectEquipment>>,
@@ -18401,13 +18402,13 @@ pub struct SubrentalPayload {
     pub delivery_out: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalRequest.equipment_cost`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equipment_cost: Option<Decimal>,
+    pub equipment_cost: Option<RentmanAmount>,
     /// Rentman API field `SubrentalRequest.price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price: Option<Decimal>,
+    pub price: Option<RentmanAmount>,
     /// For possible transport costs, administration costs etc.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub extra_cost: Option<Decimal>,
+    pub extra_cost: Option<RentmanAmount>,
     /// Rentman API field `SubrentalRequest.auto_update_costs`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auto_update_costs: Option<bool>,
@@ -18504,11 +18505,11 @@ pub struct Subrental {
     /// Rentman API field `SubrentalResponse.delivery_out`.
     pub delivery_out: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.equipment_cost`.
-    pub equipment_cost: Decimal,
+    pub equipment_cost: RentmanAmount,
     /// Rentman API field `SubrentalResponse.price`.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// For possible transport costs, administration costs etc.
-    pub extra_cost: Decimal,
+    pub extra_cost: RentmanAmount,
     /// Rentman API field `SubrentalResponse.auto_update_costs`.
     pub auto_update_costs: bool,
     /// Rentman API field `SubrentalResponse.remark`.
@@ -18587,7 +18588,7 @@ pub struct SupplierPayload {
     pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SupplierRequest.price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub price: Option<Decimal>,
+    pub price: Option<RentmanAmount>,
     /// Rentman API field `SupplierRequest.details`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub details: Option<String>,
@@ -18630,7 +18631,7 @@ pub struct Supplier {
     #[serde(default, with = "crate::id::optional_link")]
     pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SupplierResponse.price`.
-    pub price: Decimal,
+    pub price: RentmanAmount,
     /// Rentman API field `SupplierResponse.details`.
     pub details: String,
 }
@@ -18760,7 +18761,7 @@ pub struct TaskPayload {
     pub expiry_notification_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskRequest.time_budget`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub time_budget: Option<Decimal>,
+    pub time_budget: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -18869,7 +18870,7 @@ pub struct Task {
     /// Rentman API field `TaskResponse.expiry_notification_date`.
     pub expiry_notification_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.time_budget`.
-    pub time_budget: Option<Decimal>,
+    pub time_budget: Option<RentmanAmount>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD. ~~The API path of the parent item. Use this path to fetch the parent item directly from the API.~~.
@@ -18988,7 +18989,7 @@ pub struct TimeRegistrationPayload {
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationRequest.distance`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub distance: Option<Decimal>,
+    pub distance: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationRequest.is_lunch_included`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_lunch_included: Option<bool>,
@@ -19001,16 +19002,16 @@ pub struct TimeRegistrationPayload {
     pub leavetype: Option<Id<LeaveType>>,
     /// For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationRequest.break_duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub break_duration: Option<Decimal>,
+    pub break_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationRequest.travel_time`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub travel_time: Option<Decimal>,
+    pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationRequest.correction_duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub correction_duration: Option<Decimal>,
+    pub correction_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationRequest.remark`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
@@ -19041,7 +19042,7 @@ pub struct TimeRegistration {
     /// Rentman API field `TimeRegistrationResponse.end`.
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.distance`.
-    pub distance: Decimal,
+    pub distance: RentmanAmount,
     /// Rentman API field `TimeRegistrationResponse.is_lunch_included`.
     pub is_lunch_included: bool,
     /// Rentman API field `TimeRegistrationResponse.leavetype`.
@@ -19051,19 +19052,19 @@ pub struct TimeRegistration {
     #[serde(default, with = "crate::id::optional_link")]
     pub leaverequest: Option<Id<LeaveRequest>>,
     /// For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
-    pub duration: Decimal,
+    pub duration: RentmanAmount,
     /// Rentman API field `TimeRegistrationResponse.break_duration`.
-    pub break_duration: Option<Decimal>,
+    pub break_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.travel_time`.
-    pub travel_time: Option<Decimal>,
+    pub travel_time: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.correction_duration`.
-    pub correction_duration: Option<Decimal>,
+    pub correction_duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationResponse.remark`.
     pub remark: String,
     /// Rentman API field `TimeRegistrationResponse.status`.
     pub status: TimeRegistrationStatus,
     /// GENERATED FIELD. The sum of breaks that were created for this time registration with exact start and end time.
-    pub break_duration_with_start_end: Option<Decimal>,
+    pub break_duration_with_start_end: Option<RentmanAmount>,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
@@ -19090,7 +19091,7 @@ pub struct TimeRegistrationActivityPayload {
     pub description: Option<String>,
     /// Rentman API field `TimeRegistrationActivityRequest.duration`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationActivityRequest.is_activity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_activity: Option<bool>,
@@ -19128,7 +19129,7 @@ pub struct TimeRegistrationActivity {
     /// Rentman API field `TimeRegistrationActivityResponse.description`.
     pub description: String,
     /// Rentman API field `TimeRegistrationActivityResponse.duration`.
-    pub duration: Option<Decimal>,
+    pub duration: Option<RentmanAmount>,
     /// Rentman API field `TimeRegistrationActivityResponse.is_activity`.
     pub is_activity: bool,
     /// Rentman API field `TimeRegistrationActivityResponse.from`.
@@ -19162,13 +19163,13 @@ pub struct VehiclePayload {
     pub in_planner: Option<bool>,
     /// Rentman API field `VehicleRequest.height`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub height: Option<Decimal>,
+    pub height: Option<RentmanAmount>,
     /// Rentman API field `VehicleRequest.length`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub length: Option<Decimal>,
+    pub length: Option<RentmanAmount>,
     /// Rentman API field `VehicleRequest.width`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub width: Option<Decimal>,
+    pub width: Option<RentmanAmount>,
     /// Rentman API field `VehicleRequest.seats`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub seats: Option<i64>,
@@ -19183,7 +19184,7 @@ pub struct VehiclePayload {
     pub remark: Option<String>,
     /// Rentman API field `VehicleRequest.payload_capacity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub payload_capacity: Option<Decimal>,
+    pub payload_capacity: Option<RentmanAmount>,
     /// Rentman API field `VehicleRequest.surface_area`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub surface_area: Option<String>,
@@ -19234,11 +19235,11 @@ pub struct Vehicle {
     /// Rentman API field `VehicleResponse.in_planner`.
     pub in_planner: bool,
     /// Rentman API field `VehicleResponse.height`.
-    pub height: Decimal,
+    pub height: RentmanAmount,
     /// Rentman API field `VehicleResponse.length`.
-    pub length: Decimal,
+    pub length: RentmanAmount,
     /// Rentman API field `VehicleResponse.width`.
-    pub width: Decimal,
+    pub width: RentmanAmount,
     /// Rentman API field `VehicleResponse.seats`.
     pub seats: i64,
     /// Rentman API field `VehicleResponse.inspection_date`.
@@ -19248,7 +19249,7 @@ pub struct Vehicle {
     /// Rentman API field `VehicleResponse.remark`.
     pub remark: String,
     /// Rentman API field `VehicleResponse.payload_capacity`.
-    pub payload_capacity: Decimal,
+    pub payload_capacity: RentmanAmount,
     /// Rentman API field `VehicleResponse.surface_area`.
     pub surface_area: String,
     /// Can be scheduled more than once at the same time. For example, for employment agencies.
@@ -19262,9 +19263,9 @@ pub struct Vehicle {
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD. Costs per kilometer.
-    pub distance_cost: Decimal,
+    pub distance_cost: RentmanAmount,
     /// GENERATED FIELD.
-    pub fixed_cost: Decimal,
+    pub fixed_cost: RentmanAmount,
     /// The object containing all custom defined fields.
     pub custom: CustomFields,
 }
