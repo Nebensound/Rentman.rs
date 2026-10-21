@@ -102,17 +102,21 @@ pub(crate) fn decode<P: Projection>(mut item: ProjectedItem) -> crate::Result<P>
 }
 
 /// Fields Rentman adds to every selection by itself but does not accept in
-/// `fields=` (`RESOURCE_EXTRA_FIELDS` in the generator): next to other fields
-/// it drops them silently, and named alone it ignores the whole selection and
+/// `fields=` (`REVISION_FIELD` in the generator): next to other fields it
+/// drops them silently, and named alone it ignores the whole selection and
 /// returns full items (verified live on 2026-10-21).
 const ALWAYS_SENT: &[&str] = &["updateHash"];
 
 /// The `fields=` value of a projection, e.g. `id,firstname`.
-///
-/// Fields Rentman always sends are not requested; a projection of only such
-/// fields selects `id`, which Rentman accepts and adds them to.
 pub(crate) fn fields<P: Projection>() -> String {
-    let selected = P::FIELDS
+    selection(P::FIELDS)
+}
+
+/// Joins the fields to request. Fields Rentman always sends are left out; a
+/// selection of only such fields requests `id`, which Rentman accepts and adds
+/// them to.
+fn selection(fields: &[&str]) -> String {
+    let selected = fields
         .iter()
         .copied()
         .filter(|field| !ALWAYS_SENT.contains(field))
