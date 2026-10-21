@@ -40,9 +40,6 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     }
 
     /// Adds query parameters to the request.
-    // Coverage is disabled because this generic serde adapter is monomorphized
-    // per caller; request-building behavior is covered by non-generic helpers.
-    #[cfg_attr(coverage_nightly, coverage(off))]
     pub fn query<T: Serialize + ?Sized>(mut self, query: &T) -> Result<Self> {
         self.query_params.extend(serialize_query_params(query)?);
         Ok(self)
@@ -55,9 +52,9 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     }
 
     /// Sets the typed JSON request body.
-    // Coverage is disabled because this generic serde adapter is monomorphized
-    // per endpoint; concrete body handling is covered after JSON conversion.
-    #[cfg_attr(coverage_nightly, coverage(off))]
+    ///
+    /// Fails when the body cannot be represented as JSON, which only a custom
+    /// [`endpoint::Endpoint`] request type with a failing serializer can cause.
     pub fn body(mut self, body: E::Request) -> Result<Self>
     where
         E::Request: Serialize,
@@ -68,9 +65,6 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     }
 
     /// Sends the request and returns the typed Rentman API response.
-    // Coverage is disabled because this generic async glue is monomorphized per
-    // endpoint; all branching is delegated to non-generic helpers below.
-    #[cfg_attr(coverage_nightly, coverage(off))]
     pub async fn send(self) -> Result<E::Response>
     where
         E: endpoint::ExecutableEndpoint,
@@ -94,9 +88,6 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
     /// the response gets lost, a retry would write twice. On an error the
     /// outcome is unknown and the caller has to reconcile, e.g. by reading the
     /// affected collection.
-    // Coverage is disabled because this generic async glue is monomorphized per
-    // endpoint; all branching is delegated to non-generic helpers below.
-    #[cfg_attr(coverage_nightly, coverage(off))]
     pub async fn send_once(self) -> Result<E::Response>
     where
         E: endpoint::ExecutableEndpoint,
@@ -122,9 +113,6 @@ impl<E: endpoint::EndpointWithId> RentmanEndpointRequest<E> {
     }
 }
 
-// Coverage is disabled because this generic async adapter is monomorphized per
-// response type; request construction and JSON body selection are non-generic.
-#[cfg_attr(coverage_nightly, coverage(off))]
 async fn send_typed_endpoint<T: DeserializeOwned>(
     client: &RentmanClient,
     spec: endpoint::EndpointSpec,
@@ -174,9 +162,6 @@ fn build_endpoint_request(
     Ok(request)
 }
 
-// Coverage is disabled because serde's generic serializer shape is
-// caller-specific; parsed query pairs are covered by the non-generic parser.
-#[cfg_attr(coverage_nightly, coverage(off))]
 fn serialize_query_params<T: Serialize + ?Sized>(query: &T) -> Result<Vec<(String, String)>> {
     let encoded = serde_urlencoded::to_string(query).context("Rentman query is invalid")?;
     Ok(parse_query_params(&encoded))
@@ -231,7 +216,7 @@ fn endpoint_url(
 // library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
-    use super::*;
+
     use crate::test_support::*;
     use crate::{
         RentmanApiToken, RentmanClient, Url,
@@ -248,7 +233,6 @@ mod tests {
     use chrono::DateTime;
 
     use rust_decimal::Decimal;
-    use serde::Serialize;
 
     #[tokio::test]
     async fn executes_typed_endpoint_with_path_query_body_and_response() {
@@ -432,28 +416,35 @@ mod tests {
     }
 
     #[test]
-    fn typed_query_reports_serialization_errors() {
-        struct BrokenQuery;
-
-        impl Serialize for BrokenQuery {
-            fn serialize<S: serde::Serializer>(&self, _: S) -> Result<S::Ok, S::Error> {
-                Err(serde::ser::Error::custom("broken query"))
-            }
-        }
-
+    fn typed_query_accepts_flat_values_and_reports_serialization_errors() {
         let client = RentmanClient::with_base_url(
             Url::parse("http://example.test/").unwrap(),
             RentmanApiToken::new("token"),
         );
+        // One query type for both outcomes: flat fields serialize, nested
+        // objects cannot be expressed as URL query parameters.
+        let flat = serde_json::json!({"limit": 5, "fields": "id,name"});
+        let nested = serde_json::json!({"filter": {"name": "x"}});
+
+        let request = client
+            .endpoint::<GetAccessoryCollectionEndpoint>()
+            .query(&flat)
+            .unwrap();
+        assert_eq!(
+            request.query_params,
+            vec![
+                ("fields".to_string(), "id,name".to_string()),
+                ("limit".to_string(), "5".to_string()),
+            ]
+        );
 
         let error = match client
             .endpoint::<GetAccessoryCollectionEndpoint>()
-            .query(&BrokenQuery)
+            .query(&nested)
         {
-            Ok(_) => panic!("broken query should fail"),
+            Ok(_) => panic!("nested query should fail"),
             Err(error) => error,
         };
-
         assert!(error.to_string().contains("Rentman query is invalid"));
     }
 
@@ -489,5 +480,65 @@ mod tests {
                 .contains("Rentman endpoint getAccessoryCollection failed")
         );
         assert_request(&server.next_request(), "GET", "/accessories");
+    }
+
+    /// Request body whose `Broken` variant cannot be serialized, as a custom
+    /// endpoint's request type might.
+    enum CustomBody {
+        Valid(u8),
+        Broken,
+    }
+
+    impl serde::Serialize for CustomBody {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            match self {
+                Self::Valid(value) => serializer.serialize_u8(*value),
+                Self::Broken => Err(serde::ser::Error::custom("broken body")),
+            }
+        }
+    }
+
+    struct CustomBodyEndpoint;
+
+    impl crate::endpoint::Endpoint for CustomBodyEndpoint {
+        type Request = CustomBody;
+        type Response = NoContent;
+        const SPEC: crate::endpoint::EndpointSpec = crate::endpoint::EndpointSpec {
+            method: "POST",
+            path: "/custom",
+            operation_id: "customBody",
+            tag: "custom",
+            parameters: &[],
+            request: crate::endpoint::EndpointRequestSpec::Json("CustomBody"),
+            response: crate::endpoint::EndpointResponseSpec::NoContent,
+            errors: &[],
+        };
+    }
+
+    #[test]
+    fn body_accepts_serializable_values_and_reports_serialization_errors() {
+        let client = RentmanClient::with_base_url(
+            Url::parse("http://example.test/").unwrap(),
+            RentmanApiToken::new("token"),
+        );
+
+        let request = client
+            .endpoint::<CustomBodyEndpoint>()
+            .body(CustomBody::Valid(7))
+            .unwrap();
+        assert_eq!(request.body, Some(serde_json::json!(7)));
+
+        let error = match client
+            .endpoint::<CustomBodyEndpoint>()
+            .body(CustomBody::Broken)
+        {
+            Ok(_) => panic!("a failing serializer must be reported"),
+            Err(error) => error,
+        };
+        assert_eq!(
+            error.to_string(),
+            "Rentman request body is invalid JSON value"
+        );
+        assert_eq!(error.root_cause().to_string(), "broken body");
     }
 }
