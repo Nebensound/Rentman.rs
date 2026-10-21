@@ -811,7 +811,10 @@ def generate_live_sweep(operations: list[dict]) -> None:
         lines.extend(
             [
                 "#[tokio::test]",
-                '#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]',
+                "#[cfg_attr(",
+                "    not(live_api_tests_enabled),",
+                '    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"',
+                ")]",
                 f"async fn {test_name}() {{",
                 f"    check::<endpoint::{operation['endpoint_name']}>().await;",
                 "}",
