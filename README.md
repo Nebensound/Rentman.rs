@@ -65,6 +65,20 @@ compared with the OpenAPI document by a contract test. Rentman carries filters
 through `next_page_url`; with several sort fields only the first applies
 across pages.
 
+Projections select exactly the fields a struct declares:
+`projection! { pub struct CrewName from Crew { id, firstname, email } }`
+declares the struct by field names only; the field types come from the
+generated model through one marker per field in `projection_fields`
+(`projection_fields::Crew::firstname`, `r#type` for `type`), and
+`all_as::<CrewName>()`, `first_as` and `get_as` send exactly those names as
+`fields=`. An unknown field does not compile (compile-fail doctest in
+`src/projection.rs`). It is a `macro_rules!` macro: the expansion decodes field
+by field through the hand-written `ProjectedItem::take`, so consumers need no
+serde dependency and link fields are read through the same adapters as the
+models. Rentman always adds `id`, `created`, `modified`, `updateHash`, and
+`custom` to a selection; projections ignore fields they do not declare, and
+custom fields are selected as a whole through `custom`.
+
 User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
 example is compile-checked by `cargo test --doc`. This README is the

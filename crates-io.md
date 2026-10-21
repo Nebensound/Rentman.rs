@@ -31,7 +31,7 @@ Create a client with your Rentman API token and work with Rentman data
 through its resources:
 
 ```rust
-use rentman_client::{PageSize, RentmanApiToken, RentmanClient, model};
+use rentman_client::{PageSize, RentmanApiToken, RentmanClient, fields, model};
 
 # async fn example() -> rentman_client::Result<()> {
 let client = RentmanClient::new(RentmanApiToken::new("token"));
@@ -56,6 +56,19 @@ let status = client
     .create(&model::TaskStatusPayload::new("green".to_string()))
     .await?;
 client.task_statuses().delete(status.id).await?;
+
+// Typed filters, sorting, and an own field selection.
+rentman_client::projection! {
+    /// Name and email of a crew member.
+    pub struct CrewName from Crew { id, firstname, lastname, email }
+}
+let names: Vec<CrewName> = client
+    .crew()
+    .list()
+    .filter(fields::crew::ACTIVE.eq(true))
+    .sort(fields::crew::LASTNAME.asc())
+    .all_as::<CrewName>()
+    .await?;
 # Ok(())
 # }
 ```

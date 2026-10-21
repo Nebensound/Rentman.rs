@@ -18,6 +18,7 @@ use crate::{
     id::{Id, Resource},
     model::ItemResponse,
     paging::{CollectionRequest, PageSize},
+    projection::{self, ProjectedItem, Projection},
 };
 use reqwest::Method;
 use serde::{Serialize, de::DeserializeOwned};
@@ -141,6 +142,22 @@ impl<M: Get> Collection<M> {
             .send_json::<ItemResponse<M::Item>>()
             .await
             .map(|response| response.data)
+            .map_err(|error| error.in_operation(spec.operation_id).about(id))
+    }
+}
+
+impl<M: Get> Collection<M> {
+    /// Reads one item as projection `P`: only the fields `P` declares are
+    /// requested. Transient failures are retried.
+    pub async fn get_as<P: Projection<Resource = M::Item>>(&self, id: Id<M::Item>) -> Result<P> {
+        let spec = M::GET.0;
+        let fields = projection::fields::<P>();
+        self.client
+            .request(Method::GET, &render_path(spec, Some(id.get())))
+            .query(&[("fields", fields)])
+            .send_json::<ItemResponse<ProjectedItem>>()
+            .await
+            .and_then(|response| projection::decode(response.data))
             .map_err(|error| error.in_operation(spec.operation_id).about(id))
     }
 }
@@ -325,6 +342,51 @@ impl<T: DeserializeOwned> ListRequest<T> {
             .map_err(|error| error.in_operation(self.operation))
     }
 
+    /// Reads every page as projection `P`: only the fields `P` declares are
+    /// requested (`fields=`), and Rentman carries the selection through every
+    /// page.
+    pub async fn all_as<P: Projection<Resource = T>>(self) -> Result<Vec<P>> {
+        let fields = projection::fields::<P>();
+        let sort = self.sort.join(",");
+        let mut query = self.query_pairs(&sort);
+        query.push(("fields", &fields));
+        let items: Vec<ProjectedItem> = self
+            .client
+            .read_all(CollectionRequest {
+                path: &self.path,
+                query: &query,
+                page_size: self.page_size,
+                operation: self.operation,
+            })
+            .await?;
+        items
+            .into_iter()
+            .map(projection::decode)
+            .collect::<Result<_>>()
+            .map_err(|error| error.in_operation(self.operation))
+    }
+
+    /// Reads at most `count` items (1 to 1500) as projection `P` with a single
+    /// request.
+    pub async fn first_as<P: Projection<Resource = T>>(self, count: usize) -> Result<Vec<P>> {
+        let limit = PageSize::new(count)
+            .map_err(|error| error.in_operation(self.operation))?
+            .get()
+            .to_string();
+        let fields = projection::fields::<P>();
+        let sort = self.sort.join(",");
+        let mut query = self.query_pairs(&sort);
+        query.push(("limit", &limit));
+        query.push(("fields", &fields));
+        self.client
+            .request(Method::GET, &self.path)
+            .query(&query)
+            .send_json::<crate::model::CollectionResponse<ProjectedItem>>()
+            .await
+            .and_then(|page| page.data.into_iter().map(projection::decode).collect())
+            .map_err(|error| error.in_operation(self.operation))
+    }
+
     /// Filters and the joined sort terms (`sort=+a,-b`) as query pairs.
     fn query_pairs<'a>(&'a self, sort: &'a str) -> Vec<(&'a str, &'a str)> {
         let mut pairs = self
@@ -470,6 +532,135 @@ mod tests {
         assert_eq!(request.query_value("color[neq]").as_deref(), Some("red"));
         assert_eq!(request.query_value("sort").as_deref(), Some("-order"));
         assert_eq!(request.query_value("limit").as_deref(), Some("5"));
+        server.assert_no_more_requests();
+    }
+
+    crate::projection! {
+        struct StatusColor from TaskStatus { id, color, r#type }
+    }
+
+    #[tokio::test]
+    async fn reads_projections_with_their_field_selection() {
+        use crate::fields::task_status;
+        let server = spawn_server(vec![
+            json_response(
+                r#"{"data":[{"id":5,"color":"green","type":"done","created":null,"custom":{}}],"itemCount":1,"limit":1,"next_page_url":"{base}/taskstatuses?fields=id%2Ccolor%2Ctype&type=done&cursor=2"}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":6,"color":"red","type":"todo"}],"itemCount":1,"limit":2,"next_page_url":null}"#,
+            ),
+            json_response(
+                r#"{"data":[{"id":5,"color":"green","type":"done"}],"itemCount":1,"limit":3}"#,
+            ),
+            item(r#"{"id":5,"color":"green","type":"done"}"#),
+            json_response(r#"{"data":[{"id":5}],"itemCount":1,"limit":1500,"next_page_url":null}"#),
+            json_response(r#"{"data":[{"id":5}],"itemCount":1,"limit":3}"#),
+            item(r#"{"id":5}"#),
+            text_response("HTTP/1.1 400 Bad Request", "broken"),
+        ]);
+        let client = client(&server);
+
+        let all = client
+            .task_statuses()
+            .list()
+            .filter(task_status::TYPE.eq(TaskStatusType::Done))
+            .sort(task_status::ORDER.asc())
+            .page_size(PageSize::new(1).unwrap())
+            .all_as::<StatusColor>()
+            .await
+            .unwrap();
+        assert_eq!(all.len(), 2);
+        assert_eq!(all[1].color, "red");
+        assert_eq!(all[1].r#type, TaskStatusType::Todo);
+        let first = server.next_request();
+        assert_request(&first, "GET", "/taskstatuses");
+        assert_eq!(
+            first.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+        assert_eq!(first.query_value("type").as_deref(), Some("done"));
+        assert_eq!(first.query_value("sort").as_deref(), Some("+order"));
+        // The cursor carries the selection; it is followed unchanged.
+        let second = server.next_request();
+        assert_eq!(
+            second.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+        assert_eq!(second.query_value("cursor").as_deref(), Some("2"));
+
+        let top = client
+            .task_statuses()
+            .list()
+            .first_as::<StatusColor>(3)
+            .await
+            .unwrap();
+        assert_eq!(top[0].id, TaskStatusId::new(5));
+        let request = server.next_request();
+        assert_eq!(
+            request.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+        assert_eq!(request.query_value("limit").as_deref(), Some("3"));
+
+        let one: StatusColor = client
+            .task_statuses()
+            .get_as(TaskStatusId::new(5))
+            .await
+            .unwrap();
+        assert_eq!(one.color, "green");
+        let request = server.next_request();
+        assert_request(&request, "GET", "/taskstatuses/5");
+        assert_eq!(
+            request.query_value("fields").as_deref(),
+            Some("id,color,type")
+        );
+
+        // Items without the selected required fields fail with the operation.
+        let error = client
+            .task_statuses()
+            .list()
+            .all_as::<StatusColor>()
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::Decode(_)));
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        server.next_request();
+        let error = client
+            .task_statuses()
+            .list()
+            .first_as::<StatusColor>(3)
+            .await
+            .unwrap_err();
+        assert_eq!(error.operation(), Some("getTaskStatusCollection"));
+        server.next_request();
+        let error = client
+            .task_statuses()
+            .get_as::<StatusColor>(TaskStatusId::new(5))
+            .await
+            .unwrap_err();
+        assert_eq!(error.operation(), Some("getTaskStatusItem"));
+        assert_eq!(
+            error.resource(),
+            Some(ResourceRef::from(TaskStatusId::new(5)))
+        );
+        server.next_request();
+
+        let error = client
+            .task_statuses()
+            .list()
+            .all_as::<StatusColor>()
+            .await
+            .unwrap_err();
+        assert_eq!(error.status(), Some(StatusCode::BAD_REQUEST));
+        server.next_request();
+
+        let error = client
+            .task_statuses()
+            .list()
+            .first_as::<StatusColor>(0)
+            .await
+            .unwrap_err();
+        assert!(matches!(error.kind(), ErrorKind::InvalidRequest(_)));
         server.assert_no_more_requests();
     }
 

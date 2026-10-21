@@ -355,3 +355,83 @@ async fn filters_survive_the_cursor_live() {
         assert_eq!(ids(&paged), ids(&single));
     }
 }
+
+rentman_client::projection! {
+    /// The fields of an equipment item this test selects.
+    struct EquipmentName from Equipment { id, name, in_archive, creator }
+}
+
+/// Runs without credentials: the projection used by the live test below
+/// expands and decodes from outside the crate.
+#[test]
+fn equipment_projection_decodes_outside_the_crate() {
+    use rentman_client::{__private::ProjectedItem, Projection};
+
+    assert_eq!(
+        EquipmentName::FIELDS,
+        ["id", "name", "in_archive", "creator"]
+    );
+    let mut item: ProjectedItem = serde_json::from_value(serde_json::json!({
+        "id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "custom": {}
+    }))
+    .unwrap();
+    let equipment = EquipmentName::decode(&mut item).unwrap();
+    assert_eq!(equipment.id, rentman_client::EquipmentId::new(3));
+    assert_eq!(equipment.name, "Mixer");
+    assert!(equipment.in_archive);
+    assert_eq!(
+        equipment.creator,
+        Some(rentman_client::model::CrewId::new(2))
+    );
+
+    // Every field that does not decode fails with its name.
+    let valid =
+        serde_json::json!({"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2"});
+    for (field, broken) in [
+        ("id", serde_json::json!("three")),
+        ("name", serde_json::Value::Null),
+        ("in_archive", serde_json::json!("yes")),
+        ("creator", serde_json::json!("/projects/2")),
+    ] {
+        let mut wire = valid.clone();
+        wire[field] = broken;
+        let mut item: ProjectedItem = serde_json::from_value(wire).unwrap();
+        let error = EquipmentName::decode(&mut item).unwrap_err();
+        assert!(
+            error.to_string().starts_with(&format!("field `{field}`")),
+            "{error}"
+        );
+    }
+}
+
+#[tokio::test]
+#[ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"]
+async fn projections_keep_their_field_selection_across_the_cursor_live() {
+    use rentman_client::{PageSize, fields::equipment};
+
+    let client = live_client();
+    let projected = client
+        .equipment()
+        .list()
+        .filter(equipment::IN_ARCHIVE.eq(true))
+        .page_size(PageSize::new(100).unwrap())
+        .all_as::<EquipmentName>()
+        .await
+        .unwrap();
+    let full = client
+        .equipment()
+        .list()
+        .filter(equipment::IN_ARCHIVE.eq(true))
+        .page_size(PageSize::MAX)
+        .all()
+        .await
+        .unwrap();
+
+    assert_eq!(projected.len(), full.len());
+    for (projected, full) in projected.iter().zip(&full) {
+        assert_eq!(projected.id, full.id);
+        assert_eq!(projected.name, full.name);
+        assert!(projected.in_archive);
+        assert_eq!(projected.creator, full.creator);
+    }
+}
