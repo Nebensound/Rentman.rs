@@ -5,7 +5,7 @@ use crate::{
     client::RentmanRequestBuilder,
     endpoint,
     error::{Error, InvalidRequest, Result},
-    model,
+    id::Id,
     transport::RetryPolicy,
 };
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
@@ -119,7 +119,7 @@ impl<E: endpoint::Endpoint> RentmanEndpointRequest<E> {
 
 impl<E: endpoint::EndpointWithId> RentmanEndpointRequest<E> {
     /// Sets the documented integer `{id}` path parameter.
-    pub fn id(self, id: model::RentmanId) -> Self {
+    pub fn id(self, id: Id<E::Resource>) -> Self {
         self.path_param("id", id)
     }
 }
@@ -229,15 +229,14 @@ mod tests {
     use crate::test_support::*;
     use crate::{ErrorKind, InvalidRequest, RequestOutcome};
     use crate::{
-        RentmanApiToken, RentmanClient, Url,
+        Id, InvoiceId, PaymentId, RentmanApiToken, RentmanClient, Url,
         endpoint::{
             CreatePaymentEndpoint, DeleteAccessoryEndpoint, GetAccessoryCollectionEndpoint,
             GetAccessoryItemEndpoint,
         },
-        model::RentmanId,
         model::{
             EmailAddress, ItemResponse, NoContent, NoRequest, PaymentPayload,
-            PaymentPayloadPaymentImportSource, ResourceReference,
+            PaymentPayloadPaymentImportSource,
         },
     };
     use chrono::DateTime;
@@ -264,7 +263,7 @@ mod tests {
 
         let response: ItemResponse<_> = client
             .endpoint::<CreatePaymentEndpoint>()
-            .id(RentmanId(7))
+            .id(Id::new(7))
             .query(&[("limit", "1")])
             .unwrap()
             .query_param("fields", "id,moment,invoice,amount,description")
@@ -275,7 +274,8 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.data.id.to_string(), "99");
-        assert_eq!(response.data.invoice.as_str(), "/invoices/7");
+        assert_eq!(response.data.invoice, InvoiceId::new(7));
+        assert_eq!(response.data.id, PaymentId::new(99));
         assert_eq!(response.data.description, "Manual booking");
 
         let request = server.next_request();
@@ -304,7 +304,7 @@ mod tests {
 
         let response = client
             .endpoint::<DeleteAccessoryEndpoint>()
-            .id(RentmanId(10))
+            .id(Id::new(10))
             .send()
             .await
             .unwrap();
@@ -325,7 +325,7 @@ mod tests {
 
         let error = client
             .endpoint::<CreatePaymentEndpoint>()
-            .id(RentmanId(7))
+            .id(Id::new(7))
             .send()
             .await
             .unwrap_err();
@@ -355,7 +355,7 @@ mod tests {
 
         let error = client
             .endpoint::<DeleteAccessoryEndpoint>()
-            .id(RentmanId(10))
+            .id(Id::new(10))
             .body(NoRequest)
             .unwrap()
             .send()
@@ -433,7 +433,7 @@ mod tests {
 
         let error = client
             .endpoint::<DeleteAccessoryEndpoint>()
-            .id(RentmanId(10))
+            .id(Id::new(10))
             .send_once()
             .await
             .unwrap_err();
@@ -444,7 +444,7 @@ mod tests {
         // Without a retry the second prepared response is still unused.
         let response = client
             .endpoint::<DeleteAccessoryEndpoint>()
-            .id(RentmanId(10))
+            .id(Id::new(10))
             .send_once()
             .await
             .unwrap();
@@ -492,9 +492,6 @@ mod tests {
 
     #[test]
     fn typed_models_reject_invalid_json_types() {
-        let error = serde_json::from_str::<ResourceReference>("42").unwrap_err();
-        assert!(error.to_string().contains("invalid type"));
-
         let error = serde_json::from_str::<EmailAddress>("42").unwrap_err();
         assert!(error.to_string().contains("invalid type"));
     }

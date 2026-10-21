@@ -103,7 +103,10 @@ pub trait Endpoint {
 }
 
 /// Endpoint whose path contains a documented integer `{id}` parameter.
-pub trait EndpointWithId: Endpoint {}
+pub trait EndpointWithId: Endpoint {
+    /// Resource the `{id}` belongs to: the collection the path starts with.
+    type Resource: crate::Resource;
+}
 
 /// Endpoint whose request and response types can be sent through `RentmanClient`.
 pub trait ExecutableEndpoint: Endpoint

@@ -6,13 +6,17 @@ use rentman_client::endpoint::{
     EndpointParameterValueSpec, EndpointRequestSpec, EndpointResponseSpec, EndpointSpec,
 };
 use rentman_client::model::{
-    CollectionResponse, EmailAddress, ProjectsCreateFromTemplatePayload, RentmanId,
-    ResourceReference, SCHEMA_TYPES, TaxClass, TaxClassType,
+    CollectionResponse, Crew, CrewId, EmailAddress, Invoice, LINK_FIELDS, Payment,
+    ProjectsCreateFromTemplatePayload, RESOURCE_COLLECTIONS, Rate, SCHEMA_TYPES, TaxClass,
+    TaxClassType,
 };
+use rentman_client::{Id, InvoiceId, LinkError, PaymentId, Resource};
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, fmt::Debug, fs};
 
+#[path = "contract/generated_payload_constructors.rs"]
+mod generated_payload_constructors;
 #[path = "contract/generated_response_enums.rs"]
 mod generated_response_enums;
 
@@ -105,16 +109,136 @@ fn every_schema_maps_to_exactly_one_resource_named_type() {
 }
 
 #[test]
-fn wire_resource_references_are_validated_paths() {
-    let reference: ResourceReference = serde_json::from_str(r#""/invoices/14""#).unwrap();
-    assert_eq!(reference.as_str(), "/invoices/14");
+fn every_link_targets_its_documented_collection() {
+    let spec = openapi_spec();
+    let documented = spec["components"]["schemas"]
+        .as_object()
+        .expect("OpenAPI schemas are an object")
+        .iter()
+        .flat_map(|(name, schema)| {
+            schema["properties"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .filter_map(move |(field, property)| {
+                    let example = property["example"].as_str()?;
+                    let (collection, id) = example.strip_prefix('/')?.split_once('/')?;
+                    id.parse::<u64>().ok()?;
+                    Some((name.clone(), field.clone(), collection.to_string()))
+                })
+        })
+        // Documented as a link, but Rentman sends the project name instead.
+        .filter(|(name, field, _)| {
+            (name.as_str(), field.as_str()) != ("PurchaseOrderCostResponse", "project")
+        })
+        .collect::<BTreeSet<_>>();
+    let generated = LINK_FIELDS
+        .iter()
+        .map(|(schema, field, collection)| {
+            (
+                schema.to_string(),
+                field.to_string(),
+                collection.to_string(),
+            )
+        })
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        documented, generated,
+        "link fields drifted from openapi/rentman-oas.json; run scripts/generate_endpoint_manifest.py"
+    );
 
-    let error = serde_json::from_str::<ResourceReference>(r#""invoices/14""#).unwrap_err();
+    let collections = RESOURCE_COLLECTIONS
+        .iter()
+        .map(|(_, collection)| *collection)
+        .collect::<BTreeSet<_>>();
+    for (schema, field, collection) in LINK_FIELDS {
+        assert!(
+            collections.contains(collection),
+            "{schema}.{field} links to /{collection}, which is no resource"
+        );
+    }
+}
+
+#[test]
+fn every_resource_is_the_item_type_of_its_collection() {
+    let spec = openapi_spec();
+    let documented = spec["paths"]
+        .as_object()
+        .expect("OpenAPI paths are an object")
+        .iter()
+        .filter_map(|(path, methods)| {
+            let collection = path.strip_prefix('/')?.strip_suffix("/{id}")?;
+            if collection.contains('/') {
+                return None;
+            }
+            let schema = methods["get"]["responses"]["200"]["content"]["application/json"]
+                ["schema"]["allOf"]
+                .as_array()?
+                .iter()
+                .find_map(|part| part["properties"]["data"]["$ref"].as_str())?;
+            let schema = schema.rsplit('/').next()?;
+            let rust_type = SCHEMA_TYPES
+                .iter()
+                .find(|(name, _)| *name == schema)
+                .map(|(_, rust_type)| *rust_type)?;
+            Some((rust_type.to_string(), collection.to_string()))
+        })
+        .collect::<BTreeSet<_>>();
+    let generated = RESOURCE_COLLECTIONS
+        .iter()
+        .map(|(rust_type, collection)| (rust_type.to_string(), collection.to_string()))
+        .collect::<BTreeSet<_>>();
+    assert_eq!(documented, generated);
+
+    assert_eq!(<Crew as Resource>::COLLECTION, "crew");
+    assert_eq!(<Invoice as Resource>::COLLECTION, "invoices");
+    assert_eq!(<Rate as Resource>::COLLECTION, "rates");
+}
+
+#[test]
+fn generated_models_read_and_write_typed_links() {
+    let payment: Payment = serde_json::from_value(json!({
+        "id": 99, "created": null, "modified": null, "creator": "/crew/3",
+        "displayname": "Payment 99", "invoice": "/invoices/7",
+        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 42.5,
+        "description": "Manual booking"
+    }))
+    .unwrap();
+    assert_eq!(payment.id, PaymentId::new(99));
+    assert_eq!(payment.invoice, InvoiceId::new(7));
+    assert_eq!(payment.creator, Some(CrewId::new(3)));
+    let wire = serde_json::to_value(&payment).unwrap();
+    assert_eq!(wire["id"], json!(99));
+    assert_eq!(wire["invoice"], json!("/invoices/7"));
+    assert_eq!(wire["creator"], json!("/crew/3"));
+
+    // A nullable link may also be missing.
+    let payment: Payment = serde_json::from_value(json!({
+        "id": 99, "created": null, "modified": null, "displayname": "Payment 99",
+        "invoice": "/invoices/7", "moment": "2026-07-05T00:00:00.000+02:00",
+        "amount": 1, "description": ""
+    }))
+    .unwrap();
+    assert_eq!(payment.creator, None);
+
+    let error = serde_json::from_value::<Payment>(json!({
+        "id": 99, "created": null, "modified": null, "creator": null,
+        "displayname": "Payment 99", "invoice": "/projects/7",
+        "moment": "2026-07-05T00:00:00.000+02:00", "amount": 1, "description": ""
+    }))
+    .unwrap_err();
     assert!(
         error
             .to_string()
-            .contains("Rentman resource reference must start with '/'")
+            .contains("link to /projects where a link to /invoices was expected"),
+        "{error}"
     );
+
+    let link = LinkError::WrongCollection {
+        expected: "invoices",
+        found: "projects".to_string(),
+    };
+    assert_eq!(InvoiceId::from_link("/projects/7"), Err(link));
 }
 
 #[test]
@@ -134,11 +258,6 @@ fn wire_email_addresses_are_validated() {
 }
 
 #[test]
-fn wire_rentman_id_displays_plain_number() {
-    assert_eq!(RentmanId(42).to_string(), "42");
-}
-
-#[test]
 fn wire_date_fields_serialize_as_date_only() {
     let spec = openapi_spec();
     let request_schema = schema(&spec, "ProjectsCreateFromTemplateRequest");
@@ -146,7 +265,7 @@ fn wire_date_fields_serialize_as_date_only() {
     assert_eq!(property(request_schema, "start_date")["format"], "date");
 
     let request = ProjectsCreateFromTemplatePayload {
-        template: RentmanId(7),
+        template: Id::new(7),
         start_date: NaiveDate::from_ymd_opt(2026, 10, 20).expect("valid date"),
     };
     let json = serde_json::to_value(&request).expect("request serializes");
@@ -651,6 +770,28 @@ where
         );
         assert_eq!(serde_json::to_value(&parsed).unwrap(), json!(text));
     }
+}
+
+/// Asserts that a payload sends exactly the given fields, which are the
+/// required fields of the documented request schema.
+fn assert_sends_exactly<T: Serialize>(payload: &T, schema_name: &str, fields: &[&str]) {
+    let spec = openapi_spec();
+    let required = schema(&spec, schema_name)["required"]
+        .as_array()
+        .expect("payload schema has required fields")
+        .iter()
+        .map(|field| field.as_str().expect("required field name"))
+        .collect::<BTreeSet<_>>();
+    assert_eq!(fields.iter().copied().collect::<BTreeSet<_>>(), required);
+
+    let sent = serde_json::to_value(payload).expect("payload serializes");
+    let sent = sent
+        .as_object()
+        .expect("payload is a JSON object")
+        .keys()
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(sent, required, "{schema_name} sends other fields");
 }
 
 fn openapi_spec() -> Value {

@@ -43,7 +43,7 @@ let response: model::CollectionResponse<model::Invoice> = client
 
 let response: model::ItemResponse<model::Accessory> = client
     .endpoint::<endpoint::GetAccessoryItemEndpoint>()
-    .id(model::RentmanId(42))
+    .id(model::AccessoryId::new(42))
     .send()
     .await?;
 # Ok(())

@@ -3,8 +3,8 @@
 use crate::{
     RentmanAmount,
     client::RentmanClient,
-    error::{Resource, Result},
-    ids::EquipmentId,
+    error::Result,
+    model::EquipmentId,
     paging::{CollectionRequest, PageSize},
 };
 use reqwest::Method;
@@ -79,11 +79,7 @@ impl RentmanClient {
             .json(payload)
             .send_unit()
             .await
-            .map_err(|error| {
-                error
-                    .in_operation("updateEquipment")
-                    .about(Resource::Equipment(equipment_id))
-            })
+            .map_err(|error| error.in_operation("updateEquipment").about(equipment_id))
     }
 }
 
@@ -97,7 +93,7 @@ mod tests {
     use crate::{
         EquipmentId, EquipmentPricePayload, RentmanAmount, RentmanApiToken, RentmanClient, Url,
     };
-    use crate::{RentmanClientConfig, RequestOutcome, Resource};
+    use crate::{RentmanClientConfig, RequestOutcome, ResourceRef};
     use reqwest::StatusCode;
     use std::{num::NonZeroUsize, time::Duration};
 
@@ -266,11 +262,11 @@ mod tests {
         assert_eq!(error.operation(), Some("updateEquipment"));
         assert_eq!(
             error.resource(),
-            Some(Resource::Equipment(EquipmentId::new(2163)))
+            Some(ResourceRef::from(EquipmentId::new(2163)))
         );
         assert_eq!(
             error.to_string(),
-            "Rentman updateEquipment failed for equipment 2163: \
+            "Rentman updateEquipment failed for /equipment/2163: \
              Rentman API returned 400 Bad Request: broken"
         );
     }

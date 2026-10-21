@@ -101,7 +101,9 @@ impl Endpoint for DeleteAccessoryEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteAccessoryEndpoint {}
+impl EndpointWithId for DeleteAccessoryEndpoint {
+    type Resource = Accessory;
+}
 
 const GETACCESSORYITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -153,7 +155,9 @@ impl Endpoint for GetAccessoryItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetAccessoryItemEndpoint {}
+impl EndpointWithId for GetAccessoryItemEndpoint {
+    type Resource = Accessory;
+}
 
 const UPDATEACCESSORYENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -205,7 +209,9 @@ impl Endpoint for UpdateAccessoryEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateAccessoryEndpoint {}
+impl EndpointWithId for UpdateAccessoryEndpoint {
+    type Resource = Accessory;
+}
 
 const GETACTUALCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -303,7 +309,9 @@ impl Endpoint for GetActualContentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetActualContentItemEndpoint {}
+impl EndpointWithId for GetActualContentItemEndpoint {
+    type Resource = ActualContent;
+}
 
 const GETALTERNATIVECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -400,7 +408,9 @@ impl Endpoint for DeleteAlternativeEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteAlternativeEndpoint {}
+impl EndpointWithId for DeleteAlternativeEndpoint {
+    type Resource = Alternative;
+}
 
 const GETALTERNATIVEITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -452,7 +462,9 @@ impl Endpoint for GetAlternativeItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetAlternativeItemEndpoint {}
+impl EndpointWithId for GetAlternativeItemEndpoint {
+    type Resource = Alternative;
+}
 
 const UPDATEALTERNATIVEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -504,7 +516,9 @@ impl Endpoint for UpdateAlternativeEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateAlternativeEndpoint {}
+impl EndpointWithId for UpdateAlternativeEndpoint {
+    type Resource = Alternative;
+}
 
 const GETAPPOINTMENTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -602,7 +616,9 @@ impl Endpoint for DeleteAppointmentCrewEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteAppointmentCrewEndpoint {}
+impl EndpointWithId for DeleteAppointmentCrewEndpoint {
+    type Resource = AppointmentCrew;
+}
 
 const GETAPPOINTMENTCREWITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -655,7 +671,9 @@ impl Endpoint for GetAppointmentCrewItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetAppointmentCrewItemEndpoint {}
+impl EndpointWithId for GetAppointmentCrewItemEndpoint {
+    type Resource = AppointmentCrew;
+}
 
 const UPDATEAPPOINTMENTCREWENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -708,7 +726,9 @@ impl Endpoint for UpdateAppointmentCrewEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateAppointmentCrewEndpoint {}
+impl EndpointWithId for UpdateAppointmentCrewEndpoint {
+    type Resource = AppointmentCrew;
+}
 
 const GETAPPOINTMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -850,7 +870,9 @@ impl Endpoint for DeleteAppointmentEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteAppointmentEndpoint {}
+impl EndpointWithId for DeleteAppointmentEndpoint {
+    type Resource = Appointment;
+}
 
 const GETAPPOINTMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -902,7 +924,9 @@ impl Endpoint for GetAppointmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetAppointmentItemEndpoint {}
+impl EndpointWithId for GetAppointmentItemEndpoint {
+    type Resource = Appointment;
+}
 
 const UPDATEAPPOINTMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -954,7 +978,9 @@ impl Endpoint for UpdateAppointmentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateAppointmentEndpoint {}
+impl EndpointWithId for UpdateAppointmentEndpoint {
+    type Resource = Appointment;
+}
 
 const GETAPPOINTMENTAPPOINTMENTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1007,7 +1033,9 @@ impl Endpoint for GetAppointmentAppointmentCrewCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetAppointmentAppointmentCrewCollectionEndpoint {}
+impl EndpointWithId for GetAppointmentAppointmentCrewCollectionEndpoint {
+    type Resource = Appointment;
+}
 
 const CREATEAPPOINTMENTCREWENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1060,7 +1088,9 @@ impl Endpoint for CreateAppointmentCrewEndpoint {
     };
 }
 
-impl EndpointWithId for CreateAppointmentCrewEndpoint {}
+impl EndpointWithId for CreateAppointmentCrewEndpoint {
+    type Resource = Appointment;
+}
 
 const GETCONTACTPERSONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -1157,7 +1187,9 @@ impl Endpoint for DeleteContactPersonEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteContactPersonEndpoint {}
+impl EndpointWithId for DeleteContactPersonEndpoint {
+    type Resource = ContactPerson;
+}
 
 const GETCONTACTPERSONITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1210,7 +1242,9 @@ impl Endpoint for GetContactPersonItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactPersonItemEndpoint {}
+impl EndpointWithId for GetContactPersonItemEndpoint {
+    type Resource = ContactPerson;
+}
 
 const UPDATECONTACTPERSONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -1262,7 +1296,9 @@ impl Endpoint for UpdateContactPersonEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateContactPersonEndpoint {}
+impl EndpointWithId for UpdateContactPersonEndpoint {
+    type Resource = ContactPerson;
+}
 
 const GETCONTACTPERSONFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1315,7 +1351,9 @@ impl Endpoint for GetContactPersonFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactPersonFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetContactPersonFileFolderCollectionEndpoint {
+    type Resource = ContactPerson;
+}
 
 const GETCONTACTPERSONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1368,7 +1406,9 @@ impl Endpoint for GetContactPersonFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactPersonFileCollectionEndpoint {}
+impl EndpointWithId for GetContactPersonFileCollectionEndpoint {
+    type Resource = ContactPerson;
+}
 
 const GETCONTACTPERSONTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1421,7 +1461,9 @@ impl Endpoint for GetContactPersonTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactPersonTaskCollectionEndpoint {}
+impl EndpointWithId for GetContactPersonTaskCollectionEndpoint {
+    type Resource = ContactPerson;
+}
 
 const CREATETASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -1473,7 +1515,9 @@ impl Endpoint for CreateTaskEndpoint {
     };
 }
 
-impl EndpointWithId for CreateTaskEndpoint {}
+impl EndpointWithId for CreateTaskEndpoint {
+    type Resource = ContactPerson;
+}
 
 const GETCONTACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -1615,7 +1659,9 @@ impl Endpoint for DeleteContactEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteContactEndpoint {}
+impl EndpointWithId for DeleteContactEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTACTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -1667,7 +1713,9 @@ impl Endpoint for GetContactItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactItemEndpoint {}
+impl EndpointWithId for GetContactItemEndpoint {
+    type Resource = Contact;
+}
 
 const UPDATECONTACTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -1719,7 +1767,9 @@ impl Endpoint for UpdateContactEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateContactEndpoint {}
+impl EndpointWithId for UpdateContactEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTACTCONTACTPERSONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1772,7 +1822,9 @@ impl Endpoint for GetContactContactPersonCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactContactPersonCollectionEndpoint {}
+impl EndpointWithId for GetContactContactPersonCollectionEndpoint {
+    type Resource = Contact;
+}
 
 const CREATECONTACTPERSONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -1824,7 +1876,9 @@ impl Endpoint for CreateContactPersonEndpoint {
     };
 }
 
-impl EndpointWithId for CreateContactPersonEndpoint {}
+impl EndpointWithId for CreateContactPersonEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTACTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1877,7 +1931,9 @@ impl Endpoint for GetContactFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetContactFileFolderCollectionEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTACTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1930,7 +1986,9 @@ impl Endpoint for GetContactFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactFileCollectionEndpoint {}
+impl EndpointWithId for GetContactFileCollectionEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTACTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -1983,7 +2041,9 @@ impl Endpoint for GetContactTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContactTaskCollectionEndpoint {}
+impl EndpointWithId for GetContactTaskCollectionEndpoint {
+    type Resource = Contact;
+}
 
 const POSTCONTACTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -2035,7 +2095,9 @@ impl Endpoint for PostContactsIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostContactsIdTasksEndpoint {}
+impl EndpointWithId for PostContactsIdTasksEndpoint {
+    type Resource = Contact;
+}
 
 const GETCONTRACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -2132,7 +2194,9 @@ impl Endpoint for GetContractItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetContractItemEndpoint {}
+impl EndpointWithId for GetContractItemEndpoint {
+    type Resource = Contract;
+}
 
 const GETCONTRACTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2185,7 +2249,9 @@ impl Endpoint for GetContractFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContractFileCollectionEndpoint {}
+impl EndpointWithId for GetContractFileCollectionEndpoint {
+    type Resource = Contract;
+}
 
 const GETCONTRACTINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2238,7 +2304,9 @@ impl Endpoint for GetContractInvoiceLineCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContractInvoiceLineCollectionEndpoint {}
+impl EndpointWithId for GetContractInvoiceLineCollectionEndpoint {
+    type Resource = Contract;
+}
 
 const GETCONTRACTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2291,7 +2359,9 @@ impl Endpoint for GetContractTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetContractTaskCollectionEndpoint {}
+impl EndpointWithId for GetContractTaskCollectionEndpoint {
+    type Resource = Contract;
+}
 
 const POSTCONTRACTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2344,7 +2414,9 @@ impl Endpoint for PostContractsIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostContractsIdTasksEndpoint {}
+impl EndpointWithId for PostContractsIdTasksEndpoint {
+    type Resource = Contract;
+}
 
 const GETPROJECTCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -2441,7 +2513,9 @@ impl Endpoint for DeleteProjectCostEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteProjectCostEndpoint {}
+impl EndpointWithId for DeleteProjectCostEndpoint {
+    type Resource = ProjectCost;
+}
 
 const GETPROJECTCOSTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -2493,7 +2567,9 @@ impl Endpoint for GetProjectCostItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectCostItemEndpoint {}
+impl EndpointWithId for GetProjectCostItemEndpoint {
+    type Resource = ProjectCost;
+}
 
 const UPDATEPROJECTCOSTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -2545,7 +2621,9 @@ impl Endpoint for UpdateProjectCostEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateProjectCostEndpoint {}
+impl EndpointWithId for UpdateProjectCostEndpoint {
+    type Resource = ProjectCost;
+}
 
 const GETCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -2642,7 +2720,9 @@ impl Endpoint for GetCrewItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewItemEndpoint {}
+impl EndpointWithId for GetCrewItemEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWAPPOINTMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2695,7 +2775,9 @@ impl Endpoint for GetCrewAppointmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewAppointmentCollectionEndpoint {}
+impl EndpointWithId for GetCrewAppointmentCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWCREWAVAILABILITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2748,7 +2830,9 @@ impl Endpoint for GetCrewCrewAvailabilityCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewCrewAvailabilityCollectionEndpoint {}
+impl EndpointWithId for GetCrewCrewAvailabilityCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const CREATECREWAVAILABILITYENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2801,7 +2885,9 @@ impl Endpoint for CreateCrewAvailabilityEndpoint {
     };
 }
 
-impl EndpointWithId for CreateCrewAvailabilityEndpoint {}
+impl EndpointWithId for CreateCrewAvailabilityEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWCREWRATESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2854,7 +2940,9 @@ impl Endpoint for GetCrewCrewRatesCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewCrewRatesCollectionEndpoint {}
+impl EndpointWithId for GetCrewCrewRatesCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2907,7 +2995,9 @@ impl Endpoint for GetCrewFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetCrewFileFolderCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -2960,7 +3050,9 @@ impl Endpoint for GetCrewFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewFileCollectionEndpoint {}
+impl EndpointWithId for GetCrewFileCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWINVITATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3013,7 +3105,9 @@ impl Endpoint for GetCrewInvitationsCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewInvitationsCollectionEndpoint {}
+impl EndpointWithId for GetCrewInvitationsCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3066,7 +3160,9 @@ impl Endpoint for GetCrewTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewTaskCollectionEndpoint {}
+impl EndpointWithId for GetCrewTaskCollectionEndpoint {
+    type Resource = Crew;
+}
 
 const POSTCREWIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -3118,7 +3214,9 @@ impl Endpoint for PostCrewIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostCrewIdTasksEndpoint {}
+impl EndpointWithId for PostCrewIdTasksEndpoint {
+    type Resource = Crew;
+}
 
 const GETCREWAVAILABILITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -3216,7 +3314,9 @@ impl Endpoint for DeleteCrewAvailabilityEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteCrewAvailabilityEndpoint {}
+impl EndpointWithId for DeleteCrewAvailabilityEndpoint {
+    type Resource = CrewAvailability;
+}
 
 const GETCREWAVAILABILITYITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3269,7 +3369,9 @@ impl Endpoint for GetCrewAvailabilityItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewAvailabilityItemEndpoint {}
+impl EndpointWithId for GetCrewAvailabilityItemEndpoint {
+    type Resource = CrewAvailability;
+}
 
 const UPDATECREWAVAILABILITYENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3322,7 +3424,9 @@ impl Endpoint for UpdateCrewAvailabilityEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateCrewAvailabilityEndpoint {}
+impl EndpointWithId for UpdateCrewAvailabilityEndpoint {
+    type Resource = CrewAvailability;
+}
 
 const GETCREWRATESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -3419,7 +3523,9 @@ impl Endpoint for GetCrewRatesItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewRatesItemEndpoint {}
+impl EndpointWithId for GetCrewRatesItemEndpoint {
+    type Resource = CrewRate;
+}
 
 const GETEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -3561,7 +3667,9 @@ impl Endpoint for GetEquipmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentItemEndpoint {}
+impl EndpointWithId for GetEquipmentItemEndpoint {
+    type Resource = Equipment;
+}
 
 const UPDATEEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -3613,7 +3721,9 @@ impl Endpoint for UpdateEquipmentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateEquipmentEndpoint {}
+impl EndpointWithId for UpdateEquipmentEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTACCESSORYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3666,7 +3776,9 @@ impl Endpoint for GetEquipmentAccessoryCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentAccessoryCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentAccessoryCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATEACCESSORYENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -3718,7 +3830,9 @@ impl Endpoint for CreateAccessoryEndpoint {
     };
 }
 
-impl EndpointWithId for CreateAccessoryEndpoint {}
+impl EndpointWithId for CreateAccessoryEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTALTERNATIVECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3771,7 +3885,9 @@ impl Endpoint for GetEquipmentAlternativeCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentAlternativeCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentAlternativeCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATEALTERNATIVEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -3823,7 +3939,9 @@ impl Endpoint for CreateAlternativeEndpoint {
     };
 }
 
-impl EndpointWithId for CreateAlternativeEndpoint {}
+impl EndpointWithId for CreateAlternativeEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3876,7 +3994,9 @@ impl Endpoint for GetEquipmentEquipmentSetContentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentEquipmentSetContentCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentEquipmentSetContentCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATEEQUIPMENTSETCONTENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3929,7 +4049,9 @@ impl Endpoint for CreateEquipmentSetContentEndpoint {
     };
 }
 
-impl EndpointWithId for CreateEquipmentSetContentEndpoint {}
+impl EndpointWithId for CreateEquipmentSetContentEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -3982,7 +4104,9 @@ impl Endpoint for GetEquipmentFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentFileFolderCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4035,7 +4159,9 @@ impl Endpoint for GetEquipmentFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentFileCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentFileCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTREPAIRCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4088,7 +4214,9 @@ impl Endpoint for GetEquipmentRepairCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentRepairCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentRepairCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTSERIALNUMBERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4141,7 +4269,9 @@ impl Endpoint for GetEquipmentSerialNumberCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentSerialNumberCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentSerialNumberCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATESERIALNUMBERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -4193,7 +4323,9 @@ impl Endpoint for CreateSerialNumberEndpoint {
     };
 }
 
-impl EndpointWithId for CreateSerialNumberEndpoint {}
+impl EndpointWithId for CreateSerialNumberEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTSTOCKMOVEMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4246,7 +4378,9 @@ impl Endpoint for GetEquipmentStockMovementCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentStockMovementCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentStockMovementCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATESTOCKMOVEMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -4298,7 +4432,9 @@ impl Endpoint for CreateStockMovementEndpoint {
     };
 }
 
-impl EndpointWithId for CreateStockMovementEndpoint {}
+impl EndpointWithId for CreateStockMovementEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTSUPPLIERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4351,7 +4487,9 @@ impl Endpoint for GetEquipmentSupplierCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentSupplierCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentSupplierCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const CREATESUPPLIERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -4403,7 +4541,9 @@ impl Endpoint for CreateSupplierEndpoint {
     };
 }
 
-impl EndpointWithId for CreateSupplierEndpoint {}
+impl EndpointWithId for CreateSupplierEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4456,7 +4596,9 @@ impl Endpoint for GetEquipmentTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentTaskCollectionEndpoint {}
+impl EndpointWithId for GetEquipmentTaskCollectionEndpoint {
+    type Resource = Equipment;
+}
 
 const POSTEQUIPMENTIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4509,7 +4651,9 @@ impl Endpoint for PostEquipmentIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostEquipmentIdTasksEndpoint {}
+impl EndpointWithId for PostEquipmentIdTasksEndpoint {
+    type Resource = Equipment;
+}
 
 const GETEQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -4607,7 +4751,9 @@ impl Endpoint for GetEquipmentAssignedSerialsItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentAssignedSerialsItemEndpoint {}
+impl EndpointWithId for GetEquipmentAssignedSerialsItemEndpoint {
+    type Resource = EquipmentAssignedSerial;
+}
 
 const GETEQUIPMENTSETCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -4705,7 +4851,9 @@ impl Endpoint for DeleteEquipmentSetContentEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteEquipmentSetContentEndpoint {}
+impl EndpointWithId for DeleteEquipmentSetContentEndpoint {
+    type Resource = EquipmentSetContent;
+}
 
 const GETEQUIPMENTSETCONTENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4758,7 +4906,9 @@ impl Endpoint for GetEquipmentSetContentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetEquipmentSetContentItemEndpoint {}
+impl EndpointWithId for GetEquipmentSetContentItemEndpoint {
+    type Resource = EquipmentSetContent;
+}
 
 const UPDATEEQUIPMENTSETCONTENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -4811,7 +4961,9 @@ impl Endpoint for UpdateEquipmentSetContentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateEquipmentSetContentEndpoint {}
+impl EndpointWithId for UpdateEquipmentSetContentEndpoint {
+    type Resource = EquipmentSetContent;
+}
 
 const GETEXTRAINPUTFIELDCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -4909,7 +5061,9 @@ impl Endpoint for GetExtraInputFieldItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetExtraInputFieldItemEndpoint {}
+impl EndpointWithId for GetExtraInputFieldItemEndpoint {
+    type Resource = ExtraInputField;
+}
 
 const GETFACTORGROUPSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5006,7 +5160,9 @@ impl Endpoint for GetFactorGroupsItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactorGroupsItemEndpoint {}
+impl EndpointWithId for GetFactorGroupsItemEndpoint {
+    type Resource = FactorGroup;
+}
 
 const GETFACTORGROUPSFACTORSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -5059,7 +5215,9 @@ impl Endpoint for GetFactorGroupsFactorsCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactorGroupsFactorsCollectionEndpoint {}
+impl EndpointWithId for GetFactorGroupsFactorsCollectionEndpoint {
+    type Resource = FactorGroup;
+}
 
 const GETFACTORSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5156,7 +5314,9 @@ impl Endpoint for GetFactorsItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactorsItemEndpoint {}
+impl EndpointWithId for GetFactorsItemEndpoint {
+    type Resource = Factor;
+}
 
 const GETFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5253,7 +5413,9 @@ impl Endpoint for GetFileFolderItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFileFolderItemEndpoint {}
+impl EndpointWithId for GetFileFolderItemEndpoint {
+    type Resource = FileFolder;
+}
 
 const GETFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5350,7 +5512,9 @@ impl Endpoint for GetFileItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFileItemEndpoint {}
+impl EndpointWithId for GetFileItemEndpoint {
+    type Resource = File;
+}
 
 const GETFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5492,7 +5656,9 @@ impl Endpoint for GetFolderItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFolderItemEndpoint {}
+impl EndpointWithId for GetFolderItemEndpoint {
+    type Resource = Folder;
+}
 
 const UPDATEFOLDERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -5544,7 +5710,9 @@ impl Endpoint for UpdateFolderEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateFolderEndpoint {}
+impl EndpointWithId for UpdateFolderEndpoint {
+    type Resource = Folder;
+}
 
 const GETINVITATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5641,7 +5809,9 @@ impl Endpoint for GetInvitationsItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetInvitationsItemEndpoint {}
+impl EndpointWithId for GetInvitationsItemEndpoint {
+    type Resource = Invitation;
+}
 
 const GETINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5738,7 +5908,9 @@ impl Endpoint for GetInvoiceLineItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetInvoiceLineItemEndpoint {}
+impl EndpointWithId for GetInvoiceLineItemEndpoint {
+    type Resource = InvoiceLine;
+}
 
 const GETFACTUURCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -5835,7 +6007,9 @@ impl Endpoint for GetFactuurItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactuurItemEndpoint {}
+impl EndpointWithId for GetFactuurItemEndpoint {
+    type Resource = Invoice;
+}
 
 const GETFACTUURFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -5888,7 +6062,9 @@ impl Endpoint for GetFactuurFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactuurFileCollectionEndpoint {}
+impl EndpointWithId for GetFactuurFileCollectionEndpoint {
+    type Resource = Invoice;
+}
 
 const GETFACTUURINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -5941,7 +6117,9 @@ impl Endpoint for GetFactuurInvoiceLineCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactuurInvoiceLineCollectionEndpoint {}
+impl EndpointWithId for GetFactuurInvoiceLineCollectionEndpoint {
+    type Resource = Invoice;
+}
 
 const GETFACTUURPAYMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -5994,7 +6172,9 @@ impl Endpoint for GetFactuurPaymentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactuurPaymentCollectionEndpoint {}
+impl EndpointWithId for GetFactuurPaymentCollectionEndpoint {
+    type Resource = Invoice;
+}
 
 const CREATEPAYMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -6046,7 +6226,9 @@ impl Endpoint for CreatePaymentEndpoint {
     };
 }
 
-impl EndpointWithId for CreatePaymentEndpoint {}
+impl EndpointWithId for CreatePaymentEndpoint {
+    type Resource = Invoice;
+}
 
 const GETFACTUURTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -6099,7 +6281,9 @@ impl Endpoint for GetFactuurTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetFactuurTaskCollectionEndpoint {}
+impl EndpointWithId for GetFactuurTaskCollectionEndpoint {
+    type Resource = Invoice;
+}
 
 const POSTINVOICESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -6151,7 +6335,9 @@ impl Endpoint for PostInvoicesIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostInvoicesIdTasksEndpoint {}
+impl EndpointWithId for PostInvoicesIdTasksEndpoint {
+    type Resource = Invoice;
+}
 
 const GETLEAVEMUTATIONSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -6294,7 +6480,9 @@ impl Endpoint for GetLeaveMutationsItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetLeaveMutationsItemEndpoint {}
+impl EndpointWithId for GetLeaveMutationsItemEndpoint {
+    type Resource = LeaveMutation;
+}
 
 const GETLEAVEREQUESTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -6436,7 +6624,9 @@ impl Endpoint for GetLeaveRequestItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetLeaveRequestItemEndpoint {}
+impl EndpointWithId for GetLeaveRequestItemEndpoint {
+    type Resource = LeaveRequest;
+}
 
 const UPDATELEAVEREQUESTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -6488,7 +6678,9 @@ impl Endpoint for UpdateLeaveRequestEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateLeaveRequestEndpoint {}
+impl EndpointWithId for UpdateLeaveRequestEndpoint {
+    type Resource = LeaveRequest;
+}
 
 const GETLEAVEREQUESTTIMEREGISTRATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -6541,7 +6733,9 @@ impl Endpoint for GetLeaveRequestTimeRegistrationCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetLeaveRequestTimeRegistrationCollectionEndpoint {}
+impl EndpointWithId for GetLeaveRequestTimeRegistrationCollectionEndpoint {
+    type Resource = LeaveRequest;
+}
 
 const CREATETIMEREGISTRATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -6594,7 +6788,9 @@ impl Endpoint for CreateTimeRegistrationEndpoint {
     };
 }
 
-impl EndpointWithId for CreateTimeRegistrationEndpoint {}
+impl EndpointWithId for CreateTimeRegistrationEndpoint {
+    type Resource = LeaveRequest;
+}
 
 const GETLEAVETYPESCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -6691,7 +6887,9 @@ impl Endpoint for GetLeaveTypesItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetLeaveTypesItemEndpoint {}
+impl EndpointWithId for GetLeaveTypesItemEndpoint {
+    type Resource = LeaveType;
+}
 
 const GETLEDGERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -6788,7 +6986,9 @@ impl Endpoint for GetLedgerItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetLedgerItemEndpoint {}
+impl EndpointWithId for GetLedgerItemEndpoint {
+    type Resource = LedgerCode;
+}
 
 const GETPAYMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -6885,7 +7085,9 @@ impl Endpoint for GetPaymentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetPaymentItemEndpoint {}
+impl EndpointWithId for GetPaymentItemEndpoint {
+    type Resource = Payment;
+}
 
 const UPDATEPAYMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -6937,7 +7139,9 @@ impl Endpoint for UpdatePaymentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdatePaymentEndpoint {}
+impl EndpointWithId for UpdatePaymentEndpoint {
+    type Resource = Payment;
+}
 
 const GETPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7034,7 +7238,9 @@ impl Endpoint for GetProjectCrewItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectCrewItemEndpoint {}
+impl EndpointWithId for GetProjectCrewItemEndpoint {
+    type Resource = ProjectCrew;
+}
 
 const GETPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7132,7 +7338,9 @@ impl Endpoint for GetProjectEquipmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectEquipmentItemEndpoint {}
+impl EndpointWithId for GetProjectEquipmentItemEndpoint {
+    type Resource = ProjectEquipment;
+}
 
 const GETPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7230,7 +7438,9 @@ impl Endpoint for GetProjectEquipmentGroupItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectEquipmentGroupItemEndpoint {}
+impl EndpointWithId for GetProjectEquipmentGroupItemEndpoint {
+    type Resource = ProjectEquipmentGroup;
+}
 
 const GETPROJECTEQUIPMENTGROUPPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -7283,7 +7493,9 @@ impl Endpoint for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetProjectEquipmentGroupProjectEquipmentCollectionEndpoint {
+    type Resource = ProjectEquipmentGroup;
+}
 
 const GETPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7381,7 +7593,9 @@ impl Endpoint for GetProjectFunctionGroupItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFunctionGroupItemEndpoint {}
+impl EndpointWithId for GetProjectFunctionGroupItemEndpoint {
+    type Resource = ProjectFunctionGroup;
+}
 
 const GETPROJECTFUNCTIONGROUPPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -7434,7 +7648,9 @@ impl Endpoint for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {}
+impl EndpointWithId for GetProjectFunctionGroupProjectFunctionCollectionEndpoint {
+    type Resource = ProjectFunctionGroup;
+}
 
 const GETPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7532,7 +7748,9 @@ impl Endpoint for GetProjectFunctionItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFunctionItemEndpoint {}
+impl EndpointWithId for GetProjectFunctionItemEndpoint {
+    type Resource = ProjectFunction;
+}
 
 const GETPROJECTFUNCTIONPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -7585,7 +7803,9 @@ impl Endpoint for GetProjectFunctionProjectCrewCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFunctionProjectCrewCollectionEndpoint {}
+impl EndpointWithId for GetProjectFunctionProjectCrewCollectionEndpoint {
+    type Resource = ProjectFunction;
+}
 
 const GETPROJECTFUNCTIONPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -7638,7 +7858,9 @@ impl Endpoint for GetProjectFunctionProjectVehicleCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFunctionProjectVehicleCollectionEndpoint {}
+impl EndpointWithId for GetProjectFunctionProjectVehicleCollectionEndpoint {
+    type Resource = ProjectFunction;
+}
 
 const GETPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7736,7 +7958,9 @@ impl Endpoint for DeleteProjectRequestEquipmentEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteProjectRequestEquipmentEndpoint {}
+impl EndpointWithId for DeleteProjectRequestEquipmentEndpoint {
+    type Resource = ProjectRequestEquipment;
+}
 
 const GETPROJECTREQUESTEQUIPMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -7789,7 +8013,9 @@ impl Endpoint for GetProjectRequestEquipmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectRequestEquipmentItemEndpoint {}
+impl EndpointWithId for GetProjectRequestEquipmentItemEndpoint {
+    type Resource = ProjectRequestEquipment;
+}
 
 const UPDATEPROJECTREQUESTEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -7842,7 +8068,9 @@ impl Endpoint for UpdateProjectRequestEquipmentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateProjectRequestEquipmentEndpoint {}
+impl EndpointWithId for UpdateProjectRequestEquipmentEndpoint {
+    type Resource = ProjectRequestEquipment;
+}
 
 const GETPROJECTREQUESTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -7985,7 +8213,9 @@ impl Endpoint for DeleteProjectRequestEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteProjectRequestEndpoint {}
+impl EndpointWithId for DeleteProjectRequestEndpoint {
+    type Resource = ProjectRequest;
+}
 
 const GETPROJECTREQUESTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8038,7 +8268,9 @@ impl Endpoint for GetProjectRequestItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectRequestItemEndpoint {}
+impl EndpointWithId for GetProjectRequestItemEndpoint {
+    type Resource = ProjectRequest;
+}
 
 const UPDATEPROJECTREQUESTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8091,7 +8323,9 @@ impl Endpoint for UpdateProjectRequestEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateProjectRequestEndpoint {}
+impl EndpointWithId for UpdateProjectRequestEndpoint {
+    type Resource = ProjectRequest;
+}
 
 const GETPROJECTREQUESTPROJECTREQUESTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -8144,7 +8378,9 @@ impl Endpoint for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetProjectRequestProjectRequestEquipmentCollectionEndpoint {
+    type Resource = ProjectRequest;
+}
 
 const CREATEPROJECTREQUESTEQUIPMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8197,7 +8433,9 @@ impl Endpoint for CreateProjectRequestEquipmentEndpoint {
     };
 }
 
-impl EndpointWithId for CreateProjectRequestEquipmentEndpoint {}
+impl EndpointWithId for CreateProjectRequestEquipmentEndpoint {
+    type Resource = ProjectRequest;
+}
 
 const GETPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -8384,7 +8622,9 @@ impl Endpoint for GetProjectItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectItemEndpoint {}
+impl EndpointWithId for GetProjectItemEndpoint {
+    type Resource = Project;
+}
 
 const SETCLIENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -8436,7 +8676,9 @@ impl Endpoint for SetClientEndpoint {
     };
 }
 
-impl EndpointWithId for SetClientEndpoint {}
+impl EndpointWithId for SetClientEndpoint {
+    type Resource = Project;
+}
 
 const SETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -8488,7 +8730,9 @@ impl Endpoint for SetLocationEndpoint {
     };
 }
 
-impl EndpointWithId for SetLocationEndpoint {}
+impl EndpointWithId for SetLocationEndpoint {
+    type Resource = Project;
+}
 
 const SETTYPEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -8540,7 +8784,9 @@ impl Endpoint for SetTypeEndpoint {
     };
 }
 
-impl EndpointWithId for SetTypeEndpoint {}
+impl EndpointWithId for SetTypeEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTCONTRACTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8593,7 +8839,9 @@ impl Endpoint for GetProjectContractCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectContractCollectionEndpoint {}
+impl EndpointWithId for GetProjectContractCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8646,7 +8894,9 @@ impl Endpoint for GetProjectProjectCostCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectCostCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectCostCollectionEndpoint {
+    type Resource = Project;
+}
 
 const CREATEPROJECTCOSTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -8698,7 +8948,9 @@ impl Endpoint for CreateProjectCostEndpoint {
     };
 }
 
-impl EndpointWithId for CreateProjectCostEndpoint {}
+impl EndpointWithId for CreateProjectCostEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8751,7 +9003,9 @@ impl Endpoint for GetProjectFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetProjectFileFolderCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8804,7 +9058,9 @@ impl Endpoint for GetProjectFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectFileCollectionEndpoint {}
+impl EndpointWithId for GetProjectFileCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8857,7 +9113,9 @@ impl Endpoint for GetProjectProjectCrewCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectCrewCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectCrewCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8910,7 +9168,9 @@ impl Endpoint for GetProjectProjectEquipmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectEquipmentCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -8963,7 +9223,9 @@ impl Endpoint for GetProjectProjectEquipmentGroupCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectEquipmentGroupCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectEquipmentGroupCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9016,7 +9278,9 @@ impl Endpoint for GetProjectProjectFunctionGroupCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectFunctionGroupCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectFunctionGroupCollectionEndpoint {
+    type Resource = Project;
+}
 
 const CREATEPROJECTFUNCTIONGROUPENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9069,7 +9333,9 @@ impl Endpoint for CreateProjectFunctionGroupEndpoint {
     };
 }
 
-impl EndpointWithId for CreateProjectFunctionGroupEndpoint {}
+impl EndpointWithId for CreateProjectFunctionGroupEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTFUNCTIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9122,7 +9388,9 @@ impl Endpoint for GetProjectProjectFunctionCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectFunctionCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectFunctionCollectionEndpoint {
+    type Resource = Project;
+}
 
 const CREATEPROJECTFUNCTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9175,7 +9443,9 @@ impl Endpoint for CreateProjectFunctionEndpoint {
     };
 }
 
-impl EndpointWithId for CreateProjectFunctionEndpoint {}
+impl EndpointWithId for CreateProjectFunctionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9228,7 +9498,9 @@ impl Endpoint for GetProjectProjectVehicleCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectProjectVehicleCollectionEndpoint {}
+impl EndpointWithId for GetProjectProjectVehicleCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTQUOTATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9281,7 +9553,9 @@ impl Endpoint for GetProjectQuotationCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectQuotationCollectionEndpoint {}
+impl EndpointWithId for GetProjectQuotationCollectionEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTSUBPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9334,7 +9608,9 @@ impl Endpoint for GetProjectSubprojectCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectSubprojectCollectionEndpoint {}
+impl EndpointWithId for GetProjectSubprojectCollectionEndpoint {
+    type Resource = Project;
+}
 
 const CREATESUBPROJECTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -9386,7 +9662,9 @@ impl Endpoint for CreateSubprojectEndpoint {
     };
 }
 
-impl EndpointWithId for CreateSubprojectEndpoint {}
+impl EndpointWithId for CreateSubprojectEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -9439,7 +9717,9 @@ impl Endpoint for GetProjectTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectTaskCollectionEndpoint {}
+impl EndpointWithId for GetProjectTaskCollectionEndpoint {
+    type Resource = Project;
+}
 
 const POSTPROJECTSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -9491,7 +9771,9 @@ impl Endpoint for PostProjectsIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostProjectsIdTasksEndpoint {}
+impl EndpointWithId for PostProjectsIdTasksEndpoint {
+    type Resource = Project;
+}
 
 const GETPROJECTSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -9589,7 +9871,9 @@ impl Endpoint for GetProjectStatusItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectStatusItemEndpoint {}
+impl EndpointWithId for GetProjectStatusItemEndpoint {
+    type Resource = ProjectStatus;
+}
 
 const GETPROJECTTEMPLATECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -9687,7 +9971,9 @@ impl Endpoint for GetProjectTemplateItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectTemplateItemEndpoint {}
+impl EndpointWithId for GetProjectTemplateItemEndpoint {
+    type Resource = ProjectTemplate;
+}
 
 const GETPROJECTTYPECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -9784,7 +10070,9 @@ impl Endpoint for GetProjectTypeItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectTypeItemEndpoint {}
+impl EndpointWithId for GetProjectTypeItemEndpoint {
+    type Resource = ProjectType;
+}
 
 const GETPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -9882,7 +10170,9 @@ impl Endpoint for GetProjectVehicleItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetProjectVehicleItemEndpoint {}
+impl EndpointWithId for GetProjectVehicleItemEndpoint {
+    type Resource = ProjectVehicle;
+}
 
 const GETPURCHASEORDERCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -9980,7 +10270,9 @@ impl Endpoint for GetPurchaseOrderCostItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderCostItemEndpoint {}
+impl EndpointWithId for GetPurchaseOrderCostItemEndpoint {
+    type Resource = PurchaseOrderCost;
+}
 
 const GETPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -10078,7 +10370,9 @@ impl Endpoint for GetPurchaseOrderGlobalCostItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderGlobalCostItemEndpoint {}
+impl EndpointWithId for GetPurchaseOrderGlobalCostItemEndpoint {
+    type Resource = PurchaseOrderGlobalCost;
+}
 
 const GETPURCHASEORDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -10176,7 +10470,9 @@ impl Endpoint for GetPurchaseOrderItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderItemEndpoint {}
+impl EndpointWithId for GetPurchaseOrderItemEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10229,7 +10525,9 @@ impl Endpoint for GetPurchaseOrderFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderFileFolderCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10282,7 +10580,9 @@ impl Endpoint for GetPurchaseOrderFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderFileCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderFileCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10335,7 +10635,9 @@ impl Endpoint for GetPurchaseOrderInvoiceLineCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderInvoiceLineCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderInvoiceLineCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERPURCHASEORDERCOSTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10388,7 +10690,9 @@ impl Endpoint for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderPurchaseOrderCostCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERPURCHASEORDERGLOBALCOSTCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -10441,7 +10745,9 @@ impl Endpoint for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderPurchaseOrderGlobalCostCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETPURCHASEORDERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10494,7 +10800,9 @@ impl Endpoint for GetPurchaseOrderTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetPurchaseOrderTaskCollectionEndpoint {}
+impl EndpointWithId for GetPurchaseOrderTaskCollectionEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const POSTPURCHASEORDERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10547,7 +10855,9 @@ impl Endpoint for PostPurchaseordersIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostPurchaseordersIdTasksEndpoint {}
+impl EndpointWithId for PostPurchaseordersIdTasksEndpoint {
+    type Resource = PurchaseOrder;
+}
 
 const GETQUOTATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -10644,7 +10954,9 @@ impl Endpoint for GetQuotationItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetQuotationItemEndpoint {}
+impl EndpointWithId for GetQuotationItemEndpoint {
+    type Resource = Quote;
+}
 
 const GETQUOTATIONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10697,7 +11009,9 @@ impl Endpoint for GetQuotationFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetQuotationFileCollectionEndpoint {}
+impl EndpointWithId for GetQuotationFileCollectionEndpoint {
+    type Resource = Quote;
+}
 
 const GETQUOTATIONINVOICELINECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10750,7 +11064,9 @@ impl Endpoint for GetQuotationInvoiceLineCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetQuotationInvoiceLineCollectionEndpoint {}
+impl EndpointWithId for GetQuotationInvoiceLineCollectionEndpoint {
+    type Resource = Quote;
+}
 
 const GETQUOTATIONTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -10803,7 +11119,9 @@ impl Endpoint for GetQuotationTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetQuotationTaskCollectionEndpoint {}
+impl EndpointWithId for GetQuotationTaskCollectionEndpoint {
+    type Resource = Quote;
+}
 
 const POSTQUOTESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -10855,7 +11173,9 @@ impl Endpoint for PostQuotesIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostQuotesIdTasksEndpoint {}
+impl EndpointWithId for PostQuotesIdTasksEndpoint {
+    type Resource = Quote;
+}
 
 const GETCREWRATEFACTORCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -10953,7 +11273,9 @@ impl Endpoint for GetCrewRateFactorItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewRateFactorItemEndpoint {}
+impl EndpointWithId for GetCrewRateFactorItemEndpoint {
+    type Resource = RateFactor;
+}
 
 const GETCREWRATECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -11050,7 +11372,9 @@ impl Endpoint for GetCrewRateItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewRateItemEndpoint {}
+impl EndpointWithId for GetCrewRateItemEndpoint {
+    type Resource = Rate;
+}
 
 const GETCREWRATECREWRATEFACTORCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11103,7 +11427,9 @@ impl Endpoint for GetCrewRateCrewRateFactorCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetCrewRateCrewRateFactorCollectionEndpoint {}
+impl EndpointWithId for GetCrewRateCrewRateFactorCollectionEndpoint {
+    type Resource = Rate;
+}
 
 const GETREPAIRCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -11200,7 +11526,9 @@ impl Endpoint for GetRepairItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetRepairItemEndpoint {}
+impl EndpointWithId for GetRepairItemEndpoint {
+    type Resource = Repair;
+}
 
 const GETREPAIRFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11253,7 +11581,9 @@ impl Endpoint for GetRepairFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetRepairFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetRepairFileFolderCollectionEndpoint {
+    type Resource = Repair;
+}
 
 const GETREPAIRFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11306,7 +11636,9 @@ impl Endpoint for GetRepairFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetRepairFileCollectionEndpoint {}
+impl EndpointWithId for GetRepairFileCollectionEndpoint {
+    type Resource = Repair;
+}
 
 const GETREPAIRTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11359,7 +11691,9 @@ impl Endpoint for GetRepairTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetRepairTaskCollectionEndpoint {}
+impl EndpointWithId for GetRepairTaskCollectionEndpoint {
+    type Resource = Repair;
+}
 
 const POSTREPAIRSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -11411,7 +11745,9 @@ impl Endpoint for PostRepairsIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostRepairsIdTasksEndpoint {}
+impl EndpointWithId for PostRepairsIdTasksEndpoint {
+    type Resource = Repair;
+}
 
 const GETSERIALNUMBERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -11508,7 +11844,9 @@ impl Endpoint for DeleteSerialNumberEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteSerialNumberEndpoint {}
+impl EndpointWithId for DeleteSerialNumberEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBERITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -11560,7 +11898,9 @@ impl Endpoint for GetSerialNumberItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberItemEndpoint {}
+impl EndpointWithId for GetSerialNumberItemEndpoint {
+    type Resource = SerialNumber;
+}
 
 const UPDATESERIALNUMBERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -11612,7 +11952,9 @@ impl Endpoint for UpdateSerialNumberEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateSerialNumberEndpoint {}
+impl EndpointWithId for UpdateSerialNumberEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBERACTUALCONTENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11665,7 +12007,9 @@ impl Endpoint for GetSerialNumberActualContentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberActualContentCollectionEndpoint {}
+impl EndpointWithId for GetSerialNumberActualContentCollectionEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBEREQUIPMENTASSIGNEDSERIALSCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -11718,7 +12062,9 @@ impl Endpoint for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {}
+impl EndpointWithId for GetSerialNumberEquipmentAssignedSerialsCollectionEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11771,7 +12117,9 @@ impl Endpoint for GetSerialNumberFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetSerialNumberFileFolderCollectionEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11824,7 +12172,9 @@ impl Endpoint for GetSerialNumberFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberFileCollectionEndpoint {}
+impl EndpointWithId for GetSerialNumberFileCollectionEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSERIALNUMBERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11877,7 +12227,9 @@ impl Endpoint for GetSerialNumberTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSerialNumberTaskCollectionEndpoint {}
+impl EndpointWithId for GetSerialNumberTaskCollectionEndpoint {
+    type Resource = SerialNumber;
+}
 
 const POSTSERIALNUMBERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -11930,7 +12282,9 @@ impl Endpoint for PostSerialnumbersIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostSerialnumbersIdTasksEndpoint {}
+impl EndpointWithId for PostSerialnumbersIdTasksEndpoint {
+    type Resource = SerialNumber;
+}
 
 const GETSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -12027,7 +12381,9 @@ impl Endpoint for GetStatusItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetStatusItemEndpoint {}
+impl EndpointWithId for GetStatusItemEndpoint {
+    type Resource = Status;
+}
 
 const GETSTOCKLOCATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -12125,7 +12481,9 @@ impl Endpoint for GetStockLocationItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetStockLocationItemEndpoint {}
+impl EndpointWithId for GetStockLocationItemEndpoint {
+    type Resource = StockLocation;
+}
 
 const GETSTOCKLOCATIONVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12178,7 +12536,9 @@ impl Endpoint for GetStockLocationVehicleCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetStockLocationVehicleCollectionEndpoint {}
+impl EndpointWithId for GetStockLocationVehicleCollectionEndpoint {
+    type Resource = StockLocation;
+}
 
 const CREATEVEHICLEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -12230,7 +12590,9 @@ impl Endpoint for CreateVehicleEndpoint {
     };
 }
 
-impl EndpointWithId for CreateVehicleEndpoint {}
+impl EndpointWithId for CreateVehicleEndpoint {
+    type Resource = StockLocation;
+}
 
 const GETSTOCKMOVEMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -12327,7 +12689,9 @@ impl Endpoint for DeleteStockMovementEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteStockMovementEndpoint {}
+impl EndpointWithId for DeleteStockMovementEndpoint {
+    type Resource = StockMovement;
+}
 
 const GETSTOCKMOVEMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12380,7 +12744,9 @@ impl Endpoint for GetStockMovementItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetStockMovementItemEndpoint {}
+impl EndpointWithId for GetStockMovementItemEndpoint {
+    type Resource = StockMovement;
+}
 
 const UPDATESTOCKMOVEMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -12432,7 +12798,9 @@ impl Endpoint for UpdateStockMovementEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateStockMovementEndpoint {}
+impl EndpointWithId for UpdateStockMovementEndpoint {
+    type Resource = StockMovement;
+}
 
 const GETSUBPROJECTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -12529,7 +12897,9 @@ impl Endpoint for GetSubprojectItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectItemEndpoint {}
+impl EndpointWithId for GetSubprojectItemEndpoint {
+    type Resource = Subproject;
+}
 
 const POSTSUBPROJECTSIDSETLOCATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12582,7 +12952,9 @@ impl Endpoint for PostSubprojectsIdSetLocationEndpoint {
     };
 }
 
-impl EndpointWithId for PostSubprojectsIdSetLocationEndpoint {}
+impl EndpointWithId for PostSubprojectsIdSetLocationEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12635,7 +13007,9 @@ impl Endpoint for GetSubprojectFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectFileFolderCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTPROJECTCREWCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12688,7 +13062,9 @@ impl Endpoint for GetSubprojectProjectCrewCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectProjectCrewCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectProjectCrewCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTPROJECTEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12741,7 +13117,9 @@ impl Endpoint for GetSubprojectProjectEquipmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectProjectEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectProjectEquipmentCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTPROJECTEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12794,7 +13172,9 @@ impl Endpoint for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectProjectEquipmentGroupCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectProjectEquipmentGroupCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTPROJECTFUNCTIONGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12847,7 +13227,9 @@ impl Endpoint for GetSubprojectProjectFunctionGroupCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectProjectFunctionGroupCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectProjectFunctionGroupCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBPROJECTPROJECTVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -12900,7 +13282,9 @@ impl Endpoint for GetSubprojectProjectVehicleCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubprojectProjectVehicleCollectionEndpoint {}
+impl EndpointWithId for GetSubprojectProjectVehicleCollectionEndpoint {
+    type Resource = Subproject;
+}
 
 const GETSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -12998,7 +13382,9 @@ impl Endpoint for GetSubrentalEquipmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalEquipmentItemEndpoint {}
+impl EndpointWithId for GetSubrentalEquipmentItemEndpoint {
+    type Resource = SubrentalEquipment;
+}
 
 const GETSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -13096,7 +13482,9 @@ impl Endpoint for GetSubrentalEquipmentGroupItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalEquipmentGroupItemEndpoint {}
+impl EndpointWithId for GetSubrentalEquipmentGroupItemEndpoint {
+    type Resource = SubrentalEquipmentGroup;
+}
 
 const GETSUBRENTALEQUIPMENTGROUPSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -13150,7 +13538,9 @@ impl Endpoint for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint
     };
 }
 
-impl EndpointWithId for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalEquipmentGroupSubrentalEquipmentCollectionEndpoint {
+    type Resource = SubrentalEquipmentGroup;
+}
 
 const GETSUBRENTALCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -13247,7 +13637,9 @@ impl Endpoint for GetSubrentalItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalItemEndpoint {}
+impl EndpointWithId for GetSubrentalItemEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBRENTALFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13300,7 +13692,9 @@ impl Endpoint for GetSubrentalFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalFileFolderCollectionEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBRENTALFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13353,7 +13747,9 @@ impl Endpoint for GetSubrentalFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalFileCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalFileCollectionEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBRENTALSUBRENTALEQUIPMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13406,7 +13802,9 @@ impl Endpoint for GetSubrentalSubrentalEquipmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalSubrentalEquipmentCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalSubrentalEquipmentCollectionEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBRENTALSUBRENTALEQUIPMENTGROUPCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13459,7 +13857,9 @@ impl Endpoint for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalSubrentalEquipmentGroupCollectionEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBRENTALTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13512,7 +13912,9 @@ impl Endpoint for GetSubrentalTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubrentalTaskCollectionEndpoint {}
+impl EndpointWithId for GetSubrentalTaskCollectionEndpoint {
+    type Resource = Subrental;
+}
 
 const POSTSUBRENTALSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -13565,7 +13967,9 @@ impl Endpoint for PostSubrentalsIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostSubrentalsIdTasksEndpoint {}
+impl EndpointWithId for PostSubrentalsIdTasksEndpoint {
+    type Resource = Subrental;
+}
 
 const GETSUBTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -13662,7 +14066,9 @@ impl Endpoint for DeleteSubtaskEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteSubtaskEndpoint {}
+impl EndpointWithId for DeleteSubtaskEndpoint {
+    type Resource = Subtask;
+}
 
 const GETSUBTASKITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -13714,7 +14120,9 @@ impl Endpoint for GetSubtaskItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSubtaskItemEndpoint {}
+impl EndpointWithId for GetSubtaskItemEndpoint {
+    type Resource = Subtask;
+}
 
 const UPDATESUBTASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -13766,7 +14174,9 @@ impl Endpoint for UpdateSubtaskEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateSubtaskEndpoint {}
+impl EndpointWithId for UpdateSubtaskEndpoint {
+    type Resource = Subtask;
+}
 
 const GETSUPPLIERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -13863,7 +14273,9 @@ impl Endpoint for DeleteSupplierEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteSupplierEndpoint {}
+impl EndpointWithId for DeleteSupplierEndpoint {
+    type Resource = Supplier;
+}
 
 const GETSUPPLIERITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -13915,7 +14327,9 @@ impl Endpoint for GetSupplierItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetSupplierItemEndpoint {}
+impl EndpointWithId for GetSupplierItemEndpoint {
+    type Resource = Supplier;
+}
 
 const UPDATESUPPLIERENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -13967,7 +14381,9 @@ impl Endpoint for UpdateSupplierEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateSupplierEndpoint {}
+impl EndpointWithId for UpdateSupplierEndpoint {
+    type Resource = Supplier;
+}
 
 const GETSUPPLIERFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14020,7 +14436,9 @@ impl Endpoint for GetSupplierFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSupplierFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetSupplierFileFolderCollectionEndpoint {
+    type Resource = Supplier;
+}
 
 const GETSUPPLIERFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14073,7 +14491,9 @@ impl Endpoint for GetSupplierFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSupplierFileCollectionEndpoint {}
+impl EndpointWithId for GetSupplierFileCollectionEndpoint {
+    type Resource = Supplier;
+}
 
 const GETSUPPLIERTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14126,7 +14546,9 @@ impl Endpoint for GetSupplierTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetSupplierTaskCollectionEndpoint {}
+impl EndpointWithId for GetSupplierTaskCollectionEndpoint {
+    type Resource = Supplier;
+}
 
 const POSTSUPPLIERSIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14179,7 +14601,9 @@ impl Endpoint for PostSuppliersIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostSuppliersIdTasksEndpoint {}
+impl EndpointWithId for PostSuppliersIdTasksEndpoint {
+    type Resource = Supplier;
+}
 
 const GETTASKASSIGNMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -14277,7 +14701,9 @@ impl Endpoint for DeleteTaskAssignmentEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteTaskAssignmentEndpoint {}
+impl EndpointWithId for DeleteTaskAssignmentEndpoint {
+    type Resource = TaskAssignment;
+}
 
 const GETTASKASSIGNMENTITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14330,7 +14756,9 @@ impl Endpoint for GetTaskAssignmentItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskAssignmentItemEndpoint {}
+impl EndpointWithId for GetTaskAssignmentItemEndpoint {
+    type Resource = TaskAssignment;
+}
 
 const UPDATETASKASSIGNMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14383,7 +14811,9 @@ impl Endpoint for UpdateTaskAssignmentEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateTaskAssignmentEndpoint {}
+impl EndpointWithId for UpdateTaskAssignmentEndpoint {
+    type Resource = TaskAssignment;
+}
 
 const GETTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -14525,7 +14955,9 @@ impl Endpoint for DeleteTaskEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteTaskEndpoint {}
+impl EndpointWithId for DeleteTaskEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -14577,7 +15009,9 @@ impl Endpoint for GetTaskItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskItemEndpoint {}
+impl EndpointWithId for GetTaskItemEndpoint {
+    type Resource = Task;
+}
 
 const UPDATETASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -14629,7 +15063,9 @@ impl Endpoint for UpdateTaskEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateTaskEndpoint {}
+impl EndpointWithId for UpdateTaskEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14682,7 +15118,9 @@ impl Endpoint for GetTaskFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetTaskFileFolderCollectionEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14735,7 +15173,9 @@ impl Endpoint for GetTaskFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskFileCollectionEndpoint {}
+impl EndpointWithId for GetTaskFileCollectionEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKSUBTASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14788,7 +15228,9 @@ impl Endpoint for GetTaskSubtaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskSubtaskCollectionEndpoint {}
+impl EndpointWithId for GetTaskSubtaskCollectionEndpoint {
+    type Resource = Task;
+}
 
 const CREATESUBTASKENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -14840,7 +15282,9 @@ impl Endpoint for CreateSubtaskEndpoint {
     };
 }
 
-impl EndpointWithId for CreateSubtaskEndpoint {}
+impl EndpointWithId for CreateSubtaskEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKTASKASSIGNMENTCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14893,7 +15337,9 @@ impl Endpoint for GetTaskTaskAssignmentCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskTaskAssignmentCollectionEndpoint {}
+impl EndpointWithId for GetTaskTaskAssignmentCollectionEndpoint {
+    type Resource = Task;
+}
 
 const CREATETASKASSIGNMENTENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -14946,7 +15392,9 @@ impl Endpoint for CreateTaskAssignmentEndpoint {
     };
 }
 
-impl EndpointWithId for CreateTaskAssignmentEndpoint {}
+impl EndpointWithId for CreateTaskAssignmentEndpoint {
+    type Resource = Task;
+}
 
 const GETTASKSTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15088,7 +15536,9 @@ impl Endpoint for DeleteTaskStatusEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteTaskStatusEndpoint {}
+impl EndpointWithId for DeleteTaskStatusEndpoint {
+    type Resource = TaskStatus;
+}
 
 const GETTASKSTATUSITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -15140,7 +15590,9 @@ impl Endpoint for GetTaskStatusItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaskStatusItemEndpoint {}
+impl EndpointWithId for GetTaskStatusItemEndpoint {
+    type Resource = TaskStatus;
+}
 
 const UPDATETASKSTATUSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -15192,7 +15644,9 @@ impl Endpoint for UpdateTaskStatusEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateTaskStatusEndpoint {}
+impl EndpointWithId for UpdateTaskStatusEndpoint {
+    type Resource = TaskStatus;
+}
 
 const GETTAXCLASSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15289,7 +15743,9 @@ impl Endpoint for GetTaxClassItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTaxClassItemEndpoint {}
+impl EndpointWithId for GetTaxClassItemEndpoint {
+    type Resource = TaxClass;
+}
 
 const GETTIMEREGISTRATIONCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15432,7 +15888,9 @@ impl Endpoint for DeleteTimeRegistrationEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteTimeRegistrationEndpoint {}
+impl EndpointWithId for DeleteTimeRegistrationEndpoint {
+    type Resource = TimeRegistration;
+}
 
 const GETTIMEREGISTRATIONITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -15485,7 +15943,9 @@ impl Endpoint for GetTimeRegistrationItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTimeRegistrationItemEndpoint {}
+impl EndpointWithId for GetTimeRegistrationItemEndpoint {
+    type Resource = TimeRegistration;
+}
 
 const UPDATETIMEREGISTRATIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -15538,7 +15998,9 @@ impl Endpoint for UpdateTimeRegistrationEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateTimeRegistrationEndpoint {}
+impl EndpointWithId for UpdateTimeRegistrationEndpoint {
+    type Resource = TimeRegistration;
+}
 
 const GETTIMEREGISTRATIONFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -15591,7 +16053,9 @@ impl Endpoint for GetTimeRegistrationFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetTimeRegistrationFileCollectionEndpoint {}
+impl EndpointWithId for GetTimeRegistrationFileCollectionEndpoint {
+    type Resource = TimeRegistration;
+}
 
 const GETTIMEREGISTRATIONTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_PARAMETERS:
     &[EndpointParameterSpec] = &[EndpointParameterSpec {
@@ -15645,7 +16109,9 @@ impl Endpoint for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint 
     };
 }
 
-impl EndpointWithId for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint {}
+impl EndpointWithId for GetTimeRegistrationTimeRegistrationActivityCollectionEndpoint {
+    type Resource = TimeRegistration;
+}
 
 const GETTIMEREGISTRATIONACTIVITYCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15743,7 +16209,9 @@ impl Endpoint for GetTimeRegistrationActivityItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetTimeRegistrationActivityItemEndpoint {}
+impl EndpointWithId for GetTimeRegistrationActivityItemEndpoint {
+    type Resource = TimeRegistrationActivity;
+}
 
 const GETVEHICLECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -15885,7 +16353,9 @@ impl Endpoint for DeleteVehicleEndpoint {
     };
 }
 
-impl EndpointWithId for DeleteVehicleEndpoint {}
+impl EndpointWithId for DeleteVehicleEndpoint {
+    type Resource = Vehicle;
+}
 
 const GETVEHICLEITEMENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -15937,7 +16407,9 @@ impl Endpoint for GetVehicleItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetVehicleItemEndpoint {}
+impl EndpointWithId for GetVehicleItemEndpoint {
+    type Resource = Vehicle;
+}
 
 const UPDATEVEHICLEENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -15989,7 +16461,9 @@ impl Endpoint for UpdateVehicleEndpoint {
     };
 }
 
-impl EndpointWithId for UpdateVehicleEndpoint {}
+impl EndpointWithId for UpdateVehicleEndpoint {
+    type Resource = Vehicle;
+}
 
 const GETVEHICLEFILEFOLDERCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -16042,7 +16516,9 @@ impl Endpoint for GetVehicleFileFolderCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetVehicleFileFolderCollectionEndpoint {}
+impl EndpointWithId for GetVehicleFileFolderCollectionEndpoint {
+    type Resource = Vehicle;
+}
 
 const GETVEHICLEFILECOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -16095,7 +16571,9 @@ impl Endpoint for GetVehicleFileCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetVehicleFileCollectionEndpoint {}
+impl EndpointWithId for GetVehicleFileCollectionEndpoint {
+    type Resource = Vehicle;
+}
 
 const GETVEHICLETASKCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] =
     &[EndpointParameterSpec {
@@ -16148,7 +16626,9 @@ impl Endpoint for GetVehicleTaskCollectionEndpoint {
     };
 }
 
-impl EndpointWithId for GetVehicleTaskCollectionEndpoint {}
+impl EndpointWithId for GetVehicleTaskCollectionEndpoint {
+    type Resource = Vehicle;
+}
 
 const POSTVEHICLESIDTASKSENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[EndpointParameterSpec {
     name: "id",
@@ -16200,7 +16680,9 @@ impl Endpoint for PostVehiclesIdTasksEndpoint {
     };
 }
 
-impl EndpointWithId for PostVehiclesIdTasksEndpoint {}
+impl EndpointWithId for PostVehiclesIdTasksEndpoint {
+    type Resource = Vehicle;
+}
 
 const GETWAREHOUSESTATUSCOLLECTIONENDPOINT_PARAMETERS: &[EndpointParameterSpec] = &[];
 
@@ -16298,7 +16780,9 @@ impl Endpoint for GetWarehouseStatusItemEndpoint {
     };
 }
 
-impl EndpointWithId for GetWarehouseStatusItemEndpoint {}
+impl EndpointWithId for GetWarehouseStatusItemEndpoint {
+    type Resource = WarehouseStatus;
+}
 
 /// All operations in the checked-in Rentman API document.
 pub const ALL_ENDPOINTS: &[EndpointSpec] = &[

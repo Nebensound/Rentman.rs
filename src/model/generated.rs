@@ -4,10 +4,11 @@
 
 #![allow(clippy::module_name_repetitions)]
 
+use crate::id::{Id, ItemId, Resource};
 use chrono::{DateTime, FixedOffset, NaiveDate};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, fmt};
+use std::collections::BTreeMap;
 use url::Url;
 
 /// Marker type for endpoints without a JSON request body.
@@ -54,38 +55,6 @@ pub struct ItemResponse<T> {
     /// URL for the next page when cursor pagination is used.
     #[serde(default)]
     pub next_page_url: Option<Url>,
-}
-
-/// Rentman integer identifier.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct RentmanId(pub u64);
-
-/// Link to another Rentman resource, for example `/invoices/14`.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(transparent)]
-pub struct ResourceReference(String);
-
-impl ResourceReference {
-    /// Returns the raw Rentman resource path.
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl<'de> Deserialize<'de> for ResourceReference {
-    // Coverage is disabled because serde monomorphizes this adapter per
-    // deserializer; behavior is covered through model deserialization tests.
-    #[cfg_attr(coverage_nightly, coverage(off))]
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let value = String::deserialize(deserializer)?;
-        if !value.starts_with('/') {
-            return Err(serde::de::Error::custom(
-                "Rentman resource reference must start with '/'",
-            ));
-        }
-        Ok(Self(value))
-    }
 }
 
 /// Email address string from Rentman. Empty when the address is not set.
@@ -137,12 +106,6 @@ pub enum CustomFieldValue {
     List(Vec<CustomFieldValue>),
     /// Object custom field value.
     Object(BTreeMap<String, CustomFieldValue>),
-}
-
-impl fmt::Display for RentmanId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
 }
 
 /// Values documented for `AppointmentResponse.recurrence_interval_unit`.
@@ -13007,11 +12970,15 @@ pub struct ApiResponse {
 }
 
 /// Rentman API schema `AccessoryRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AccessoryPayload {
     /// The equipment that is represented by this accessory.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `AccessoryRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<i64>,
@@ -13036,19 +13003,22 @@ pub struct AccessoryPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Accessory {
     /// Rentman API field `AccessoryResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Accessory>,
     /// Rentman API field `AccessoryResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AccessoryResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AccessoryResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// The equipment that this item is an accessory of.
-    pub parent_equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub parent_equipment: Id<Equipment>,
     /// The equipment that is represented by this accessory.
-    pub equipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `AccessoryResponse.quantity`.
     pub quantity: i64,
     /// Automatically add the accessory as soon as the equipment is added to the project.
@@ -13064,14 +13034,22 @@ pub struct Accessory {
 }
 
 /// Rentman API schema `ActualContentRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ActualContentPayload {
     /// Rentman API field `ActualContentRequest.equipment`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `ActualContentRequest.serial`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub serial: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub serial: Option<Id<SerialNumber>>,
     /// Rentman API field `ActualContentRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<String>,
@@ -13081,75 +13059,103 @@ pub struct ActualContentPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ActualContent {
     /// Rentman API field `ActualContentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ActualContent>,
     /// Rentman API field `ActualContentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ActualContentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ActualContentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ActualContentResponse.equipment`.
-    pub equipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `ActualContentResponse.serial`.
-    pub serial: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub serial: Option<Id<SerialNumber>>,
     /// Rentman API field `ActualContentResponse.quantity`.
     pub quantity: i64,
     /// GENERATED FIELD. The combination that contains this equipment.
-    pub combination_serial: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub combination_serial: Option<Id<SerialNumber>>,
 }
 
 /// Rentman API schema `AlternativeRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AlternativePayload {
     /// Rentman API field `AlternativeRequest.alternative`.
-    pub alternative: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub alternative: Id<Equipment>,
+}
+
+impl AlternativePayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(alternative: Id<Equipment>) -> Self {
+        Self { alternative }
+    }
 }
 
 /// Rentman API schema `AlternativeResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Alternative {
     /// Rentman API field `AlternativeResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Alternative>,
     /// Rentman API field `AlternativeResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AlternativeResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AlternativeResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `AlternativeResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Rentman API field `AlternativeResponse.alternative`.
-    pub alternative: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub alternative: Id<Equipment>,
 }
 
 /// Rentman API schema `AppointmentCrewRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AppointmentCrewPayload {
     /// Rentman API field `AppointmentCrewRequest.crew`.
-    pub crew: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crew: Id<Crew>,
+}
+
+impl AppointmentCrewPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(crew: Id<Crew>) -> Self {
+        Self { crew }
+    }
 }
 
 /// Rentman API schema `AppointmentCrewResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AppointmentCrew {
     /// Rentman API field `AppointmentCrewResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<AppointmentCrew>,
     /// Rentman API field `AppointmentCrewResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentCrewResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `AppointmentCrewResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `AppointmentCrewResponse.appointment`.
-    pub appointment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub appointment: Id<Appointment>,
     /// Rentman API field `AppointmentCrewResponse.crew`.
-    pub crew: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crew: Id<Crew>,
 }
 
 /// Rentman API schema `AppointmentRequest`.
@@ -13179,17 +13185,35 @@ pub struct AppointmentPayload {
     pub is_plannable: Option<bool>,
 }
 
+impl AppointmentPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(start: DateTime<FixedOffset>, end: DateTime<FixedOffset>) -> Self {
+        Self {
+            name: None,
+            start,
+            end,
+            color: None,
+            location: None,
+            remark: None,
+            is_public: None,
+            is_plannable: None,
+        }
+    }
+}
+
 /// Rentman API schema `AppointmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Appointment {
     /// Rentman API field `AppointmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Appointment>,
     /// Rentman API field `AppointmentResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `AppointmentResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `AppointmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `AppointmentResponse.name`.
@@ -13225,7 +13249,7 @@ pub struct Appointment {
 }
 
 /// Rentman API schema `ContactPersonRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ContactPersonPayload {
     /// Rentman API field `ContactPersonRequest.firstname`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -13275,17 +13299,19 @@ pub struct ContactPersonPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ContactPerson {
     /// Rentman API field `ContactPersonResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ContactPerson>,
     /// Rentman API field `ContactPersonResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactPersonResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactPersonResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ContactPersonResponse.contact`.
-    pub contact: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub contact: Id<Contact>,
     /// Rentman API field `ContactPersonResponse.firstname`.
     pub firstname: String,
     /// Rentman API field `ContactPersonResponse.middle_name`.
@@ -13319,11 +13345,15 @@ pub struct ContactPerson {
 }
 
 /// Rentman API schema `ContactRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ContactPayload {
     /// Rentman API field `ContactRequest.folder`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `ContactRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<ContactPayloadType>,
@@ -13481,11 +13511,19 @@ pub struct ContactPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub bank_account: Option<String>,
     /// This contact person is automatically selected if you choose this contact in a project or subrental.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub default_person: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub default_person: Option<Id<ContactPerson>>,
     /// This contact person is automatically selected when creating invoices.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub admin_contactperson: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub admin_contactperson: Option<Id<ContactPerson>>,
     /// Discount applied to the 'crew' category upon selecting this contact as a client in a project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discount_crew: Option<Decimal>,
@@ -13514,8 +13552,12 @@ pub struct ContactPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discount_subrent: Option<Decimal>,
     /// Rentman API field `ContactRequest.image`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub image: Option<Id<File>>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -13525,17 +13567,19 @@ pub struct ContactPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Contact {
     /// Rentman API field `ContactResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Contact>,
     /// Rentman API field `ContactResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ContactResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ContactResponse.folder`.
-    pub folder: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `ContactResponse.type`.
     #[serde(rename = "type")]
     pub type_: ContactType,
@@ -13643,9 +13687,11 @@ pub struct Contact {
     /// Rentman API field `ContactResponse.bank_account`.
     pub bank_account: String,
     /// This contact person is automatically selected if you choose this contact in a project or subrental.
-    pub default_person: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub default_person: Option<Id<ContactPerson>>,
     /// This contact person is automatically selected when creating invoices.
-    pub admin_contactperson: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub admin_contactperson: Option<Id<ContactPerson>>,
     /// Discount applied to the 'crew' category upon selecting this contact as a client in a project.
     pub discount_crew: Decimal,
     /// Discount applied to the 'transport' category upon selecting this contact as a client in a project.
@@ -13665,7 +13711,8 @@ pub struct Contact {
     /// Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
     pub discount_subrent: Decimal,
     /// Rentman API field `ContactResponse.image`.
-    pub image: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub image: Option<Id<File>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// The object containing all custom defined fields.
@@ -13673,17 +13720,25 @@ pub struct Contact {
 }
 
 /// Rentman API schema `ContractRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ContractPayload {
     /// Rentman API field `ContractRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
     /// Rentman API field `ContractRequest.customer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `ContractRequest.contact`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ContractRequest.date`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -13708,21 +13763,24 @@ pub struct ContractPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Contract {
     /// Rentman API field `ContractResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Contract>,
     /// Rentman API field `ContractResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ContractResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ContractResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ContractResponse.number`.
     pub number: String,
     /// Rentman API field `ContractResponse.customer`.
-    pub customer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `ContractResponse.contact`.
-    pub contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ContractResponse.date`.
     pub date: Option<String>,
     /// The date on which this quotation expires.
@@ -13734,7 +13792,8 @@ pub struct Contract {
     /// Rentman API field `ContractResponse.show_tax`.
     pub show_tax: bool,
     /// Rentman API field `ContractResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `ContractResponse.filename`.
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -13788,19 +13847,32 @@ pub struct ProjectCostPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discount: Option<Decimal>,
     /// Rentman API field `ProjectCostRequest.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectCostRequest.is_template`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_template: Option<bool>,
     /// This class, in combination with the chosen VAT scheme at project level, determines the final VAT rate.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub taxclass: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `ProjectCostRequest.ledger`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostRequest.ledger_debit`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostRequest.sale_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sale_price: Option<Decimal>,
@@ -13812,17 +13884,39 @@ pub struct ProjectCostPayload {
     pub custom: Option<CustomFields>,
 }
 
+impl ProjectCostPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(subproject: Id<Subproject>) -> Self {
+        Self {
+            name: None,
+            remark: None,
+            quantity: None,
+            discount: None,
+            subproject,
+            is_template: None,
+            taxclass: None,
+            ledger: None,
+            ledger_debit: None,
+            sale_price: None,
+            purchase_price: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectCostResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectCost>,
     /// Rentman API field `ProjectCostResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCostResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCostResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectCostResponse.name`.
@@ -13830,7 +13924,8 @@ pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.remark`.
     pub remark: String,
     /// Rentman API field `ProjectCostResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `ProjectCostResponse.quantity`.
     pub quantity: i64,
     /// Rentman API field `ProjectCostResponse.discount`.
@@ -13838,15 +13933,19 @@ pub struct ProjectCost {
     /// Rentman API field `ProjectCostResponse.order`.
     pub order: i64,
     /// Rentman API field `ProjectCostResponse.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectCostResponse.is_template`.
     pub is_template: bool,
     /// This class, in combination with the chosen VAT scheme at project level, determines the final VAT rate.
-    pub taxclass: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `ProjectCostResponse.ledger`.
-    pub ledger: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostResponse.ledger_debit`.
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectCostResponse.sale_price`.
     pub sale_price: Decimal,
     /// Rentman API field `ProjectCostResponse.purchase_price`.
@@ -13856,11 +13955,15 @@ pub struct ProjectCost {
 }
 
 /// Rentman API schema `CrewRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct CrewPayload {
     /// Rentman API field `CrewRequest.folder`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `CrewRequest.street`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub street: Option<String>,
@@ -13943,14 +14046,22 @@ pub struct CrewPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub active: Option<bool>,
     /// Rentman API field `CrewRequest.avatar`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub avatar: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub avatar: Option<Id<File>>,
     /// Rentman API field `CrewRequest.vt_fullname`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vt_fullname: Option<String>,
     /// Rentman API field `CrewRequest.default_warehouse`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub default_warehouse: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub default_warehouse: Option<Id<StockLocation>>,
     /// Can be used for the employee ID from your accounting software.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_reference: Option<String>,
@@ -13963,17 +14074,19 @@ pub struct CrewPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Crew {
     /// Rentman API field `CrewResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Crew>,
     /// Rentman API field `CrewResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `CrewResponse.folder`.
-    pub folder: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `CrewResponse.street`.
     pub street: String,
     /// Rentman API field `CrewResponse.housenumber`.
@@ -14029,11 +14142,13 @@ pub struct Crew {
     /// Rentman API field `CrewResponse.active`.
     pub active: bool,
     /// Rentman API field `CrewResponse.avatar`.
-    pub avatar: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub avatar: Option<Id<File>>,
     /// Rentman API field `CrewResponse.vt_fullname`.
     pub vt_fullname: String,
     /// Rentman API field `CrewResponse.default_warehouse`.
-    pub default_warehouse: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub default_warehouse: Option<Id<StockLocation>>,
     /// Can be used for the employee ID from your accounting software.
     pub external_reference: String,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
@@ -14046,8 +14161,12 @@ pub struct Crew {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CrewAvailabilityPayload {
     /// Rentman API field `CrewAvailabilityRequest.last_updater`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub last_updater: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub last_updater: Option<Id<Crew>>,
     /// Rentman API field `CrewAvailabilityRequest.last_updated`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<DateTime<FixedOffset>>,
@@ -14078,21 +14197,43 @@ pub struct CrewAvailabilityPayload {
     pub recurrence_weekdays: Option<String>,
 }
 
+impl CrewAvailabilityPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(start: DateTime<FixedOffset>, end: DateTime<FixedOffset>) -> Self {
+        Self {
+            last_updater: None,
+            last_updated: None,
+            start,
+            end,
+            status: None,
+            remark: None,
+            recurrence_interval_unit: None,
+            recurrence_enddate: None,
+            recurrence_interval: None,
+            recurrent_group: None,
+            recurrence_weekdays: None,
+        }
+    }
+}
+
 /// Rentman API schema `CrewAvailabilityResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CrewAvailability {
     /// Rentman API field `CrewAvailabilityResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<CrewAvailability>,
     /// Rentman API field `CrewAvailabilityResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `CrewAvailabilityResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `CrewAvailabilityResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `CrewAvailabilityResponse.last_updater`.
-    pub last_updater: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub last_updater: Option<Id<Crew>>,
     /// Rentman API field `CrewAvailabilityResponse.last_updated`.
     pub last_updated: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewAvailabilityResponse.start`.
@@ -14100,7 +14241,8 @@ pub struct CrewAvailability {
     /// Rentman API field `CrewAvailabilityResponse.end`.
     pub end: DateTime<FixedOffset>,
     /// Rentman API field `CrewAvailabilityResponse.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
     pub status: CrewAvailabilityStatus,
     /// Rentman API field `CrewAvailabilityResponse.remark`.
@@ -14118,49 +14260,64 @@ pub struct CrewAvailability {
 }
 
 /// Rentman API schema `CrewRatesRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct CrewRatePayload {
     /// Rentman API field `CrewRatesRequest.naam`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub naam: Option<String>,
     /// Rentman API field `CrewRatesRequest.cost_rate`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub cost_rate: Option<Id<Rate>>,
 }
 
 /// Rentman API schema `CrewRatesResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CrewRate {
     /// Rentman API field `CrewRatesResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<CrewRate>,
     /// Rentman API field `CrewRatesResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRatesResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRatesResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `CrewRatesResponse.naam`.
     pub naam: String,
     /// Rentman API field `CrewRatesResponse.cost_rate`.
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `CrewRatesResponse.medewerker`.
-    pub medewerker: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub medewerker: Id<Crew>,
 }
 
 /// Rentman API schema `EquipmentRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct EquipmentPayload {
     /// Rentman API field `EquipmentRequest.folder`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `EquipmentRequest.code`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
     /// Rentman API field `EquipmentRequest.factor_group`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub factor_group: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub factor_group: Option<Id<FactorGroup>>,
     /// Rentman API field `EquipmentRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -14225,8 +14382,12 @@ pub struct EquipmentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub stock_management: Option<EquipmentPayloadStockManagement>,
     /// Rentman API field `EquipmentRequest.taxclass`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub taxclass: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `EquipmentRequest.list_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub list_price: Option<Decimal>,
@@ -14261,14 +14422,26 @@ pub struct EquipmentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub country_of_origin: Option<EquipmentPayloadCountryOfOrigin>,
     /// Rentman API field `EquipmentRequest.image`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub image: Option<Id<File>>,
     /// Rentman API field `EquipmentRequest.ledger`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `EquipmentRequest.ledger_debit`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Enter an equipment group to automatically place the item in when planning.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub defaultgroup: Option<String>,
@@ -14293,21 +14466,24 @@ pub struct EquipmentPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Equipment {
     /// Rentman API field `EquipmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Equipment>,
     /// Rentman API field `EquipmentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `EquipmentResponse.folder`.
-    pub folder: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `EquipmentResponse.code`.
     pub code: String,
     /// Rentman API field `EquipmentResponse.factor_group`.
-    pub factor_group: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub factor_group: Option<Id<FactorGroup>>,
     /// Rentman API field `EquipmentResponse.name`.
     pub name: String,
     /// Note on packing lists.
@@ -14352,7 +14528,8 @@ pub struct Equipment {
     /// Rentman API field `EquipmentResponse.stock_management`.
     pub stock_management: EquipmentStockManagement,
     /// Rentman API field `EquipmentResponse.taxclass`.
-    pub taxclass: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `EquipmentResponse.list_price`.
     pub list_price: Decimal,
     /// Rentman API field `EquipmentResponse.volume`.
@@ -14376,11 +14553,14 @@ pub struct Equipment {
     /// The country where the equipment was manufactured. This is used for e.g. carnet exports.
     pub country_of_origin: EquipmentCountryOfOrigin,
     /// Rentman API field `EquipmentResponse.image`.
-    pub image: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub image: Option<Id<File>>,
     /// Rentman API field `EquipmentResponse.ledger`.
-    pub ledger: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `EquipmentResponse.ledger_debit`.
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Enter an equipment group to automatically place the item in when planning.
     pub defaultgroup: String,
     /// Rentman API field `EquipmentResponse.is_combination`.
@@ -14416,26 +14596,38 @@ pub struct Equipment {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EquipmentAssignedSerialPayload {
     /// Rentman API field `EquipmentAssignedSerialsRequest.serialnumber`.
-    pub serialnumber: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub serialnumber: Id<SerialNumber>,
+}
+
+impl EquipmentAssignedSerialPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(serialnumber: Id<SerialNumber>) -> Self {
+        Self { serialnumber }
+    }
 }
 
 /// Rentman API schema `EquipmentAssignedSerialsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EquipmentAssignedSerial {
     /// Rentman API field `EquipmentAssignedSerialsResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<EquipmentAssignedSerial>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `EquipmentAssignedSerialsResponse.combination`.
-    pub combination: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub combination: Id<SerialNumber>,
     /// Rentman API field `EquipmentAssignedSerialsResponse.serialnumber`.
-    pub serialnumber: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub serialnumber: Id<SerialNumber>,
 }
 
 /// Rentman API schema `EquipmentSetContentRequest`.
@@ -14448,7 +14640,8 @@ pub struct EquipmentSetContentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order: Option<String>,
     /// Rentman API field `EquipmentSetContentRequest.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Permanently reduce the stock by the amount from this combination.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_fixed: Option<EquipmentSetContentPayloadIsFixed>,
@@ -14457,27 +14650,44 @@ pub struct EquipmentSetContentPayload {
     pub is_physically_connected: Option<EquipmentSetContentPayloadIsPhysicallyConnected>,
 }
 
+impl EquipmentSetContentPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(equipment: Id<Equipment>) -> Self {
+        Self {
+            quantity: None,
+            order: None,
+            equipment,
+            is_fixed: None,
+            is_physically_connected: None,
+        }
+    }
+}
+
 /// Rentman API schema `EquipmentSetContentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EquipmentSetContent {
     /// Rentman API field `EquipmentSetContentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<EquipmentSetContent>,
     /// Rentman API field `EquipmentSetContentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentSetContentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `EquipmentSetContentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Quantity in this combination.
     pub quantity: i64,
     /// Rentman API field `EquipmentSetContentResponse.parent_equipment`.
-    pub parent_equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub parent_equipment: Id<Equipment>,
     /// Rentman API field `EquipmentSetContentResponse.order`.
     pub order: i64,
     /// Rentman API field `EquipmentSetContentResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Permanently reduce the stock by the amount from this combination.
     pub is_fixed: EquipmentSetContentIsFixed,
     /// When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
@@ -14485,7 +14695,7 @@ pub struct EquipmentSetContent {
 }
 
 /// Rentman API schema `ExtraInputFieldRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ExtraInputFieldPayload {
     /// Rentman API field `ExtraInputFieldRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -14501,8 +14711,12 @@ pub struct ExtraInputFieldPayload {
     )]
     pub linked_item_type: Option<ExtraInputFieldPayloadLinkedItemType>,
     /// Rentman API field `ExtraInputFieldRequest.parent`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<ExtraInputField>>,
     /// Rentman API field `ExtraInputFieldRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<ExtraInputFieldPayloadType>,
@@ -14530,13 +14744,14 @@ pub struct ExtraInputFieldPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ExtraInputField {
     /// Rentman API field `ExtraInputFieldResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ExtraInputField>,
     /// Rentman API field `ExtraInputFieldResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ExtraInputFieldResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ExtraInputFieldResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ExtraInputFieldResponse.name`.
@@ -14551,7 +14766,8 @@ pub struct ExtraInputField {
     )]
     pub linked_item_type: Option<ExtraInputFieldLinkedItemType>,
     /// Rentman API field `ExtraInputFieldResponse.parent`.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<ExtraInputField>>,
     /// Rentman API field `ExtraInputFieldResponse.type`.
     #[serde(rename = "type")]
     pub type_: ExtraInputFieldType,
@@ -14570,7 +14786,7 @@ pub struct ExtraInputField {
 }
 
 /// Rentman API schema `FactorGroupsRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct FactorGroupPayload {
     /// Rentman API field `FactorGroupsRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -14581,13 +14797,14 @@ pub struct FactorGroupPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FactorGroup {
     /// Rentman API field `FactorGroupsResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<FactorGroup>,
     /// Rentman API field `FactorGroupsResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorGroupsResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorGroupsResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FactorGroupsResponse.name`.
@@ -14595,7 +14812,7 @@ pub struct FactorGroup {
 }
 
 /// Rentman API schema `FactorsRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct FactorPayload {
     /// Rentman API field `FactorsRequest.from_days`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -14612,13 +14829,14 @@ pub struct FactorPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Factor {
     /// Rentman API field `FactorsResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Factor>,
     /// Rentman API field `FactorsResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorsResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FactorsResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FactorsResponse.from_days`.
@@ -14628,15 +14846,20 @@ pub struct Factor {
     /// Rentman API field `FactorsResponse.factor`.
     pub factor: Decimal,
     /// Rentman API field `FactorsResponse.factor_group`.
-    pub factor_group: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub factor_group: Id<FactorGroup>,
 }
 
 /// Rentman API schema `FileFolderRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct FileFolderPayload {
     /// Rentman API field `FileFolderRequest.parent`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<FileFolder>>,
     /// Rentman API field `FileFolderRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -14645,7 +14868,7 @@ pub struct FileFolderPayload {
     pub classified: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `FileFolderRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileFolderPayloadItemtype>,
@@ -14655,23 +14878,25 @@ pub struct FileFolderPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FileFolder {
     /// Rentman API field `FileFolderResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<FileFolder>,
     /// Rentman API field `FileFolderResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FileFolderResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FileFolderResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FileFolderResponse.parent`.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<FileFolder>>,
     /// Rentman API field `FileFolderResponse.name`.
     pub name: String,
     /// Confidential folders are only visible with the user right to download all files.
     pub classified: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `FileFolderResponse.itemtype`.
     pub itemtype: Option<FileFolderItemtype>,
     /// Rentman API field `FileFolderResponse.is_template`.
@@ -14682,7 +14907,7 @@ pub struct FileFolder {
 }
 
 /// Rentman API schema `FileRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct FilePayload {
     /// Rentman API field `FileRequest.readable_name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -14698,7 +14923,7 @@ pub struct FilePayload {
     pub image: Option<bool>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `FileRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FilePayloadItemtype>,
@@ -14721,8 +14946,12 @@ pub struct FilePayload {
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<String>,
     /// Rentman API field `FileRequest.preview_of`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub preview_of: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub preview_of: Option<Id<File>>,
     /// Rentman API field `FileRequest.previewstatus`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub previewstatus: Option<FilePayloadPreviewstatus>,
@@ -14733,21 +14962,26 @@ pub struct FilePayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_itemtype: Option<String>,
     /// Rentman API field `FileRequest.folder`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub folder: Option<Id<FileFolder>>,
 }
 
 /// Rentman API schema `FileResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct File {
     /// Rentman API field `FileResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<File>,
     /// Rentman API field `FileResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `FileResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `FileResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FileResponse.readable_name`.
@@ -14759,7 +14993,7 @@ pub struct File {
     /// Rentman API field `FileResponse.image`.
     pub image: bool,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `FileResponse.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<FileItemtype>,
@@ -14777,7 +15011,8 @@ pub struct File {
     #[serde(rename = "type")]
     pub type_: String,
     /// Rentman API field `FileResponse.preview_of`.
-    pub preview_of: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub preview_of: Option<Id<File>>,
     /// Rentman API field `FileResponse.previewstatus`.
     pub previewstatus: FilePreviewstatus,
     /// Rentman API field `FileResponse.file_item`.
@@ -14785,7 +15020,8 @@ pub struct File {
     /// Rentman API field `FileResponse.file_itemtype`.
     pub file_itemtype: String,
     /// Rentman API field `FileResponse.folder`.
-    pub folder: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub folder: Option<Id<FileFolder>>,
     /// GENERATED FIELD.
     pub path: String,
     /// GENERATED FIELD.
@@ -14808,11 +15044,15 @@ pub struct File {
 }
 
 /// Rentman API schema `FolderRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct FolderPayload {
     /// Rentman API field `FolderRequest.parent`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<Folder>>,
     /// Rentman API field `FolderRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -14828,17 +15068,19 @@ pub struct FolderPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Folder {
     /// Rentman API field `FolderResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Folder>,
     /// Rentman API field `FolderResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FolderResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `FolderResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FolderResponse.parent`.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<Folder>>,
     /// Rentman API field `FolderResponse.name`.
     pub name: String,
     /// Rentman API field `FolderResponse.order`.
@@ -14850,7 +15092,7 @@ pub struct Folder {
 }
 
 /// Rentman API schema `InvitationsRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct InvitationPayload {
     /// `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
@@ -14871,11 +15113,19 @@ pub struct InvitationPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsRequest.function`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub function: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub function: Option<Id<ProjectFunction>>,
     /// Rentman API field `InvitationsRequest.projectcrew`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub projectcrew: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub projectcrew: Option<Id<ProjectCrew>>,
     /// Rentman API field `InvitationsRequest.remark`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remark: Option<String>,
@@ -14897,13 +15147,14 @@ pub struct InvitationPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Invitation {
     /// Rentman API field `InvitationsResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Invitation>,
     /// Rentman API field `InvitationsResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
@@ -14920,11 +15171,14 @@ pub struct Invitation {
     /// Rentman API field `InvitationsResponse.end`.
     pub end: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvitationsResponse.function`.
-    pub function: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub function: Option<Id<ProjectFunction>>,
     /// Rentman API field `InvitationsResponse.projectcrew`.
-    pub projectcrew: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub projectcrew: Option<Id<ProjectCrew>>,
     /// Rentman API field `InvitationsResponse.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// Rentman API field `InvitationsResponse.remark`.
     pub remark: String,
     /// Rentman API field `InvitationsResponse.emailstatus`.
@@ -14940,38 +15194,44 @@ pub struct Invitation {
 }
 
 /// Rentman API schema `InvoiceLineRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct InvoiceLinePayload {
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `InvoiceLineRequest.base`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base: Option<Decimal>,
     /// Rentman API field `InvoiceLineRequest.ledger`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger: Option<Id<LedgerCode>>,
 }
 
 /// Rentman API schema `InvoiceLineResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct InvoiceLine {
     /// Rentman API field `InvoiceLineResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<InvoiceLine>,
     /// Rentman API field `InvoiceLineResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvoiceLineResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `InvoiceLineResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `InvoiceLineResponse.base`.
     pub base: Decimal,
     /// Rentman API field `InvoiceLineResponse.ledger`.
-    pub ledger: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub ledger: Id<LedgerCode>,
     /// GENERATED FIELD.
     pub vatrate: Decimal,
     /// GENERATED FIELD.
@@ -14986,17 +15246,29 @@ pub struct InvoiceLine {
 }
 
 /// Rentman API schema `FactuurRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct InvoicePayload {
     /// Rentman API field `FactuurRequest.customer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `FactuurRequest.account_manager`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub account_manager: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub account_manager: Option<Id<Crew>>,
     /// Rentman API field `FactuurRequest.contact`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact: Option<Id<ContactPerson>>,
     /// The latest payment date for this invoice.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiration: Option<String>,
@@ -15022,8 +15294,12 @@ pub struct InvoicePayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub integration_reference_id: Option<String>,
     /// Rentman API field `FactuurRequest.project`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `FactuurRequest.filename`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub filename: Option<String>,
@@ -15033,21 +15309,25 @@ pub struct InvoicePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Invoice {
     /// Rentman API field `FactuurResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Invoice>,
     /// Rentman API field `FactuurResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `FactuurResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `FactuurResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `FactuurResponse.customer`.
-    pub customer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `FactuurResponse.account_manager`.
-    pub account_manager: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub account_manager: Option<Id<Crew>>,
     /// Rentman API field `FactuurResponse.contact`.
-    pub contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contact: Option<Id<ContactPerson>>,
     /// The latest payment date for this invoice.
     pub expiration: Option<String>,
     /// Rentman API field `FactuurResponse.date`.
@@ -15065,7 +15345,8 @@ pub struct Invoice {
     /// Rentman API field `FactuurResponse.integration_reference_id`.
     pub integration_reference_id: Option<String>,
     /// Rentman API field `FactuurResponse.project`.
-    pub project: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub project: Option<Id<Project>>,
     /// Rentman API field `FactuurResponse.filename`.
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -15135,25 +15416,42 @@ pub struct LeaveMutationPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<Decimal>,
     /// Rentman API field `LeaveMutationsRequest.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// Rentman API field `LeaveMutationsRequest.leavetype`.
-    pub leavetype: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub leavetype: Id<LeaveType>,
     /// Rentman API field `LeaveMutationsRequest.mutation_date`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mutation_date: Option<String>,
+}
+
+impl LeaveMutationPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(crewmember: Id<Crew>, leavetype: Id<LeaveType>) -> Self {
+        Self {
+            description: None,
+            duration: None,
+            crewmember,
+            leavetype,
+            mutation_date: None,
+        }
+    }
 }
 
 /// Rentman API schema `LeaveMutationsResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LeaveMutation {
     /// Rentman API field `LeaveMutationsResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<LeaveMutation>,
     /// Rentman API field `LeaveMutationsResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveMutationsResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveMutationsResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `LeaveMutationsResponse.description`.
@@ -15161,9 +15459,11 @@ pub struct LeaveMutation {
     /// Rentman API field `LeaveMutationsResponse.duration`.
     pub duration: Decimal,
     /// Rentman API field `LeaveMutationsResponse.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// Rentman API field `LeaveMutationsResponse.leavetype`.
-    pub leavetype: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub leavetype: Id<LeaveType>,
     /// Rentman API field `LeaveMutationsResponse.mutation_date`.
     pub mutation_date: String,
 }
@@ -15178,26 +15478,46 @@ pub struct LeaveRequestPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approval_status: Option<LeaveRequestPayloadApprovalStatus>,
     /// Rentman API field `LeaveRequestRequest.requested_for`.
-    pub requested_for: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub requested_for: Id<Crew>,
     /// Rentman API field `LeaveRequestRequest.reviewed_on`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reviewed_on: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestRequest.reviewer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reviewer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub reviewer: Option<Id<Crew>>,
+}
+
+impl LeaveRequestPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(requested_for: Id<Crew>) -> Self {
+        Self {
+            description: None,
+            approval_status: None,
+            requested_for,
+            reviewed_on: None,
+            reviewer: None,
+        }
+    }
 }
 
 /// Rentman API schema `LeaveRequestResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LeaveRequest {
     /// Rentman API field `LeaveRequestResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<LeaveRequest>,
     /// Rentman API field `LeaveRequestResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `LeaveRequestResponse.description`.
@@ -15205,15 +15525,17 @@ pub struct LeaveRequest {
     /// Rentman API field `LeaveRequestResponse.approval_status`.
     pub approval_status: LeaveRequestApprovalStatus,
     /// Rentman API field `LeaveRequestResponse.requested_for`.
-    pub requested_for: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub requested_for: Id<Crew>,
     /// Rentman API field `LeaveRequestResponse.reviewed_on`.
     pub reviewed_on: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveRequestResponse.reviewer`.
-    pub reviewer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub reviewer: Option<Id<Crew>>,
 }
 
 /// Rentman API schema `LeaveTypesRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct LeaveTypePayload {
     /// Rentman API field `LeaveTypesRequest.type`.
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
@@ -15254,13 +15576,14 @@ pub struct LeaveTypePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LeaveType {
     /// Rentman API field `LeaveTypesResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<LeaveType>,
     /// Rentman API field `LeaveTypesResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveTypesResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LeaveTypesResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `LeaveTypesResponse.type`.
@@ -15291,7 +15614,7 @@ pub struct LeaveType {
 }
 
 /// Rentman API schema `LedgerRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct LedgerCodePayload {
     /// Rentman API field `LedgerRequest.code`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -15308,13 +15631,14 @@ pub struct LedgerCodePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LedgerCode {
     /// Rentman API field `LedgerResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<LedgerCode>,
     /// Rentman API field `LedgerResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LedgerResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `LedgerResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `LedgerResponse.code`.
@@ -15341,21 +15665,36 @@ pub struct PaymentPayload {
     pub payment_import_source: Option<PaymentPayloadPaymentImportSource>,
 }
 
+impl PaymentPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(moment: DateTime<FixedOffset>) -> Self {
+        Self {
+            moment,
+            amount: None,
+            description: None,
+            payment_import_source: None,
+        }
+    }
+}
+
 /// Rentman API schema `PaymentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Payment {
     /// Rentman API field `PaymentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Payment>,
     /// Rentman API field `PaymentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PaymentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PaymentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `PaymentResponse.invoice`.
-    pub invoice: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub invoice: Id<Invoice>,
     /// Rentman API field `PaymentResponse.moment`.
     pub moment: DateTime<FixedOffset>,
     /// Rentman API field `PaymentResponse.amount`.
@@ -15371,8 +15710,12 @@ pub struct Payment {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectCrewPayload {
     /// Rentman API field `ProjectCrewRequest.cost_rate`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectCrewRequest.cost_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_accommodation: Option<Decimal>,
@@ -15386,7 +15729,8 @@ pub struct ProjectCrewPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_other: Option<Decimal>,
     /// Rentman API field `ProjectCrewRequest.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// Rentman API field `ProjectCrewRequest.visible`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub visible: Option<bool>,
@@ -15419,21 +15763,48 @@ pub struct ProjectCrewPayload {
     pub custom: Option<CustomFields>,
 }
 
+impl ProjectCrewPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(crewmember: Id<Crew>) -> Self {
+        Self {
+            cost_rate: None,
+            cost_accommodation: None,
+            cost_catering: None,
+            cost_travel: None,
+            cost_other: None,
+            crewmember,
+            visible: None,
+            planperiod_start: None,
+            planperiod_end: None,
+            transport: None,
+            remark: None,
+            remark_planner: None,
+            invoice_reference: None,
+            project_leader: None,
+            is_visible_on_dashboard: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectCrewResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectCrew {
     /// Rentman API field `ProjectCrewResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectCrew>,
     /// Rentman API field `ProjectCrewResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCrewResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectCrewResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectCrewResponse.cost_rate`.
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectCrewResponse.cost_accommodation`.
     pub cost_accommodation: Decimal,
     /// Rentman API field `ProjectCrewResponse.cost_catering`.
@@ -15443,9 +15814,11 @@ pub struct ProjectCrew {
     /// Rentman API field `ProjectCrewResponse.cost_other`.
     pub cost_other: Decimal,
     /// Rentman API field `ProjectCrewResponse.function`.
-    pub function: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub function: Id<ProjectFunction>,
     /// Rentman API field `ProjectCrewResponse.crewmember`.
-    pub crewmember: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crewmember: Id<Crew>,
     /// Rentman API field `ProjectCrewResponse.visible`.
     pub visible: bool,
     /// Rentman API field `ProjectCrewResponse.planperiod_start`.
@@ -15485,20 +15858,36 @@ pub struct ProjectCrew {
 }
 
 /// Rentman API schema `ProjectEquipmentRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectEquipmentPayload {
     /// Rentman API field `ProjectEquipmentRequest.equipment`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// The combination it is part of.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<ProjectEquipment>>,
     /// Rentman API field `ProjectEquipmentRequest.ledger`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentRequest.ledger_debit`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<String>,
@@ -15547,29 +15936,35 @@ pub struct ProjectEquipmentPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectEquipment {
     /// Rentman API field `ProjectEquipmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectEquipment>,
     /// Rentman API field `ProjectEquipmentResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectEquipmentResponse.equipment`.
-    pub equipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub equipment: Option<Id<Equipment>>,
     /// The combination it is part of.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<ProjectEquipment>>,
     /// Rentman API field `ProjectEquipmentResponse.ledger`.
-    pub ledger: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentResponse.ledger_debit`.
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectEquipmentResponse.quantity`.
     pub quantity: i64,
     /// Rentman API field `ProjectEquipmentResponse.quantity_total`.
     pub quantity_total: i64,
     /// Rentman API field `ProjectEquipmentResponse.equipment_group`.
-    pub equipment_group: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment_group: Id<ProjectEquipmentGroup>,
     /// Rentman API field `ProjectEquipmentResponse.discount`.
     pub discount: Decimal,
     /// Rentman API field `ProjectEquipmentResponse.is_option`.
@@ -15616,7 +16011,8 @@ pub struct ProjectEquipment {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectEquipmentGroupPayload {
     /// Rentman API field `ProjectEquipmentGroupRequest.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// This group was additionally scanned from the warehouse.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub additional_scanned: Option<bool>,
@@ -15652,23 +16048,47 @@ pub struct ProjectEquipmentGroupPayload {
     pub remark: Option<String>,
 }
 
+impl ProjectEquipmentGroupPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(subproject: Id<Subproject>) -> Self {
+        Self {
+            subproject,
+            additional_scanned: None,
+            name: None,
+            usageperiod_start: None,
+            usageperiod_end: None,
+            duration: None,
+            planperiod_start: None,
+            planperiod_end: None,
+            is_delayed: None,
+            order: None,
+            in_price_calculation: None,
+            remark: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectEquipmentGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectEquipmentGroup {
     /// Rentman API field `ProjectEquipmentGroupResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectEquipmentGroup>,
     /// Rentman API field `ProjectEquipmentGroupResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentGroupResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectEquipmentGroupResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectEquipmentGroupResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `ProjectEquipmentGroupResponse.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// This group was additionally scanned from the warehouse.
     pub additional_scanned: bool,
     /// Rentman API field `ProjectEquipmentGroupResponse.name`.
@@ -15710,7 +16130,8 @@ pub struct ProjectFunctionGroupPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// Rentman API field `ProjectFunctionGroupRequest.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectFunctionGroupRequest.usageperiod_start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
@@ -15728,25 +16149,44 @@ pub struct ProjectFunctionGroupPayload {
     pub remark: Option<String>,
 }
 
+impl ProjectFunctionGroupPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(subproject: Id<Subproject>) -> Self {
+        Self {
+            name: None,
+            subproject,
+            usageperiod_start: None,
+            usageperiod_end: None,
+            planperiod_start: None,
+            planperiod_end: None,
+            remark: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectFunctionGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectFunctionGroup {
     /// Rentman API field `ProjectFunctionGroupResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectFunctionGroup>,
     /// Rentman API field `ProjectFunctionGroupResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionGroupResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionGroupResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectFunctionGroupResponse.name`.
     pub name: String,
     /// Rentman API field `ProjectFunctionGroupResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `ProjectFunctionGroupResponse.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectFunctionGroupResponse.duration`.
     pub duration: Option<Decimal>,
     /// Rentman API field `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`.
@@ -15773,7 +16213,8 @@ pub struct ProjectFunctionGroup {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectFunctionPayload {
     /// Rentman API field `ProjectFunctionRequest.cost_rate`.
-    pub cost_rate: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub cost_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionRequest.cost_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_accommodation: Option<Decimal>,
@@ -15787,7 +16228,8 @@ pub struct ProjectFunctionPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cost_other: Option<Decimal>,
     /// Rentman API field `ProjectFunctionRequest.price_rate`.
-    pub price_rate: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub price_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionRequest.price_accommodation`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub price_accommodation: Option<Decimal>,
@@ -15801,10 +16243,15 @@ pub struct ProjectFunctionPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub price_other: Option<Decimal>,
     /// Rentman API field `ProjectFunctionRequest.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectFunctionRequest.group`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub group: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub group: Option<Id<ProjectFunctionGroup>>,
     /// Name on financial documents.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name_external: Option<String>,
@@ -15837,21 +16284,54 @@ pub struct ProjectFunctionPayload {
     pub custom: Option<CustomFields>,
 }
 
+impl ProjectFunctionPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(cost_rate: Id<Rate>, price_rate: Id<Rate>, subproject: Id<Subproject>) -> Self {
+        Self {
+            cost_rate,
+            cost_accommodation: None,
+            cost_catering: None,
+            cost_travel: None,
+            cost_other: None,
+            price_rate,
+            price_accommodation: None,
+            price_catering: None,
+            price_travel: None,
+            price_other: None,
+            subproject,
+            group: None,
+            name_external: None,
+            name: None,
+            usageperiod_start: None,
+            usageperiod_end: None,
+            planperiod_start: None,
+            planperiod_end: None,
+            type_: None,
+            amount: None,
+            is_plannable: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectFunctionResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectFunction>,
     /// Rentman API field `ProjectFunctionResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectFunctionResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD. Name on packing slips.
     pub displayname: String,
     /// Rentman API field `ProjectFunctionResponse.cost_rate`.
-    pub cost_rate: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub cost_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionResponse.cost_accommodation`.
     pub cost_accommodation: Decimal,
     /// Rentman API field `ProjectFunctionResponse.cost_catering`.
@@ -15861,7 +16341,8 @@ pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.cost_other`.
     pub cost_other: Decimal,
     /// Rentman API field `ProjectFunctionResponse.price_rate`.
-    pub price_rate: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub price_rate: Id<Rate>,
     /// Rentman API field `ProjectFunctionResponse.price_accommodation`.
     pub price_accommodation: Decimal,
     /// Rentman API field `ProjectFunctionResponse.price_catering`.
@@ -15871,13 +16352,16 @@ pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.price_other`.
     pub price_other: Decimal,
     /// Rentman API field `ProjectFunctionResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `ProjectFunctionResponse.subproject`.
-    pub subproject: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subproject: Id<Subproject>,
     /// Rentman API field `ProjectFunctionResponse.is_template`.
     pub is_template: bool,
     /// Rentman API field `ProjectFunctionResponse.group`.
-    pub group: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub group: Option<Id<ProjectFunctionGroup>>,
     /// Name on financial documents.
     pub name_external: String,
     /// Name on packing lists.
@@ -15921,11 +16405,14 @@ pub struct ProjectFunction {
     /// Rentman API field `ProjectFunctionResponse.twoway`.
     pub twoway: bool,
     /// Rentman API field `ProjectFunctionResponse.taxclass`.
-    pub taxclass: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub taxclass: Option<Id<TaxClass>>,
     /// Rentman API field `ProjectFunctionResponse.ledger`.
-    pub ledger: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectFunctionResponse.ledger_debit`.
-    pub ledger_debit: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub ledger_debit: Option<Id<LedgerCode>>,
     /// Rentman API field `ProjectFunctionResponse.order`.
     pub order: i64,
     /// Rentman API field `ProjectFunctionResponse.remark_client`.
@@ -15969,7 +16456,7 @@ pub struct ProjectFunction {
 }
 
 /// Rentman API schema `ProjectRequestEquipmentRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectRequestEquipmentPayload {
     /// Rentman API field `ProjectRequestEquipmentRequest.quantity`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -15987,8 +16474,12 @@ pub struct ProjectRequestEquipmentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discount: Option<Decimal>,
     /// Rentman API field `ProjectRequestEquipmentRequest.linked_equipment`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub linked_equipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub linked_equipment: Option<Id<Equipment>>,
     /// Rentman API field `ProjectRequestEquipmentRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -15996,8 +16487,12 @@ pub struct ProjectRequestEquipmentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub external_remark: Option<String>,
     /// The combination it is part of.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<ProjectRequestEquipment>>,
     /// Rentman API field `ProjectRequestEquipmentRequest.unit_price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub unit_price: Option<Decimal>,
@@ -16013,13 +16508,14 @@ pub struct ProjectRequestEquipmentPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectRequestEquipment {
     /// Rentman API field `ProjectRequestEquipmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectRequestEquipment>,
     /// Rentman API field `ProjectRequestEquipmentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectRequestEquipmentResponse.quantity`.
@@ -16033,17 +16529,20 @@ pub struct ProjectRequestEquipment {
     /// Rentman API field `ProjectRequestEquipmentResponse.discount`.
     pub discount: Decimal,
     /// Rentman API field `ProjectRequestEquipmentResponse.linked_equipment`.
-    pub linked_equipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub linked_equipment: Option<Id<Equipment>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.name`.
     pub name: String,
     /// Rentman API field `ProjectRequestEquipmentResponse.external_remark`.
     pub external_remark: String,
     /// The combination it is part of.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<ProjectRequestEquipment>>,
     /// Rentman API field `ProjectRequestEquipmentResponse.unit_price`.
     pub unit_price: Decimal,
     /// Rentman API field `ProjectRequestEquipmentResponse.project_request`.
-    pub project_request: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project_request: Id<ProjectRequest>,
     /// Rentman API field `ProjectRequestEquipmentResponse.factor`.
     pub factor: Decimal,
     /// Rentman API field `ProjectRequestEquipmentResponse.order`.
@@ -16054,8 +16553,12 @@ pub struct ProjectRequestEquipment {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectRequestPayload {
     /// Rentman API field `ProjectRequestRequest.linked_contact`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub linked_contact: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub linked_contact: Option<Id<Contact>>,
     /// Rentman API field `ProjectRequestRequest.contact_mailing_number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contact_mailing_number: Option<String>,
@@ -16146,21 +16649,66 @@ pub struct ProjectRequestPayload {
     pub price: Option<Decimal>,
 }
 
+impl ProjectRequestPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(
+        planperiod_end: DateTime<FixedOffset>,
+        planperiod_start: DateTime<FixedOffset>,
+    ) -> Self {
+        Self {
+            linked_contact: None,
+            contact_mailing_number: None,
+            contact_mailing_country: None,
+            contact_name: None,
+            contact_mailing_postalcode: None,
+            contact_phone: None,
+            contact_mailing_city: None,
+            contact_mailing_street: None,
+            contact_person_lastname: None,
+            contact_person_email: None,
+            contact_person_middle_name: None,
+            contact_person_first_name: None,
+            usageperiod_end: None,
+            usageperiod_start: None,
+            is_paid: None,
+            language: None,
+            in_: None,
+            out: None,
+            location_mailing_number: None,
+            location_mailing_country: None,
+            location_name: None,
+            location_mailing_postalcode: None,
+            location_mailing_city: None,
+            location_mailing_street: None,
+            location_phone: None,
+            name: None,
+            external_reference: None,
+            remark: None,
+            planperiod_end,
+            planperiod_start,
+            price: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectRequestResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectRequest>,
     /// Rentman API field `ProjectRequestResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectRequestResponse.linked_contact`.
-    pub linked_contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub linked_contact: Option<Id<Contact>>,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_number`.
     pub contact_mailing_number: String,
     /// Rentman API field `ProjectRequestResponse.contact_mailing_country`.
@@ -16176,7 +16724,8 @@ pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.contact_mailing_street`.
     pub contact_mailing_street: String,
     /// Rentman API field `ProjectRequestResponse.linked_contact_person`.
-    pub linked_contact_person: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub linked_contact_person: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectRequestResponse.contact_person_lastname`.
     pub contact_person_lastname: String,
     /// Rentman API field `ProjectRequestResponse.contact_person_email`.
@@ -16199,7 +16748,8 @@ pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.out`.
     pub out: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectRequestResponse.linked_location`.
-    pub linked_location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub linked_location: Option<Id<Contact>>,
     /// Rentman API field `ProjectRequestResponse.location_mailing_number`.
     pub location_mailing_number: String,
     /// Rentman API field `ProjectRequestResponse.location_mailing_country`.
@@ -16227,7 +16777,8 @@ pub struct ProjectRequest {
     /// Rentman API field `ProjectRequestResponse.price`.
     pub price: Decimal,
     /// Rentman API field `ProjectRequestResponse.linked_project`.
-    pub linked_project: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub linked_project: Option<Id<Project>>,
     /// Rentman API field `ProjectRequestResponse.source`.
     pub source: ProjectRequestSource,
     /// Rentman API field `ProjectRequestResponse.status`.
@@ -16235,7 +16786,7 @@ pub struct ProjectRequest {
 }
 
 /// Rentman API schema `ProjectRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectPayload {
     /// Rentman API field `ProjectRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16255,29 +16806,35 @@ pub struct ProjectPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Project {
     /// Rentman API field `ProjectResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Project>,
     /// Rentman API field `ProjectResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectResponse.location`.
-    pub location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub location: Option<Id<Contact>>,
     /// Rentman API field `ProjectResponse.refundabledeposit`.
     pub refundabledeposit: Decimal,
     /// Rentman API field `ProjectResponse.deposit_status`.
     pub deposit_status: ProjectDepositStatus,
     /// Rentman API field `ProjectResponse.customer`.
-    pub customer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `ProjectResponse.loc_contact`.
-    pub loc_contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub loc_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectResponse.cust_contact`.
-    pub cust_contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub cust_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `ProjectResponse.project_type`.
-    pub project_type: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project_type: Id<ProjectType>,
     /// Rentman API field `ProjectResponse.name`.
     pub name: String,
     /// Rentman API field `ProjectResponse.reference`.
@@ -16285,7 +16842,8 @@ pub struct Project {
     /// Rentman API field `ProjectResponse.number`.
     pub number: i64,
     /// Rentman API field `ProjectResponse.account_manager`.
-    pub account_manager: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub account_manager: Option<Id<Crew>>,
     /// Rentman API field `ProjectResponse.color`.
     pub color: String,
     /// Rentman API field `ProjectResponse.conditions`.
@@ -16357,7 +16915,7 @@ pub struct Project {
 }
 
 /// Rentman API schema `ProjectStatusRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectStatusPayload {
     /// Rentman API field `ProjectStatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16368,13 +16926,14 @@ pub struct ProjectStatusPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectStatus {
     /// Rentman API field `ProjectStatusResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectStatus>,
     /// Rentman API field `ProjectStatusResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectStatusResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectStatusResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectStatusResponse.name`.
@@ -16382,7 +16941,7 @@ pub struct ProjectStatus {
 }
 
 /// Rentman API schema `ProjectTemplateRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectTemplatePayload {
     /// Rentman API field `ProjectTemplateRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16393,13 +16952,14 @@ pub struct ProjectTemplatePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectTemplate {
     /// Rentman API field `ProjectTemplateResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectTemplate>,
     /// Rentman API field `ProjectTemplateResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTemplateResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTemplateResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectTemplateResponse.name`.
@@ -16407,7 +16967,7 @@ pub struct ProjectTemplate {
 }
 
 /// Rentman API schema `ProjectTypeRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct ProjectTypePayload {
     /// Rentman API field `ProjectTypeRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16424,13 +16984,14 @@ pub struct ProjectTypePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectType {
     /// Rentman API field `ProjectTypeResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectType>,
     /// Rentman API field `ProjectTypeResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTypeResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectTypeResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectTypeResponse.name`.
@@ -16446,13 +17007,18 @@ pub struct ProjectType {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectVehiclePayload {
     /// Rentman API field `ProjectVehicleRequest.cost_rate`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectVehicleRequest.transport`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transport: Option<ProjectVehiclePayloadTransport>,
     /// Rentman API field `ProjectVehicleRequest.vehicle`.
-    pub vehicle: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub vehicle: Id<Vehicle>,
     /// Rentman API field `ProjectVehicleRequest.planningperiod_start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planningperiod_start: Option<DateTime<FixedOffset>>,
@@ -16470,27 +17036,48 @@ pub struct ProjectVehiclePayload {
     pub custom: Option<CustomFields>,
 }
 
+impl ProjectVehiclePayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(vehicle: Id<Vehicle>) -> Self {
+        Self {
+            cost_rate: None,
+            transport: None,
+            vehicle,
+            planningperiod_start: None,
+            planningperiod_end: None,
+            remark: None,
+            remark_planner: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectVehicleResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectVehicle {
     /// Rentman API field `ProjectVehicleResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<ProjectVehicle>,
     /// Rentman API field `ProjectVehicleResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `ProjectVehicleResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `ProjectVehicleResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `ProjectVehicleResponse.cost_rate`.
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `ProjectVehicleResponse.function`.
-    pub function: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub function: Id<ProjectFunction>,
     /// Rentman API field `ProjectVehicleResponse.transport`.
     pub transport: ProjectVehicleTransport,
     /// Rentman API field `ProjectVehicleResponse.vehicle`.
-    pub vehicle: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub vehicle: Id<Vehicle>,
     /// Rentman API field `ProjectVehicleResponse.planningperiod_start`.
     pub planningperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `ProjectVehicleResponse.planningperiod_end`.
@@ -16506,7 +17093,7 @@ pub struct ProjectVehicle {
 }
 
 /// Rentman API schema `PurchaseOrderCostRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PurchaseOrderCostPayload {
     /// Rentman API field `PurchaseOrderCostRequest.costitem`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16523,17 +17110,19 @@ pub struct PurchaseOrderCostPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PurchaseOrderCost {
     /// Rentman API field `PurchaseOrderCostResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<PurchaseOrderCost>,
     /// Rentman API field `PurchaseOrderCostResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderCostResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderCostResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `PurchaseOrderCostResponse.purchase_order`.
-    pub purchase_order: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub purchase_order: Id<PurchaseOrder>,
     /// Rentman API field `PurchaseOrderCostResponse.costitem`.
     pub costitem: i64,
     /// Rentman API field `PurchaseOrderCostResponse.costitemtype`.
@@ -16553,7 +17142,7 @@ pub struct PurchaseOrderCost {
 }
 
 /// Rentman API schema `PurchaseOrderGlobalCostRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PurchaseOrderGlobalCostPayload {
     /// Rentman API field `PurchaseOrderGlobalCostRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16565,25 +17154,31 @@ pub struct PurchaseOrderGlobalCostPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub quantity: Option<i64>,
     /// Rentman API field `PurchaseOrderGlobalCostRequest.taxclass`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub taxclass: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub taxclass: Option<Id<TaxClass>>,
 }
 
 /// Rentman API schema `PurchaseOrderGlobalCostResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<PurchaseOrderGlobalCost>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.purchase_order`.
-    pub purchase_order: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub purchase_order: Id<PurchaseOrder>,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.name`.
     pub name: String,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.unit_purchase_cost`.
@@ -16591,7 +17186,8 @@ pub struct PurchaseOrderGlobalCost {
     /// Rentman API field `PurchaseOrderGlobalCostResponse.quantity`.
     pub quantity: i64,
     /// Rentman API field `PurchaseOrderGlobalCostResponse.taxclass`.
-    pub taxclass: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub taxclass: Option<Id<TaxClass>>,
 }
 
 /// Rentman API schema `PurchaseOrderRequest`.
@@ -16604,8 +17200,12 @@ pub struct PurchaseOrderPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subject: Option<String>,
     /// Rentman API field `PurchaseOrderRequest.owner`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub owner: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub owner: Option<Id<Crew>>,
     /// Rentman API field `PurchaseOrderRequest.date_of_issue`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date_of_issue: Option<String>,
@@ -16627,23 +17227,43 @@ pub struct PurchaseOrderPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_amount: Option<Decimal>,
     /// Rentman API field `PurchaseOrderRequest.supplier`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub supplier: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub supplier: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderRequest.contact_person`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact_person: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderRequest.delivery_type`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub delivery_type: Option<PurchaseOrderPayloadDeliveryType>,
     /// Rentman API field `PurchaseOrderRequest.delivery_location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub delivery_location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub delivery_location: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderRequest.delivery_location_person`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub delivery_location_person: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub delivery_location_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderRequest.delivery_warehouse`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub delivery_warehouse: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub delivery_warehouse: Option<Id<StockLocation>>,
     /// External identifier used for integrations with accounting software.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub accounting_code: Option<String>,
@@ -16661,17 +17281,48 @@ pub struct PurchaseOrderPayload {
     pub custom: Option<CustomFields>,
 }
 
+impl PurchaseOrderPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(previous_status: PurchaseOrderPayloadPreviousStatus) -> Self {
+        Self {
+            filename: None,
+            subject: None,
+            owner: None,
+            date_of_issue: None,
+            delivery_date: None,
+            description: None,
+            number: None,
+            approval_status: None,
+            previous_status,
+            approved_amount: None,
+            supplier: None,
+            contact_person: None,
+            delivery_type: None,
+            delivery_location: None,
+            delivery_location_person: None,
+            delivery_warehouse: None,
+            accounting_code: None,
+            export_status: None,
+            export_date: None,
+            export_message: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `PurchaseOrderResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PurchaseOrder {
     /// Rentman API field `PurchaseOrderResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<PurchaseOrder>,
     /// Rentman API field `PurchaseOrderResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `PurchaseOrderResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `PurchaseOrderResponse.filename`.
@@ -16679,7 +17330,8 @@ pub struct PurchaseOrder {
     /// Rentman API field `PurchaseOrderResponse.subject`.
     pub subject: String,
     /// Rentman API field `PurchaseOrderResponse.owner`.
-    pub owner: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub owner: Id<Crew>,
     /// Rentman API field `PurchaseOrderResponse.date_of_issue`.
     pub date_of_issue: Option<String>,
     /// Rentman API field `PurchaseOrderResponse.delivery_date`.
@@ -16696,17 +17348,22 @@ pub struct PurchaseOrder {
     /// Rentman API field `PurchaseOrderResponse.approved_amount`.
     pub approved_amount: Decimal,
     /// Rentman API field `PurchaseOrderResponse.supplier`.
-    pub supplier: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub supplier: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderResponse.contact_person`.
-    pub contact_person: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contact_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_type`.
     pub delivery_type: PurchaseOrderDeliveryType,
     /// Rentman API field `PurchaseOrderResponse.delivery_location`.
-    pub delivery_location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub delivery_location: Option<Id<Contact>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_location_person`.
-    pub delivery_location_person: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub delivery_location_person: Option<Id<ContactPerson>>,
     /// Rentman API field `PurchaseOrderResponse.delivery_warehouse`.
-    pub delivery_warehouse: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub delivery_warehouse: Option<Id<StockLocation>>,
     /// External identifier used for integrations with accounting software.
     pub accounting_code: String,
     /// Rentman API field `PurchaseOrderResponse.export_status`.
@@ -16724,7 +17381,8 @@ pub struct PurchaseOrder {
     /// GENERATED FIELD.
     pub underlying_cost_amount_with_tax: Decimal,
     /// GENERATED FIELD.
-    pub approved_by: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub approved_by: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub approved_at: Option<String>,
     /// GENERATED FIELD.
@@ -16734,17 +17392,25 @@ pub struct PurchaseOrder {
 }
 
 /// Rentman API schema `QuotationRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct QuotePayload {
     /// Rentman API field `QuotationRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
     /// Rentman API field `QuotationRequest.customer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub customer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `QuotationRequest.contact`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `QuotationRequest.date`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub date: Option<String>,
@@ -16769,21 +17435,24 @@ pub struct QuotePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Quote {
     /// Rentman API field `QuotationResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Quote>,
     /// Rentman API field `QuotationResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `QuotationResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `QuotationResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `QuotationResponse.number`.
     pub number: String,
     /// Rentman API field `QuotationResponse.customer`.
-    pub customer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub customer: Option<Id<Contact>>,
     /// Rentman API field `QuotationResponse.contact`.
-    pub contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contact: Option<Id<ContactPerson>>,
     /// Rentman API field `QuotationResponse.date`.
     pub date: Option<String>,
     /// The date on which this quotation expires.
@@ -16795,7 +17464,8 @@ pub struct Quote {
     /// Rentman API field `QuotationResponse.show_tax`.
     pub show_tax: bool,
     /// Rentman API field `QuotationResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `QuotationResponse.filename`.
     pub filename: String,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
@@ -16836,7 +17506,7 @@ pub struct Quote {
 }
 
 /// Rentman API schema `CrewRateFactorRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct RateFactorPayload {
     /// Rentman API field `CrewRateFactorRequest.from`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16856,17 +17526,19 @@ pub struct RateFactorPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RateFactor {
     /// Rentman API field `CrewRateFactorResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<RateFactor>,
     /// Rentman API field `CrewRateFactorResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateFactorResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateFactorResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `CrewRateFactorResponse.rate_id`.
-    pub rate_id: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub rate_id: Id<Rate>,
     /// Rentman API field `CrewRateFactorResponse.from`.
     pub from: Option<Decimal>,
     /// Rentman API field `CrewRateFactorResponse.to`.
@@ -16878,7 +17550,7 @@ pub struct RateFactor {
 }
 
 /// Rentman API schema `CrewRateRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct RatePayload {
     /// Rentman API field `CrewRateRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -16898,13 +17570,14 @@ pub struct RatePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Rate {
     /// Rentman API field `CrewRateResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Rate>,
     /// Rentman API field `CrewRateResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `CrewRateResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `CrewRateResponse.name`.
@@ -16919,23 +17592,39 @@ pub struct Rate {
 }
 
 /// Rentman API schema `RepairRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct RepairPayload {
     /// Rentman API field `RepairRequest.internal_name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub internal_name: Option<String>,
     /// Rentman API field `RepairRequest.serialnumber`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub serialnumber: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub serialnumber: Option<Id<SerialNumber>>,
     /// Rentman API field `RepairRequest.reporter`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reporter: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub reporter: Option<Id<Crew>>,
     /// Rentman API field `RepairRequest.assignee`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub assignee: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub assignee: Option<Id<Crew>>,
     /// Rentman API field `RepairRequest.external_repairer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub external_repairer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub external_repairer: Option<Id<Contact>>,
     /// Rentman API field `RepairRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
@@ -16958,20 +17647,36 @@ pub struct RepairPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_usable: Option<RepairPayloadIsUsable>,
     /// Rentman API field `RepairRequest.costs_charged_to_customer`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub costs_charged_to_customer: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub costs_charged_to_customer: Option<Id<ProjectCost>>,
     /// Rentman API field `RepairRequest.subproject`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub subproject: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `RepairRequest.stock_location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub stock_location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub stock_location: Option<Id<StockLocation>>,
     /// Rentman API field `RepairRequest.repair_status`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repair_status: Option<RepairPayloadRepairStatus>,
     /// Rentman API field `RepairRequest.unrepairable_of`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unrepairable_of: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub unrepairable_of: Option<Id<Repair>>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -16981,27 +17686,33 @@ pub struct RepairPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Repair {
     /// Rentman API field `RepairResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Repair>,
     /// Rentman API field `RepairResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `RepairResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `RepairResponse.internal_name`.
     pub internal_name: String,
     /// Rentman API field `RepairResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Rentman API field `RepairResponse.serialnumber`.
-    pub serialnumber: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub serialnumber: Option<Id<SerialNumber>>,
     /// Rentman API field `RepairResponse.reporter`.
-    pub reporter: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub reporter: Option<Id<Crew>>,
     /// Rentman API field `RepairResponse.assignee`.
-    pub assignee: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub assignee: Option<Id<Crew>>,
     /// Rentman API field `RepairResponse.external_repairer`.
-    pub external_repairer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub external_repairer: Option<Id<Contact>>,
     /// Rentman API field `RepairResponse.number`.
     pub number: i64,
     /// Rentman API field `RepairResponse.repairperiod_start`.
@@ -17017,15 +17728,19 @@ pub struct Repair {
     /// Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
     pub is_usable: RepairIsUsable,
     /// Rentman API field `RepairResponse.costs_charged_to_customer`.
-    pub costs_charged_to_customer: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub costs_charged_to_customer: Option<Id<ProjectCost>>,
     /// Rentman API field `RepairResponse.subproject`.
-    pub subproject: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub subproject: Option<Id<Subproject>>,
     /// Rentman API field `RepairResponse.stock_location`.
-    pub stock_location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub stock_location: Option<Id<StockLocation>>,
     /// Rentman API field `RepairResponse.repair_status`.
     pub repair_status: RepairRepairStatus,
     /// Rentman API field `RepairResponse.unrepairable_of`.
-    pub unrepairable_of: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub unrepairable_of: Option<Id<Repair>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// The object containing all custom defined fields.
@@ -17033,7 +17748,7 @@ pub struct Repair {
 }
 
 /// Rentman API schema `SerialNumberRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SerialNumberPayload {
     /// The manufacturer serial number of the equipment.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17063,11 +17778,19 @@ pub struct SerialNumberPayload {
     #[serde(rename = "ref", default, skip_serializing_if = "Option::is_none")]
     pub ref_: Option<String>,
     /// Rentman API field `SerialNumberRequest.asset_location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub asset_location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub asset_location: Option<Id<StockLocation>>,
     /// Rentman API field `SerialNumberRequest.image`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub image: Option<Id<File>>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -17077,17 +17800,19 @@ pub struct SerialNumberPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SerialNumber {
     /// Rentman API field `SerialNumberResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<SerialNumber>,
     /// Rentman API field `SerialNumberResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SerialNumberResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SerialNumberResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SerialNumberResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// The manufacturer serial number of the equipment.
     pub serial: String,
     /// Rentman API field `SerialNumberResponse.purchasedate`.
@@ -17108,9 +17833,11 @@ pub struct SerialNumber {
     #[serde(rename = "ref")]
     pub ref_: String,
     /// Rentman API field `SerialNumberResponse.asset_location`.
-    pub asset_location: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub asset_location: Id<StockLocation>,
     /// Rentman API field `SerialNumberResponse.image`.
-    pub image: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub image: Option<Id<File>>,
     /// GENERATED FIELD.
     pub current_book_value: Decimal,
     /// GENERATED FIELD.
@@ -17120,7 +17847,8 @@ pub struct SerialNumber {
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD.
-    pub last_subproject: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub last_subproject: Option<Id<Subproject>>,
     /// GENERATED FIELD.
     pub sealed: bool,
     /// The object containing all custom defined fields.
@@ -17128,7 +17856,7 @@ pub struct SerialNumber {
 }
 
 /// Rentman API schema `StatusRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct StatusPayload {
     /// Rentman API field `StatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17139,13 +17867,14 @@ pub struct StatusPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Status {
     /// Rentman API field `StatusResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Status>,
     /// Rentman API field `StatusResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StatusResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StatusResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `StatusResponse.name`.
@@ -17153,7 +17882,7 @@ pub struct Status {
 }
 
 /// Rentman API schema `StockLocationRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct StockLocationPayload {
     /// Rentman API field `StockLocationRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17194,13 +17923,14 @@ pub struct StockLocationPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StockLocation {
     /// Rentman API field `StockLocationResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<StockLocation>,
     /// Rentman API field `StockLocationResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockLocationResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockLocationResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `StockLocationResponse.name`.
@@ -17235,8 +17965,12 @@ pub struct StockMovementPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub amount: Option<i64>,
     /// Rentman API field `StockMovementRequest.projectequipment`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub projectequipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub projectequipment: Option<Id<ProjectEquipment>>,
     /// Rentman API field `StockMovementRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -17246,32 +17980,55 @@ pub struct StockMovementPayload {
     /// Rentman API field `StockMovementRequest.date`.
     pub date: DateTime<FixedOffset>,
     /// Rentman API field `StockMovementRequest.stock_location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub stock_location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub stock_location: Option<Id<StockLocation>>,
     /// Rentman API field `StockMovementRequest.api_client`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub api_client: Option<String>,
+}
+
+impl StockMovementPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(date: DateTime<FixedOffset>) -> Self {
+        Self {
+            amount: None,
+            projectequipment: None,
+            description: None,
+            details: None,
+            date,
+            stock_location: None,
+            api_client: None,
+        }
+    }
 }
 
 /// Rentman API schema `StockMovementResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StockMovement {
     /// Rentman API field `StockMovementResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<StockMovement>,
     /// Rentman API field `StockMovementResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockMovementResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `StockMovementResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `StockMovementResponse.amount`.
     pub amount: i64,
     /// Rentman API field `StockMovementResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Rentman API field `StockMovementResponse.projectequipment`.
-    pub projectequipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub projectequipment: Option<Id<ProjectEquipment>>,
     /// Rentman API field `StockMovementResponse.description`.
     pub description: String,
     /// Rentman API field `StockMovementResponse.details`.
@@ -17282,13 +18039,14 @@ pub struct StockMovement {
     #[serde(rename = "type")]
     pub type_: StockMovementType,
     /// Rentman API field `StockMovementResponse.stock_location`.
-    pub stock_location: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub stock_location: Id<StockLocation>,
     /// Rentman API field `StockMovementResponse.api_client`.
     pub api_client: String,
 }
 
 /// Rentman API schema `SubprojectRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SubprojectPayload {
     /// Rentman API field `SubprojectRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17302,29 +18060,34 @@ pub struct SubprojectPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Subproject {
     /// Rentman API field `SubprojectResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Subproject>,
     /// Rentman API field `SubprojectResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `SubprojectResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `SubprojectResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SubprojectResponse.project`.
-    pub project: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub project: Id<Project>,
     /// Rentman API field `SubprojectResponse.order`.
     pub order: i64,
     /// Rentman API field `SubprojectResponse.name`.
     pub name: String,
     /// Rentman API field `SubprojectResponse.status`.
-    pub status: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub status: Id<Status>,
     /// Rentman API field `SubprojectResponse.is_template`.
     pub is_template: bool,
     /// Rentman API field `SubprojectResponse.location`.
-    pub location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub location: Option<Id<Contact>>,
     /// Rentman API field `SubprojectResponse.loc_contact`.
-    pub loc_contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub loc_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubprojectResponse.insurance_rate`.
     pub insurance_rate: Decimal,
     /// Rentman API field `SubprojectResponse.discount_rental`.
@@ -17352,7 +18115,8 @@ pub struct Subproject {
     /// Rentman API field `SubprojectResponse.in_financial`.
     pub in_financial: bool,
     /// Rentman API field `SubprojectResponse.asset_location_from`.
-    pub asset_location_from: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub asset_location_from: Option<Id<StockLocation>>,
     /// GENERATED FIELD. Total of not-canceled subprojects. Not visible in collection responses unless explicitly requested.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub project_total_price: Option<Decimal>,
@@ -17418,14 +18182,22 @@ pub struct Subproject {
 }
 
 /// Rentman API schema `SubrentalEquipmentRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SubrentalEquipmentPayload {
     /// Rentman API field `SubrentalEquipmentRequest.equipment`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub equipment: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `SubrentalEquipmentRequest.parent`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub parent: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub parent: Option<Id<SubrentalEquipment>>,
     /// Rentman API field `SubrentalEquipmentRequest.planperiod_start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub planperiod_start: Option<DateTime<FixedOffset>>,
@@ -17460,29 +18232,37 @@ pub struct SubrentalEquipmentPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub lineprice: Option<Decimal>,
     /// Rentman API field `SubrentalEquipmentRequest.supplier_planningmateriaal`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub supplier_planningmateriaal: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub supplier_planningmateriaal: Option<Id<ProjectEquipment>>,
 }
 
 /// Rentman API schema `SubrentalEquipmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<SubrentalEquipment>,
     /// Rentman API field `SubrentalEquipmentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SubrentalEquipmentResponse.subrental_group`.
-    pub subrental_group: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subrental_group: Id<SubrentalEquipmentGroup>,
     /// Rentman API field `SubrentalEquipmentResponse.equipment`.
-    pub equipment: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub equipment: Option<Id<Equipment>>,
     /// Rentman API field `SubrentalEquipmentResponse.parent`.
-    pub parent: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub parent: Option<Id<SubrentalEquipment>>,
     /// Rentman API field `SubrentalEquipmentResponse.planperiod_start`.
     pub planperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentResponse.planperiod_end`.
@@ -17506,11 +18286,12 @@ pub struct SubrentalEquipment {
     /// Rentman API field `SubrentalEquipmentResponse.lineprice`.
     pub lineprice: Decimal,
     /// Rentman API field `SubrentalEquipmentResponse.supplier_planningmateriaal`.
-    pub supplier_planningmateriaal: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub supplier_planningmateriaal: Option<Id<ProjectEquipment>>,
 }
 
 /// Rentman API schema `SubrentalEquipmentGroupRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SubrentalEquipmentGroupPayload {
     /// Rentman API field `SubrentalEquipmentGroupRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17519,60 +18300,87 @@ pub struct SubrentalEquipmentGroupPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub order: Option<String>,
     /// Rentman API field `SubrentalEquipmentGroupRequest.supplier_category`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub supplier_category: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub supplier_category: Option<Id<ProjectEquipmentGroup>>,
 }
 
 /// Rentman API schema `SubrentalEquipmentGroupResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SubrentalEquipmentGroup {
     /// Rentman API field `SubrentalEquipmentGroupResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<SubrentalEquipmentGroup>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SubrentalEquipmentGroupResponse.subrental`.
-    pub subrental: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub subrental: Id<Subrental>,
     /// Rentman API field `SubrentalEquipmentGroupResponse.name`.
     pub name: String,
     /// Rentman API field `SubrentalEquipmentGroupResponse.order`.
     pub order: i64,
     /// Rentman API field `SubrentalEquipmentGroupResponse.supplier_category`.
-    pub supplier_category: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub supplier_category: Option<Id<ProjectEquipmentGroup>>,
 }
 
 /// Rentman API schema `SubrentalRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SubrentalPayload {
     /// Rentman API field `SubrentalRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// Rentman API field `SubrentalRequest.accountmanager`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub accountmanager: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub accountmanager: Option<Id<Crew>>,
     /// Rentman API field `SubrentalRequest.reference`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reference: Option<String>,
     /// Rentman API field `SubrentalRequest.supplier`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub supplier: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub supplier: Option<Id<Contact>>,
     /// Rentman API field `SubrentalRequest.number`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
     /// Rentman API field `SubrentalRequest.contactperson`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contactperson: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalRequest.location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub location: Option<Id<Contact>>,
     /// Rentman API field `SubrentalRequest.location_contact`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub location_contact: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub location_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalRequest.usageperiod_start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
@@ -17610,23 +18418,39 @@ pub struct SubrentalPayload {
     #[serde(rename = "type", default, skip_serializing_if = "Option::is_none")]
     pub type_: Option<SubrentalPayloadType>,
     /// Rentman API field `SubrentalRequest.status`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub status: Option<Id<Status>>,
     /// Rentman API field `SubrentalRequest.sent`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sent: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalRequest.asset_location_to`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub asset_location_to: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub asset_location_to: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalRequest.asset_location_from`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub asset_location_from: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub asset_location_from: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalRequest.is_internal`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_internal: Option<bool>,
     /// Rentman API field `SubrentalRequest.supplier_project`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub supplier_project: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub supplier_project: Option<Id<Project>>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -17636,31 +18460,37 @@ pub struct SubrentalPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Subrental {
     /// Rentman API field `SubrentalResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Subrental>,
     /// Rentman API field `SubrentalResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SubrentalResponse.name`.
     pub name: String,
     /// Rentman API field `SubrentalResponse.accountmanager`.
-    pub accountmanager: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub accountmanager: Option<Id<Crew>>,
     /// Rentman API field `SubrentalResponse.reference`.
     pub reference: String,
     /// Rentman API field `SubrentalResponse.supplier`.
-    pub supplier: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub supplier: Option<Id<Contact>>,
     /// Rentman API field `SubrentalResponse.number`.
     pub number: i64,
     /// Rentman API field `SubrentalResponse.contactperson`.
-    pub contactperson: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalResponse.location`.
-    pub location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub location: Option<Id<Contact>>,
     /// Rentman API field `SubrentalResponse.location_contact`.
-    pub location_contact: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub location_contact: Option<Id<ContactPerson>>,
     /// Rentman API field `SubrentalResponse.usageperiod_start`.
     pub usageperiod_start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.usageperiod_end`.
@@ -17687,17 +18517,21 @@ pub struct Subrental {
     #[serde(rename = "type")]
     pub type_: SubrentalType,
     /// Rentman API field `SubrentalResponse.status`.
-    pub status: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub status: Id<Status>,
     /// Rentman API field `SubrentalResponse.sent`.
     pub sent: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubrentalResponse.asset_location_to`.
-    pub asset_location_to: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub asset_location_to: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalResponse.asset_location_from`.
-    pub asset_location_from: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub asset_location_from: Option<Id<StockLocation>>,
     /// Rentman API field `SubrentalResponse.is_internal`.
     pub is_internal: bool,
     /// Rentman API field `SubrentalResponse.supplier_project`.
-    pub supplier_project: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub supplier_project: Option<Id<Project>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// The object containing all custom defined fields.
@@ -17705,7 +18539,7 @@ pub struct Subrental {
 }
 
 /// Rentman API schema `SubtaskRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SubtaskPayload {
     /// Rentman API field `SubtaskRequest.title`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -17719,17 +18553,19 @@ pub struct SubtaskPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Subtask {
     /// Rentman API field `SubtaskResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Subtask>,
     /// Rentman API field `SubtaskResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubtaskResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SubtaskResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SubtaskResponse.task`.
-    pub task: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub task: Id<Task>,
     /// Rentman API field `SubtaskResponse.title`.
     pub title: String,
     /// Rentman API field `SubtaskResponse.completed`.
@@ -17740,10 +18576,15 @@ pub struct Subtask {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SupplierPayload {
     /// Rentman API field `SupplierRequest.contact`.
-    pub contact: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub contact: Id<Contact>,
     /// Rentman API field `SupplierRequest.contactperson`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contactperson: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SupplierRequest.price`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub price: Option<Decimal>,
@@ -17752,25 +18593,42 @@ pub struct SupplierPayload {
     pub details: Option<String>,
 }
 
+impl SupplierPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(contact: Id<Contact>) -> Self {
+        Self {
+            contact,
+            contactperson: None,
+            price: None,
+            details: None,
+        }
+    }
+}
+
 /// Rentman API schema `SupplierResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Supplier {
     /// Rentman API field `SupplierResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Supplier>,
     /// Rentman API field `SupplierResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SupplierResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `SupplierResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `SupplierResponse.equipment`.
-    pub equipment: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub equipment: Id<Equipment>,
     /// Rentman API field `SupplierResponse.contact`.
-    pub contact: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub contact: Id<Contact>,
     /// Rentman API field `SupplierResponse.contactperson`.
-    pub contactperson: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub contactperson: Option<Id<ContactPerson>>,
     /// Rentman API field `SupplierResponse.price`.
     pub price: Decimal,
     /// Rentman API field `SupplierResponse.details`.
@@ -17781,26 +18639,38 @@ pub struct Supplier {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TaskAssignmentPayload {
     /// Rentman API field `TaskAssignmentRequest.crew`.
-    pub crew: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crew: Id<Crew>,
+}
+
+impl TaskAssignmentPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(crew: Id<Crew>) -> Self {
+        Self { crew }
+    }
 }
 
 /// Rentman API schema `TaskAssignmentResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TaskAssignment {
     /// Rentman API field `TaskAssignmentResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<TaskAssignment>,
     /// Rentman API field `TaskAssignmentResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskAssignmentResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskAssignmentResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TaskAssignmentResponse.task`.
-    pub task: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub task: Id<Task>,
     /// Rentman API field `TaskAssignmentResponse.crew`.
-    pub crew: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub crew: Id<Crew>,
 }
 
 /// Rentman API schema `TaskRequest`.
@@ -17854,11 +18724,15 @@ pub struct TaskPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskRequest.status`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub status: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub status: Option<Id<TaskStatus>>,
     /// Numeric ID of the linked item (plain integer, not a path).
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `TaskRequest.itemtype`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub itemtype: Option<TaskPayloadItemtype>,
@@ -17875,8 +18749,12 @@ pub struct TaskPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub assignment_type: Option<TaskPayloadAssignmentType>,
     /// Rentman API field `TaskRequest.completed_by`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub completed_by: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub completed_by: Option<Id<Crew>>,
     /// Rentman API field `TaskRequest.expiry_notification_date`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expiry_notification_date: Option<DateTime<FixedOffset>>,
@@ -17888,17 +18766,54 @@ pub struct TaskPayload {
     pub custom: Option<CustomFields>,
 }
 
+impl TaskPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(color: String) -> Self {
+        Self {
+            recurhoe: None,
+            recureind: None,
+            recurperiode: None,
+            is_template: None,
+            name: None,
+            details: None,
+            color,
+            priority: None,
+            order: None,
+            deadline: None,
+            deadline_type: None,
+            deadline_relative_offset_base: None,
+            deadline_relative_offset_amount: None,
+            deadline_relative_offset_unit: None,
+            deadline_relative_offset_direction: None,
+            completed_at: None,
+            status: None,
+            item: None,
+            itemtype: None,
+            synchronization_id: None,
+            synchronization_uri: None,
+            public: None,
+            assignment_type: None,
+            completed_by: None,
+            expiry_notification_date: None,
+            time_budget: None,
+            custom: None,
+        }
+    }
+}
+
 /// Rentman API schema `TaskResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Task {
     /// Rentman API field `TaskResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Task>,
     /// Rentman API field `TaskResponse.created`.
     pub created: DateTime<FixedOffset>,
     /// Rentman API field `TaskResponse.modified`.
     pub modified: DateTime<FixedOffset>,
     /// Rentman API field `TaskResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TaskResponse.recurhoe`.
@@ -17934,9 +18849,10 @@ pub struct Task {
     /// Rentman API field `TaskResponse.completed_at`.
     pub completed_at: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.status`.
-    pub status: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub status: Id<TaskStatus>,
     /// Numeric ID of the linked item (plain integer, not a path).
-    pub item: Option<RentmanId>,
+    pub item: Option<ItemId>,
     /// Rentman API field `TaskResponse.itemtype`.
     pub itemtype: Option<TaskItemtype>,
     /// Rentman API field `TaskResponse.synchronization_id`.
@@ -17948,7 +18864,8 @@ pub struct Task {
     /// Rentman API field `TaskResponse.assignment_type`.
     pub assignment_type: TaskAssignmentType,
     /// Rentman API field `TaskResponse.completed_by`.
-    pub completed_by: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub completed_by: Option<Id<Crew>>,
     /// Rentman API field `TaskResponse.expiry_notification_date`.
     pub expiry_notification_date: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskResponse.time_budget`.
@@ -17978,17 +18895,31 @@ pub struct TaskStatusPayload {
     pub order: Option<String>,
 }
 
+impl TaskStatusPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(color: String) -> Self {
+        Self {
+            name: None,
+            color,
+            type_: None,
+            order: None,
+        }
+    }
+}
+
 /// Rentman API schema `TaskStatusResponse`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TaskStatus {
     /// Rentman API field `TaskStatusResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<TaskStatus>,
     /// Rentman API field `TaskStatusResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskStatusResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaskStatusResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TaskStatusResponse.name`.
@@ -18003,7 +18934,7 @@ pub struct TaskStatus {
 }
 
 /// Rentman API schema `TaxClassRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TaxClassPayload {
     /// Rentman API field `TaxClassRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -18020,13 +18951,14 @@ pub struct TaxClassPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TaxClass {
     /// Rentman API field `TaxClassResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<TaxClass>,
     /// Rentman API field `TaxClassResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaxClassResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TaxClassResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TaxClassResponse.name`.
@@ -18039,11 +18971,15 @@ pub struct TaxClass {
 }
 
 /// Rentman API schema `TimeRegistrationRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TimeRegistrationPayload {
     /// Rentman API field `TimeRegistrationRequest.crewmember`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub crewmember: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `TimeRegistrationRequest.start`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub start: Option<DateTime<FixedOffset>>,
@@ -18057,8 +18993,12 @@ pub struct TimeRegistrationPayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub is_lunch_included: Option<bool>,
     /// Rentman API field `TimeRegistrationRequest.leavetype`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub leavetype: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub leavetype: Option<Id<LeaveType>>,
     /// For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub duration: Option<Decimal>,
@@ -18083,17 +19023,19 @@ pub struct TimeRegistrationPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TimeRegistration {
     /// Rentman API field `TimeRegistrationResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<TimeRegistration>,
     /// Rentman API field `TimeRegistrationResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TimeRegistrationResponse.crewmember`.
-    pub crewmember: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub crewmember: Option<Id<Crew>>,
     /// Rentman API field `TimeRegistrationResponse.start`.
     pub start: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationResponse.end`.
@@ -18103,9 +19045,11 @@ pub struct TimeRegistration {
     /// Rentman API field `TimeRegistrationResponse.is_lunch_included`.
     pub is_lunch_included: bool,
     /// Rentman API field `TimeRegistrationResponse.leavetype`.
-    pub leavetype: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub leavetype: Option<Id<LeaveType>>,
     /// Rentman API field `TimeRegistrationResponse.leaverequest`.
-    pub leaverequest: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub leaverequest: Option<Id<LeaveRequest>>,
     /// For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
     pub duration: Decimal,
     /// Rentman API field `TimeRegistrationResponse.break_duration`.
@@ -18125,14 +19069,22 @@ pub struct TimeRegistration {
 }
 
 /// Rentman API schema `TimeRegistrationActivityRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TimeRegistrationActivityPayload {
     /// Rentman API field `TimeRegistrationActivityRequest.project_function`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub project_function: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub project_function: Option<Id<ProjectFunction>>,
     /// Rentman API field `TimeRegistrationActivityRequest.subproject_function`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub subproject_function: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub subproject_function: Option<Id<Subproject>>,
     /// Rentman API field `TimeRegistrationActivityRequest.description`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -18154,21 +19106,25 @@ pub struct TimeRegistrationActivityPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TimeRegistrationActivity {
     /// Rentman API field `TimeRegistrationActivityResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<TimeRegistrationActivity>,
     /// Rentman API field `TimeRegistrationActivityResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `TimeRegistrationActivityResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `TimeRegistrationActivityResponse.time_registration`.
-    pub time_registration: ResourceReference,
+    #[serde(with = "crate::id::link")]
+    pub time_registration: Id<TimeRegistration>,
     /// Rentman API field `TimeRegistrationActivityResponse.project_function`.
-    pub project_function: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub project_function: Option<Id<ProjectFunction>>,
     /// Rentman API field `TimeRegistrationActivityResponse.subproject_function`.
-    pub subproject_function: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub subproject_function: Option<Id<Subproject>>,
     /// Rentman API field `TimeRegistrationActivityResponse.description`.
     pub description: String,
     /// Rentman API field `TimeRegistrationActivityResponse.duration`.
@@ -18182,17 +19138,25 @@ pub struct TimeRegistrationActivity {
 }
 
 /// Rentman API schema `VehicleRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct VehiclePayload {
     /// Rentman API field `VehicleRequest.folder`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub folder: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `VehicleRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// Rentman API field `VehicleRequest.cost_rate`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `VehicleRequest.in_planner`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub in_planner: Option<bool>,
@@ -18227,11 +19191,19 @@ pub struct VehiclePayload {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub multiple: Option<VehiclePayloadMultiple>,
     /// Rentman API field `VehicleRequest.image`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub image: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub image: Option<Id<File>>,
     /// Rentman API field `VehicleRequest.asset_location`.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub asset_location: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub asset_location: Option<Id<StockLocation>>,
     /// The object containing all custom defined fields.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<CustomFields>,
@@ -18241,21 +19213,24 @@ pub struct VehiclePayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Vehicle {
     /// Rentman API field `VehicleResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<Vehicle>,
     /// Rentman API field `VehicleResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `VehicleResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `VehicleResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `VehicleResponse.folder`.
-    pub folder: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub folder: Option<Id<Folder>>,
     /// Rentman API field `VehicleResponse.name`.
     pub name: String,
     /// Rentman API field `VehicleResponse.cost_rate`.
-    pub cost_rate: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub cost_rate: Option<Id<Rate>>,
     /// Rentman API field `VehicleResponse.in_planner`.
     pub in_planner: bool,
     /// Rentman API field `VehicleResponse.height`.
@@ -18279,9 +19254,11 @@ pub struct Vehicle {
     /// Can be scheduled more than once at the same time. For example, for employment agencies.
     pub multiple: VehicleMultiple,
     /// Rentman API field `VehicleResponse.image`.
-    pub image: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub image: Option<Id<File>>,
     /// Rentman API field `VehicleResponse.asset_location`.
-    pub asset_location: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub asset_location: Option<Id<StockLocation>>,
     /// GENERATED FIELD. Tags starting with 'import-' are hidden in this field.
     pub tags: String,
     /// GENERATED FIELD. Costs per kilometer.
@@ -18293,7 +19270,7 @@ pub struct Vehicle {
 }
 
 /// Rentman API schema `WarehouseStatusRequest`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct WarehouseStatusPayload {
     /// Rentman API field `WarehouseStatusRequest.name`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -18304,13 +19281,14 @@ pub struct WarehouseStatusPayload {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WarehouseStatus {
     /// Rentman API field `WarehouseStatusResponse.id`.
-    pub id: RentmanId,
+    pub id: Id<WarehouseStatus>,
     /// Rentman API field `WarehouseStatusResponse.created`.
     pub created: Option<DateTime<FixedOffset>>,
     /// Rentman API field `WarehouseStatusResponse.modified`.
     pub modified: Option<DateTime<FixedOffset>>,
     /// Rentman API field `WarehouseStatusResponse.creator`.
-    pub creator: Option<ResourceReference>,
+    #[serde(default, with = "crate::id::optional_link")]
+    pub creator: Option<Id<Crew>>,
     /// GENERATED FIELD.
     pub displayname: String,
     /// Rentman API field `WarehouseStatusResponse.name`.
@@ -18321,48 +19299,79 @@ pub struct WarehouseStatus {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectReference {
     /// API path
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub path: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub path: Option<Id<Project>>,
 }
 
 /// Reference to a subproject
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SubprojectReference {
     /// API path
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub path: Option<ResourceReference>,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "crate::id::optional_link"
+    )]
+    pub path: Option<Id<Subproject>>,
 }
 
 /// Rentman API schema `ProjectsCreateFromTemplateRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsCreateFromTemplatePayload {
     /// ID of the project template
-    pub template: RentmanId,
+    pub template: Id<ProjectTemplate>,
     /// First date of the project
     pub start_date: NaiveDate,
+}
+
+impl ProjectsCreateFromTemplatePayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(template: Id<ProjectTemplate>, start_date: NaiveDate) -> Self {
+        Self {
+            template,
+            start_date,
+        }
+    }
 }
 
 /// Rentman API schema `ProjectsSetClientRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsSetClientPayload {
     /// ID of the contact to set as client
-    pub client: i64,
+    pub client: Id<Contact>,
     /// ID of the contact person, which must belong to the client
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact_person: Option<i64>,
+    pub contact_person: Option<Id<ContactPerson>>,
     /// Copy the client's tax schema, invoice moment, discounts and insurance percentage onto the project
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub copy_data: Option<bool>,
+}
+
+impl ProjectsSetClientPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(client: Id<Contact>) -> Self {
+        Self {
+            client,
+            contact_person: None,
+            copy_data: None,
+        }
+    }
 }
 
 /// Rentman API schema `ProjectsSetLocationRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsSetLocationPayload {
     /// ID of the contact to set as location
-    pub location: i64,
+    pub location: Id<Contact>,
     /// ID of the contact person, which must belong to the location. Defaults to the location's default contact person
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact_person: Option<i64>,
+    pub contact_person: Option<Id<ContactPerson>>,
     /// Copy the location's tax schema onto the project
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub copy_data: Option<bool>,
@@ -18371,26 +19380,1059 @@ pub struct ProjectsSetLocationPayload {
     pub apply_distances: Option<bool>,
 }
 
+impl ProjectsSetLocationPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(location: Id<Contact>) -> Self {
+        Self {
+            location,
+            contact_person: None,
+            copy_data: None,
+            apply_distances: None,
+        }
+    }
+}
+
 /// Rentman API schema `ProjectsSetTypeRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectsSetTypePayload {
     /// ID of the project type
     #[serde(rename = "type")]
-    pub type_: i64,
+    pub type_: Id<ProjectType>,
     /// Replace the project's terms and conditions with the type's default ones
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub copy_terms_and_conditions: Option<bool>,
+}
+
+impl ProjectsSetTypePayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(type_: Id<ProjectType>) -> Self {
+        Self {
+            type_,
+            copy_terms_and_conditions: None,
+        }
+    }
 }
 
 /// Rentman API schema `SubprojectsSetLocationRequest`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SubprojectsSetLocationPayload {
     /// ID of the contact to set as location
-    pub location: i64,
+    pub location: Id<Contact>,
     /// ID of the contact person, which must belong to the location. Defaults to the location's default contact person
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub contact_person: Option<i64>,
+    pub contact_person: Option<Id<ContactPerson>>,
 }
+
+impl SubprojectsSetLocationPayload {
+    /// Creates the payload from its required fields; every optional field
+    /// is `None` and not sent.
+    pub fn new(location: Id<Contact>) -> Self {
+        Self {
+            location,
+            contact_person: None,
+        }
+    }
+}
+
+impl Resource for Accessory {
+    const COLLECTION: &'static str = "accessories";
+}
+
+/// ID of a [`Accessory`] item (`/accessories/{id}`).
+pub type AccessoryId = Id<Accessory>;
+
+impl Resource for ActualContent {
+    const COLLECTION: &'static str = "actualcontent";
+}
+
+/// ID of a [`ActualContent`] item (`/actualcontent/{id}`).
+pub type ActualContentId = Id<ActualContent>;
+
+impl Resource for Alternative {
+    const COLLECTION: &'static str = "alternatives";
+}
+
+/// ID of a [`Alternative`] item (`/alternatives/{id}`).
+pub type AlternativeId = Id<Alternative>;
+
+impl Resource for AppointmentCrew {
+    const COLLECTION: &'static str = "appointmentcrew";
+}
+
+/// ID of a [`AppointmentCrew`] item (`/appointmentcrew/{id}`).
+pub type AppointmentCrewId = Id<AppointmentCrew>;
+
+impl Resource for Appointment {
+    const COLLECTION: &'static str = "appointments";
+}
+
+/// ID of a [`Appointment`] item (`/appointments/{id}`).
+pub type AppointmentId = Id<Appointment>;
+
+impl Resource for ContactPerson {
+    const COLLECTION: &'static str = "contactpersons";
+}
+
+/// ID of a [`ContactPerson`] item (`/contactpersons/{id}`).
+pub type ContactPersonId = Id<ContactPerson>;
+
+impl Resource for Contact {
+    const COLLECTION: &'static str = "contacts";
+}
+
+/// ID of a [`Contact`] item (`/contacts/{id}`).
+pub type ContactId = Id<Contact>;
+
+impl Resource for Contract {
+    const COLLECTION: &'static str = "contracts";
+}
+
+/// ID of a [`Contract`] item (`/contracts/{id}`).
+pub type ContractId = Id<Contract>;
+
+impl Resource for ProjectCost {
+    const COLLECTION: &'static str = "costs";
+}
+
+/// ID of a [`ProjectCost`] item (`/costs/{id}`).
+pub type ProjectCostId = Id<ProjectCost>;
+
+impl Resource for Crew {
+    const COLLECTION: &'static str = "crew";
+}
+
+/// ID of a [`Crew`] item (`/crew/{id}`).
+pub type CrewId = Id<Crew>;
+
+impl Resource for CrewAvailability {
+    const COLLECTION: &'static str = "crewavailability";
+}
+
+/// ID of a [`CrewAvailability`] item (`/crewavailability/{id}`).
+pub type CrewAvailabilityId = Id<CrewAvailability>;
+
+impl Resource for CrewRate {
+    const COLLECTION: &'static str = "crewrates";
+}
+
+/// ID of a [`CrewRate`] item (`/crewrates/{id}`).
+pub type CrewRateId = Id<CrewRate>;
+
+impl Resource for Equipment {
+    const COLLECTION: &'static str = "equipment";
+}
+
+/// ID of a [`Equipment`] item (`/equipment/{id}`).
+pub type EquipmentId = Id<Equipment>;
+
+impl Resource for EquipmentAssignedSerial {
+    const COLLECTION: &'static str = "equipmentassignedserials";
+}
+
+/// ID of a [`EquipmentAssignedSerial`] item (`/equipmentassignedserials/{id}`).
+pub type EquipmentAssignedSerialId = Id<EquipmentAssignedSerial>;
+
+impl Resource for EquipmentSetContent {
+    const COLLECTION: &'static str = "equipmentsetscontent";
+}
+
+/// ID of a [`EquipmentSetContent`] item (`/equipmentsetscontent/{id}`).
+pub type EquipmentSetContentId = Id<EquipmentSetContent>;
+
+impl Resource for ExtraInputField {
+    const COLLECTION: &'static str = "extrainputfields";
+}
+
+/// ID of a [`ExtraInputField`] item (`/extrainputfields/{id}`).
+pub type ExtraInputFieldId = Id<ExtraInputField>;
+
+impl Resource for FactorGroup {
+    const COLLECTION: &'static str = "factorgroups";
+}
+
+/// ID of a [`FactorGroup`] item (`/factorgroups/{id}`).
+pub type FactorGroupId = Id<FactorGroup>;
+
+impl Resource for Factor {
+    const COLLECTION: &'static str = "factors";
+}
+
+/// ID of a [`Factor`] item (`/factors/{id}`).
+pub type FactorId = Id<Factor>;
+
+impl Resource for FileFolder {
+    const COLLECTION: &'static str = "file_folders";
+}
+
+/// ID of a [`FileFolder`] item (`/file_folders/{id}`).
+pub type FileFolderId = Id<FileFolder>;
+
+impl Resource for File {
+    const COLLECTION: &'static str = "files";
+}
+
+/// ID of a [`File`] item (`/files/{id}`).
+pub type FileId = Id<File>;
+
+impl Resource for Folder {
+    const COLLECTION: &'static str = "folders";
+}
+
+/// ID of a [`Folder`] item (`/folders/{id}`).
+pub type FolderId = Id<Folder>;
+
+impl Resource for Invitation {
+    const COLLECTION: &'static str = "invitations";
+}
+
+/// ID of a [`Invitation`] item (`/invitations/{id}`).
+pub type InvitationId = Id<Invitation>;
+
+impl Resource for InvoiceLine {
+    const COLLECTION: &'static str = "invoicelines";
+}
+
+/// ID of a [`InvoiceLine`] item (`/invoicelines/{id}`).
+pub type InvoiceLineId = Id<InvoiceLine>;
+
+impl Resource for Invoice {
+    const COLLECTION: &'static str = "invoices";
+}
+
+/// ID of a [`Invoice`] item (`/invoices/{id}`).
+pub type InvoiceId = Id<Invoice>;
+
+impl Resource for LeaveMutation {
+    const COLLECTION: &'static str = "leavemutation";
+}
+
+/// ID of a [`LeaveMutation`] item (`/leavemutation/{id}`).
+pub type LeaveMutationId = Id<LeaveMutation>;
+
+impl Resource for LeaveRequest {
+    const COLLECTION: &'static str = "leaverequest";
+}
+
+/// ID of a [`LeaveRequest`] item (`/leaverequest/{id}`).
+pub type LeaveRequestId = Id<LeaveRequest>;
+
+impl Resource for LeaveType {
+    const COLLECTION: &'static str = "leavetypes";
+}
+
+/// ID of a [`LeaveType`] item (`/leavetypes/{id}`).
+pub type LeaveTypeId = Id<LeaveType>;
+
+impl Resource for LedgerCode {
+    const COLLECTION: &'static str = "ledgercodes";
+}
+
+/// ID of a [`LedgerCode`] item (`/ledgercodes/{id}`).
+pub type LedgerCodeId = Id<LedgerCode>;
+
+impl Resource for Payment {
+    const COLLECTION: &'static str = "payments";
+}
+
+/// ID of a [`Payment`] item (`/payments/{id}`).
+pub type PaymentId = Id<Payment>;
+
+impl Resource for ProjectCrew {
+    const COLLECTION: &'static str = "projectcrew";
+}
+
+/// ID of a [`ProjectCrew`] item (`/projectcrew/{id}`).
+pub type ProjectCrewId = Id<ProjectCrew>;
+
+impl Resource for ProjectEquipment {
+    const COLLECTION: &'static str = "projectequipment";
+}
+
+/// ID of a [`ProjectEquipment`] item (`/projectequipment/{id}`).
+pub type ProjectEquipmentId = Id<ProjectEquipment>;
+
+impl Resource for ProjectEquipmentGroup {
+    const COLLECTION: &'static str = "projectequipmentgroup";
+}
+
+/// ID of a [`ProjectEquipmentGroup`] item (`/projectequipmentgroup/{id}`).
+pub type ProjectEquipmentGroupId = Id<ProjectEquipmentGroup>;
+
+impl Resource for ProjectFunctionGroup {
+    const COLLECTION: &'static str = "projectfunctiongroups";
+}
+
+/// ID of a [`ProjectFunctionGroup`] item (`/projectfunctiongroups/{id}`).
+pub type ProjectFunctionGroupId = Id<ProjectFunctionGroup>;
+
+impl Resource for ProjectFunction {
+    const COLLECTION: &'static str = "projectfunctions";
+}
+
+/// ID of a [`ProjectFunction`] item (`/projectfunctions/{id}`).
+pub type ProjectFunctionId = Id<ProjectFunction>;
+
+impl Resource for ProjectRequestEquipment {
+    const COLLECTION: &'static str = "projectrequestequipment";
+}
+
+/// ID of a [`ProjectRequestEquipment`] item (`/projectrequestequipment/{id}`).
+pub type ProjectRequestEquipmentId = Id<ProjectRequestEquipment>;
+
+impl Resource for ProjectRequest {
+    const COLLECTION: &'static str = "projectrequests";
+}
+
+/// ID of a [`ProjectRequest`] item (`/projectrequests/{id}`).
+pub type ProjectRequestId = Id<ProjectRequest>;
+
+impl Resource for Project {
+    const COLLECTION: &'static str = "projects";
+}
+
+/// ID of a [`Project`] item (`/projects/{id}`).
+pub type ProjectId = Id<Project>;
+
+impl Resource for ProjectStatus {
+    const COLLECTION: &'static str = "projectstatuses";
+}
+
+/// ID of a [`ProjectStatus`] item (`/projectstatuses/{id}`).
+pub type ProjectStatusId = Id<ProjectStatus>;
+
+impl Resource for ProjectTemplate {
+    const COLLECTION: &'static str = "projecttemplates";
+}
+
+/// ID of a [`ProjectTemplate`] item (`/projecttemplates/{id}`).
+pub type ProjectTemplateId = Id<ProjectTemplate>;
+
+impl Resource for ProjectType {
+    const COLLECTION: &'static str = "projecttypes";
+}
+
+/// ID of a [`ProjectType`] item (`/projecttypes/{id}`).
+pub type ProjectTypeId = Id<ProjectType>;
+
+impl Resource for ProjectVehicle {
+    const COLLECTION: &'static str = "projectvehicles";
+}
+
+/// ID of a [`ProjectVehicle`] item (`/projectvehicles/{id}`).
+pub type ProjectVehicleId = Id<ProjectVehicle>;
+
+impl Resource for PurchaseOrderCost {
+    const COLLECTION: &'static str = "purchaseordercosts";
+}
+
+/// ID of a [`PurchaseOrderCost`] item (`/purchaseordercosts/{id}`).
+pub type PurchaseOrderCostId = Id<PurchaseOrderCost>;
+
+impl Resource for PurchaseOrderGlobalCost {
+    const COLLECTION: &'static str = "purchaseorderglobalcosts";
+}
+
+/// ID of a [`PurchaseOrderGlobalCost`] item (`/purchaseorderglobalcosts/{id}`).
+pub type PurchaseOrderGlobalCostId = Id<PurchaseOrderGlobalCost>;
+
+impl Resource for PurchaseOrder {
+    const COLLECTION: &'static str = "purchaseorders";
+}
+
+/// ID of a [`PurchaseOrder`] item (`/purchaseorders/{id}`).
+pub type PurchaseOrderId = Id<PurchaseOrder>;
+
+impl Resource for Quote {
+    const COLLECTION: &'static str = "quotes";
+}
+
+/// ID of a [`Quote`] item (`/quotes/{id}`).
+pub type QuoteId = Id<Quote>;
+
+impl Resource for RateFactor {
+    const COLLECTION: &'static str = "ratefactors";
+}
+
+/// ID of a [`RateFactor`] item (`/ratefactors/{id}`).
+pub type RateFactorId = Id<RateFactor>;
+
+impl Resource for Rate {
+    const COLLECTION: &'static str = "rates";
+}
+
+/// ID of a [`Rate`] item (`/rates/{id}`).
+pub type RateId = Id<Rate>;
+
+impl Resource for Repair {
+    const COLLECTION: &'static str = "repairs";
+}
+
+/// ID of a [`Repair`] item (`/repairs/{id}`).
+pub type RepairId = Id<Repair>;
+
+impl Resource for SerialNumber {
+    const COLLECTION: &'static str = "serialnumbers";
+}
+
+/// ID of a [`SerialNumber`] item (`/serialnumbers/{id}`).
+pub type SerialNumberId = Id<SerialNumber>;
+
+impl Resource for Status {
+    const COLLECTION: &'static str = "statuses";
+}
+
+/// ID of a [`Status`] item (`/statuses/{id}`).
+pub type StatusId = Id<Status>;
+
+impl Resource for StockLocation {
+    const COLLECTION: &'static str = "stocklocations";
+}
+
+/// ID of a [`StockLocation`] item (`/stocklocations/{id}`).
+pub type StockLocationId = Id<StockLocation>;
+
+impl Resource for StockMovement {
+    const COLLECTION: &'static str = "stockmovements";
+}
+
+/// ID of a [`StockMovement`] item (`/stockmovements/{id}`).
+pub type StockMovementId = Id<StockMovement>;
+
+impl Resource for Subproject {
+    const COLLECTION: &'static str = "subprojects";
+}
+
+/// ID of a [`Subproject`] item (`/subprojects/{id}`).
+pub type SubprojectId = Id<Subproject>;
+
+impl Resource for SubrentalEquipment {
+    const COLLECTION: &'static str = "subrentalequipment";
+}
+
+/// ID of a [`SubrentalEquipment`] item (`/subrentalequipment/{id}`).
+pub type SubrentalEquipmentId = Id<SubrentalEquipment>;
+
+impl Resource for SubrentalEquipmentGroup {
+    const COLLECTION: &'static str = "subrentalequipmentgroup";
+}
+
+/// ID of a [`SubrentalEquipmentGroup`] item (`/subrentalequipmentgroup/{id}`).
+pub type SubrentalEquipmentGroupId = Id<SubrentalEquipmentGroup>;
+
+impl Resource for Subrental {
+    const COLLECTION: &'static str = "subrentals";
+}
+
+/// ID of a [`Subrental`] item (`/subrentals/{id}`).
+pub type SubrentalId = Id<Subrental>;
+
+impl Resource for Subtask {
+    const COLLECTION: &'static str = "subtasks";
+}
+
+/// ID of a [`Subtask`] item (`/subtasks/{id}`).
+pub type SubtaskId = Id<Subtask>;
+
+impl Resource for Supplier {
+    const COLLECTION: &'static str = "suppliers";
+}
+
+/// ID of a [`Supplier`] item (`/suppliers/{id}`).
+pub type SupplierId = Id<Supplier>;
+
+impl Resource for TaskAssignment {
+    const COLLECTION: &'static str = "taskassignments";
+}
+
+/// ID of a [`TaskAssignment`] item (`/taskassignments/{id}`).
+pub type TaskAssignmentId = Id<TaskAssignment>;
+
+impl Resource for Task {
+    const COLLECTION: &'static str = "tasks";
+}
+
+/// ID of a [`Task`] item (`/tasks/{id}`).
+pub type TaskId = Id<Task>;
+
+impl Resource for TaskStatus {
+    const COLLECTION: &'static str = "taskstatuses";
+}
+
+/// ID of a [`TaskStatus`] item (`/taskstatuses/{id}`).
+pub type TaskStatusId = Id<TaskStatus>;
+
+impl Resource for TaxClass {
+    const COLLECTION: &'static str = "taxclasses";
+}
+
+/// ID of a [`TaxClass`] item (`/taxclasses/{id}`).
+pub type TaxClassId = Id<TaxClass>;
+
+impl Resource for TimeRegistration {
+    const COLLECTION: &'static str = "timeregistration";
+}
+
+/// ID of a [`TimeRegistration`] item (`/timeregistration/{id}`).
+pub type TimeRegistrationId = Id<TimeRegistration>;
+
+impl Resource for TimeRegistrationActivity {
+    const COLLECTION: &'static str = "timeregistrationactivities";
+}
+
+/// ID of a [`TimeRegistrationActivity`] item (`/timeregistrationactivities/{id}`).
+pub type TimeRegistrationActivityId = Id<TimeRegistrationActivity>;
+
+impl Resource for Vehicle {
+    const COLLECTION: &'static str = "vehicles";
+}
+
+/// ID of a [`Vehicle`] item (`/vehicles/{id}`).
+pub type VehicleId = Id<Vehicle>;
+
+impl Resource for WarehouseStatus {
+    const COLLECTION: &'static str = "warehousestatuses";
+}
+
+/// ID of a [`WarehouseStatus`] item (`/warehousestatuses/{id}`).
+pub type WarehouseStatusId = Id<WarehouseStatus>;
+
+/// Every resource type and its collection path segment.
+pub const RESOURCE_COLLECTIONS: &[(&str, &str)] = &[
+    ("Accessory", "accessories"),
+    ("ActualContent", "actualcontent"),
+    ("Alternative", "alternatives"),
+    ("Appointment", "appointments"),
+    ("AppointmentCrew", "appointmentcrew"),
+    ("Contact", "contacts"),
+    ("ContactPerson", "contactpersons"),
+    ("Contract", "contracts"),
+    ("Crew", "crew"),
+    ("CrewAvailability", "crewavailability"),
+    ("CrewRate", "crewrates"),
+    ("Equipment", "equipment"),
+    ("EquipmentAssignedSerial", "equipmentassignedserials"),
+    ("EquipmentSetContent", "equipmentsetscontent"),
+    ("ExtraInputField", "extrainputfields"),
+    ("Factor", "factors"),
+    ("FactorGroup", "factorgroups"),
+    ("File", "files"),
+    ("FileFolder", "file_folders"),
+    ("Folder", "folders"),
+    ("Invitation", "invitations"),
+    ("Invoice", "invoices"),
+    ("InvoiceLine", "invoicelines"),
+    ("LeaveMutation", "leavemutation"),
+    ("LeaveRequest", "leaverequest"),
+    ("LeaveType", "leavetypes"),
+    ("LedgerCode", "ledgercodes"),
+    ("Payment", "payments"),
+    ("Project", "projects"),
+    ("ProjectCost", "costs"),
+    ("ProjectCrew", "projectcrew"),
+    ("ProjectEquipment", "projectequipment"),
+    ("ProjectEquipmentGroup", "projectequipmentgroup"),
+    ("ProjectFunction", "projectfunctions"),
+    ("ProjectFunctionGroup", "projectfunctiongroups"),
+    ("ProjectRequest", "projectrequests"),
+    ("ProjectRequestEquipment", "projectrequestequipment"),
+    ("ProjectStatus", "projectstatuses"),
+    ("ProjectTemplate", "projecttemplates"),
+    ("ProjectType", "projecttypes"),
+    ("ProjectVehicle", "projectvehicles"),
+    ("PurchaseOrder", "purchaseorders"),
+    ("PurchaseOrderCost", "purchaseordercosts"),
+    ("PurchaseOrderGlobalCost", "purchaseorderglobalcosts"),
+    ("Quote", "quotes"),
+    ("Rate", "rates"),
+    ("RateFactor", "ratefactors"),
+    ("Repair", "repairs"),
+    ("SerialNumber", "serialnumbers"),
+    ("Status", "statuses"),
+    ("StockLocation", "stocklocations"),
+    ("StockMovement", "stockmovements"),
+    ("Subproject", "subprojects"),
+    ("Subrental", "subrentals"),
+    ("SubrentalEquipment", "subrentalequipment"),
+    ("SubrentalEquipmentGroup", "subrentalequipmentgroup"),
+    ("Subtask", "subtasks"),
+    ("Supplier", "suppliers"),
+    ("Task", "tasks"),
+    ("TaskAssignment", "taskassignments"),
+    ("TaskStatus", "taskstatuses"),
+    ("TaxClass", "taxclasses"),
+    ("TimeRegistration", "timeregistration"),
+    ("TimeRegistrationActivity", "timeregistrationactivities"),
+    ("Vehicle", "vehicles"),
+    ("WarehouseStatus", "warehousestatuses"),
+];
+
+/// Every link field (`schema`, `field`, linked collection).
+pub const LINK_FIELDS: &[(&str, &str, &str)] = &[
+    ("AccessoryRequest", "equipment", "equipment"),
+    ("AccessoryResponse", "creator", "crew"),
+    ("AccessoryResponse", "parent_equipment", "equipment"),
+    ("AccessoryResponse", "equipment", "equipment"),
+    ("ActualContentRequest", "equipment", "equipment"),
+    ("ActualContentRequest", "serial", "serialnumbers"),
+    ("ActualContentResponse", "creator", "crew"),
+    ("ActualContentResponse", "equipment", "equipment"),
+    ("ActualContentResponse", "serial", "serialnumbers"),
+    (
+        "ActualContentResponse",
+        "combination_serial",
+        "serialnumbers",
+    ),
+    ("AlternativeRequest", "alternative", "equipment"),
+    ("AlternativeResponse", "creator", "crew"),
+    ("AlternativeResponse", "equipment", "equipment"),
+    ("AlternativeResponse", "alternative", "equipment"),
+    ("AppointmentCrewRequest", "crew", "crew"),
+    ("AppointmentCrewResponse", "creator", "crew"),
+    ("AppointmentCrewResponse", "appointment", "appointments"),
+    ("AppointmentCrewResponse", "crew", "crew"),
+    ("AppointmentResponse", "creator", "crew"),
+    ("ContactPersonResponse", "creator", "crew"),
+    ("ContactPersonResponse", "contact", "contacts"),
+    ("ContactRequest", "folder", "folders"),
+    ("ContactRequest", "default_person", "contactpersons"),
+    ("ContactRequest", "admin_contactperson", "contactpersons"),
+    ("ContactRequest", "image", "files"),
+    ("ContactResponse", "creator", "crew"),
+    ("ContactResponse", "folder", "folders"),
+    ("ContactResponse", "default_person", "contactpersons"),
+    ("ContactResponse", "admin_contactperson", "contactpersons"),
+    ("ContactResponse", "image", "files"),
+    ("ContractRequest", "customer", "contacts"),
+    ("ContractRequest", "contact", "contactpersons"),
+    ("ContractResponse", "creator", "crew"),
+    ("ContractResponse", "customer", "contacts"),
+    ("ContractResponse", "contact", "contactpersons"),
+    ("ContractResponse", "project", "projects"),
+    ("CrewAvailabilityRequest", "last_updater", "crew"),
+    ("CrewAvailabilityResponse", "creator", "crew"),
+    ("CrewAvailabilityResponse", "last_updater", "crew"),
+    ("CrewAvailabilityResponse", "crewmember", "crew"),
+    ("CrewRateFactorResponse", "creator", "crew"),
+    ("CrewRateFactorResponse", "rate_id", "rates"),
+    ("CrewRateResponse", "creator", "crew"),
+    ("CrewRatesRequest", "cost_rate", "rates"),
+    ("CrewRatesResponse", "creator", "crew"),
+    ("CrewRatesResponse", "cost_rate", "rates"),
+    ("CrewRatesResponse", "medewerker", "crew"),
+    ("CrewRequest", "folder", "folders"),
+    ("CrewRequest", "avatar", "files"),
+    ("CrewRequest", "default_warehouse", "stocklocations"),
+    ("CrewResponse", "creator", "crew"),
+    ("CrewResponse", "folder", "folders"),
+    ("CrewResponse", "avatar", "files"),
+    ("CrewResponse", "default_warehouse", "stocklocations"),
+    (
+        "EquipmentAssignedSerialsRequest",
+        "serialnumber",
+        "serialnumbers",
+    ),
+    ("EquipmentAssignedSerialsResponse", "creator", "crew"),
+    (
+        "EquipmentAssignedSerialsResponse",
+        "combination",
+        "serialnumbers",
+    ),
+    (
+        "EquipmentAssignedSerialsResponse",
+        "serialnumber",
+        "serialnumbers",
+    ),
+    ("EquipmentRequest", "folder", "folders"),
+    ("EquipmentRequest", "factor_group", "factorgroups"),
+    ("EquipmentRequest", "taxclass", "taxclasses"),
+    ("EquipmentRequest", "image", "files"),
+    ("EquipmentRequest", "ledger", "ledgercodes"),
+    ("EquipmentRequest", "ledger_debit", "ledgercodes"),
+    ("EquipmentResponse", "creator", "crew"),
+    ("EquipmentResponse", "folder", "folders"),
+    ("EquipmentResponse", "factor_group", "factorgroups"),
+    ("EquipmentResponse", "taxclass", "taxclasses"),
+    ("EquipmentResponse", "image", "files"),
+    ("EquipmentResponse", "ledger", "ledgercodes"),
+    ("EquipmentResponse", "ledger_debit", "ledgercodes"),
+    ("EquipmentSetContentRequest", "equipment", "equipment"),
+    ("EquipmentSetContentResponse", "creator", "crew"),
+    (
+        "EquipmentSetContentResponse",
+        "parent_equipment",
+        "equipment",
+    ),
+    ("EquipmentSetContentResponse", "equipment", "equipment"),
+    ("ExtraInputFieldRequest", "parent", "extrainputfields"),
+    ("ExtraInputFieldResponse", "creator", "crew"),
+    ("ExtraInputFieldResponse", "parent", "extrainputfields"),
+    ("FactorGroupsResponse", "creator", "crew"),
+    ("FactorsResponse", "creator", "crew"),
+    ("FactorsResponse", "factor_group", "factorgroups"),
+    ("FactuurRequest", "customer", "contacts"),
+    ("FactuurRequest", "account_manager", "crew"),
+    ("FactuurRequest", "contact", "contactpersons"),
+    ("FactuurRequest", "project", "projects"),
+    ("FactuurResponse", "creator", "crew"),
+    ("FactuurResponse", "customer", "contacts"),
+    ("FactuurResponse", "account_manager", "crew"),
+    ("FactuurResponse", "contact", "contactpersons"),
+    ("FactuurResponse", "project", "projects"),
+    ("FileFolderRequest", "parent", "file_folders"),
+    ("FileFolderResponse", "creator", "crew"),
+    ("FileFolderResponse", "parent", "file_folders"),
+    ("FileRequest", "preview_of", "files"),
+    ("FileRequest", "folder", "file_folders"),
+    ("FileResponse", "creator", "crew"),
+    ("FileResponse", "preview_of", "files"),
+    ("FileResponse", "folder", "file_folders"),
+    ("FolderRequest", "parent", "folders"),
+    ("FolderResponse", "creator", "crew"),
+    ("FolderResponse", "parent", "folders"),
+    ("InvitationsRequest", "function", "projectfunctions"),
+    ("InvitationsRequest", "projectcrew", "projectcrew"),
+    ("InvitationsResponse", "creator", "crew"),
+    ("InvitationsResponse", "function", "projectfunctions"),
+    ("InvitationsResponse", "projectcrew", "projectcrew"),
+    ("InvitationsResponse", "crewmember", "crew"),
+    ("InvoiceLineRequest", "ledger", "ledgercodes"),
+    ("InvoiceLineResponse", "creator", "crew"),
+    ("InvoiceLineResponse", "ledger", "ledgercodes"),
+    ("LeaveMutationsRequest", "crewmember", "crew"),
+    ("LeaveMutationsRequest", "leavetype", "leavetypes"),
+    ("LeaveMutationsResponse", "creator", "crew"),
+    ("LeaveMutationsResponse", "crewmember", "crew"),
+    ("LeaveMutationsResponse", "leavetype", "leavetypes"),
+    ("LeaveRequestRequest", "requested_for", "crew"),
+    ("LeaveRequestRequest", "reviewer", "crew"),
+    ("LeaveRequestResponse", "creator", "crew"),
+    ("LeaveRequestResponse", "requested_for", "crew"),
+    ("LeaveRequestResponse", "reviewer", "crew"),
+    ("LeaveTypesResponse", "creator", "crew"),
+    ("LedgerResponse", "creator", "crew"),
+    ("PaymentResponse", "creator", "crew"),
+    ("PaymentResponse", "invoice", "invoices"),
+    ("ProjectCostRequest", "subproject", "subprojects"),
+    ("ProjectCostRequest", "taxclass", "taxclasses"),
+    ("ProjectCostRequest", "ledger", "ledgercodes"),
+    ("ProjectCostRequest", "ledger_debit", "ledgercodes"),
+    ("ProjectCostResponse", "creator", "crew"),
+    ("ProjectCostResponse", "project", "projects"),
+    ("ProjectCostResponse", "subproject", "subprojects"),
+    ("ProjectCostResponse", "taxclass", "taxclasses"),
+    ("ProjectCostResponse", "ledger", "ledgercodes"),
+    ("ProjectCostResponse", "ledger_debit", "ledgercodes"),
+    ("ProjectCrewRequest", "cost_rate", "rates"),
+    ("ProjectCrewRequest", "crewmember", "crew"),
+    ("ProjectCrewResponse", "creator", "crew"),
+    ("ProjectCrewResponse", "cost_rate", "rates"),
+    ("ProjectCrewResponse", "function", "projectfunctions"),
+    ("ProjectCrewResponse", "crewmember", "crew"),
+    ("ProjectEquipmentGroupRequest", "subproject", "subprojects"),
+    ("ProjectEquipmentGroupResponse", "creator", "crew"),
+    ("ProjectEquipmentGroupResponse", "project", "projects"),
+    ("ProjectEquipmentGroupResponse", "subproject", "subprojects"),
+    ("ProjectEquipmentRequest", "equipment", "equipment"),
+    ("ProjectEquipmentRequest", "parent", "projectequipment"),
+    ("ProjectEquipmentRequest", "ledger", "ledgercodes"),
+    ("ProjectEquipmentRequest", "ledger_debit", "ledgercodes"),
+    ("ProjectEquipmentResponse", "creator", "crew"),
+    ("ProjectEquipmentResponse", "equipment", "equipment"),
+    ("ProjectEquipmentResponse", "parent", "projectequipment"),
+    ("ProjectEquipmentResponse", "ledger", "ledgercodes"),
+    ("ProjectEquipmentResponse", "ledger_debit", "ledgercodes"),
+    (
+        "ProjectEquipmentResponse",
+        "equipment_group",
+        "projectequipmentgroup",
+    ),
+    ("ProjectFunctionGroupRequest", "subproject", "subprojects"),
+    ("ProjectFunctionGroupResponse", "creator", "crew"),
+    ("ProjectFunctionGroupResponse", "project", "projects"),
+    ("ProjectFunctionGroupResponse", "subproject", "subprojects"),
+    ("ProjectFunctionRequest", "cost_rate", "rates"),
+    ("ProjectFunctionRequest", "price_rate", "rates"),
+    ("ProjectFunctionRequest", "subproject", "subprojects"),
+    ("ProjectFunctionRequest", "group", "projectfunctiongroups"),
+    ("ProjectFunctionResponse", "creator", "crew"),
+    ("ProjectFunctionResponse", "cost_rate", "rates"),
+    ("ProjectFunctionResponse", "price_rate", "rates"),
+    ("ProjectFunctionResponse", "project", "projects"),
+    ("ProjectFunctionResponse", "subproject", "subprojects"),
+    ("ProjectFunctionResponse", "group", "projectfunctiongroups"),
+    ("ProjectFunctionResponse", "taxclass", "taxclasses"),
+    ("ProjectFunctionResponse", "ledger", "ledgercodes"),
+    ("ProjectFunctionResponse", "ledger_debit", "ledgercodes"),
+    ("ProjectReferenceResponse", "path", "projects"),
+    (
+        "ProjectRequestEquipmentRequest",
+        "linked_equipment",
+        "equipment",
+    ),
+    (
+        "ProjectRequestEquipmentRequest",
+        "parent",
+        "projectrequestequipment",
+    ),
+    ("ProjectRequestEquipmentResponse", "creator", "crew"),
+    (
+        "ProjectRequestEquipmentResponse",
+        "linked_equipment",
+        "equipment",
+    ),
+    (
+        "ProjectRequestEquipmentResponse",
+        "parent",
+        "projectrequestequipment",
+    ),
+    (
+        "ProjectRequestEquipmentResponse",
+        "project_request",
+        "projectrequests",
+    ),
+    ("ProjectRequestRequest", "linked_contact", "contacts"),
+    ("ProjectRequestResponse", "creator", "crew"),
+    ("ProjectRequestResponse", "linked_contact", "contacts"),
+    (
+        "ProjectRequestResponse",
+        "linked_contact_person",
+        "contactpersons",
+    ),
+    ("ProjectRequestResponse", "linked_location", "contacts"),
+    ("ProjectRequestResponse", "linked_project", "projects"),
+    ("ProjectResponse", "creator", "crew"),
+    ("ProjectResponse", "location", "contacts"),
+    ("ProjectResponse", "customer", "contacts"),
+    ("ProjectResponse", "loc_contact", "contactpersons"),
+    ("ProjectResponse", "cust_contact", "contactpersons"),
+    ("ProjectResponse", "project_type", "projecttypes"),
+    ("ProjectResponse", "account_manager", "crew"),
+    ("ProjectStatusResponse", "creator", "crew"),
+    ("ProjectTemplateResponse", "creator", "crew"),
+    ("ProjectTypeResponse", "creator", "crew"),
+    ("ProjectVehicleRequest", "cost_rate", "rates"),
+    ("ProjectVehicleRequest", "vehicle", "vehicles"),
+    ("ProjectVehicleResponse", "creator", "crew"),
+    ("ProjectVehicleResponse", "cost_rate", "rates"),
+    ("ProjectVehicleResponse", "function", "projectfunctions"),
+    ("ProjectVehicleResponse", "vehicle", "vehicles"),
+    ("PurchaseOrderCostResponse", "creator", "crew"),
+    (
+        "PurchaseOrderCostResponse",
+        "purchase_order",
+        "purchaseorders",
+    ),
+    ("PurchaseOrderGlobalCostRequest", "taxclass", "taxclasses"),
+    ("PurchaseOrderGlobalCostResponse", "creator", "crew"),
+    (
+        "PurchaseOrderGlobalCostResponse",
+        "purchase_order",
+        "purchaseorders",
+    ),
+    ("PurchaseOrderGlobalCostResponse", "taxclass", "taxclasses"),
+    ("PurchaseOrderRequest", "owner", "crew"),
+    ("PurchaseOrderRequest", "supplier", "contacts"),
+    ("PurchaseOrderRequest", "contact_person", "contactpersons"),
+    ("PurchaseOrderRequest", "delivery_location", "contacts"),
+    (
+        "PurchaseOrderRequest",
+        "delivery_location_person",
+        "contactpersons",
+    ),
+    (
+        "PurchaseOrderRequest",
+        "delivery_warehouse",
+        "stocklocations",
+    ),
+    ("PurchaseOrderResponse", "creator", "crew"),
+    ("PurchaseOrderResponse", "owner", "crew"),
+    ("PurchaseOrderResponse", "supplier", "contacts"),
+    ("PurchaseOrderResponse", "contact_person", "contactpersons"),
+    ("PurchaseOrderResponse", "delivery_location", "contacts"),
+    (
+        "PurchaseOrderResponse",
+        "delivery_location_person",
+        "contactpersons",
+    ),
+    (
+        "PurchaseOrderResponse",
+        "delivery_warehouse",
+        "stocklocations",
+    ),
+    ("PurchaseOrderResponse", "approved_by", "crew"),
+    ("QuotationRequest", "customer", "contacts"),
+    ("QuotationRequest", "contact", "contactpersons"),
+    ("QuotationResponse", "creator", "crew"),
+    ("QuotationResponse", "customer", "contacts"),
+    ("QuotationResponse", "contact", "contactpersons"),
+    ("QuotationResponse", "project", "projects"),
+    ("RepairRequest", "serialnumber", "serialnumbers"),
+    ("RepairRequest", "reporter", "crew"),
+    ("RepairRequest", "assignee", "crew"),
+    ("RepairRequest", "external_repairer", "contacts"),
+    ("RepairRequest", "costs_charged_to_customer", "costs"),
+    ("RepairRequest", "subproject", "subprojects"),
+    ("RepairRequest", "stock_location", "stocklocations"),
+    ("RepairRequest", "unrepairable_of", "repairs"),
+    ("RepairResponse", "creator", "crew"),
+    ("RepairResponse", "equipment", "equipment"),
+    ("RepairResponse", "serialnumber", "serialnumbers"),
+    ("RepairResponse", "reporter", "crew"),
+    ("RepairResponse", "assignee", "crew"),
+    ("RepairResponse", "external_repairer", "contacts"),
+    ("RepairResponse", "costs_charged_to_customer", "costs"),
+    ("RepairResponse", "subproject", "subprojects"),
+    ("RepairResponse", "stock_location", "stocklocations"),
+    ("RepairResponse", "unrepairable_of", "repairs"),
+    ("SerialNumberRequest", "asset_location", "stocklocations"),
+    ("SerialNumberRequest", "image", "files"),
+    ("SerialNumberResponse", "creator", "crew"),
+    ("SerialNumberResponse", "equipment", "equipment"),
+    ("SerialNumberResponse", "asset_location", "stocklocations"),
+    ("SerialNumberResponse", "image", "files"),
+    ("SerialNumberResponse", "last_subproject", "subprojects"),
+    ("StatusResponse", "creator", "crew"),
+    ("StockLocationResponse", "creator", "crew"),
+    (
+        "StockMovementRequest",
+        "projectequipment",
+        "projectequipment",
+    ),
+    ("StockMovementRequest", "stock_location", "stocklocations"),
+    ("StockMovementResponse", "creator", "crew"),
+    ("StockMovementResponse", "equipment", "equipment"),
+    (
+        "StockMovementResponse",
+        "projectequipment",
+        "projectequipment",
+    ),
+    ("StockMovementResponse", "stock_location", "stocklocations"),
+    ("SubprojectReferenceResponse", "path", "subprojects"),
+    ("SubprojectResponse", "creator", "crew"),
+    ("SubprojectResponse", "project", "projects"),
+    ("SubprojectResponse", "status", "statuses"),
+    ("SubprojectResponse", "location", "contacts"),
+    ("SubprojectResponse", "loc_contact", "contactpersons"),
+    (
+        "SubprojectResponse",
+        "asset_location_from",
+        "stocklocations",
+    ),
+    (
+        "SubrentalEquipmentGroupRequest",
+        "supplier_category",
+        "projectequipmentgroup",
+    ),
+    ("SubrentalEquipmentGroupResponse", "creator", "crew"),
+    ("SubrentalEquipmentGroupResponse", "subrental", "subrentals"),
+    (
+        "SubrentalEquipmentGroupResponse",
+        "supplier_category",
+        "projectequipmentgroup",
+    ),
+    ("SubrentalEquipmentRequest", "equipment", "equipment"),
+    ("SubrentalEquipmentRequest", "parent", "subrentalequipment"),
+    (
+        "SubrentalEquipmentRequest",
+        "supplier_planningmateriaal",
+        "projectequipment",
+    ),
+    ("SubrentalEquipmentResponse", "creator", "crew"),
+    (
+        "SubrentalEquipmentResponse",
+        "subrental_group",
+        "subrentalequipmentgroup",
+    ),
+    ("SubrentalEquipmentResponse", "equipment", "equipment"),
+    ("SubrentalEquipmentResponse", "parent", "subrentalequipment"),
+    (
+        "SubrentalEquipmentResponse",
+        "supplier_planningmateriaal",
+        "projectequipment",
+    ),
+    ("SubrentalRequest", "accountmanager", "crew"),
+    ("SubrentalRequest", "supplier", "contacts"),
+    ("SubrentalRequest", "contactperson", "contactpersons"),
+    ("SubrentalRequest", "location", "contacts"),
+    ("SubrentalRequest", "location_contact", "contactpersons"),
+    ("SubrentalRequest", "status", "statuses"),
+    ("SubrentalRequest", "asset_location_to", "stocklocations"),
+    ("SubrentalRequest", "asset_location_from", "stocklocations"),
+    ("SubrentalRequest", "supplier_project", "projects"),
+    ("SubrentalResponse", "creator", "crew"),
+    ("SubrentalResponse", "accountmanager", "crew"),
+    ("SubrentalResponse", "supplier", "contacts"),
+    ("SubrentalResponse", "contactperson", "contactpersons"),
+    ("SubrentalResponse", "location", "contacts"),
+    ("SubrentalResponse", "location_contact", "contactpersons"),
+    ("SubrentalResponse", "status", "statuses"),
+    ("SubrentalResponse", "asset_location_to", "stocklocations"),
+    ("SubrentalResponse", "asset_location_from", "stocklocations"),
+    ("SubrentalResponse", "supplier_project", "projects"),
+    ("SubtaskResponse", "creator", "crew"),
+    ("SubtaskResponse", "task", "tasks"),
+    ("SupplierRequest", "contact", "contacts"),
+    ("SupplierRequest", "contactperson", "contactpersons"),
+    ("SupplierResponse", "creator", "crew"),
+    ("SupplierResponse", "equipment", "equipment"),
+    ("SupplierResponse", "contact", "contacts"),
+    ("SupplierResponse", "contactperson", "contactpersons"),
+    ("TaskAssignmentRequest", "crew", "crew"),
+    ("TaskAssignmentResponse", "creator", "crew"),
+    ("TaskAssignmentResponse", "task", "tasks"),
+    ("TaskAssignmentResponse", "crew", "crew"),
+    ("TaskRequest", "status", "taskstatuses"),
+    ("TaskRequest", "completed_by", "crew"),
+    ("TaskResponse", "creator", "crew"),
+    ("TaskResponse", "status", "taskstatuses"),
+    ("TaskResponse", "completed_by", "crew"),
+    ("TaskStatusResponse", "creator", "crew"),
+    ("TaxClassResponse", "creator", "crew"),
+    (
+        "TimeRegistrationActivityRequest",
+        "project_function",
+        "projectfunctions",
+    ),
+    (
+        "TimeRegistrationActivityRequest",
+        "subproject_function",
+        "subprojects",
+    ),
+    ("TimeRegistrationActivityResponse", "creator", "crew"),
+    (
+        "TimeRegistrationActivityResponse",
+        "time_registration",
+        "timeregistration",
+    ),
+    (
+        "TimeRegistrationActivityResponse",
+        "project_function",
+        "projectfunctions",
+    ),
+    (
+        "TimeRegistrationActivityResponse",
+        "subproject_function",
+        "subprojects",
+    ),
+    ("TimeRegistrationRequest", "crewmember", "crew"),
+    ("TimeRegistrationRequest", "leavetype", "leavetypes"),
+    ("TimeRegistrationResponse", "creator", "crew"),
+    ("TimeRegistrationResponse", "crewmember", "crew"),
+    ("TimeRegistrationResponse", "leavetype", "leavetypes"),
+    ("TimeRegistrationResponse", "leaverequest", "leaverequest"),
+    ("VehicleRequest", "folder", "folders"),
+    ("VehicleRequest", "cost_rate", "rates"),
+    ("VehicleRequest", "image", "files"),
+    ("VehicleRequest", "asset_location", "stocklocations"),
+    ("VehicleResponse", "creator", "crew"),
+    ("VehicleResponse", "folder", "folders"),
+    ("VehicleResponse", "cost_rate", "rates"),
+    ("VehicleResponse", "image", "files"),
+    ("VehicleResponse", "asset_location", "stocklocations"),
+    ("WarehouseStatusResponse", "creator", "crew"),
+];
 
 /// Every Rentman API component schema and the Rust type that represents it.
 pub const SCHEMA_TYPES: &[(&str, &str)] = &[

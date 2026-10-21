@@ -3,8 +3,9 @@
 use crate::{
     RentmanAmount,
     client::RentmanClient,
-    error::{Error, ErrorKind, Resource, Result},
-    ids::{InvoiceId, InvoiceNumber, PaymentId},
+    error::Result,
+    ids::InvoiceNumber,
+    model::{InvoiceId, PaymentId},
     paging::{CollectionRequest, PageSize},
 };
 use chrono::{DateTime, FixedOffset, SecondsFormat};
@@ -97,23 +98,12 @@ fn serialize_moment<S: serde::Serializer>(
 struct PaymentListItem {
     id: PaymentId,
     moment: DateTime<FixedOffset>,
-    invoice: String,
+    #[serde(with = "crate::id::link")]
+    invoice: InvoiceId,
     #[serde(default)]
     amount: Option<RentmanAmount>,
     #[serde(default)]
     description: Option<String>,
-}
-
-fn parse_invoice_reference(reference: &str) -> Result<InvoiceId> {
-    reference
-        .strip_prefix("/invoices/")
-        .and_then(|id| id.parse::<u64>().ok())
-        .map(InvoiceId::new)
-        .ok_or_else(|| {
-            Error::new(ErrorKind::UnexpectedResponse(format!(
-                "invoice reference {reference:?} is not an /invoices/{{id}} link"
-            )))
-        })
 }
 
 impl RentmanClient {
@@ -144,14 +134,15 @@ impl RentmanClient {
 
         let mut result: HashMap<InvoiceId, Vec<RentmanPayment>> = HashMap::new();
         for item in items {
-            let invoice_id = parse_invoice_reference(&item.invoice)
-                .map_err(|error| error.in_operation("getPaymentCollection"))?;
-            result.entry(invoice_id).or_default().push(RentmanPayment {
-                id: item.id,
-                moment: item.moment,
-                amount: item.amount,
-                description: item.description,
-            });
+            result
+                .entry(item.invoice)
+                .or_default()
+                .push(RentmanPayment {
+                    id: item.id,
+                    moment: item.moment,
+                    amount: item.amount,
+                    description: item.description,
+                });
         }
 
         for payments in result.values_mut() {
@@ -173,18 +164,14 @@ impl RentmanClient {
             .json(payload)
             .send_unit()
             .await
-            .map_err(|error| {
-                error
-                    .in_operation("updatePayment")
-                    .about(Resource::Payment(payment_id))
-            })
+            .map_err(|error| error.in_operation("updatePayment").about(payment_id))
     }
 
     /// Creates a payment on a Rentman invoice.
     ///
     /// The request is sent exactly once, without retrying: creating a payment
     /// is not idempotent, and when only the response gets lost a retry would
-    /// book the payment twice. When [`Error::outcome`] is not
+    /// book the payment twice. When [`Error::outcome`](crate::Error::outcome) is not
     /// [`RequestOutcome::NotApplied`](crate::RequestOutcome::NotApplied),
     /// reconcile by reading the invoice's payments with
     /// [`Self::all_payments_by_invoice`] before creating it again.
@@ -197,11 +184,7 @@ impl RentmanClient {
             .json(payload)
             .send_unit_once()
             .await
-            .map_err(|error| {
-                error
-                    .in_operation("createPayment")
-                    .about(Resource::Invoice(invoice_id))
-            })
+            .map_err(|error| error.in_operation("createPayment").about(invoice_id))
     }
 }
 
@@ -212,7 +195,7 @@ impl RentmanClient {
 mod tests {
 
     use crate::test_support::*;
-    use crate::{ErrorKind, RequestOutcome, Resource};
+    use crate::{ErrorKind, RequestOutcome, ResourceRef};
     use crate::{
         InvoiceId, InvoiceNumber, InvoicePaymentStatus, PaymentId, PaymentImportSource,
         RentmanAmount, RentmanApiToken, RentmanClient, RentmanPaymentPayload, Url,
@@ -465,12 +448,14 @@ mod tests {
 
         let error = client.all_payments_by_invoice().await.unwrap_err();
 
-        let ErrorKind::UnexpectedResponse(message) = error.kind() else {
-            panic!("expected an unexpected response, got {error:?}");
+        let ErrorKind::Decode(cause) = error.kind() else {
+            panic!("expected a decode error, got {error:?}");
         };
-        assert_eq!(
-            message,
-            r#"invoice reference "/broken/1" is not an /invoices/{id} link"#
+        assert!(
+            cause
+                .to_string()
+                .contains("link to /broken where a link to /invoices was expected"),
+            "{cause}"
         );
         assert_eq!(error.operation(), Some("getPaymentCollection"));
         assert_request(&server.next_request(), "GET", "/payments");
@@ -622,7 +607,7 @@ mod tests {
         assert_eq!(error.operation(), Some("updatePayment"));
         assert_eq!(
             error.resource(),
-            Some(Resource::Payment(PaymentId::new(10)))
+            Some(ResourceRef::from(PaymentId::new(10)))
         );
         // The first attempt got a 500 and may have been applied; the retries
         // then found the server gone. The error must not claim "not applied".
@@ -649,10 +634,10 @@ mod tests {
             .unwrap_err();
 
         assert_eq!(error.operation(), Some("createPayment"));
-        assert_eq!(error.resource(), Some(Resource::Invoice(InvoiceId::new(1))));
+        assert_eq!(error.resource(), Some(ResourceRef::from(InvoiceId::new(1))));
         assert_eq!(
             error.to_string(),
-            "Rentman createPayment failed for invoice 1: \
+            "Rentman createPayment failed for /invoices/1: \
              Rentman API returned 500 Internal Server Error: rentman broken"
         );
         assert_request(&server.next_request(), "POST", "/invoices/1/payments");

@@ -24,8 +24,9 @@ repositories.
 - Keep the library fully async for Rentman API I/O. Do not add blocking HTTP
   clients, blocking sleeps, or thread-based production request execution.
 - Prefer small domain types over raw primitives at API boundaries. Examples:
-  `RentmanApiToken`, `InvoiceId`, `PaymentId`, `InvoiceNumber`, and
-  `RentmanAmount`.
+  `RentmanApiToken`, `Id<R>` (e.g. `InvoiceId = Id<Invoice>`), `InvoiceNumber`,
+  and `RentmanAmount`. IDs and links to the same resource share one `Id<R>`
+  type; never add untyped ID or link types.
 - Do not leak secrets. Token wrappers must keep `Debug` redacted.
 - Use exact decimal values for payment amounts. Do not use `f32` or `f64` for
   money-like values.
@@ -58,7 +59,7 @@ repositories.
   compile-time executability assertion in sync with every endpoint type.
 - Every documented path/query parameter must be represented through
   `EndpointParameterSpec`. When a parameter has clear semantics, expose a typed
-  builder helper such as `id(model::RentmanId)` instead of making users pass raw
+  builder helper such as `id(Id<R>)` instead of making users pass raw
   strings.
 - Response enums are open (`Unknown(String)` keeps an undocumented value as
   sent); request enums stay closed. Every documented value must still be a
@@ -71,7 +72,8 @@ repositories.
   foreign-origin `next_page_url`. Page sizes are a validated `PageSize`.
 - Keep authentication, retry handling, and rate limiting inside the client.
 - Translate wire quirks at the boundary. For example, Rentman's invoice links
-  such as `/invoices/14` should become `InvoiceId`.
+  such as `/invoices/14` become `InvoiceId` through the generated link
+  adapters, not through hand-written parsing.
 
 ## Tests And Coverage
 

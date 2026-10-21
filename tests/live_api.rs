@@ -99,9 +99,7 @@ async fn active_equipment_listing_works_and_excludes_archived_items_live() {
 
     for item in &archived {
         assert!(
-            !active
-                .iter()
-                .any(|equipment| equipment.id == EquipmentId::new(item.id.0)),
+            !active.iter().any(|equipment| equipment.id == item.id),
             "all_active_equipment() returned archived equipment {}",
             item.id
         );
@@ -168,7 +166,7 @@ async fn equipment_price_write_is_a_no_op_live() {
     assert_typed_request_is_exact(&request, &payload);
     client
         .endpoint::<endpoint::UpdateEquipmentEndpoint>()
-        .id(model::RentmanId(id))
+        .id(rentman_client::Id::new(id))
         .body(request)
         .expect("request body serializes")
         .send_once()

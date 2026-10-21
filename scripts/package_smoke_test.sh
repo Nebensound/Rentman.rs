@@ -49,7 +49,7 @@ fn main() {
     let client = RentmanClient::new(token);
     let _request = client
         .endpoint::<endpoint::GetAccessoryItemEndpoint>()
-        .id(model::RentmanId(1));
+        .id(model::AccessoryId::new(1));
 
     println!("rentman-client package smoke test passed");
 }
