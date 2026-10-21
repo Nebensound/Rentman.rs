@@ -1,6 +1,6 @@
 //! Typed errors of the client.
 
-use crate::ids::{EquipmentId, InvoiceId, PaymentId};
+use crate::id::{Id, Resource};
 use reqwest::StatusCode;
 use std::fmt;
 
@@ -16,7 +16,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 pub struct Error {
     kind: ErrorKind,
     operation: Option<&'static str>,
-    resource: Option<Resource>,
+    resource: Option<ResourceRef>,
     earlier_attempt_uncertain: bool,
     acknowledged: bool,
 }
@@ -92,25 +92,38 @@ pub enum InvalidRequest {
     Http(#[source] reqwest::Error),
 }
 
-/// Rentman resource a failed call was about.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Resource {
-    /// An invoice, e.g. when creating a payment on it.
-    Invoice(InvoiceId),
-    /// A payment.
-    Payment(PaymentId),
-    /// An equipment item.
-    Equipment(EquipmentId),
+/// Rentman item a failed call was about, e.g. `/payments/7`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ResourceRef {
+    collection: &'static str,
+    id: u64,
 }
 
-impl fmt::Display for Resource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Invoice(id) => write!(f, "invoice {id}"),
-            Self::Payment(id) => write!(f, "payment {id}"),
-            Self::Equipment(id) => write!(f, "equipment {id}"),
+impl ResourceRef {
+    /// Collection of the item, e.g. `payments`.
+    pub fn collection(&self) -> &'static str {
+        self.collection
+    }
+
+    /// Typed ID of the item, when it belongs to resource `R`.
+    pub fn id<R: Resource>(&self) -> Option<Id<R>> {
+        (self.collection == R::COLLECTION).then_some(Id::new(self.id))
+    }
+}
+
+impl<R: Resource> From<Id<R>> for ResourceRef {
+    fn from(id: Id<R>) -> Self {
+        Self {
+            collection: R::COLLECTION,
+            id: id.get(),
         }
+    }
+}
+
+/// Displays the item's link, e.g. `/payments/7`.
+impl fmt::Display for ResourceRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "/{}/{}", self.collection, self.id)
     }
 }
 
@@ -149,8 +162,8 @@ impl Error {
     }
 
     /// Records the resource the failed call was about.
-    pub(crate) fn about(mut self, resource: Resource) -> Self {
-        self.resource = Some(resource);
+    pub(crate) fn about(mut self, resource: impl Into<ResourceRef>) -> Self {
+        self.resource = Some(resource.into());
         self
     }
 
@@ -180,7 +193,7 @@ impl Error {
     }
 
     /// Resource the failed call was about, if it was about a single one.
-    pub fn resource(&self) -> Option<Resource> {
+    pub fn resource(&self) -> Option<ResourceRef> {
         self.resource
     }
 
@@ -247,6 +260,7 @@ impl std::error::Error for Error {
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;
+    use crate::model::{Invoice, Payment, PaymentId};
     use std::error::Error as _;
 
     fn status(code: u16) -> Error {
@@ -282,13 +296,18 @@ mod tests {
     fn describes_operation_and_resource() {
         let error = status(404)
             .in_operation("updatePayment")
-            .about(Resource::Payment(PaymentId::new(7)));
+            .about(PaymentId::new(7));
         assert_eq!(
             error.to_string(),
-            "Rentman updatePayment failed for payment 7: Rentman API returned 404 Not Found: body"
+            "Rentman updatePayment failed for /payments/7: Rentman API returned 404 Not Found: body"
         );
         assert_eq!(error.operation(), Some("updatePayment"));
-        assert_eq!(error.resource(), Some(Resource::Payment(PaymentId::new(7))));
+        let resource = error.resource().unwrap();
+        assert_eq!(resource, ResourceRef::from(PaymentId::new(7)));
+        assert_eq!(resource.collection(), "payments");
+        assert_eq!(resource.id::<Payment>(), Some(PaymentId::new(7)));
+        assert_eq!(resource.id::<Invoice>(), None);
+        assert_eq!(resource.to_string(), "/payments/7");
 
         assert_eq!(
             status(404).in_operation("getFactuurCollection").to_string(),
@@ -297,19 +316,6 @@ mod tests {
         assert_eq!(
             status(404).to_string(),
             "Rentman API returned 404 Not Found: body"
-        );
-
-        assert_eq!(
-            Resource::Invoice(InvoiceId::new(1)).to_string(),
-            "invoice 1"
-        );
-        assert_eq!(
-            Resource::Payment(PaymentId::new(2)).to_string(),
-            "payment 2"
-        );
-        assert_eq!(
-            Resource::Equipment(EquipmentId::new(3)).to_string(),
-            "equipment 3"
         );
     }
 

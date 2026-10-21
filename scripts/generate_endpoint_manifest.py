@@ -14,6 +14,7 @@ ENDPOINT_OUTPUT = ROOT / "src" / "endpoint" / "generated.rs"
 WIRE_OUTPUT = ROOT / "src" / "model" / "generated.rs"
 LIVE_SWEEP_OUTPUT = ROOT / "tests" / "live" / "generated_sweep.rs"
 RESPONSE_ENUM_TESTS_OUTPUT = ROOT / "tests" / "contract" / "generated_response_enums.rs"
+PAYLOAD_TESTS_OUTPUT = ROOT / "tests" / "contract" / "generated_payload_constructors.rs"
 
 RUST_KEYWORDS = {
     "as",
@@ -44,17 +45,28 @@ RUST_KEYWORDS = {
 }
 
 DATE_TIME_FIELDS = {"created", "modified"}
-# Integer fields documented as resource IDs whose names do not follow the
-# `id`/`*_id` convention.
+# Integer fields documented as resource IDs other than an item's own `id`, with
+# their Rust type.
 ID_FIELDS = {
-    ("ProjectsCreateFromTemplateRequest", "template"),
+    ("ProjectsCreateFromTemplateRequest", "template"): "Id<ProjectTemplate>",
+    ("ProjectsSetClientRequest", "client"): "Id<Contact>",
+    ("ProjectsSetClientRequest", "contact_person"): "Id<ContactPerson>",
+    ("ProjectsSetLocationRequest", "location"): "Id<Contact>",
+    ("ProjectsSetLocationRequest", "contact_person"): "Id<ContactPerson>",
+    ("SubprojectsSetLocationRequest", "location"): "Id<Contact>",
+    ("SubprojectsSetLocationRequest", "contact_person"): "Id<ContactPerson>",
+    ("ProjectsSetTypeRequest", "type"): "Id<ProjectType>",
     # Polymorphic link: `itemtype` names the resource, `item` holds its ID.
-    *(
-        (f"{resource}{direction}", "item")
+    **{
+        (f"{resource}{direction}", "item"): "ItemId"
         for resource in ("File", "FileFolder", "InvoiceLine", "Task")
         for direction in ("Request", "Response")
-    ),
+    },
 }
+
+# Collection path segment -> Rust item type, filled from the documented
+# `GET /{collection}/{id}` operations by `collect_resources`.
+RESOURCE_COLLECTIONS: dict[str, str] = {}
 URL_FIELDS = {"url", "website", "image", "logo"}
 
 # Deliberate deviations from the documented OpenAPI types, verified against
@@ -255,6 +267,38 @@ def enum_variant_name(value: object, used: set[str]) -> str:
     return variant
 
 
+def collect_resources(spec: dict) -> None:
+    for path, methods in spec["paths"].items():
+        match = re.fullmatch(r"/([a-z_]+)/\{id\}", path)
+        if match is None or "get" not in methods:
+            continue
+        kind, schema = response_shape(methods["get"])
+        if kind == "Item":
+            RESOURCE_COLLECTIONS[match.group(1)] = rust_type_name(schema)
+    types = list(RESOURCE_COLLECTIONS.values())
+    if len(types) != len(set(types)):
+        raise ValueError(f"a type serves several collections: {RESOURCE_COLLECTIONS}")
+
+
+def resource_for_collection(collection: str, context: str) -> str:
+    try:
+        return RESOURCE_COLLECTIONS[collection]
+    except KeyError:
+        raise ValueError(f"{context} links to undocumented collection /{collection}") from None
+
+
+def link_target(schema_name_value: str, field: str, schema: dict) -> str:
+    """Rust item type a link field points to, from its documented example
+    such as `/crew/0`."""
+    example = schema.get("example")
+    match = re.fullmatch(r"/([a-z_]+)/\d+", example) if isinstance(example, str) else None
+    if match is None:
+        raise ValueError(
+            f"link field {schema_name_value}.{field} has no /{{collection}}/{{id}} example: {example!r}"
+        )
+    return resource_for_collection(match.group(1), f"{schema_name_value}.{field}")
+
+
 def is_reference_field(field: str, schema: dict) -> bool:
     example = schema.get("example")
     if isinstance(example, str) and example.startswith("/"):
@@ -297,8 +341,17 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
 
     kind, _ = openapi_type(schema)
     if kind == "integer":
-        if field == "id" or field.endswith("_id") or (schema_name_value, field) in ID_FIELDS:
-            return "RentmanId"
+        if (schema_name_value, field) in ID_FIELDS:
+            return ID_FIELDS[(schema_name_value, field)]
+        if field == "id":
+            own = rust_type_name(schema_name_value)
+            if own not in RESOURCE_COLLECTIONS.values():
+                raise ValueError(f"{schema_name_value}.id belongs to no documented collection")
+            return f"Id<{own}>"
+        # Integer IDs other than `id` carry no example that names their
+        # collection, so each one needs a deliberate ID_FIELDS entry.
+        if field.endswith("_id") or re.match(r"(Numeric )?ID of", schema.get("description") or ""):
+            raise ValueError(f"{schema_name_value}.{field} needs an ID_FIELDS entry")
         return "i64"
     if kind == "number":
         return "Decimal"
@@ -314,7 +367,7 @@ def base_rust_type(schema_name_value: str, field: str, schema: dict) -> str:
         if schema.get("format") == "email":
             return "EmailAddress"
         if is_reference_field(field, schema):
-            return "ResourceReference"
+            return f"Id<{link_target(schema_name_value, field, schema)}>"
         if is_url_field(field):
             return "Url"
         return "String"
@@ -490,10 +543,11 @@ def generate_wire(spec: dict) -> None:
         "",
         "#![allow(clippy::module_name_repetitions)]",
         "",
+        "use crate::id::{Id, ItemId, Resource};",
         "use chrono::{DateTime, FixedOffset, NaiveDate};",
         "use rust_decimal::Decimal;",
         "use serde::{Deserialize, Serialize};",
-        "use std::{collections::BTreeMap, fmt};",
+        "use std::collections::BTreeMap;",
         "use url::Url;",
         "",
         "/// Marker type for endpoints without a JSON request body.",
@@ -540,36 +594,6 @@ def generate_wire(spec: dict) -> None:
         "    /// URL for the next page when cursor pagination is used.",
         "    #[serde(default)]",
         "    pub next_page_url: Option<Url>,",
-        "}",
-        "",
-        "/// Rentman integer identifier.",
-        "#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]",
-        "#[serde(transparent)]",
-        "pub struct RentmanId(pub u64);",
-        "",
-        "/// Link to another Rentman resource, for example `/invoices/14`.",
-        "#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]",
-        "#[serde(transparent)]",
-        "pub struct ResourceReference(String);",
-        "",
-        "impl ResourceReference {",
-        "    /// Returns the raw Rentman resource path.",
-        "    pub fn as_str(&self) -> &str {",
-        "        &self.0",
-        "    }",
-        "}",
-        "",
-        "impl<'de> Deserialize<'de> for ResourceReference {",
-        "    // Coverage is disabled because serde monomorphizes this adapter per",
-        "    // deserializer; behavior is covered through model deserialization tests.",
-        "    #[cfg_attr(coverage_nightly, coverage(off))]",
-        "    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {",
-        "        let value = String::deserialize(deserializer)?;",
-        "        if !value.starts_with('/') {",
-        "            return Err(serde::de::Error::custom(\"Rentman resource reference must start with '/'\"));",
-        "        }",
-        "        Ok(Self(value))",
-        "    }",
         "}",
         "",
         "/// Email address string from Rentman. Empty when the address is not set.",
@@ -621,11 +645,6 @@ def generate_wire(spec: dict) -> None:
         "    Object(BTreeMap<String, CustomFieldValue>),",
         "}",
         "",
-        "impl fmt::Display for RentmanId {",
-        "    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {",
-        "        write!(f, \"{}\", self.0)",
-        "    }",
-        "}",
         "",
     ]
 
@@ -675,10 +694,15 @@ def generate_wire(spec: dict) -> None:
             schema.get("description"),
             f"Rentman API schema `{schema_name_value}`.",
         )
-        lines.append(f"/// {description}")
-        lines.append("#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]")
-        lines.append(f"pub struct {rust_type_name(schema_name_value)} {{")
         required = effective_required(schema_name_value, schema)
+        is_payload = schema_name_value.endswith("Request")
+        derives = "Debug, Clone, PartialEq, Serialize, Deserialize"
+        if is_payload and not required:
+            # Every field is optional: start from `Default` and set what changes.
+            derives += ", Default"
+        lines.append(f"/// {description}")
+        lines.append(f"#[derive({derives})]")
+        lines.append(f"pub struct {rust_type_name(schema_name_value)} {{")
         for field, field_schema in (schema.get("properties") or {}).items():
             rust_name = rust_field(field)
             field_type = rust_field_type(schema_name_value, field, field_schema, required)
@@ -690,14 +714,23 @@ def generate_wire(spec: dict) -> None:
             serde_attributes = []
             if rust_name != field:
                 serde_attributes.append(f'rename = "{escape(field)}"')
+            is_link = openapi_type(field_schema)[0] == "string" and "Id<" in field_type
             if field not in required:
                 serde_attributes.append("default")
                 serde_attributes.append("skip_serializing_if = \"Option::is_none\"")
+            elif is_link and field_type.startswith("Option<"):
+                # Like a plain `Option`, a nullable link may also be missing.
+                serde_attributes.append("default")
+            if is_link:
+                adapter = "optional_link" if field_type.startswith("Option<") else "link"
+                serde_attributes.append(f'with = "crate::id::{adapter}"')
             if serde_attributes:
                 lines.append(f"    #[serde({', '.join(serde_attributes)})]")
             lines.append(f"    pub {rust_name}: {field_type},")
         lines.append("}")
         lines.append("")
+        if is_payload and required:
+            lines.extend(payload_constructor(schema_name_value, schema, required))
 
     type_names = [rust_type_name(name) for name in schemas]
     enum_names = [
@@ -707,14 +740,45 @@ def generate_wire(spec: dict) -> None:
         if "enum" in field_schema
     ]
     fixed_names = [
-        "NoRequest", "NoContent", "CollectionResponse", "ItemResponse", "RentmanId",
-        "ResourceReference", "EmailAddress", "CustomFields", "CustomFieldValue",
+        "NoRequest", "NoContent", "CollectionResponse", "ItemResponse", "Id", "ItemId",
+        "Resource", "EmailAddress", "CustomFields", "CustomFieldValue",
     ]
-    all_names = type_names + enum_names + fixed_names
+    alias_names = [f"{name}Id" for name in RESOURCE_COLLECTIONS.values()]
+    all_names = type_names + enum_names + fixed_names + alias_names
     duplicates = sorted({name for name in all_names if all_names.count(name) > 1})
     if duplicates:
         raise ValueError(f"generated type names collide: {duplicates}")
 
+    for collection, rust_type in sorted(RESOURCE_COLLECTIONS.items()):
+        lines.extend(
+            [
+                f"impl Resource for {rust_type} {{",
+                f'    const COLLECTION: &\'static str = "{collection}";',
+                "}",
+                "",
+                f"/// ID of a [`{rust_type}`] item (`/{collection}/{{id}}`).",
+                f"pub type {rust_type}Id = Id<{rust_type}>;",
+                "",
+            ]
+        )
+
+    lines.append("/// Every resource type and its collection path segment.")
+    lines.append("pub const RESOURCE_COLLECTIONS: &[(&str, &str)] = &[")
+    for collection, rust_type in sorted(RESOURCE_COLLECTIONS.items(), key=lambda item: item[1]):
+        lines.append(f'    ("{rust_type}", "{collection}"),')
+    lines.append("];")
+    lines.append("")
+    lines.append("/// Every link field (`schema`, `field`, linked collection).")
+    lines.append("pub const LINK_FIELDS: &[(&str, &str, &str)] = &[")
+    for name in sorted(schemas):
+        for field, field_schema in (schemas[name].get("properties") or {}).items():
+            field_type = base_rust_type(name, field, field_schema)
+            if openapi_type(field_schema)[0] == "string" and field_type.startswith("Id<"):
+                target = field_type[3:-1]
+                collection = next(c for c, t in RESOURCE_COLLECTIONS.items() if t == target)
+                lines.append(f'    ("{name}", "{escape(field)}", "{collection}"),')
+    lines.append("];")
+    lines.append("")
     lines.append("/// Every Rentman API component schema and the Rust type that represents it.")
     lines.append("pub const SCHEMA_TYPES: &[(&str, &str)] = &[")
     for name in sorted(schemas):
@@ -812,7 +876,11 @@ def generate_endpoints(operations: list[dict]) -> None:
             and parameter["value"] == "Integer"
             for parameter in operation["parameters"]
         ):
-            lines.append(f"impl EndpointWithId for {operation['endpoint_name']} {{}}")
+            collection = operation["path"].split("/")[1]
+            resource = resource_for_collection(collection, operation["operation_id"])
+            lines.append(f"impl EndpointWithId for {operation['endpoint_name']} {{")
+            lines.append(f"    type Resource = {resource};")
+            lines.append("}")
             lines.append("")
 
     lines.append("/// All operations in the checked-in Rentman API document.")
@@ -891,6 +959,94 @@ def generate_live_sweep(operations: list[dict]) -> None:
     LIVE_SWEEP_OUTPUT.write_text("\n".join(lines))
 
 
+def payload_fields(schema_name_value: str, schema: dict, required: set[str]) -> list[tuple[str, str, bool]]:
+    """(Rust field name, Rust type, required) of a payload, in schema order."""
+    return [
+        (rust_field(field), rust_field_type(schema_name_value, field, field_schema, required), field in required)
+        for field, field_schema in (schema.get("properties") or {}).items()
+    ]
+
+
+def payload_constructor(schema_name_value: str, schema: dict, required: set[str]) -> list[str]:
+    fields = payload_fields(schema_name_value, schema, required)
+    parameters = ", ".join(f"{name}: {rust_type}" for name, rust_type, is_required in fields if is_required)
+    lines = [
+        f"impl {rust_type_name(schema_name_value)} {{",
+        "    /// Creates the payload from its required fields; every optional field",
+        "    /// is `None` and not sent.",
+        f"    pub fn new({parameters}) -> Self {{",
+        "        Self {",
+    ]
+    for name, _, is_required in fields:
+        lines.append(f"            {name}," if is_required else f"            {name}: None,")
+    lines.extend(["        }", "    }", "}", ""])
+    return lines
+
+
+def sample_value(rust_type: str, schema_name_value: str, field: str, field_schema: dict) -> str:
+    """A valid Rust expression of the given field type for generated tests."""
+    if rust_type.startswith("Option<"):
+        return "None"
+    if rust_type.startswith("Id<"):
+        return "rentman_client::Id::new(1)"
+    if "enum" in field_schema:
+        variant = enum_variant_name(field_schema["enum"][0], {"Unknown"} if schema_name_value.endswith("Response") else set())
+        return f"model::{rust_type}::{variant}"
+    samples = {
+        "String": 'String::from("x")',
+        "DateTime<FixedOffset>": 'chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap()',
+        "NaiveDate": "chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap()",
+        "i64": "1",
+        "bool": "true",
+        "Decimal": "rust_decimal::Decimal::ONE",
+        "ItemId": "rentman_client::ItemId::new(1)",
+    }
+    if rust_type not in samples:
+        raise ValueError(f"no sample value for {schema_name_value}.{field}: {rust_type}")
+    return samples[rust_type]
+
+
+def generate_payload_constructor_tests(spec: dict) -> None:
+    lines = [
+        "//! One test per payload constructor: `new` sets exactly the required",
+        "//! fields, and only they are sent.",
+        "//!",
+        "//! This file is generated by `scripts/generate_endpoint_manifest.py`.",
+        "",
+        "use super::assert_sends_exactly;",
+        "use rentman_client::model;",
+        "",
+    ]
+    for schema_name_value, schema in spec["components"]["schemas"].items():
+        required = effective_required(schema_name_value, schema)
+        if not schema_name_value.endswith("Request") or not required:
+            continue
+        properties = schema.get("properties") or {}
+        arguments = ", ".join(
+            sample_value(
+                rust_field_type(schema_name_value, field, properties[field], required),
+                schema_name_value,
+                field,
+                properties[field],
+            )
+            for field in properties
+            if field in required
+        )
+        sent = ", ".join(f'"{escape(field)}"' for field in properties if field in required)
+        lines.extend(
+            [
+                "#[test]",
+                f"fn {rust_field(rust_type_name(schema_name_value))}() {{",
+                f"    let payload = model::{rust_type_name(schema_name_value)}::new({arguments});",
+                f'    assert_sends_exactly(&payload, "{schema_name_value}", &[{sent}]);',
+                "}",
+                "",
+            ]
+        )
+    PAYLOAD_TESTS_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    PAYLOAD_TESTS_OUTPUT.write_text("\n".join(lines))
+
+
 def generate_response_enum_tests(spec: dict) -> None:
     fields = [
         (schema_name_value, field)
@@ -936,11 +1092,13 @@ def generate_response_enum_tests(spec: dict) -> None:
 
 def main() -> None:
     spec = json.loads(OPENAPI.read_text())
+    collect_resources(spec)
     generate_wire(spec)
     operations = collect_operations(spec)
     generate_endpoints(operations)
     generate_live_sweep(operations)
     generate_response_enum_tests(spec)
+    generate_payload_constructor_tests(spec)
     subprocess.run(["cargo", "fmt", "--all"], cwd=ROOT, check=True)
 
 

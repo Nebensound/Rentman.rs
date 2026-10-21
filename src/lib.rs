@@ -10,6 +10,7 @@ mod config;
 mod endpoint_request;
 mod equipment;
 mod error;
+mod id;
 mod ids;
 mod invoices;
 mod paging;
@@ -27,12 +28,14 @@ pub use config::{
 };
 pub use endpoint_request::RentmanEndpointRequest;
 pub use equipment::{EquipmentPricePayload, RentmanEquipment};
-pub use error::{Error, ErrorKind, InvalidRequest, RequestOutcome, Resource, Result};
-pub use ids::{EquipmentId, InvoiceId, InvoiceNumber, PaymentId, RentmanApiToken};
+pub use error::{Error, ErrorKind, InvalidRequest, RequestOutcome, ResourceRef, Result};
+pub use id::{Id, ItemId, LinkError, Resource};
+pub use ids::{InvoiceNumber, RentmanApiToken};
 pub use invoices::{
     InvoicePaymentStatus, PaymentImportSource, RentmanInvoice, RentmanPayment,
     RentmanPaymentPayload,
 };
+pub use model::{EquipmentId, InvoiceId, PaymentId};
 pub use paging::PageSize;
 /// Re-export of the URL type used for client configuration.
 pub use reqwest::Url;

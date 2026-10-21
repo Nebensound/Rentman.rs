@@ -29,60 +29,6 @@ impl fmt::Debug for RentmanApiToken {
     }
 }
 
-/// Internal Rentman invoice ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
-#[serde(transparent)]
-pub struct InvoiceId(u64);
-
-impl InvoiceId {
-    /// Creates a Rentman invoice ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for InvoiceId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-/// Internal Rentman payment ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize)]
-#[serde(transparent)]
-pub struct PaymentId(u64);
-
-impl PaymentId {
-    /// Creates a Rentman payment ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for PaymentId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-/// Internal Rentman equipment ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
-#[serde(transparent)]
-pub struct EquipmentId(u64);
-
-impl EquipmentId {
-    /// Creates a Rentman equipment ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for EquipmentId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
 /// Rentman invoice number.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(transparent)]

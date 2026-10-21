@@ -43,8 +43,21 @@ contributor documentation and stays out of the published package.
 
 The hand-written domain facade translates API formats into narrower domain
 types such as
-`RentmanApiToken`, `InvoiceId`, `PaymentId`, `InvoiceNumber`, and
-`RentmanAmount`.
+`RentmanApiToken`, `InvoiceNumber`, and `RentmanAmount`.
+
+IDs are typed by their resource: `Id<R>` (`src/id.rs`) is used for an item's
+own `id` and for every link to it, with a generated alias per resource
+(`CrewId = Id<Crew>`, `InvoiceId = Id<Invoice>`, ...). An `id` field is a
+number on the wire and a link field a path such as `/crew/12`; the generator
+types each link field from its documented example and attaches a serde
+adapter, so reading a link to the wrong collection fails. Integer ID fields
+without such an example (for example `template` or the IDs of the
+`:setClient` actions) are typed through the generator's `ID_FIELDS` table,
+and the generator refuses an `ID of ...` field that is missing there.
+Polymorphic `item` fields, whose collection is named by `itemtype`, are an
+`ItemId`. Errors name the affected item as a `ResourceRef` (`/payments/7`).
+Write payloads with required fields get a generated `new` taking exactly those
+fields; payloads without required fields implement `Default`.
 
 ## Update the API contract
 
@@ -286,7 +299,7 @@ tests verify the shared execution path for path parameters, query parameters,
 typed JSON bodies, typed JSON responses, and no-content responses.
 Documented path/query parameters are represented as `EndpointParameterSpec`
 metadata; clear parameter semantics also get typed builder helpers such as
-`id(model::RentmanId)`.
+`id(Id<R>)`, where `R` is the resource of the path's collection.
 
 All Rentman API I/O is async. Public API operations return futures and are used
 with `.await`; production code must not add blocking HTTP clients, blocking
