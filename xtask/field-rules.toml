@@ -1,0 +1,40 @@
+date_time_fields = ["created", "modified"]
+url_fields = ["url", "website", "image", "logo"]
+reference_fields = [
+    "creator",
+    "invoice",
+    "customer",
+    "account_manager",
+    "contact",
+    "project",
+    "folder",
+    "parent",
+    "equipment",
+    "serialnumber",
+    "vehicle",
+    "crew",
+    "supplier",
+    "subproject",
+    "task",
+]
+filterable_types = [
+    "Decimal",
+    "i64",
+    "bool",
+    "String",
+    "DateTime<FixedOffset>",
+    "EmailAddress",
+    "ItemId",
+]
+uncountable_types = [
+    "Crew",
+    "Equipment",
+    "ActualContent",
+    "EquipmentSetContent",
+    "CrewAvailability",
+    "ProjectCrew",
+    "ProjectEquipment",
+    "SubrentalEquipment",
+    "ProjectRequestEquipment",
+    "AppointmentCrew",
+]

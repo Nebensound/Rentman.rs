@@ -1,6 +1,21 @@
 # Rentman.rs
 
-Typed Rust client for calling the Rentman API.
+[![crates.io](https://img.shields.io/crates/v/rentman-client.svg)](https://crates.io/crates/rentman-client)
+[![Released crate OpenAPI status](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FNebensound%2FRentman.rs%2Fapi-status%2Fapi-status.json&cacheSeconds=300)](https://github.com/Nebensound/Rentman.rs/actions/workflows/update-openapi.yml)
+
+**Using the crate?** Start with [crates.io](https://crates.io/crates/rentman-client)
+and the [end-user documentation and examples](https://docs.rs/rentman-client/latest/rentman_client/).
+This README is the technical guide for contributors working on the crate.
+
+The contract badge compares the **latest stable version published on crates.io**
+with Rentman's published OpenAPI document during the daily update workflow:
+green means identical JSON content (ignoring object key order and formatting),
+orange means different, and grey means the check was unavailable. A difference
+does not necessarily mean incompatibility, and a match is not a live API test.
+The [status data](https://github.com/Nebensound/Rentman.rs/blob/api-status/api-status.json)
+includes the checked version and UTC check time as a Unix timestamp; the badge reports that check,
+not a continuous guarantee. Until the first workflow run publishes it, the
+badge is unavailable.
 
 ## Independence and API access
 
@@ -22,43 +37,203 @@ boundaries, redacted secrets, retry handling, and rate limiting.
 The public crate surface is Rentman-focused:
 
 - `RentmanClient` owns authentication, retry handling, rate limiting, and async
-  HTTP transport.
-- `model` contains typed Rentman API request and response models.
-- `endpoint` contains typed Rentman API endpoint definitions and endpoint
-  metadata.
-- High-level domain methods such as `all_invoices()` keep common workflows
-  smaller and stricter than raw API calls.
+  HTTP transport, and is the entry point to every resource (`client.crew()`).
+- `resource` contains the collections and their operations (`List`, `Get`,
+  `Create`, `Update`, `Delete`, `ListRequest`).
+- `model` contains the item types (`Crew`), write payloads (`CrewPayload`),
+  enums, and ID aliases (`CrewId`).
+- `fields` contains the filter and sort constants, `projection!` and
+  `projection_fields` the field selection.
+- `Id<R>`, `Decimal`, `PageSize`, and the typed `Error`.
 
-The checked-in Rentman OpenAPI definition lives in `openapi/rentman-oas.json`.
-It is an internal contract source, not the public abstraction. The generated
-files `src/model/generated.rs` and `src/endpoint/generated.rs` are exposed as
-Rentman API models and endpoints through `model` and `endpoint`.
+The resource layer is the only public API for Rentman data. The endpoint layer
+(`src/endpoint.rs` and `src/endpoint/generated.rs`: one typed endpoint per
+documented operation with its parameters, body, response, and error statuses)
+and the response envelopes (`CollectionResponse`, `ItemResponse`) are the
+crate-internal foundation the resources are built on; compile-fail doctests in
+`src/resource.rs` keep them private. The checked-in Rentman OpenAPI definition
+lives in `openapi/rentman-oas.json`; it is an internal contract source, not
+the public abstraction.
 
-Every documented endpoint is executable through the typed endpoint layer.
+Every documented operation is reachable through the resource layer (`src/resource.rs`): the generator groups
+the documented paths into collections (`client.crew()`), nested collections
+(`client.crew().appointments(id)`), and named actions
+(`client.projects().set_client(id, &payload)`). Accessors are the snake_case
+plural of the item type (`project_equipment_groups`, `time_registrations`;
+`xtask/field-rules.toml` keeps `crew` and `equipment` singular). A
+collection gets only the operation traits (`List`, `Get`, `Create`, `Update`,
+`Delete`) that Rentman documents for it, so an undocumented operation does not
+compile. All request logic is hand-written in `src/resource.rs`; the generated
+`src/resource/generated.rs` contains only trait impls, accessors, and one
+local-server test per operation that checks method and path.
+`resource::REACHABLE_OPERATIONS` is compared with the OpenAPI document by a
+contract test. `create` and actions are sent exactly once; `get`, `update`,
+`delete` and every list page are retried.
+
+Lists take typed filters and sorting built from the generated field
+constants in `fields` (`src/fields.rs`, one module per resource):
+`.filter(contact::COUNTRY.eq(ContactCountry::Gb))`,
+`.filter(contact::DISTANCE.le(Decimal::from(300)))`,
+`.filter(contact::FOLDER.is_some())`, `.filter(task_status::ORDER.in_range(2..5))`,
+`.sort(contact::NAME.asc())`. The public operators use the names of Rust's
+comparison methods (`eq`, `ne`, `lt`, `le`, `gt`, `ge`), `Option`-style null
+checks (`is_none`, `is_some`), and Rust ranges; `src/filter.rs` translates them
+into Rentman's `[neq]`, `[lte]`, `[gte]`, and `[isnull]` syntax. A `Filter`
+holds one or more query conditions (a range yields up to two). A
+`Field<R, V>` only accepts values of type `V` and only filters lists of `R`
+(compile-fail doctests in `src/filter.rs`). Values are rendered as Rentman
+expects them (checked live on 2026-10-21): booleans as `1`/`0` (Rentman
+silently ignores `true`/`false`), IDs and links as the numeric ID, timestamps
+as RFC 3339, enums as their documented text. Fields marked `GENERATED FIELD`
+and the `custom` object get no constant; `fields::QUERYABLE_FIELDS` is
+compared with the OpenAPI document by a contract test. Rentman carries filters
+through `next_page_url`; with several sort fields only the first applies
+across pages.
+
+Projections select exactly the fields a struct declares:
+`projection! { pub struct CrewName from Crew { id, firstname, email } }`
+declares the struct by field names only; the field types come from the
+generated projection markers in `projection_fields` and can be stricter than
+the full model because explicitly selected fields must satisfy their documented
+requirements. Markers carry the model's Rust field names (`rust_member` in
+`xtask/src/openapi.rs`: snake_case, raw identifiers for keywords, so
+`projection_fields::Crew::firstname`, `Contact::vat_code` for `VAT_code`,
+`r#type` for `type`, and `revision` for `updateHash`); `ProjectionField::NAME`
+keeps Rentman's name for `fields=` and decoding.
+`all_as::<CrewName>()`, `first_as` and `get_as` send the selection as `fields=`;
+the client omits automatically returned `updateHash` and adds `custom` when
+needed for registry validation. An unknown field does not compile (compile-fail doctest in
+`src/projection.rs`). It is a `macro_rules!` macro: the expansion decodes field
+by field through the hand-written `ProjectedItem::take`, so consumers need no
+serde dependency and link fields are read through the same adapters as the
+models. Rentman always adds `id`, `created`, `modified`, and `updateHash` to a
+selection; `custom` appears when the account defines custom fields. Projections
+ignore fields they do not declare. When the client has a custom-field
+registry, the resource layer requests `custom` and validates registered keys.
 
 User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
 example is compile-checked by `cargo test --doc`. This README is the
 contributor documentation and stays out of the published package.
 
-The hand-written domain facade translates API formats into narrower domain
-types such as
-`RentmanApiToken`, `InvoiceId`, `PaymentId`, `InvoiceNumber`, and
-`RentmanAmount`.
+The published guide covers initialization (including account-specific custom
+fields), typed reads and writes, paging, errors, projections, and change
+detection. Detailed `projection!` and resource-method examples live beside
+their public APIs. Generated field documentation retains available OpenAPI
+descriptions and explains the resolved Rust value, its wire identity, and
+missing/null behavior separately for models, filters, and projections.
+Write for crate consumers first: explain the Rust type, its meaning, and how
+to use it before describing Rentman's wire format or schema identity. The
+published guide and reference should contain the information needed for normal
+use without consulting Rentman's API documentation: examples, available enum
+values, payload requirements, validation rules, resource names, and limitations.
+Do not infer business meanings when Rentman's description is absent.
+Every public item has a compile-checked example: hand-written items carry
+them in their rustdoc, and the generator emits one for each client accessor,
+nested collection, named action, resource model, payload, and enum. Keep new
+public API in that pattern. Rustfmt does not format Markdown or doc comments
+on stable, so keep code in `crates-io.md` at four-space indentation by hand.
+`src/model/resource_names.md` is generated with the models and included in
+the public `model` module documentation; it maps response/request schemas,
+Rust resource/payload names, collection paths, and client accessors. Keep
+this derived file in the package and the OpenAPI update workflow's file lists.
+
+Hand-written boundary types translate API formats into narrower types such as
+`RentmanApiToken` and `Id<R>`. Every OpenAPI number in generated models,
+payloads, and projections uses `Decimal`; its arbitrary-precision JSON Serde
+integration reads and writes the exact number text without an `f64` conversion.
+Values in the open `custom` fields object also use `Decimal`. A number with
+more than 28 decimal places is rounded to 28 without a warning; a number whose
+digits do not fit `Decimal`'s 96-bit mantissa, or an exponent beyond its scale,
+is rejected. For response models, only the core fields `id`, `updateHash`, `created`, `modified`, and `creator` are
+required. The first two are non-null; the last three may be null but their
+keys must be present. Other declared response fields are optional because
+Rentman omits them from field selections and some responses. Unknown response
+fields are ignored and are not re-emitted when a model is serialized. Request
+payloads still follow the OpenAPI request schema's required fields.
+
+Custom-field definitions are account-specific. The `ExtraInputField` resource
+exposes each field's ID, `type`, and `itemtype`, so callers can interpret
+`custom_<id>` values at runtime. Enum definitions do not include their allowed
+values; `CustomFields` therefore keeps values as open JSON-compatible data.
+Register the fields used by the application when building the client; only
+those keys are retained and validated, and each must be present in returned
+`custom` data:
+
+```rust
+use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model};
+
+let custom_fields = CustomFieldRegistry::new([
+  CustomFieldDefinition::new::<model::Equipment>(8, model::ExtraInputFieldType::Text),
+])?;
+let client = RentmanClient::new(RentmanApiToken::new("token"))
+  .with_custom_fields(custom_fields);
+```
+
+Every full resource model is a read snapshot with both `id: Id<R>` and
+`revision: Revision<R>` (`updateHash` on the wire), not only an item ID.
+Published guides and generated model docs explain this pair at the point of
+use: identity stays the same across edits, while revision marks the observed
+state. Compare revisions for the same item ID, retain them with stored objects,
+and do not imply ordered versions, automatic local tracking, or conditional
+writes. Payloads and bare IDs are not read snapshots; custom projections carry
+only declared fields. `client.equipment().list().revisions().await?` reads a paginated
+ID-to-revision snapshot without loading full item bodies; compare snapshots
+with `changes_since`.
+
+`create` and `update` return a full resource. If a write response omits fields,
+the client follows it with the resource's GET endpoint. If that GET fails after
+a successful write, the error outcome is `Applied`. `create_as` and `update_as`
+return only the requested projection and fetch only when selected fields are
+missing from the write response.
+
+IDs are typed by their resource: `Id<R>` (`src/id.rs`) is used for an item's
+own `id` and for every link to it, with a generated alias per resource
+(`CrewId = Id<Crew>`, `InvoiceId = Id<Invoice>`, ...). An `id` field is a
+number on the wire and a link field a path such as `/crew/12`; the generator
+types each link field from its documented example and attaches a serde
+adapter, so reading a link to the wrong collection fails. Integer ID fields
+without such an example (for example `template` or the IDs of the
+`:setClient` actions) are typed through `xtask/schema-names.toml`,
+and the generator refuses an `ID of ...` field that is missing there.
+Polymorphic `item` fields, whose collection is named by `itemtype`, are an
+`ItemId`. Errors name the affected item as a `ResourceRef` (`/payments/7`).
+Write payloads with required fields get a generated `new` taking exactly those
+fields; payloads without required fields implement `Default`.
 
 ## Update the API contract
 
 ```bash
-scripts/update_openapi.py
+cargo xtask update-openapi
 cargo test --workspace --locked
 ```
 
+`update-openapi` is the normal path: it downloads the current document and
+regenerates every group. `fetch-openapi` and `generate-openapi` are optional
+commands for separating those steps; `generate-openapi` uses the checked-in
+document without network access, and `--only` accepts `models`, `endpoints`,
+`resources`, `fields`, `projections`, or `tests`. The `tests` group includes the
+resource HTTP tests, live sweep, and generated contract tests. Each command
+prints a short status for its current phase.
+
 The `Update OpenAPI` workflow runs daily at 05:37 UTC and can also be started
-manually in GitHub Actions. It runs `scripts/update_openapi.py` on the default
+manually in GitHub Actions. It runs `cargo xtask update-openapi` on the default
 branch and, when the contract changes, creates or updates a pull request from
 the fixed `automation/update-openapi` branch. An open update PR is reused;
 unchanged generated files do not cause another commit or CI run. Keep this
 branch reserved for automation.
+
+After refreshing the contract, the same workflow runs
+`cargo xtask api-status`. It downloads the latest
+stable crates.io package and compares its packaged OpenAPI fixture with the
+freshly downloaded document, rather than comparing the repository head or a
+release tag. Missing packages, missing fixtures, or failed downloads produce
+an unavailable status. A failed refresh also publishes an unavailable status
+instead of comparing a stale local fixture. The Shields endpoint JSON is
+published to `api-status.json` on the reserved `api-status` branch using
+`GITHUB_TOKEN`, independently of whether an update PR is needed. Do not use
+that branch for development. Publication failures fail the workflow; inspect
+the status timestamp if a scheduled run fails before it can publish.
 
 The workflow uses the built-in `GITHUB_TOKEN`; no additional secret is needed.
 Under **Settings > Actions > General > Workflow permissions**, enable
@@ -73,15 +248,41 @@ When Rentman adds, removes, or renames endpoints, fields, schemas, enum values,
 request bodies, response types, or error status codes, the contract tests fail
 until the generated contract is updated and reviewed.
 
+Generated models carry resource names, not schema names: a response schema
+drops its suffix (`CrewResponse` → `Crew`) and a request schema becomes a
+write payload (`CrewRequest` → `CrewPayload`); generated enums follow the new
+type name (`CrewCountry`). Schemas whose name does not match their collection
+are mapped in `xtask/schema-names.toml` (`FactuurResponse` →
+`Invoice`, `CrewRateResponse` → `Rate` for `/rates`, `CrewRatesResponse` →
+`CrewRate` for `/crewrates`, `QuotationResponse` → `Quote`, `LedgerResponse`
+→ `LedgerCode`, ...). `model::SCHEMA_TYPES` lists every schema with its Rust
+type; the contract tests require exactly one type per schema. Endpoint
+metadata (`EndpointRequestSpec`, `EndpointResponseSpec`) and the override
+tables keep the OpenAPI schema names.
+
 Where live API payloads contradict the documented schema, the generator applies
-deliberate, documented overrides for response models (see the `RESPONSE_*`
-tables in `scripts/generate_endpoint_manifest.py`) — for example fields that
+deliberate, documented overrides for response models (see
+`xtask/response-overrides.toml`) — for example fields that
 are documented as strings but returned as integers, documented-required fields
 that collection responses omit, and documented non-nullable fields that return
 null. Request models always keep the documented types. The live API tests
 guard these overrides against future drift.
 
+`xtask/schema-names.toml`, `xtask/response-overrides.toml`, and
+`xtask/field-rules.toml` contain the generator's explicit schema mappings,
+observed response deviations, and field classification rules. The generator
+validates schema- and field-specific entries against the OpenAPI fixture and
+fails on stale or misspelled entries.
+
 ## Checks
+
+The release-contract badge command is part of the Rust `xtask` and uses the
+system `tar` to read the released package. Its offline tests are included in
+the workspace tests and can also be run on their own:
+
+```bash
+cargo test -p xtask --locked api_status
+```
 
 Tests:
 
@@ -101,6 +302,14 @@ Formatting and static checks:
 ```bash
 cargo fmt --all -- --check
 cargo clippy --workspace --locked --all-targets -- -D warnings
+```
+
+Generated files must match the checked-in OpenAPI document. CI regenerates them
+without downloading anything and fails when the working tree then differs:
+
+```bash
+cargo xtask generate-openapi
+git status --porcelain
 ```
 
 Minimum supported Rust version (MSRV): the `rust-version` in `Cargo.toml`
@@ -141,6 +350,13 @@ live tests remain ignored and regular `cargo test` does not call the API. The
 CI test workflow does not receive the token; live tests remain in the separate,
 non-blocking workflow below.
 
+The generated first-item smoke test exists for every top-level collection. To
+also run generated `all()` tests that read every page from every documented
+top-level collection, set `RENTMAN_LIVE_FULL_COLLECTIONS=1` in the environment
+or crate-root `.env` before running `cargo test --test live_api`. This can issue
+many requests on large accounts; the switch is opt-in and Cargo rebuilds the
+test binary when it changes.
+
 The build script deliberately watches `.env` even when the file is absent.
 Cargo then reruns the build script on each invocation and may rebuild dependent
 targets unnecessarily, including in CI where tokens come from environment
@@ -153,22 +369,22 @@ detection: [#61](https://github.com/Nebensound/Rentman.rs/issues/61).
 
 Live tests only read, with one opt-in exception: when
 `RENTMAN_LIVE_WRITE_EQUIPMENT_ID` names a dedicated, non-archived test
-equipment item, a test writes its current price back unchanged through
-`update_equipment_prices()` and through a typed `send_once()` request, and
-checks that no price field changed. Without the variable nothing is written.
+equipment item, a test reads its prices through a projection, writes the current price back
+unchanged through `client.equipment().update(...)`, and checks against the
+stored JSON text that no price field changed. Without the variable nothing is written.
 Payments are not covered, because a created payment cannot be undone without
 side effects; that needs a dedicated Rentman test account. In CI the
 `live-api` workflow reads the ID from the optional `RENTMAN_LIVE_WRITE_EQUIPMENT_ID`
 repository variable (a variable, not a secret, because the ID is not
 confidential).
 
-Every documented `GET` collection endpoint without path parameters has its own
-generated test in `tests/live/generated_sweep.rs`: each calls the endpoint
-with `limit=1` and fails individually when the live payload no longer matches
-the typed models — this catches drift between Rentman's documentation and the
+Every documented top-level collection has its own generated test in
+`tests/live/generated_sweep.rs`: each reads the first item through the
+resource layer (`client.crew().list().first(1)`) and fails individually when
+the live payload no longer matches the typed models — this catches drift between Rentman's documentation and the
 real API per endpoint. All tests share one client so the built-in rate limiter
-applies across the parallel test threads. The tests are regenerated by
-`scripts/generate_endpoint_manifest.py` together with the contract files. CI
+applies across the parallel test threads. The tests are regenerated with
+`cargo xtask generate-openapi --only tests` together with the contract files. CI
 runs the live tests in the non-blocking `live-api` workflow (manual dispatch
 plus a weekly schedule) using the `RENTMAN_API_TOKEN` repository secret.
 
@@ -181,30 +397,46 @@ cargo +nightly llvm-cov --workspace --locked \
   --fail-under-functions 100
 ```
 
-Fuzzing of amount parsing (nightly, [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)):
+## Migrating to the resource layer
 
-```bash
-cargo install cargo-fuzz --version 0.13.2 --locked
-mkdir -p fuzz/corpus/amount
-cargo +nightly fuzz run amount fuzz/corpus/amount fuzz/seeds/amount -- \
-  -max_total_time=60 -dict=fuzz/amount.dict
+The resource layer replaces the endpoint API (`client.endpoint::<E>()`,
+`RentmanEndpointRequest`, `CollectionResponse`, `ItemResponse`) and the
+hand-written helpers. Their equivalents:
+
+```rust,ignore
+use rentman_client::{PageSize, fields::equipment, model, projection};
+
+// all_active_equipment(): a typed filter and a projection of the price fields.
+projection! {
+    pub struct EquipmentPrices from Equipment { id, price, list_price, subrental_costs }
+}
+let active: Vec<EquipmentPrices> = client
+    .equipment()
+    .list()
+    .filter(equipment::IN_ARCHIVE.eq(false))
+    .page_size(PageSize::MAX)
+    .all_as()
+    .await?;
+
+// update_equipment_prices(id, &payload): `update` with the generated payload
+// (only the fields that are set are sent; PUT is retried).
+let payload = model::EquipmentPayload { price: Some(amount), ..Default::default() };
+client.equipment().update(equipment_id, &payload).await?;
+
+// all_invoices() / all_payments_by_invoice(): projections; group as needed.
+projection! { pub struct InvoiceRow from Invoice { id, number, is_paid, price_invat } }
+projection! { pub struct PaymentRow from Payment { id, invoice, moment, amount, description } }
+let invoices: Vec<InvoiceRow> = client.invoices().list().all_as().await?;
+let mut payments: std::collections::HashMap<model::InvoiceId, Vec<PaymentRow>> = Default::default();
+for payment in client.payments().list().all_as::<PaymentRow>().await? {
+    payments.entry(payment.invoice).or_default().push(payment);
+}
+
+// update_payment(id, &payload) / create_payment(invoice, &payload): `update`,
+// and the nested `create`, which is sent exactly once.
+client.payments().update(payment_id, &payment_payload).await?;
+client.invoices().payments(invoice_id).create(&payment_payload).await?;
 ```
-
-The `amount` target in `fuzz/` feeds arbitrary input to `RentmanAmount`'s
-deserialization. It checks that parsing never panics, that every JSON number
-with an exponent up to ±1000 gives the same value as an independent
-arbitrary-precision reference (`bigdecimal`), and that every accepted amount
-survives a JSON round trip with value and scale. Pull requests with changes beyond documentation and crate-version-only edits
-run it for 60 seconds in the `fuzz` CI job; the non-blocking `Fuzz` workflow runs it
-for 30 minutes every week and on manual dispatch. CI adds
-`--target x86_64-unknown-linux-gnu`, because `cargo fuzz` otherwise builds for
-the triple its own binary was built for, and a musl build has no address
-sanitizer. A crashing input is
-uploaded as a workflow artifact and reproduced with
-`cargo +nightly fuzz run amount <file>`; every finding becomes a regression
-test in the library. `fuzz/` is a separate crate with its own lockfile, kept
-in line with the library's `Cargo.lock`, and is not part of the published
-package.
 
 ## Versioning
 
@@ -235,8 +467,7 @@ Outside pull requests the version job cannot push a fix, so it fails when the
 then resolved on a pull request branch.
 
 Every merge into `main` triggers the `release` job after tests, coverage, the
-MSRV build, and the package smoke test pass, and the short fuzz run either
-passes or is explicitly skipped for documentation/version-only changes. It
+MSRV build, and the package smoke test pass. It
 verifies the package again from the merged commit, publishes it to crates.io without `--allow-dirty` (using the
 `CARGO_REGISTRY_TOKEN` repository secret), and creates the matching `v*` git
 tag and GitHub release, which in turn seeds the next version calculation.
@@ -250,15 +481,19 @@ tests, scripts, generated helper text, and Rust identifiers.
 Types are as narrow as reasonably possible. OpenAPI is the minimum contract, not
 the upper bound of strict typing:
 
-- API fields with a finite set of values are modeled as enums.
+- API fields with a finite set of values are modeled as enums. Enums in
+  response models are open: an undocumented value deserializes to
+  `Unknown(String)` and serializes back unchanged, so a value Rentman adds
+  later does not fail a whole collection. Request enums stay closed, because
+  the client only sends documented values. A generated contract test per
+  response enum (`tests/contract/generated_response_enums.rs`) fails when a
+  documented value has no named variant.
 - Timestamps are `DateTime<FixedOffset>`, not strings.
 - Money-like values use exact decimal types, never `f32` or `f64`.
-  `RentmanAmount` reads and writes JSON numbers from their exact text. An
-  amount with more precision than `Decimal` holds (more than 28 decimal places
-  or a mantissa beyond 96 bits) is rounded half away from zero to the nearest
-  value that fits, with a `tracing` warning naming the original and the
-  rounded value, so one such value cannot make a whole listing unreadable. An
-  integer part that does not fit is rejected.
+  Numeric fields use `Decimal` directly and read/write JSON numbers exactly
+  through `serde-arbitrary-precision`, never through `f64`. More than 28
+  decimal places are rounded silently; digits beyond the 96-bit mantissa are
+  rejected.
 - Identifiers, domain keys, URLs, and API tokens are dedicated types.
 - `bool` is only acceptable for real on/off switches; domain states are modeled
   as enums.
@@ -269,16 +504,25 @@ Every line of the OpenAPI definition must be handled deliberately. Schemas,
 fields, enum values, path/query parameters, request bodies, success responses,
 pagination metadata, and every documented error status code must be represented
 in the generated contract or in an explicit hand-written boundary type. The
-public API must expose this as Rentman API models/endpoints, not as an
-`openapi` user-facing module.
+public API exposes this as resources, models, and field constants, not as an
+`openapi` or endpoint module.
 
-Every generated endpoint must be executable. The build checks that each endpoint
-has a serializable request type and a deserializable response type, and unit
-tests verify the shared execution path for path parameters, query parameters,
-typed JSON bodies, typed JSON responses, and no-content responses.
-Documented path/query parameters are represented as `EndpointParameterSpec`
-metadata; clear parameter semantics also get typed builder helpers such as
-`id(model::RentmanId)`.
+Complete collections are read through one shared paging core (`src/paging.rs`);
+no other code pages by itself. It follows Rentman's `next_page_url` unchanged
+until it is `null` (the cursor carries `fields`, filters, and the page size),
+and requests the next offset only when an older response has a full page
+without `next_page_url`. A `next_page_url` that repeats an earlier page or
+leaves the configured API origin (it would receive the API token) fails with
+an `UnexpectedResponse` error. Page sizes are a validated `PageSize` (1 to
+1500, default 300).
+
+Every documented operation must be reachable through a resource; a contract
+test compares `resource::REACHABLE_OPERATIONS` with the OpenAPI document. The
+internal endpoint metadata records every documented path/query parameter
+(`EndpointParameterSpec`), body, response, and error status; its contract test
+lives next to it in `src/endpoint.rs` because the types are crate-internal.
+Path parameters are typed in the resource methods (`get(Id<R>)`,
+`appointments(Id<Crew>)`).
 
 All Rentman API I/O is async. Public API operations return futures and are used
 with `.await`; production code must not add blocking HTTP clients, blocking
@@ -297,11 +541,11 @@ Tests cover the happy path, error paths, boundary values, and every enum variant
 and branch of hand-written code. Coverage exclusions are allowed only where the
 instrumentation cannot measure the code structurally; "async IO", "timers", or
 "hard to test" are not valid reasons. Retries, backoff, rate limiting, and
-transport failures are tested against the local test server. Parsers and
-conversions such as exact amount parsing additionally get property-based tests.
-Amount parsing is also checked differentially: for generated number texts, an
-independent arbitrary-precision computation (`bigdecimal`) decides the expected
-value and whether it is exact or rounded, and the parser must agree.
+transport failures are tested against the local test server. Handwritten
+parsers and conversions get property-based tests. Numeric JSON parsing and
+serialization use `rust_decimal`'s
+arbitrary-precision Serde implementation; a model-payload test verifies exact
+digits survive a JSON round trip.
 Unit tests live next to the module they test; integration and contract tests
 live in `tests/`. Error behavior is asserted on typed error variants, not on
 message substrings.
@@ -333,7 +577,7 @@ write is reported as an error whose outcome is unknown, because the first
 server may already have applied it.
 Requests that create data (`POST`) are sent exactly once, and their
 documentation names the read method to reconcile with after an error. Every
-high-level write documents its retry behavior, and a test proves how many
+write method of the resource layer documents its retry behavior, and a test proves how many
 requests reach the server on a transient failure.
 
 ### Toolchain and CI
@@ -344,25 +588,16 @@ forbidden by a crate-level lint. Every cargo command in CI that resolves
 dependencies (build, test, clippy, doc, coverage, package) uses `--locked`;
 `cargo fmt` does not resolve dependencies and takes no `--locked`.
 
-Required pull request checks are formatting, clippy with `-D warnings`, tests
-and documentation tests, `cargo doc` with warnings as errors, the coverage gate,
-the MSRV build, a package build with a smoke test outside the source tree, and
-the 60-second fuzz run.
+Required pull request checks are formatting, up-to-date generated files,
+clippy with `-D warnings`, tests and documentation tests, `cargo doc` with
+warnings as errors, the coverage gate, the MSRV build, and a package build with
+a smoke test outside the source tree.
 
 The branch rules require the status contexts `test` and `coverage`. The `test`
-job is an aggregate gate over `version`, `checks` (formatting, tests, rustdoc,
-and clippy), `coverage`, `msrv`, `package`, `changes`, and `fuzz`. It always
-runs and requires explicit success from all unconditional jobs. The `changes`
-job skips fuzzing only when all changes are documentation (`.md`, `.rst`, `.txt`,
-or license files outside `fuzz/`) or the crate's own version in `Cargo.toml`,
-`Cargo.lock`, and `fuzz/Cargo.lock`. Files under `fuzz/` always require fuzzing,
-regardless of extension, except for that lockfile's crate-version-only changes. Rust code, dependencies, build settings, CI, and other file
-changes require fuzzing. Version-job dispatches compare the entire branch
-against the default branch; manual default-branch runs always fuzz.
-The gate accepts a skipped fuzz job only after a successful, explicit
-`fuzz_required=false` decision. Failure or cancellation always blocks merging.
-The scheduled live API and 30-minute fuzz workflows
-remain separate, non-blocking checks. Releases also wait for this gate.
+job is an aggregate gate over `version`, `checks` (formatting, generated files,
+tests, rustdoc, and clippy), `coverage`, `msrv`, and `package`. It always runs and requires
+explicit success from each job. The scheduled live API workflow remains a
+separate, non-blocking check. Releases also wait for this gate.
 
 Every check command in this README matches what CI runs. Third-party actions
 are pinned to a commit SHA or an immutable version tag, jobs get explicit
@@ -373,11 +608,3 @@ minimal `permissions`, and the release publishes exactly the verified package.
 A deliberate deviation from these rules is documented here with its rationale,
 risk, and a linked follow-up issue. Open deviations are tracked in
 [#14](https://github.com/Nebensound/Rentman.rs/issues/14).
-
-- `RentmanAmount` has no currency. Rentman's API sends amounts as bare numbers
-  and the currency is an account setting, so the type is a wire-boundary type,
-  not a money type for domain logic. Consumers convert it into their own
-  currency-carrying type. Risk: mixing amounts of different currencies or
-  meanings (net/gross) if it is used beyond the boundary. Decided in
-  [#23](https://github.com/Nebensound/Rentman.rs/issues/23); `RentmanAmount`'s
-  documentation states the same.

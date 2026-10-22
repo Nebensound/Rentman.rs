@@ -24,17 +24,19 @@ repositories.
 - Keep the library fully async for Rentman API I/O. Do not add blocking HTTP
   clients, blocking sleeps, or thread-based production request execution.
 - Prefer small domain types over raw primitives at API boundaries. Examples:
-  `RentmanApiToken`, `InvoiceId`, `PaymentId`, `InvoiceNumber`, and
-  `RentmanAmount`.
+  `RentmanApiToken`, `Id<R>` (e.g. `InvoiceId = Id<Invoice>`), `InvoiceNumber`,
+  and `Decimal`. IDs and links to the same resource share one `Id<R>`
+  type; never add untyped ID or link types.
 - Do not leak secrets. Token wrappers must keep `Debug` redacted.
 - Use exact decimal values for payment amounts. Do not use `f32` or `f64` for
   money-like values.
 - Treat the OpenAPI document as the minimum contract, not as the maximum
   strictness. If a field has clear semantics, model that semantics even when
   the OpenAPI type is only `string` or `integer`.
-- Keep generated or documentation-derived data behind a hand-written facade.
-  The public user-facing modules are `model` and `endpoint`; do not expose
-  `openapi` as part of the ergonomic main public API.
+- The resource layer is the only public API for Rentman data. The public
+  modules are `resource`, `model`, `fields`, and `projection_fields`; the
+  endpoint layer and the response envelopes are crate-internal. Do not add
+  hand-written per-endpoint methods or expose `openapi` or `endpoint`.
 - Add abstractions only when they remove real duplication or make API boundaries
   safer.
 
@@ -45,28 +47,39 @@ repositories.
   fields, enums, path/query parameters, request bodies, success responses,
   pagination metadata, and every documented error status. If a response code is
   documented, the library must know it through `EndpointErrorSpec`.
-- Refresh the OpenAPI fixture with `scripts/update_openapi.py`; do not edit
+- Refresh the OpenAPI fixture with `cargo xtask update-openapi`; do not edit
   `src/endpoint/generated.rs` or `src/model/generated.rs` by hand.
+- Generator-specific schema mappings and live API deviations are declared in
+  `xtask/schema-names.toml`, `xtask/response-overrides.toml`, and
+  `xtask/field-rules.toml`; keep these entries validated against the fixture.
 - The generated OpenAPI contract files are reviewable contract data. If Rentman
   changes documented endpoints, fields, schemas, enum values, request bodies,
   response types, or error codes, regenerate them and review the diff.
 - Every endpoint must have a meaningful Rust request type and response type.
   Use `NoRequest` or `NoContent` only when the OpenAPI operation actually has
   no JSON request or response body.
-- Every documented endpoint must be executable through `RentmanClient` with a
+- Every documented operation must be reachable through a resource, and the
+  internal endpoint for it must be executable with a
   typed request model and typed response model. The generator must keep the
   compile-time executability assertion in sync with every endpoint type.
-- Every documented path/query parameter must be represented through
-  `EndpointParameterSpec`. When a parameter has clear semantics, expose a typed
-  builder helper such as `id(model::RentmanId)` instead of making users pass raw
-  strings.
+- Every documented path/query parameter must be represented through the
+  internal `EndpointParameterSpec`. Path parameters are typed in the resource
+  methods (`get(Id<R>)`), never raw strings.
+- Response enums are open (`Unknown(String)` keeps an undocumented value as
+  sent); request enums stay closed. Every documented value must still be a
+  named variant.
 - Avoid public `serde_json::Value` as an escape hatch. For intentionally open
   OpenAPI shapes, create an explicit domain type such as `CustomFields`.
-- For collection pagination, follow Rentman's `next_page_url` when present.
-  Keep the offset fallback only for compatibility with older responses.
+- Page collections only through the shared paging core in `src/paging.rs`. It
+  follows Rentman's `next_page_url` unchanged until it is `null`, keeps the
+  offset fallback only for older responses, and rejects a repeated or
+  foreign-origin `next_page_url`. Page sizes are a validated `PageSize`.
+- Filters and sorting are typed through the generated `fields` constants;
+  never add raw query strings to the public API. Booleans are sent as `1`/`0`.
 - Keep authentication, retry handling, and rate limiting inside the client.
 - Translate wire quirks at the boundary. For example, Rentman's invoice links
-  such as `/invoices/14` should become `InvoiceId`.
+  such as `/invoices/14` become `InvoiceId` through the generated link
+  adapters, not through hand-written parsing.
 
 ## Tests And Coverage
 
@@ -95,16 +108,16 @@ repositories.
 - Do not add broad file-level exclusions for production code.
 - Cover the happy path, error paths, boundary values, and every enum variant and
   branch of hand-written code.
-- Parsers and conversions, for example exact amount parsing, additionally get
-  property-based tests (`proptest`) for round trips, equivalent notations, and
-  "never panics" on arbitrary input.
+- Handwritten parsers and conversions additionally get property-based tests
+  (`proptest`) for round trips, equivalent notations, and "never panics" on
+  arbitrary input.
 - Unit tests live in a `#[cfg(test)] mod tests` next to the module they test.
   Integration and contract tests live in `tests/`. Do not grow one test module
   for the whole crate.
 - Assert error behavior on typed error variants, not on error message
   substrings.
 - Do not require real Rentman credentials for default tests.
-- When adding a high-level client method, add both:
+- When changing the resource layer, add both:
   - a behavior test using the local test server, and
   - an OpenAPI contract assertion for the documented operation and schema fields.
 
@@ -143,7 +156,7 @@ repositories.
 - Requests that create data (`POST`) are sent exactly once. Their docs state
   that the caller has to reconcile after an error, and which read method to use
   for it.
-- Every high-level write method documents its retry behavior, and a test proves
+- Every write method of the resource layer documents its retry behavior, and a test proves
   how many requests reach the server on a transient failure.
 
 ## Toolchain And CI
@@ -171,6 +184,3 @@ repositories.
 
 - A deliberate deviation from these rules is documented in the README with its
   rationale, risk, and a linked follow-up issue.
-- `RentmanAmount` is a wire-boundary type without a currency, because the
-  Rentman API sends bare numbers. It must not be used as a general money type in
-  domain logic; consumers convert it into their own currency-carrying type.

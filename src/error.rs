@@ -1,10 +1,19 @@
 //! Typed errors of the client.
 
-use crate::ids::{EquipmentId, InvoiceId, PaymentId};
+use crate::custom_fields::CustomFieldError;
+use crate::id::{Id, Resource};
 use reqwest::StatusCode;
 use std::fmt;
 
 /// Result of a fallible client operation.
+///
+/// ```
+/// use rentman_client::{RentmanClient, model::Crew};
+///
+/// async fn active_crew(client: &RentmanClient) -> rentman_client::Result<Vec<Crew>> {
+///     client.crew().list().filter(rentman_client::fields::crew::ACTIVE.eq(true)).all().await
+/// }
+/// ```
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// Error of a Rentman API call.
@@ -12,16 +21,50 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// Match on [`Error::kind`] to tell failures apart; [`Error::operation`] and
 /// [`Error::resource`] say which call failed. For writes, [`Error::outcome`]
 /// says whether Rentman may have applied the request.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::{ErrorKind, model::CrewId};
+///
+/// match client.crew().get(CrewId::new(12)).await {
+///     Ok(member) => println!("found {}", member.id),
+///     Err(error) if error.status().is_some_and(|status| status.as_u16() == 404) => {
+///         println!("no crew member 12");
+///     }
+///     Err(error) => {
+///         eprintln!("{} failed for {:?}: {error}", error.operation().unwrap_or("request"), error.resource());
+///         if let ErrorKind::Transport(_) = error.kind() {
+///             // Network trouble: the client already retried.
+///         }
+///         return Err(error);
+///     }
+/// }
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug)]
 pub struct Error {
     kind: ErrorKind,
     operation: Option<&'static str>,
-    resource: Option<Resource>,
+    resource: Option<ResourceRef>,
     earlier_attempt_uncertain: bool,
     acknowledged: bool,
 }
 
 /// What went wrong.
+///
+/// The enum is `#[non_exhaustive]`: add a `_` arm when matching it.
+///
+/// ```
+/// use rentman_client::{ErrorKind, InvalidRequest, PageSize};
+///
+/// let error = PageSize::new(0).unwrap_err();
+/// match error.kind() {
+///     ErrorKind::InvalidRequest(InvalidRequest::PageSize { requested }) => assert_eq!(*requested, 0),
+///     ErrorKind::Status { status, body } => println!("{status}: {body}"),
+///     other => println!("{other}"),
+/// }
+/// ```
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum ErrorKind {
@@ -45,70 +88,108 @@ pub enum ErrorKind {
     /// cannot interpret.
     #[error("unexpected Rentman API response: {0}")]
     UnexpectedResponse(String),
+    /// A registered custom field was missing or had a value of the wrong JSON type.
+    #[error("invalid Rentman custom field: {0}")]
+    CustomField(#[from] CustomFieldError),
     /// The request could not be built; nothing was sent.
     #[error("invalid Rentman API request: {0}")]
     InvalidRequest(#[source] InvalidRequest),
 }
 
-/// Why a request could not be built.
+/// Why a request could not be built. Nothing was sent to Rentman.
+///
+/// ```
+/// use rentman_client::{ErrorKind, InvalidRequest, PageSize};
+///
+/// let error = PageSize::new(2000).unwrap_err();
+/// assert!(matches!(
+///     error.kind(),
+///     ErrorKind::InvalidRequest(InvalidRequest::PageSize { requested: 2000 })
+/// ));
+/// ```
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum InvalidRequest {
-    /// A path parameter was set that the endpoint path does not contain.
-    #[error("the endpoint has no {{{name}}} path parameter")]
-    UnknownPathParameter {
-        /// Name of the parameter.
-        name: String,
+    /// The page size is outside the range Rentman documents (1 to 1500).
+    #[error("page size {requested} is outside the documented range 1..=1500")]
+    PageSize {
+        /// Requested number of items per page.
+        requested: usize,
     },
-    /// The endpoint path still contains unset path parameters.
-    #[error("missing path parameters for {path}")]
-    MissingPathParameters {
-        /// Documented path template of the endpoint.
-        path: &'static str,
-    },
-    /// The endpoint requires a JSON body, but none was set.
-    #[error("a {schema} JSON request body is required")]
-    MissingBody {
-        /// Name of the documented request schema.
-        schema: &'static str,
-    },
-    /// A body was set for an endpoint that does not accept one.
-    #[error("the endpoint does not accept a JSON request body")]
-    UnexpectedBody,
-    /// The query parameters cannot be encoded into the URL.
-    #[error("the query cannot be encoded: {0}")]
-    Query(#[source] serde_urlencoded::ser::Error),
-    /// The request body cannot be encoded as JSON.
-    #[error("the body cannot be encoded as JSON: {0}")]
-    Body(#[source] serde_json::Error),
     /// The HTTP request is malformed, e.g. a header value with a line break.
     #[error("{0}")]
     Http(#[source] reqwest::Error),
 }
 
-/// Rentman resource a failed call was about.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Resource {
-    /// An invoice, e.g. when creating a payment on it.
-    Invoice(InvoiceId),
-    /// A payment.
-    Payment(PaymentId),
-    /// An equipment item.
-    Equipment(EquipmentId),
+/// Rentman item a failed call was about, e.g. `/payments/7`.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) {
+/// use rentman_client::model::{Crew, CrewId};
+///
+/// if let Err(error) = client.crew().get(CrewId::new(12)).await {
+///     if let Some(resource) = error.resource() {
+///         assert_eq!(resource.collection(), "crew");
+///         assert_eq!(resource.id::<Crew>(), Some(CrewId::new(12)));
+///         println!("failed for {resource}"); // `/crew/12`
+///     }
+/// }
+/// # }
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ResourceRef {
+    collection: &'static str,
+    id: u64,
 }
 
-impl fmt::Display for Resource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Invoice(id) => write!(f, "invoice {id}"),
-            Self::Payment(id) => write!(f, "payment {id}"),
-            Self::Equipment(id) => write!(f, "equipment {id}"),
+impl ResourceRef {
+    /// Collection of the item, e.g. `payments`.
+    pub fn collection(&self) -> &'static str {
+        self.collection
+    }
+
+    /// Typed ID of the item, when it belongs to resource `R`.
+    pub fn id<R: Resource>(&self) -> Option<Id<R>> {
+        (self.collection == R::COLLECTION).then_some(Id::new(self.id))
+    }
+}
+
+impl<R: Resource> From<Id<R>> for ResourceRef {
+    fn from(id: Id<R>) -> Self {
+        Self {
+            collection: R::COLLECTION,
+            id: id.get(),
         }
     }
 }
 
+/// Displays the item's link, e.g. `/payments/7`.
+impl fmt::Display for ResourceRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "/{}/{}", self.collection, self.id)
+    }
+}
+
 /// Whether Rentman applied a request that failed.
+///
+/// Reads and idempotent writes (`update`, `delete`) are safe to repeat in
+/// every case. Before repeating a `create` or a named action, check this:
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::{RequestOutcome, model::TaskStatusPayload};
+///
+/// let payload = TaskStatusPayload::new("green".to_string());
+/// if let Err(error) = client.task_statuses().create(&payload).await {
+///     match error.outcome() {
+///         RequestOutcome::NotApplied => { /* safe to create again */ }
+///         RequestOutcome::Applied => { /* it exists; read it instead */ }
+///         RequestOutcome::Unknown => { /* list first, then decide */ }
+///     }
+/// }
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RequestOutcome {
     /// Rentman did not apply the request; repeating it is safe.
@@ -143,8 +224,8 @@ impl Error {
     }
 
     /// Records the resource the failed call was about.
-    pub(crate) fn about(mut self, resource: Resource) -> Self {
-        self.resource = Some(resource);
+    pub(crate) fn about(mut self, resource: impl Into<ResourceRef>) -> Self {
+        self.resource = Some(resource.into());
         self
     }
 
@@ -174,7 +255,7 @@ impl Error {
     }
 
     /// Resource the failed call was about, if it was about a single one.
-    pub fn resource(&self) -> Option<Resource> {
+    pub fn resource(&self) -> Option<ResourceRef> {
         self.resource
     }
 
@@ -203,7 +284,9 @@ impl Error {
             ErrorKind::Status { .. } => RequestOutcome::NotApplied,
             ErrorKind::Transport(error) if error.is_connect() => RequestOutcome::NotApplied,
             ErrorKind::Transport(_) => RequestOutcome::Unknown,
-            ErrorKind::Decode(_) | ErrorKind::UnexpectedResponse(_) => RequestOutcome::Applied,
+            ErrorKind::Decode(_) | ErrorKind::UnexpectedResponse(_) | ErrorKind::CustomField(_) => {
+                RequestOutcome::Applied
+            }
         };
         if self.earlier_attempt_uncertain && outcome == RequestOutcome::NotApplied {
             RequestOutcome::Unknown
@@ -241,6 +324,7 @@ impl std::error::Error for Error {
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;
+    use crate::model::{Invoice, Payment, PaymentId};
     use std::error::Error as _;
 
     fn status(code: u16) -> Error {
@@ -276,13 +360,18 @@ mod tests {
     fn describes_operation_and_resource() {
         let error = status(404)
             .in_operation("updatePayment")
-            .about(Resource::Payment(PaymentId::new(7)));
+            .about(PaymentId::new(7));
         assert_eq!(
             error.to_string(),
-            "Rentman updatePayment failed for payment 7: Rentman API returned 404 Not Found: body"
+            "Rentman updatePayment failed for /payments/7: Rentman API returned 404 Not Found: body"
         );
         assert_eq!(error.operation(), Some("updatePayment"));
-        assert_eq!(error.resource(), Some(Resource::Payment(PaymentId::new(7))));
+        let resource = error.resource().unwrap();
+        assert_eq!(resource, ResourceRef::from(PaymentId::new(7)));
+        assert_eq!(resource.collection(), "payments");
+        assert_eq!(resource.id::<Payment>(), Some(PaymentId::new(7)));
+        assert_eq!(resource.id::<Invoice>(), None);
+        assert_eq!(resource.to_string(), "/payments/7");
 
         assert_eq!(
             status(404).in_operation("getFactuurCollection").to_string(),
@@ -291,19 +380,6 @@ mod tests {
         assert_eq!(
             status(404).to_string(),
             "Rentman API returned 404 Not Found: body"
-        );
-
-        assert_eq!(
-            Resource::Invoice(InvoiceId::new(1)).to_string(),
-            "invoice 1"
-        );
-        assert_eq!(
-            Resource::Payment(PaymentId::new(2)).to_string(),
-            "payment 2"
-        );
-        assert_eq!(
-            Resource::Equipment(EquipmentId::new(3)).to_string(),
-            "equipment 3"
         );
     }
 
@@ -320,7 +396,7 @@ mod tests {
         assert_eq!(status(500).outcome(), RequestOutcome::Unknown);
         assert_eq!(status(303).outcome(), RequestOutcome::Unknown);
         assert_eq!(
-            Error::invalid_request(InvalidRequest::UnexpectedBody).outcome(),
+            Error::invalid_request(InvalidRequest::PageSize { requested: 0 }).outcome(),
             RequestOutcome::NotApplied
         );
         assert_eq!(
@@ -371,26 +447,10 @@ mod tests {
 
     #[test]
     fn describes_every_invalid_request() {
-        let cases = [
-            (
-                InvalidRequest::UnknownPathParameter { name: "x".into() },
-                "the endpoint has no {x} path parameter",
-            ),
-            (
-                InvalidRequest::MissingPathParameters { path: "/a/{id}" },
-                "missing path parameters for /a/{id}",
-            ),
-            (
-                InvalidRequest::MissingBody {
-                    schema: "PaymentRequest",
-                },
-                "a PaymentRequest JSON request body is required",
-            ),
-            (
-                InvalidRequest::UnexpectedBody,
-                "the endpoint does not accept a JSON request body",
-            ),
-        ];
+        let cases = [(
+            InvalidRequest::PageSize { requested: 0 },
+            "page size 0 is outside the documented range 1..=1500",
+        )];
         for (reason, text) in cases {
             let error = Error::invalid_request(reason);
             assert_eq!(
@@ -400,12 +460,6 @@ mod tests {
             assert!(error.source().is_some());
         }
 
-        let error = Error::invalid_request(InvalidRequest::Body(decode_error()));
-        assert!(
-            error
-                .to_string()
-                .starts_with("invalid Rentman API request: the body cannot be encoded as JSON: ")
-        );
         let error = Error::invalid_request(InvalidRequest::Http(builder_error()));
         assert!(
             error

@@ -22,17 +22,19 @@ mod generated_sweep;
 
 use bigdecimal::BigDecimal;
 use rentman_client::{
-    EquipmentId, EquipmentPricePayload, RentmanApiToken, RentmanClient, RentmanEquipment, endpoint,
-    model,
+    PageSize, RentmanApiToken, RentmanClient, Revisioned, Revisions,
+    fields::equipment,
+    model::{self, EquipmentId},
 };
-use rust_decimal::Decimal;
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::sync::OnceLock;
-
-/// Rows per page for the `in_archive` filter checks: enough to contain both
-/// archived and active items in a real account.
-const FILTER_CHECK_LIMIT: usize = 500;
+use std::{
+    collections::BTreeSet,
+    io::{Read, Write},
+    net::TcpListener,
+    sync::OnceLock,
+    thread::JoinHandle,
+};
 
 /// Shared client so all parallel tests go through one rate limiter.
 fn live_client() -> RentmanClient {
@@ -122,27 +124,157 @@ mod dotenv_tests {
     }
 }
 
+rentman_client::projection! {
+    /// An invoice, reduced to its ID.
+    struct InvoiceRef from Invoice { id }
+}
+
+rentman_client::projection! {
+    /// A payment and the invoice it belongs to.
+    struct PaymentRef from Payment { id, invoice }
+}
+
+fn spawn_projection_error_server(count: usize) -> (rentman_client::Url, JoinHandle<Vec<String>>) {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let server = std::thread::spawn(move || {
+        let mut requests = Vec::with_capacity(count);
+        for _ in 0..count {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut bytes = Vec::new();
+            let mut buffer = [0; 1024];
+            loop {
+                let read = stream.read(&mut buffer).unwrap();
+                if read == 0 {
+                    break;
+                }
+                bytes.extend_from_slice(&buffer[..read]);
+                if bytes.windows(4).any(|window| window == b"\r\n\r\n") {
+                    break;
+                }
+            }
+            let request = String::from_utf8(bytes).unwrap();
+            requests.push(request.lines().next().unwrap().to_string());
+            stream
+                .write_all(
+                    b"HTTP/1.1 400 Bad Request\r\nContent-Length: 1\r\nConnection: close\r\n\r\nx",
+                )
+                .unwrap();
+        }
+        requests
+    });
+    (
+        rentman_client::Url::parse(&format!("http://{address}/")).unwrap(),
+        server,
+    )
+}
+
+#[tokio::test]
+async fn projection_listing_paths_are_exercised_without_live_credentials() {
+    let (base_url, server) = spawn_projection_error_server(4);
+    let registry = rentman_client::CustomFieldRegistry::new([
+        rentman_client::CustomFieldDefinition::new::<model::Invoice>(
+            8,
+            model::ExtraInputFieldType::Text,
+        ),
+        rentman_client::CustomFieldDefinition::new::<model::Payment>(
+            9,
+            model::ExtraInputFieldType::Text,
+        ),
+        rentman_client::CustomFieldDefinition::new::<model::Equipment>(
+            10,
+            model::ExtraInputFieldType::Text,
+        ),
+    ])
+    .unwrap();
+    let client = RentmanClient::with_base_url(base_url, RentmanApiToken::new("local-test"))
+        .unwrap()
+        .with_custom_fields(registry);
+
+    for (error, operation) in [
+        (
+            client
+                .invoices()
+                .list()
+                .all_as::<InvoiceRef>()
+                .await
+                .unwrap_err(),
+            "getFactuurCollection",
+        ),
+        (
+            client
+                .payments()
+                .list()
+                .all_as::<PaymentRef>()
+                .await
+                .unwrap_err(),
+            "getPaymentCollection",
+        ),
+        (
+            client
+                .equipment()
+                .list()
+                .all_as::<EquipmentName>()
+                .await
+                .unwrap_err(),
+            "getEquipmentCollection",
+        ),
+        (
+            client
+                .equipment()
+                .get_as::<EquipmentPrices>(EquipmentId::new(7))
+                .await
+                .unwrap_err(),
+            "getEquipmentItem",
+        ),
+    ] {
+        assert_eq!(error.status().map(|status| status.as_u16()), Some(400));
+        assert_eq!(error.operation(), Some(operation));
+    }
+
+    let requests = server.join().unwrap();
+    assert!(requests[0].starts_with("GET /invoices?"));
+    assert!(requests[0].contains("fields=id%2Ccustom"));
+    assert!(requests[1].starts_with("GET /payments?"));
+    assert!(requests[1].contains("fields=id%2Cinvoice%2Ccustom"));
+    assert!(requests[2].starts_with("GET /equipment?"));
+    assert!(requests[2].contains("fields=id%2Cname%2Cin_archive%2Ccreator%2Ccustom"));
+    assert!(requests[3].starts_with("GET /equipment/7?"));
+    assert!(requests[3].contains("fields=id%2Cprice%2Clist_price%2Csubrental_costs%2Ccustom"));
+}
+
 #[tokio::test]
 #[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
-async fn high_level_invoice_and_payment_listing_works_live() {
+async fn invoice_and_payment_listing_works_live() {
     let client = live_client();
 
     let invoices = client
-        .all_invoices()
+        .invoices()
+        .list()
+        .page_size(PageSize::MAX)
+        .all_as::<InvoiceRef>()
         .await
-        .expect("live invoice listing succeeds");
+        .expect("live invoice listing succeeds")
+        .into_iter()
+        .map(|invoice| invoice.id)
+        .collect::<BTreeSet<_>>();
     let payments = client
-        .all_payments_by_invoice()
+        .payments()
+        .list()
+        .page_size(PageSize::MAX)
+        .all_as::<PaymentRef>()
         .await
         .expect("live payment listing succeeds");
 
-    for invoice_id in payments.keys() {
+    for payment in payments {
         assert!(
-            invoices.iter().any(|invoice| invoice.id == *invoice_id),
-            "payment references invoice {invoice_id} that the invoice listing does not contain"
+            invoices.contains(&payment.invoice),
+            "payment {} references invoice {} that the invoice listing does not contain",
+            payment.id,
+            payment.invoice
         );
     }
 }
@@ -152,56 +284,37 @@ async fn high_level_invoice_and_payment_listing_works_live() {
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
-async fn active_equipment_listing_works_and_excludes_archived_items_live() {
+async fn in_archive_filter_is_applied_live() {
     let client = live_client();
+    let page = |in_archive| {
+        client
+            .equipment()
+            .list()
+            .filter(equipment::IN_ARCHIVE.eq(in_archive))
+            .first(500)
+    };
 
-    // Decodes every active item through `RentmanEquipment`/`RentmanAmount`.
-    let active = client
-        .all_active_equipment()
+    // Rentman applies the filter (sent as `1`/`0`): every row matches. A
+    // filter Rentman ignored would mix both kinds and fail one check.
+    let active = page(false)
         .await
-        .expect("live active equipment listing succeeds");
-
-    // Rentman applies `in_archive=0` (the value the facade sends) as a filter:
-    // every returned row is active ...
-    let unarchived = equipment_page(&client, "0").await;
+        .expect("active equipment listing succeeds");
     assert!(
-        unarchived.iter().all(|item| !item.in_archive),
-        "in_archive=0 returned archived equipment, so Rentman ignores the filter value"
+        active.iter().all(|item| item.in_archive == Some(false)),
+        "in_archive=0 returned archived equipment"
     );
-    // ... and the opposite value returns only archived rows. A filter that is
-    // ignored would mix both and fail one of the two checks.
-    let archived = equipment_page(&client, "1").await;
+    let archived = page(true)
+        .await
+        .expect("archived equipment listing succeeds");
     assert!(
-        archived.iter().all(|item| item.in_archive),
-        "in_archive=1 returned active equipment, so Rentman ignores the filter value"
+        archived.iter().all(|item| item.in_archive == Some(true)),
+        "in_archive=1 returned active equipment"
     );
-
-    for item in &archived {
-        assert!(
-            !active
-                .iter()
-                .any(|equipment| equipment.id == EquipmentId::new(item.id.0)),
-            "all_active_equipment() returned archived equipment {}",
-            item.id
-        );
-    }
 }
 
-/// Loads one page of equipment with the given `in_archive` filter value.
-///
-/// Full rows are requested: the generated `EquipmentResponse` requires its
-/// documented fields, so a `fields` selection would not decode.
-async fn equipment_page(client: &RentmanClient, in_archive: &str) -> Vec<model::EquipmentResponse> {
-    client
-        .endpoint::<endpoint::GetEquipmentCollectionEndpoint>()
-        .query_param("in_archive", in_archive)
-        .query_param("limit", FILTER_CHECK_LIMIT)
-        .send()
-        .await
-        .unwrap_or_else(|error| {
-            panic!("equipment listing with in_archive={in_archive} failed: {error:#}")
-        })
-        .data
+rentman_client::projection! {
+    /// The price fields of an equipment item.
+    struct EquipmentPrices from Equipment { id, price, list_price, subrental_costs }
 }
 
 #[tokio::test]
@@ -225,38 +338,46 @@ async fn equipment_price_write_is_a_no_op_live() {
         .expect("RENTMAN_LIVE_WRITE_EQUIPMENT_ID must be a numeric equipment ID");
     let equipment_id = EquipmentId::new(id);
 
-    let before = active_equipment(&client, equipment_id).await;
-
-    // Partial `PUT` through the facade: only the first set price field is sent,
-    // with its current value. `before` went through the amount deserializer,
-    // which rounds over-precise values; so first prove against the stored JSON
-    // text that exactly the stored value would be written.
-    let payload = no_op_payload(&before);
+    let before: EquipmentPrices = client
+        .equipment()
+        .get_as(equipment_id)
+        .await
+        .expect("live equipment lookup succeeds");
+    // A partial `PUT` that sends only the current price. Amounts are read
+    // exactly, but first prove against the stored JSON text that exactly the
+    // stored value would be written.
+    let payload = model::EquipmentPayload {
+        price: Some(before.price),
+        ..model::EquipmentPayload::default()
+    };
     let stored = stored_prices(id).await;
-    assert_payload_matches_stored(&payload, &stored);
-    client
-        .update_equipment_prices(equipment_id, &payload)
-        .await
-        .expect("live no-op equipment price update succeeds");
-    assert_prices_unchanged(&before, &active_equipment(&client, equipment_id).await);
+    let sent: BigDecimal = before
+        .price
+        .to_string()
+        .parse()
+        .expect("a decimal is a BigDecimal");
+    assert_eq!(
+        Some(&sent),
+        stored.price.as_ref(),
+        "decoding changed the stored price; refusing the live write"
+    );
 
-    // The same no-op through a typed endpoint sent exactly once. The generated
-    // request goes through `serde_json::Value` and `Decimal`'s float
-    // serialization, so first check that exactly the current prices would be
-    // sent; otherwise this write would change the test item.
-    let request: model::EquipmentRequest =
-        serde_json::from_value(serde_json::to_value(&payload).expect("payload serializes"))
-            .expect("price payload is a valid EquipmentRequest");
-    assert_typed_request_is_exact(&request, &payload);
-    client
-        .endpoint::<endpoint::UpdateEquipmentEndpoint>()
-        .id(model::RentmanId(id))
-        .body(request)
-        .expect("request body serializes")
-        .send_once()
+    let updated = client
+        .equipment()
+        .update(equipment_id, &payload)
         .await
-        .expect("live no-op equipment update with send_once succeeds");
-    assert_prices_unchanged(&before, &active_equipment(&client, equipment_id).await);
+        .expect("live no-op equipment update succeeds");
+    assert_eq!(updated.price, Some(before.price), "price changed");
+    assert_eq!(
+        updated.list_price,
+        Some(before.list_price),
+        "list_price changed"
+    );
+    assert_eq!(
+        updated.subrental_costs,
+        Some(before.subrental_costs),
+        "subrental_costs changed"
+    );
     assert_eq!(
         stored_prices(id).await,
         stored,
@@ -265,7 +386,7 @@ async fn equipment_price_write_is_a_no_op_live() {
 }
 
 /// The stored price fields of one equipment item as exact decimals, read from
-/// the raw JSON text without going through `RentmanAmount` or `f64`.
+/// the raw JSON text without going through the client.
 #[derive(Debug, PartialEq)]
 struct StoredPrices {
     price: Option<BigDecimal>,
@@ -319,89 +440,157 @@ async fn stored_prices(id: u64) -> StoredPrices {
     }
 }
 
-/// Refuses the write unless every price in the payload equals the stored
-/// value exactly.
-fn assert_payload_matches_stored(payload: &EquipmentPricePayload, stored: &StoredPrices) {
-    for (field, sent, stored) in [
-        ("price", payload.price, &stored.price),
-        ("list_price", payload.list_price, &stored.list_price),
-        (
-            "subrental_costs",
-            payload.subrental_costs,
-            &stored.subrental_costs,
-        ),
-    ] {
-        let Some(sent) = sent else {
-            continue;
-        };
-        let sent: BigDecimal = sent
-            .as_decimal()
-            .to_string()
-            .parse()
-            .expect("a decimal is a BigDecimal");
-        assert_eq!(
-            Some(&sent),
-            stored.as_ref(),
-            "decoding changed the stored {field}; refusing the live write"
-        );
-    }
-}
-
-async fn active_equipment(client: &RentmanClient, id: EquipmentId) -> RentmanEquipment {
-    client
-        .all_active_equipment()
+#[tokio::test]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
+async fn filters_survive_the_cursor_live() {
+    let client = live_client();
+    let archived = || {
+        client
+            .equipment()
+            .list()
+            .filter(equipment::IN_ARCHIVE.eq(true))
+    };
+    // Small pages make the filter travel through several cursors.
+    let paged = archived()
+        .page_size(PageSize::new(100).unwrap())
+        .all()
         .await
-        .expect("live active equipment listing succeeds")
-        .into_iter()
-        .find(|equipment| equipment.id == id)
-        .unwrap_or_else(|| panic!("test equipment {id} must exist and not be archived"))
-}
+        .unwrap();
+    let single = archived().first(1500).await.unwrap();
 
-fn no_op_payload(equipment: &RentmanEquipment) -> EquipmentPricePayload {
-    let mut payload = EquipmentPricePayload::default();
-    if equipment.price.is_some() {
-        payload.price = equipment.price;
-    } else if equipment.list_price.is_some() {
-        payload.list_price = equipment.list_price;
-    } else {
-        payload.subrental_costs = equipment.subrental_costs;
-    }
     assert!(
-        !payload.is_empty(),
-        "test equipment {} needs at least one price field set",
-        equipment.id
+        paged.iter().all(|item| item.in_archive == Some(true)),
+        "an active item leaked through a cursor"
     );
-    payload
+    if single.len() < 1500 {
+        let ids = |items: &[rentman_client::model::Equipment]| {
+            let mut ids = items.iter().map(|item| item.id).collect::<Vec<_>>();
+            ids.sort();
+            ids
+        };
+        assert_eq!(ids(&paged), ids(&single));
+    }
 }
 
-/// Refuses the typed write unless the body that `.body()` would build carries
-/// exactly the payload's prices.
-fn assert_typed_request_is_exact(
-    request: &model::EquipmentRequest,
-    payload: &EquipmentPricePayload,
-) {
-    let body = serde_json::to_value(request).expect("typed request serializes");
-    for (field, expected) in [
-        ("price", payload.price),
-        ("list_price", payload.list_price),
-        ("subrental_costs", payload.subrental_costs),
+rentman_client::projection! {
+    /// The fields of an equipment item this test selects.
+    struct EquipmentName from Equipment { id, name, in_archive, creator, revision }
+}
+
+/// Runs without credentials: the projection used by the live test below
+/// expands and decodes from outside the crate.
+#[test]
+fn equipment_projection_decodes_outside_the_crate() {
+    use rentman_client::{__private::ProjectedItem, Projection};
+
+    assert_eq!(
+        EquipmentName::FIELDS,
+        ["id", "name", "in_archive", "creator", "updateHash"]
+    );
+    let mut item: ProjectedItem = serde_json::from_str(
+        r#"{"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "h3", "custom": {}}"#,
+    )
+    .unwrap();
+    let equipment = EquipmentName::decode(&mut item).unwrap();
+    assert_eq!(equipment.id, EquipmentId::new(3));
+    assert_eq!(equipment.name, "Mixer");
+    assert!(equipment.in_archive);
+    assert_eq!(
+        equipment.creator,
+        Some(rentman_client::model::CrewId::new(2))
+    );
+    assert_eq!(equipment.revision.as_str(), "h3");
+
+    // Every field that does not decode fails with its name.
+    let valid = serde_json::json!({"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "h3"});
+    for (field, broken) in [
+        ("id", serde_json::json!("three")),
+        ("name", serde_json::Value::Null),
+        ("in_archive", serde_json::json!("yes")),
+        ("creator", serde_json::json!("/projects/2")),
     ] {
-        let sent = body.get(field).map(|value| {
-            Decimal::from_str_exact(&value.to_string()).expect("sent price is a decimal")
-        });
-        assert_eq!(
-            sent,
-            expected.map(|amount| amount.as_decimal()),
-            "the typed request would not send {field} exactly; refusing the live write"
+        let mut wire = valid.clone();
+        wire[field] = broken;
+        let mut item: ProjectedItem = serde_json::from_str(&wire.to_string()).unwrap();
+        let error = EquipmentName::decode(&mut item).unwrap_err();
+        assert!(
+            error.to_string().starts_with(&format!("field `{field}`")),
+            "{error}"
         );
     }
 }
 
-fn assert_prices_unchanged(before: &RentmanEquipment, after: &RentmanEquipment) {
-    assert_eq!(after.price, before.price, "price changed");
-    assert_eq!(after.list_price, before.list_price, "list_price changed");
-    assert_eq!(
-        after.subrental_costs, before.subrental_costs,
-        "subrental_costs changed"
-    );
+#[tokio::test]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
+async fn projections_keep_their_field_selection_across_the_cursor_live() {
+    let client = live_client();
+    let projected = client
+        .equipment()
+        .list()
+        .filter(equipment::IN_ARCHIVE.eq(true))
+        .page_size(PageSize::new(100).unwrap())
+        .all_as::<EquipmentName>()
+        .await
+        .unwrap();
+    let full = client
+        .equipment()
+        .list()
+        .filter(equipment::IN_ARCHIVE.eq(true))
+        .page_size(PageSize::MAX)
+        .all()
+        .await
+        .unwrap();
+
+    assert_eq!(projected.len(), full.len());
+    for (projected, full) in projected.iter().zip(&full) {
+        assert_eq!(projected.id, full.id);
+        assert_eq!(Some(projected.name.as_str()), full.name.as_deref());
+        assert!(projected.in_archive);
+        assert_eq!(projected.creator, full.creator);
+        assert_eq!(&projected.revision, full.revision());
+    }
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(live_api_tests_enabled),
+    ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
+)]
+async fn revisions_identify_item_states_live() {
+    let client = live_client();
+    let archived = || {
+        client
+            .equipment()
+            .list()
+            .filter(equipment::IN_ARCHIVE.eq(true))
+    };
+    let revisions = archived()
+        .page_size(PageSize::new(100).unwrap())
+        .revisions()
+        .await
+        .unwrap();
+    let full = archived().page_size(PageSize::MAX).all().await.unwrap();
+
+    assert_eq!(revisions, full.iter().collect::<Revisions<_>>());
+    let distinct = revisions
+        .iter()
+        .map(|(_, revision)| revision)
+        .collect::<std::collections::HashSet<_>>()
+        .len();
+    assert_eq!(distinct, revisions.len(), "two items share an updateHash");
+
+    for item in full.iter().take(3) {
+        let current = client.equipment().get(item.id).await.unwrap();
+        if current.modified == item.modified {
+            assert_eq!(current.revision(), item.revision(), "equipment {}", item.id);
+        }
+    }
+    let unchanged = full.iter().collect::<Revisions<_>>();
+    assert!(revisions.changes_since(&unchanged).is_empty());
 }

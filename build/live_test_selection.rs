@@ -1,11 +1,36 @@
 use std::{ffi::OsString, path::Path};
 
-pub(crate) fn live_api_test_cfg(token: Option<OsString>, dotenv_path: &Path) -> &'static str {
+pub(crate) fn live_api_test_cfg(
+    token: Option<OsString>,
+    full_collections: Option<OsString>,
+    dotenv_path: &Path,
+) -> String {
+    let mut cfg = String::new();
     if live_api_tests_enabled(token, dotenv_path) {
-        "cargo:rustc-cfg=live_api_tests_enabled\n"
-    } else {
-        ""
+        cfg.push_str("cargo:rustc-cfg=live_api_tests_enabled\n");
     }
+    if live_full_collection_tests_enabled(full_collections, dotenv_path) {
+        cfg.push_str("cargo:rustc-cfg=live_api_full_collection_tests_enabled\n");
+    }
+    cfg
+}
+
+fn live_full_collection_tests_enabled(value: Option<OsString>, dotenv_path: &Path) -> bool {
+    if let Some(value) = value {
+        return value.to_str().is_some_and(|value| value.trim() == "1");
+    }
+    let Ok(entries) = dotenvy::from_path_iter(dotenv_path) else {
+        return false;
+    };
+    for entry in entries {
+        let Ok((key, value)) = entry else {
+            return false;
+        };
+        if key == "RENTMAN_LIVE_FULL_COLLECTIONS" {
+            return value.trim() == "1";
+        }
+    }
+    false
 }
 
 fn live_api_tests_enabled(token: Option<OsString>, dotenv_path: &Path) -> bool {
@@ -27,6 +52,8 @@ fn live_api_tests_enabled(token: Option<OsString>, dotenv_path: &Path) -> bool {
 }
 
 #[cfg(test)]
+// Coverage is disabled for test code so the production 100% gate measures only
+// build-script behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
     use super::*;
@@ -57,10 +84,42 @@ mod tests {
     fn emits_only_a_boolean_cfg_directive_without_the_token() {
         let dotenv = Fixture::new("RENTMAN_API_TOKEN=dotenv-token\n");
         assert_eq!(
-            live_api_test_cfg(Some("dummy-secret".into()), &dotenv.0),
+            live_api_test_cfg(Some("dummy-secret".into()), None, &dotenv.0),
             "cargo:rustc-cfg=live_api_tests_enabled\n"
         );
-        assert_eq!(live_api_test_cfg(Some("".into()), &dotenv.0), "");
+        assert_eq!(live_api_test_cfg(Some("".into()), None, &dotenv.0), "");
+    }
+
+    #[test]
+    fn enables_full_collection_tests_only_for_the_opt_in_value() {
+        let dotenv = Fixture::new("RENTMAN_LIVE_FULL_COLLECTIONS=1\n");
+        assert_eq!(
+            live_api_test_cfg(None, None, &dotenv.0),
+            "cargo:rustc-cfg=live_api_full_collection_tests_enabled\n"
+        );
+        for value in ["", "0", "true", "  "] {
+            assert_eq!(live_api_test_cfg(None, Some(value.into()), &dotenv.0), "");
+        }
+        assert_eq!(
+            live_api_test_cfg(None, Some("1".into()), &dotenv.0),
+            "cargo:rustc-cfg=live_api_full_collection_tests_enabled\n"
+        );
+    }
+
+    #[test]
+    fn full_collection_tests_stay_off_without_a_readable_dotenv() {
+        let missing = Fixture::new("");
+        assert!(!live_full_collection_tests_enabled(
+            None,
+            &missing.0.with_extension("missing")
+        ));
+        for contents in [
+            "OTHER_SETTING=value\n",
+            "invalid dotenv\nRENTMAN_LIVE_FULL_COLLECTIONS=1\n",
+        ] {
+            let dotenv = Fixture::new(contents);
+            assert!(!live_full_collection_tests_enabled(None, &dotenv.0));
+        }
     }
 
     #[test]

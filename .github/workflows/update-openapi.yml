@@ -33,7 +33,36 @@ jobs:
           toolchain: stable
           components: rustfmt
       - name: Refresh the OpenAPI contract
-        run: scripts/update_openapi.py
+        id: refresh
+        run: cargo xtask update-openapi
+      - name: Compare the published crate with the refreshed contract
+        if: always()
+        id: status
+        env:
+          REFRESH_OUTCOME: ${{ steps.refresh.outcome }}
+        run: |
+          if [[ "$REFRESH_OUTCOME" == 'success' ]]; then
+            cargo xtask api-status > "$RUNNER_TEMP/api-status.json"
+          else
+            cargo xtask api-status --unavailable > "$RUNNER_TEMP/api-status.json"
+          fi
+      - name: Publish the release contract badge
+        if: always() && steps.status.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/api-status" --silent; then
+            base="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$DEFAULT_BRANCH" --jq '.object.sha')"
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref=refs/heads/api-status -f sha="$base" --silent
+          fi
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/contents/api-status.json?ref=api-status" \
+            --jq '.sha' 2>/dev/null || true)"
+          jq -n --arg content "$(base64 -w0 "$RUNNER_TEMP/api-status.json")" --arg sha "$sha" \
+            '{message: "Update released crate API status", branch: "api-status", content: $content}
+             + (if $sha == "" then {} else {sha: $sha} end)' \
+            | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/api-status.json" --input - --silent
       - name: Compare with the existing update pull request
         id: compare
         env:
@@ -46,7 +75,12 @@ jobs:
             git fetch origin "refs/heads/$UPDATE_BRANCH"
             if git diff --quiet FETCH_HEAD -- \
               openapi/rentman-oas.json src/endpoint/generated.rs \
-              src/model/generated.rs tests/live/generated_sweep.rs; then
+              src/model/resource_names.md \
+              src/model/generated.rs src/fields.rs src/projection_fields.rs \
+              src/resource/generated.rs src/resource/generated_tests.rs \
+              tests/contract/generated_payload_constructors.rs \
+              tests/contract/generated_response_enums.rs \
+              tests/contract/generated_revisions.rs tests/live/generated_sweep.rs; then
               echo "The open update pull request already contains this contract."
               echo "changed=false" >> "$GITHUB_OUTPUT"
               exit 0
@@ -71,6 +105,14 @@ jobs:
             openapi/rentman-oas.json
             src/endpoint/generated.rs
             src/model/generated.rs
+            src/model/resource_names.md
+            src/fields.rs
+            src/projection_fields.rs
+            src/resource/generated.rs
+            src/resource/generated_tests.rs
+            tests/contract/generated_payload_constructors.rs
+            tests/contract/generated_response_enums.rs
+            tests/contract/generated_revisions.rs
             tests/live/generated_sweep.rs
           commit-message: |
             Update Rentman OpenAPI contract
@@ -86,14 +128,14 @@ jobs:
             ## Solution
 
             <!-- What changes, and why this way? -->
-            Run `scripts/update_openapi.py` to refresh the OpenAPI fixture, typed
-            models, endpoints, and live API sweep. Reuse the same update branch
+            Run `cargo xtask update-openapi` to refresh the OpenAPI fixture, typed
+            models, endpoints, resources, fields, projections, and generated tests. Reuse the same update branch
             until this pull request is merged.
 
             ## Test evidence
 
             <!-- New or changed tests, and the checks you ran locally. -->
-            - `scripts/update_openapi.py`: passed, including generation and `cargo fmt --all`.
+            - `cargo xtask update-openapi`: passed, including generation and `cargo fmt --all`.
             - Full Rust checks were not run by the update job; the CI workflow is
               dispatched explicitly for this branch after creating or updating the PR.
 

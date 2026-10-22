@@ -42,10 +42,10 @@ jobs:
           import os
           import subprocess
           import tomllib
-          
+
           def git(*args):
               return subprocess.check_output(["git", *args])
-          
+
           def versionless(path, content):
               data = tomllib.loads(content.decode())
               if path == "Cargo.toml":
@@ -55,7 +55,7 @@ jobs:
                       if package.get("name") == "rentman-client":
                           package.pop("version", None)
               return data
-          
+
           def relevant(path, base):
               # Unknown paths are relevant; only documentation and the CI-generated
               # crate version are exempt. Dependency and toolchain changes still run fuzzing.
@@ -71,7 +71,7 @@ jobs:
                   except (subprocess.CalledProcessError, KeyError, tomllib.TOMLDecodeError):
                       return True
               return True
-          
+
           base = os.environ.get("BASE_SHA", "")
           default = os.environ["DEFAULT_BRANCH"]
           if not base or set(base) == {"0"}:
@@ -166,7 +166,6 @@ jobs:
         run: |
           sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
           sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" Cargo.lock
-          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" fuzz/Cargo.lock
           if git diff --quiet; then
             echo "Cargo.toml already carries version $VERSION"
             exit 0
@@ -203,6 +202,19 @@ jobs:
           grep '^version = ' Cargo.toml
       - name: Check formatting
         run: cargo fmt --all -- --check
+      # Regenerates from the checked-in spec only (no download), so a change to
+      # the generator or its configuration cannot be merged without its output.
+      # Cargo.toml and Cargo.lock carry the version applied above.
+      - name: Check generated files are up to date
+        run: |
+          cargo xtask generate-openapi
+          stale="$(git status --porcelain -- . ':!Cargo.toml' ':!Cargo.lock')"
+          if [ -n "$stale" ]; then
+            echo "$stale"
+            git diff -- . ':!Cargo.toml' ':!Cargo.lock'
+            echo "::error::Generated files are stale; run 'cargo xtask generate-openapi' and commit the result."
+            exit 1
+          fi
       - name: Run tests
         run: cargo test --workspace --locked
       - name: Run documentation tests
@@ -308,83 +320,22 @@ jobs:
             --fail-under-lines 100 \
             --fail-under-functions 100
 
-  fuzz:
-    # Documentation-only changes skip the short run; the scheduled run is unchanged.
-    runs-on: ubuntu-latest
-    needs: [version, changes]
-    if: ${{ needs.changes.outputs.fuzz_required == 'true' }}
-    env:
-      CARGO_TERM_COLOR: always
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install Rust nightly
-        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
-        with:
-          toolchain: nightly
-      - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
-        with:
-          workspaces: fuzz
-          cache-on-failure: true
-      - name: Install cargo-fuzz
-        run: cargo install cargo-fuzz --version 0.13.2 --locked
-      - name: Apply semantic version to Cargo.toml
-        env:
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          sed -i "s/^version = \".*\"\$/version = \"$VERSION\"/" Cargo.toml
-          sed -i "/^name = \"rentman-client\"\$/{n;s/^version = \".*\"\$/version = \"$VERSION\"/;}" fuzz/Cargo.lock
-          grep '^version = ' Cargo.toml
-      - name: Check the fuzz lockfile
-        # `cargo fuzz` has no `--locked`, so prove up front that the fuzz
-        # lockfile is complete and needs no change.
-        run: cargo metadata --manifest-path fuzz/Cargo.toml --locked --format-version 1 > /dev/null
-      - name: Fuzz amount parsing
-        run: |
-          mkdir -p fuzz/corpus/amount
-          # cargo fuzz builds for the triple its own binary was built for; a
-          # cached musl build would target musl, where the address sanitizer
-          # is unavailable. The explicit target makes that irrelevant.
-          cargo +nightly fuzz run --target x86_64-unknown-linux-gnu \
-            amount fuzz/corpus/amount fuzz/seeds/amount -- \
-            -max_total_time=60 -dict=fuzz/amount.dict
-      - name: Upload crashing inputs
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: fuzz-artifacts
-          path: fuzz/artifacts
-          if-no-files-found: ignore
-
-  # Keep the existing required status context. Always check explicit results:
-  # only a documentation-only decision may permit the fuzz job to be skipped.
+  # Keep the existing required status context.
   test:
     runs-on: ubuntu-latest
     if: ${{ always() }}
-    needs: [version, checks, coverage, msrv, package, changes, fuzz]
+    needs: [version, checks, coverage, msrv, package]
     steps:
-      - name: Require every applicable CI validation job to succeed
+      - name: Require every CI validation job to succeed
         env:
-          CORE_RESULTS: ${{ needs.version.result }} ${{ needs.checks.result }} ${{ needs.coverage.result }} ${{ needs.msrv.result }} ${{ needs.package.result }} ${{ needs.changes.result }}
-          FUZZ_REQUIRED: ${{ needs.changes.outputs.fuzz_required }}
-          FUZZ_RESULT: ${{ needs.fuzz.result }}
+          CORE_RESULTS: ${{ needs.version.result }} ${{ needs.checks.result }} ${{ needs.coverage.result }} ${{ needs.msrv.result }} ${{ needs.package.result }}
         run: |
           echo "Required CI job results: $CORE_RESULTS"
-          if [ "$CORE_RESULTS" != "success success success success success success" ]; then
-            echo "::error::Every unconditional CI job, including change detection, must succeed."
+          if [ "$CORE_RESULTS" != "success success success success success" ]; then
+            echo "::error::Every CI validation job must succeed."
             exit 1
           fi
-          case "$FUZZ_REQUIRED:$FUZZ_RESULT" in
-            true:success|false:success|false:skipped) ;;
-            *)
-              echo "::error::Unexpected fuzz result: required=$FUZZ_REQUIRED, result=$FUZZ_RESULT"
-              exit 1
-              ;;
-          esac
-
   release:
-    # An intentional fuzz skip must not skip a release after the gate passes.
     if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.test.result == 'success' }}
     runs-on: ubuntu-latest
     needs: [version, test, coverage, msrv, package]

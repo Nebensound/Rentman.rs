@@ -1,6 +1,6 @@
 [package]
 name = "rentman-client"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2024"
 # Minimum supported Rust version. CI builds and tests with exactly this
 # toolchain; raising it is a minor version bump.
@@ -9,20 +9,18 @@ description = "Typed Rentman API client with OpenAPI contract tests."
 license = "MIT"
 repository = "https://github.com/Nebensound/Rentman.rs"
 readme = "crates-io.md"
-exclude = ["/.github", "/README.md", "/fuzz"]
+exclude = ["/.github", "/README.md"]
 
 [dependencies]
 backon = "1.6.0"
 chrono = { version = "0.4.45", features = ["serde"] }
 governor = "0.10.4"
-percent-encoding = "2.3.2"
-reqwest = { version = "0.13.4", default-features = false, features = ["json", "query", "rustls"] }
-rust_decimal = { version = "1.42.1", default-features = false, features = ["serde-float", "std"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "query", "rustls"] }
+rust_decimal = { version = "1.43.0", default-features = false, features = ["serde-float", "serde-arbitrary-precision", "std"] }
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = { version = "1.0.151", features = ["raw_value"] }
-serde_urlencoded = "0.7.1"
+serde_json = { version = "1.0.154", features = ["raw_value"] }
 thiserror = "2.0.21"
-tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "time"] }
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.44"
 url = { version = "2.5.8", features = ["serde"] }
 
@@ -39,3 +37,6 @@ tracing-subscriber = { version = "0.3.23", default-features = false, features = 
 
 [build-dependencies]
 dotenvy = "0.15.7"
+
+[workspace]
+members = ["xtask"]

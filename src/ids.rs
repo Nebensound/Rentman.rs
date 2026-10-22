@@ -1,6 +1,5 @@
-//! Identifiers and credentials.
+//! Credentials.
 
-use serde::Deserialize;
 use std::fmt;
 
 /// API token for Rentman.
@@ -8,6 +7,13 @@ use std::fmt;
 /// This is a dedicated type instead of a `String` so the token cannot be mixed
 /// up with unrelated strings or tokens. `Debug` is redacted so the token does
 /// not accidentally end up in logs.
+///
+/// ```
+/// use rentman_client::RentmanApiToken;
+///
+/// let token = RentmanApiToken::new("secret-value");
+/// assert!(!format!("{token:?}").contains("secret-value"));
+/// ```
 #[derive(Clone)]
 pub struct RentmanApiToken(String);
 
@@ -18,6 +24,14 @@ impl RentmanApiToken {
     }
 
     /// Creates a Rentman API token.
+    ///
+    /// ```
+    /// use rentman_client::RentmanApiToken;
+    ///
+    /// let from_str = RentmanApiToken::new("token");
+    /// let from_env = RentmanApiToken::new(std::env::var("RENTMAN_TOKEN").unwrap_or_default());
+    /// # let _ = (from_str, from_env);
+    /// ```
     pub fn new(value: impl Into<String>) -> Self {
         Self(value.into())
     }
@@ -29,97 +43,13 @@ impl fmt::Debug for RentmanApiToken {
     }
 }
 
-/// Internal Rentman invoice ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
-#[serde(transparent)]
-pub struct InvoiceId(u64);
-
-impl InvoiceId {
-    /// Creates a Rentman invoice ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for InvoiceId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-/// Internal Rentman payment ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize)]
-#[serde(transparent)]
-pub struct PaymentId(u64);
-
-impl PaymentId {
-    /// Creates a Rentman payment ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for PaymentId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-/// Internal Rentman equipment ID.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
-#[serde(transparent)]
-pub struct EquipmentId(u64);
-
-impl EquipmentId {
-    /// Creates a Rentman equipment ID.
-    pub fn new(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl fmt::Display for EquipmentId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-/// Rentman invoice number.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
-#[serde(transparent)]
-pub struct InvoiceNumber(String);
-
-impl InvoiceNumber {
-    /// Creates a Rentman invoice number.
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    /// Returns the invoice number as a string slice.
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl fmt::Display for InvoiceNumber {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
 #[cfg(test)]
 // Coverage is disabled for test code so the production 100% gate measures only
 // library behavior.
 #[cfg_attr(coverage_nightly, coverage(off))]
 mod tests {
 
-    use crate::{InvoiceNumber, RentmanApiToken};
-
-    #[test]
-    fn exposes_invoice_number_as_str_and_display() {
-        let number = InvoiceNumber::new("1312");
-        assert_eq!(number.as_str(), "1312");
-        assert_eq!(number.to_string(), "1312");
-    }
+    use crate::RentmanApiToken;
 
     #[test]
     fn redacts_token_in_debug_output() {
