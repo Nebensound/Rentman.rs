@@ -350,6 +350,13 @@ live tests remain ignored and regular `cargo test` does not call the API. The
 CI test workflow does not receive the token; live tests remain in the separate,
 non-blocking workflow below.
 
+The generated first-item smoke test exists for every top-level collection. To
+also run generated `all()` tests that read every page from every documented
+top-level collection, set `RENTMAN_LIVE_FULL_COLLECTIONS=1` in the environment
+or crate-root `.env` before running `cargo test --test live_api`. This can issue
+many requests on large accounts; the switch is opt-in and Cargo rebuilds the
+test binary when it changes.
+
 The build script deliberately watches `.env` even when the file is absent.
 Cargo then reruns the build script on each invocation and may rebuild dependent
 targets unnecessarily, including in CI where tokens come from environment

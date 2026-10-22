@@ -1,7 +1,10 @@
-use crate::generator::{contract::sample_value, live_sweep::accessor_name};
+use crate::generator::{
+    contract::{sample_value, sample_wire},
+    live_sweep::accessor_name,
+};
 use crate::openapi::{Context, Operation, properties, rust_doc, rust_field};
 use regex::Regex;
-use serde_json::Value;
+use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
 
@@ -50,15 +53,26 @@ pub fn generate(
                     let item = item.ok_or("collection GET has no response item")?;
                     impls.push(format!("impl List for {owner} {{ type Item = {item}; const LIST: Operation = {endpoint_spec}; }}"));
                     reachable.push(format!("<{owner} as List>::LIST.0.operation_id"));
-                    add_test(
-                        &mut tests,
+                    tests.push(test_source(
                         &test_name,
                         "json_response(r#\"{\"data\":[],\"itemCount\":0,\"limit\":300}\"#)",
                         &format!("{base}.list().all()"),
                         "GET",
                         path,
+                        None,
                         "assert!(result.unwrap().is_empty());",
-                    );
+                    ));
+                    add_paged_collection_test(
+                        &mut tests,
+                        &test_name,
+                        path,
+                        &format!("{base}.list()"),
+                        context,
+                        operation
+                            .response
+                            .schema()
+                            .expect("collection has item schema"),
+                    )?;
                     add_collection_errors(
                         &mut tests,
                         &test_name,
@@ -80,15 +94,17 @@ pub fn generate(
                         operation.request.as_deref().unwrap(),
                         "crate::",
                     )?;
-                    add_test(
-                        &mut tests,
+                    let response =
+                        item_response_expression(context, operation.response.schema().unwrap(), 7)?;
+                    tests.push(test_source(
                         &test_name,
-                        ITEM_RESPONSE,
+                        &response,
                         &format!("{base}.create_as::<{owner}IdProjection>(&{expression})"),
                         "POST",
                         path,
+                        Some(&expression),
                         SENT_ONCE,
-                    );
+                    ));
                 }
                 _ => return Err(format!("unsupported collection operation {method} {path}")),
             }
@@ -134,11 +150,16 @@ pub fn generate(
                 "<{owner} as {trait_name}>::{const_name}.0.operation_id"
             ));
             // `trait_name` admitted only GET, PUT and DELETE above.
-            let (response, call, check) = match trait_name {
+            let (response, call, body, check) = match trait_name {
                 "Get" => (
-                    ITEM_RESPONSE,
+                    item_response_expression(
+                        context,
+                        operation.response.schema().expect("item GET has schema"),
+                        7,
+                    )?,
                     format!("{base}.get(crate::Id::new(7))"),
-                    SENT_ONCE,
+                    None,
+                    SENT_ONCE.to_owned(),
                 ),
                 "Update" => {
                     let expression = payload_expression(
@@ -147,22 +168,34 @@ pub fn generate(
                         "crate::",
                     )?;
                     (
-                        ITEM_RESPONSE,
+                        item_response_expression(
+                            context,
+                            operation.response.schema().expect("item update has schema"),
+                            7,
+                        )?,
                         format!(
                             "{base}.update_as::<{owner}IdProjection>(crate::Id::new(7), &{expression})"
                         ),
-                        SENT_ONCE,
+                        Some(expression),
+                        SENT_ONCE.to_owned(),
                     )
                 }
                 _ => (
-                    "empty_response(\"HTTP/1.1 204 No Content\")",
+                    "empty_response(\"HTTP/1.1 204 No Content\")".to_owned(),
                     format!("{base}.delete(crate::Id::new(7))"),
-                    "result.unwrap();",
+                    None,
+                    "result.unwrap();".to_owned(),
                 ),
             };
-            add_test(
-                &mut tests, &test_name, response, &call, method, &concrete, check,
-            );
+            tests.push(test_source(
+                &test_name,
+                &response,
+                &call,
+                method,
+                &concrete,
+                body.as_deref(),
+                &check,
+            ));
             continue;
         }
 
@@ -218,15 +251,26 @@ pub fn generate(
                     let item = item.ok_or("nested GET has no response item")?;
                     impls.push(format!("impl List for {marker} {{ type Item = {item}; const LIST: Operation = {endpoint_spec}; }}"));
                     reachable.push(format!("<{marker} as List>::LIST.0.operation_id"));
-                    add_test(
-                        &mut tests,
+                    tests.push(test_source(
                         &test_name,
                         EMPTY_PAGE,
                         &format!("{base}.list().all()"),
                         method,
                         &concrete,
+                        None,
                         "assert!(result.unwrap().is_empty());",
-                    );
+                    ));
+                    add_paged_collection_test(
+                        &mut tests,
+                        &test_name,
+                        &concrete,
+                        &format!("{base}.list()"),
+                        context,
+                        operation
+                            .response
+                            .schema()
+                            .expect("nested GET has item schema"),
+                    )?;
                     add_collection_errors(
                         &mut tests,
                         &test_name,
@@ -248,15 +292,17 @@ pub fn generate(
                         operation.request.as_deref().unwrap(),
                         "crate::",
                     )?;
-                    add_test(
-                        &mut tests,
+                    let response =
+                        item_response_expression(context, operation.response.schema().unwrap(), 7)?;
+                    tests.push(test_source(
                         &test_name,
-                        ITEM_RESPONSE,
+                        &response,
                         &format!("{base}.create_as::<{child}IdProjection>(&{expression})"),
                         method,
                         &concrete,
+                        Some(&expression),
                         SENT_ONCE,
-                    );
+                    ));
                 }
                 _ => return Err(format!("unsupported nested operation {method} {path}")),
             }
@@ -281,6 +327,11 @@ pub fn generate(
             let doc = rust_doc(summary, &format!("Runs `{method} {path}`."));
             let payload_type = payload.ok_or("action has no request schema")?;
             let item_type = item.ok_or("action has no response schema")?;
+            let response = item_response_expression(
+                context,
+                operation.response.schema().expect("action has item schema"),
+                7,
+            )?;
             let payload =
                 payload_expression(context, operation.request.as_deref().unwrap(), "crate::")?;
             let example_payload = payload.replace("crate::", "rentman_client::");
@@ -294,18 +345,18 @@ pub fn generate(
                     format!("    pub async fn {action}(&self, {id_param}: Id<{owner}>, payload: &{payload_type}) -> Result<{item_type}> {{"),
                     format!("        self.item_action({const_name}, {id_param}, payload).await"), "    }".to_owned(), String::new(),
                 ]);
-                add_test(
-                    &mut tests,
+                tests.push(test_source(
                     &test_name,
-                    ITEM_RESPONSE,
+                    &response,
                     &format!(
                         "client.{}().{action}(crate::Id::new(7), &{payload})",
                         accessor_name(owner)
                     ),
                     method,
                     &path.replace("{id}", "7"),
+                    Some(&payload),
                     SENT_ONCE,
-                );
+                ));
             } else {
                 methods.extend([
                     format!("    /// {doc}"), "    ///".to_owned(), "    /// Sent exactly once, like [`Collection::create`].".to_owned(),
@@ -313,15 +364,15 @@ pub fn generate(
                     format!("    pub async fn {action}(&self, payload: &{payload_type}) -> Result<{item_type}> {{"),
                     format!("        self.collection_action({const_name}, payload).await"), "    }".to_owned(), String::new(),
                 ]);
-                add_test(
-                    &mut tests,
+                tests.push(test_source(
                     &test_name,
-                    ITEM_RESPONSE,
+                    &response,
                     &format!("client.{}().{action}(&{payload})", accessor_name(owner)),
                     method,
                     path,
+                    Some(&payload),
                     SENT_ONCE,
-                );
+                ));
             }
             continue;
         }
@@ -383,9 +434,92 @@ pub fn generate(
     Ok((output, test_output))
 }
 
-const ITEM_RESPONSE: &str = "json_response(r#\"{\"data\":{\"id\":7,\"updateHash\":\"test\",\"created\":null,\"modified\":null,\"creator\":null}}\"#)";
 const EMPTY_PAGE: &str = "json_response(r#\"{\"data\":[],\"itemCount\":0,\"limit\":300}\"#)";
-const SENT_ONCE: &str = "let _ = result; // only the outgoing request is checked here";
+const SENT_ONCE: &str = "assert!(result.is_ok(), \"sample response decodes\");";
+
+fn item_response_expression(
+    context: &Context<'_>,
+    schema_name: &str,
+    id: u64,
+) -> Result<String, String> {
+    let data = response_item_wire(context, schema_name, id)?;
+    Ok(json_response_expression(&json!({"data": data})))
+}
+
+fn response_item_wire(context: &Context<'_>, schema_name: &str, id: u64) -> Result<Value, String> {
+    let schema = context
+        .schemas
+        .get(schema_name)
+        .ok_or_else(|| format!("missing response schema {schema_name}"))?;
+    let required = context.effective_required(schema_name, schema);
+    let mut item = Map::new();
+    for (field, field_schema) in properties(schema) {
+        let value = if let Some(example) = field_schema.get("example") {
+            example.clone()
+        } else if field == "custom" {
+            json!({})
+        } else if field == "id" {
+            json!(id)
+        } else {
+            let rust_type = context.field_type(schema_name, field, &required);
+            let rust_type = rust_type
+                .strip_prefix("Option<")
+                .and_then(|inner| inner.strip_suffix('>'))
+                .unwrap_or(&rust_type);
+            match rust_type {
+                "String" => json!("string"),
+                "DateTime<FixedOffset>" => json!("2019-08-24T14:15:22Z"),
+                "i64" => json!(0),
+                _ => sample_wire(context, rust_type, schema_name, field, field_schema)?,
+            }
+        };
+        item.insert(field.clone(), value);
+    }
+    item.insert("id".to_owned(), json!(id));
+    item.insert("updateHash".to_owned(), json!("test"));
+    Ok(Value::Object(item))
+}
+
+fn json_response_expression(value: &Value) -> String {
+    let body = serde_json::to_string(value).expect("JSON values serialize");
+    format!("json_response({body:?})")
+}
+
+fn add_paged_collection_test(
+    tests: &mut Vec<String>,
+    name: &str,
+    path: &str,
+    list_call: &str,
+    context: &Context<'_>,
+    schema_name: &str,
+) -> Result<(), String> {
+    let first_item = response_item_wire(context, schema_name, 1)?;
+    let second_item = response_item_wire(context, schema_name, 2)?;
+    let first_page = json!({
+        "data": [first_item],
+        "itemCount": 2,
+        "limit": 2,
+        "next_page_url": format!("{{base}}{path}?cursor=next"),
+    });
+    let second_page = json!({
+        "data": [second_item],
+        "itemCount": 1,
+        "limit": 2,
+        "next_page_url": null,
+    });
+    let first_path = path.to_owned();
+    let test_name = format!("{name}_follows_pages");
+    let first_response = json_response_expression(&first_page);
+    let second_response = json_response_expression(&second_page);
+    let mut test = String::new();
+    writeln!(
+        test,
+        "    #[tokio::test]\n    async fn {test_name}() {{\n        let server = spawn_server(vec![{first_response}, {second_response}]);\n        let client = client(&server);\n        let items = {list_call}.page_size(crate::PageSize::new(2).unwrap()).all().await.unwrap();\n        assert_eq!(items.len(), 2);\n        let first = server.next_request();\n        assert_request(&first, \"GET\", {first_path:?});\n        assert_bearer_token(&first);\n        assert_eq!(first.query_value(\"limit\").as_deref(), Some(\"2\"));\n        assert_eq!(first.query_value(\"offset\").as_deref(), Some(\"0\"));\n        let second = server.next_request();\n        assert_request(&second, \"GET\", {first_path:?});\n        assert_bearer_token(&second);\n        assert_eq!(second.query_value(\"cursor\").as_deref(), Some(\"next\"));\n        assert_eq!(second.query_value(\"limit\"), None);\n        assert_eq!(second.query_value(\"offset\"), None);\n        server.assert_no_more_requests();\n    }}\n"
+    )
+    .unwrap();
+    tests.push(test);
+    Ok(())
+}
 
 fn seal(impls: &mut Vec<String>, sealed: &mut BTreeSet<String>, marker: &str) {
     if sealed.insert(marker.to_owned()) {
@@ -393,16 +527,23 @@ fn seal(impls: &mut Vec<String>, sealed: &mut BTreeSet<String>, marker: &str) {
     }
 }
 
-fn add_test(
-    tests: &mut Vec<String>,
+fn test_source(
     name: &str,
     response: &str,
     call: &str,
     method: &str,
     path: &str,
+    expected_body: Option<&str>,
     check: &str,
-) {
-    tests.push(format!("    #[tokio::test]\n    async fn {name}() {{\n        let server = spawn_server(vec![{response}]);\n        let client = client(&server);\n        let result = {call}.await;\n        {check}\n        let request = server.next_request();\n        assert_request(&request, \"{method}\", \"{path}\");\n        assert_bearer_token(&request);\n        server.assert_no_more_requests();\n    }}\n"));
+) -> String {
+    let body_check = expected_body.map_or_else(String::new, |body| {
+        format!(
+            "        let expected_body = serde_json::to_value({body}).unwrap();\n        assert_eq!(request.json_body(), expected_body);\n"
+        )
+    });
+    format!(
+        "    #[tokio::test]\n    async fn {name}() {{\n        let server = spawn_server(vec![{response}]);\n        let client = client(&server);\n        let result = {call}.await;\n        {check}\n        let request = server.next_request();\n        assert_request(&request, \"{method}\", \"{path}\");\n        assert_bearer_token(&request);\n{body_check}        server.assert_no_more_requests();\n    }}\n"
+    )
 }
 
 fn add_collection_errors(
@@ -558,7 +699,10 @@ mod tests {
         assert_eq!(code.matches("pub struct WidgetParts;").count(), 1);
         for expected in [
             "async fn get_widget_collection()",
+            "async fn get_widget_collection_follows_pages()",
             "async fn get_widget_collection_collection_errors()",
+            "assert!(result.is_ok(), \"sample response decodes\");",
+            r#"\"updateHash\":\"test\""#,
             "client.widgets().create_as::<WidgetIdProjection>(&crate::model::WidgetPayload::new(String::from(\"x\"), crate::model::WidgetPayloadStatus::Active",
             "client.widgets().update_as::<WidgetIdProjection>(crate::Id::new(7), &crate::model::WidgetUpdatePayload::default())",
             "client.widgets().delete(crate::Id::new(7))",
@@ -569,6 +713,24 @@ mod tests {
         ] {
             assert!(tests.contains(expected), "missing {expected:?}");
         }
+    }
+
+    #[test]
+    fn response_fixtures_use_documented_examples_and_fill_nullable_values() {
+        let mut spec = spec();
+        spec["components"]["schemas"]["WidgetResponse"]["properties"]["name"]["example"] =
+            json!("Widget sample");
+        spec["components"]["schemas"]["WidgetResponse"]["properties"]["created"]["type"] =
+            json!(["string", "null"]);
+        let (context, _) = context(&spec).unwrap();
+
+        let item = response_item_wire(&context, "WidgetResponse", 7).unwrap();
+
+        assert_eq!(item["id"], 7);
+        assert_eq!(item["name"], "Widget sample");
+        assert_eq!(item["part"], "/parts/1");
+        assert_eq!(item["created"], "2019-08-24T14:15:22Z");
+        assert_eq!(item["updateHash"], "test");
     }
 
     #[test]

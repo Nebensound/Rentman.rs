@@ -95,6 +95,39 @@ async fn get_accessory_collection() {
 }
 
 #[tokio::test]
+async fn get_accessory_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/accessories?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .accessories()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/accessories");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/accessories");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_accessory_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -147,11 +180,11 @@ async fn delete_accessory() {
 #[tokio::test]
 async fn get_accessory_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.accessories().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/accessories/7");
     assert_bearer_token(&request);
@@ -161,7 +194,7 @@ async fn get_accessory_item() {
 #[tokio::test]
 async fn update_accessory() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -171,10 +204,12 @@ async fn update_accessory() {
             &crate::model::AccessoryPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/accessories/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::AccessoryPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -189,6 +224,39 @@ async fn get_actual_content_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/actualcontent");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_actual_content_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"/serialnumbers/0\",\"quantity\":0,\"combination_serial\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/actualcontent?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"/serialnumbers/0\",\"quantity\":0,\"combination_serial\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .actual_content()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/actualcontent");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/actualcontent");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -233,11 +301,11 @@ async fn get_actual_content_collection_collection_errors() {
 #[tokio::test]
 async fn get_actual_content_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"/serialnumbers/0\",\"quantity\":0,\"combination_serial\":\"/serialnumbers/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.actual_content().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/actualcontent/7");
     assert_bearer_token(&request);
@@ -255,6 +323,39 @@ async fn get_alternative_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/alternatives");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_alternative_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/alternatives?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .alternatives()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/alternatives");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/alternatives");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -311,11 +412,11 @@ async fn delete_alternative() {
 #[tokio::test]
 async fn get_alternative_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.alternatives().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/alternatives/7");
     assert_bearer_token(&request);
@@ -325,7 +426,7 @@ async fn get_alternative_item() {
 #[tokio::test]
 async fn update_alternative() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -335,10 +436,13 @@ async fn update_alternative() {
             &crate::model::AlternativePayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/alternatives/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::AlternativePayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -353,6 +457,39 @@ async fn get_appointment_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/appointmentcrew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_appointment_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/appointmentcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .appointment_crew()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/appointmentcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/appointmentcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -409,11 +546,11 @@ async fn delete_appointment_crew() {
 #[tokio::test]
 async fn get_appointment_crew_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.appointment_crew().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/appointmentcrew/7");
     assert_bearer_token(&request);
@@ -423,7 +560,7 @@ async fn get_appointment_crew_item() {
 #[tokio::test]
 async fn update_appointment_crew() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -433,10 +570,13 @@ async fn update_appointment_crew() {
             &crate::model::AppointmentCrewPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/appointmentcrew/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::AppointmentCrewPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -451,6 +591,39 @@ async fn get_appointment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/appointments");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_appointment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/appointments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .appointments()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/appointments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/appointments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -495,7 +668,7 @@ async fn get_appointment_collection_collection_errors() {
 #[tokio::test]
 async fn create_appointment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -505,10 +678,16 @@ async fn create_appointment() {
             chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/appointments");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::AppointmentPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -527,11 +706,11 @@ async fn delete_appointment() {
 #[tokio::test]
 async fn get_appointment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.appointments().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/appointments/7");
     assert_bearer_token(&request);
@@ -541,7 +720,7 @@ async fn get_appointment_item() {
 #[tokio::test]
 async fn update_appointment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -554,10 +733,16 @@ async fn update_appointment() {
             ),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/appointments/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::AppointmentPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -577,6 +762,40 @@ async fn get_appointment_appointment_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/appointments/7/appointmentcrew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_appointment_appointment_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/appointments/7/appointmentcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .appointments()
+        .appointment_crew(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/appointments/7/appointmentcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/appointments/7/appointmentcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -638,7 +857,7 @@ async fn get_appointment_appointment_crew_collection_collection_errors() {
 #[tokio::test]
 async fn create_appointment_crew() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"appointment\":\"/appointments/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -648,10 +867,13 @@ async fn create_appointment_crew() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/appointments/7/appointmentcrew");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::AppointmentCrewPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -666,6 +888,39 @@ async fn get_contact_person_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contactpersons");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contact_person_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contactpersons?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contact_persons()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contactpersons");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contactpersons");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -722,11 +977,11 @@ async fn delete_contact_person() {
 #[tokio::test]
 async fn get_contact_person_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.contact_persons().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/contactpersons/7");
     assert_bearer_token(&request);
@@ -736,7 +991,7 @@ async fn get_contact_person_item() {
 #[tokio::test]
 async fn update_contact_person() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -746,10 +1001,13 @@ async fn update_contact_person() {
             &crate::model::ContactPersonPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/contactpersons/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ContactPersonPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -769,6 +1027,40 @@ async fn get_contact_person_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contactpersons/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contact_person_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contactpersons/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contact_persons()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contactpersons/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contactpersons/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -847,6 +1139,40 @@ async fn get_contact_person_file_collection() {
 }
 
 #[tokio::test]
+async fn get_contact_person_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contactpersons/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contact_persons()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contactpersons/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contactpersons/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contact_person_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -912,6 +1238,40 @@ async fn get_contact_person_task_collection() {
 }
 
 #[tokio::test]
+async fn get_contact_person_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contactpersons/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contact_persons()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contactpersons/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contactpersons/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contact_person_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -960,7 +1320,7 @@ async fn get_contact_person_task_collection_collection_errors() {
 #[tokio::test]
 async fn create_task() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -968,10 +1328,13 @@ async fn create_task() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/contactpersons/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -986,6 +1349,39 @@ async fn get_contact_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contacts");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contact_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"type\":\"private\",\"ext_name_line\":\"string\",\"firstname\":\"string\",\"distance\":1,\"travel_time\":1,\"surfix\":\"string\",\"surname\":\"string\",\"longitude\":1,\"latitude\":1,\"code\":\"string\",\"accounting_code\":\"string\",\"vendor_accounting_code\":\"string\",\"name\":\"string\",\"gender\":\"string\",\"mailing_city\":\"string\",\"mailing_street\":\"string\",\"mailing_number\":\"string\",\"mailing_unit_number\":\"string\",\"mailing_district\":\"string\",\"mailing_extra_address_line\":\"string\",\"mailing_postalcode\":\"string\",\"mailing_state\":\"string\",\"mailing_country\":\"af\",\"visit_city\":\"string\",\"visit_street\":\"string\",\"visit_number\":\"string\",\"visit_unit_number\":\"string\",\"visit_district\":\"string\",\"visit_extra_address_line\":\"string\",\"visit_postalcode\":\"string\",\"visit_state\":\"string\",\"country\":\"af\",\"invoice_city\":\"string\",\"invoice_street\":\"string\",\"invoice_number\":\"string\",\"invoice_unit_number\":\"string\",\"invoice_district\":\"string\",\"invoice_extra_address_line\":\"string\",\"invoice_postalcode\":\"string\",\"invoice_state\":\"string\",\"invoice_country\":\"af\",\"phone_1\":\"string\",\"phone_2\":\"string\",\"email_1\":\"crew@example.test\",\"email_2\":\"crew@example.test\",\"website\":\"string\",\"VAT_code\":\"string\",\"fiscal_code\":\"string\",\"commerce_code\":\"string\",\"purchase_number\":\"string\",\"bic\":\"string\",\"bank_account\":\"string\",\"default_person\":\"/contactpersons/0\",\"admin_contactperson\":\"/contactpersons/0\",\"discount_crew\":1,\"discount_transport\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_total\":1,\"projectnote\":\"string\",\"projectnote_title\":\"string\",\"contact_warning\":\"string\",\"discount_subrent\":1,\"image\":\"/files/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contacts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"type\":\"private\",\"ext_name_line\":\"string\",\"firstname\":\"string\",\"distance\":1,\"travel_time\":1,\"surfix\":\"string\",\"surname\":\"string\",\"longitude\":1,\"latitude\":1,\"code\":\"string\",\"accounting_code\":\"string\",\"vendor_accounting_code\":\"string\",\"name\":\"string\",\"gender\":\"string\",\"mailing_city\":\"string\",\"mailing_street\":\"string\",\"mailing_number\":\"string\",\"mailing_unit_number\":\"string\",\"mailing_district\":\"string\",\"mailing_extra_address_line\":\"string\",\"mailing_postalcode\":\"string\",\"mailing_state\":\"string\",\"mailing_country\":\"af\",\"visit_city\":\"string\",\"visit_street\":\"string\",\"visit_number\":\"string\",\"visit_unit_number\":\"string\",\"visit_district\":\"string\",\"visit_extra_address_line\":\"string\",\"visit_postalcode\":\"string\",\"visit_state\":\"string\",\"country\":\"af\",\"invoice_city\":\"string\",\"invoice_street\":\"string\",\"invoice_number\":\"string\",\"invoice_unit_number\":\"string\",\"invoice_district\":\"string\",\"invoice_extra_address_line\":\"string\",\"invoice_postalcode\":\"string\",\"invoice_state\":\"string\",\"invoice_country\":\"af\",\"phone_1\":\"string\",\"phone_2\":\"string\",\"email_1\":\"crew@example.test\",\"email_2\":\"crew@example.test\",\"website\":\"string\",\"VAT_code\":\"string\",\"fiscal_code\":\"string\",\"commerce_code\":\"string\",\"purchase_number\":\"string\",\"bic\":\"string\",\"bank_account\":\"string\",\"default_person\":\"/contactpersons/0\",\"admin_contactperson\":\"/contactpersons/0\",\"discount_crew\":1,\"discount_transport\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_total\":1,\"projectnote\":\"string\",\"projectnote_title\":\"string\",\"contact_warning\":\"string\",\"discount_subrent\":1,\"image\":\"/files/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contacts()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contacts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contacts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1030,17 +1426,19 @@ async fn get_contact_collection_collection_errors() {
 #[tokio::test]
 async fn create_contact() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"type\":\"private\",\"ext_name_line\":\"string\",\"firstname\":\"string\",\"distance\":1,\"travel_time\":1,\"surfix\":\"string\",\"surname\":\"string\",\"longitude\":1,\"latitude\":1,\"code\":\"string\",\"accounting_code\":\"string\",\"vendor_accounting_code\":\"string\",\"name\":\"string\",\"gender\":\"string\",\"mailing_city\":\"string\",\"mailing_street\":\"string\",\"mailing_number\":\"string\",\"mailing_unit_number\":\"string\",\"mailing_district\":\"string\",\"mailing_extra_address_line\":\"string\",\"mailing_postalcode\":\"string\",\"mailing_state\":\"string\",\"mailing_country\":\"af\",\"visit_city\":\"string\",\"visit_street\":\"string\",\"visit_number\":\"string\",\"visit_unit_number\":\"string\",\"visit_district\":\"string\",\"visit_extra_address_line\":\"string\",\"visit_postalcode\":\"string\",\"visit_state\":\"string\",\"country\":\"af\",\"invoice_city\":\"string\",\"invoice_street\":\"string\",\"invoice_number\":\"string\",\"invoice_unit_number\":\"string\",\"invoice_district\":\"string\",\"invoice_extra_address_line\":\"string\",\"invoice_postalcode\":\"string\",\"invoice_state\":\"string\",\"invoice_country\":\"af\",\"phone_1\":\"string\",\"phone_2\":\"string\",\"email_1\":\"crew@example.test\",\"email_2\":\"crew@example.test\",\"website\":\"string\",\"VAT_code\":\"string\",\"fiscal_code\":\"string\",\"commerce_code\":\"string\",\"purchase_number\":\"string\",\"bic\":\"string\",\"bank_account\":\"string\",\"default_person\":\"/contactpersons/0\",\"admin_contactperson\":\"/contactpersons/0\",\"discount_crew\":1,\"discount_transport\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_total\":1,\"projectnote\":\"string\",\"projectnote_title\":\"string\",\"contact_warning\":\"string\",\"discount_subrent\":1,\"image\":\"/files/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .contacts()
         .create_as::<ContactIdProjection>(&crate::model::ContactPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/contacts");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ContactPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1059,11 +1457,11 @@ async fn delete_contact() {
 #[tokio::test]
 async fn get_contact_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"type\":\"private\",\"ext_name_line\":\"string\",\"firstname\":\"string\",\"distance\":1,\"travel_time\":1,\"surfix\":\"string\",\"surname\":\"string\",\"longitude\":1,\"latitude\":1,\"code\":\"string\",\"accounting_code\":\"string\",\"vendor_accounting_code\":\"string\",\"name\":\"string\",\"gender\":\"string\",\"mailing_city\":\"string\",\"mailing_street\":\"string\",\"mailing_number\":\"string\",\"mailing_unit_number\":\"string\",\"mailing_district\":\"string\",\"mailing_extra_address_line\":\"string\",\"mailing_postalcode\":\"string\",\"mailing_state\":\"string\",\"mailing_country\":\"af\",\"visit_city\":\"string\",\"visit_street\":\"string\",\"visit_number\":\"string\",\"visit_unit_number\":\"string\",\"visit_district\":\"string\",\"visit_extra_address_line\":\"string\",\"visit_postalcode\":\"string\",\"visit_state\":\"string\",\"country\":\"af\",\"invoice_city\":\"string\",\"invoice_street\":\"string\",\"invoice_number\":\"string\",\"invoice_unit_number\":\"string\",\"invoice_district\":\"string\",\"invoice_extra_address_line\":\"string\",\"invoice_postalcode\":\"string\",\"invoice_state\":\"string\",\"invoice_country\":\"af\",\"phone_1\":\"string\",\"phone_2\":\"string\",\"email_1\":\"crew@example.test\",\"email_2\":\"crew@example.test\",\"website\":\"string\",\"VAT_code\":\"string\",\"fiscal_code\":\"string\",\"commerce_code\":\"string\",\"purchase_number\":\"string\",\"bic\":\"string\",\"bank_account\":\"string\",\"default_person\":\"/contactpersons/0\",\"admin_contactperson\":\"/contactpersons/0\",\"discount_crew\":1,\"discount_transport\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_total\":1,\"projectnote\":\"string\",\"projectnote_title\":\"string\",\"contact_warning\":\"string\",\"discount_subrent\":1,\"image\":\"/files/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.contacts().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/contacts/7");
     assert_bearer_token(&request);
@@ -1073,7 +1471,7 @@ async fn get_contact_item() {
 #[tokio::test]
 async fn update_contact() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"type\":\"private\",\"ext_name_line\":\"string\",\"firstname\":\"string\",\"distance\":1,\"travel_time\":1,\"surfix\":\"string\",\"surname\":\"string\",\"longitude\":1,\"latitude\":1,\"code\":\"string\",\"accounting_code\":\"string\",\"vendor_accounting_code\":\"string\",\"name\":\"string\",\"gender\":\"string\",\"mailing_city\":\"string\",\"mailing_street\":\"string\",\"mailing_number\":\"string\",\"mailing_unit_number\":\"string\",\"mailing_district\":\"string\",\"mailing_extra_address_line\":\"string\",\"mailing_postalcode\":\"string\",\"mailing_state\":\"string\",\"mailing_country\":\"af\",\"visit_city\":\"string\",\"visit_street\":\"string\",\"visit_number\":\"string\",\"visit_unit_number\":\"string\",\"visit_district\":\"string\",\"visit_extra_address_line\":\"string\",\"visit_postalcode\":\"string\",\"visit_state\":\"string\",\"country\":\"af\",\"invoice_city\":\"string\",\"invoice_street\":\"string\",\"invoice_number\":\"string\",\"invoice_unit_number\":\"string\",\"invoice_district\":\"string\",\"invoice_extra_address_line\":\"string\",\"invoice_postalcode\":\"string\",\"invoice_state\":\"string\",\"invoice_country\":\"af\",\"phone_1\":\"string\",\"phone_2\":\"string\",\"email_1\":\"crew@example.test\",\"email_2\":\"crew@example.test\",\"website\":\"string\",\"VAT_code\":\"string\",\"fiscal_code\":\"string\",\"commerce_code\":\"string\",\"purchase_number\":\"string\",\"bic\":\"string\",\"bank_account\":\"string\",\"default_person\":\"/contactpersons/0\",\"admin_contactperson\":\"/contactpersons/0\",\"discount_crew\":1,\"discount_transport\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_total\":1,\"projectnote\":\"string\",\"projectnote_title\":\"string\",\"contact_warning\":\"string\",\"discount_subrent\":1,\"image\":\"/files/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1083,10 +1481,12 @@ async fn update_contact() {
             &crate::model::ContactPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/contacts/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ContactPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1106,6 +1506,40 @@ async fn get_contact_contact_person_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contacts/7/contactpersons");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contact_contact_person_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contacts/7/contactpersons?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contacts()
+        .contact_persons(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contacts/7/contactpersons");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contacts/7/contactpersons");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1158,7 +1592,7 @@ async fn get_contact_contact_person_collection_collection_errors() {
 #[tokio::test]
 async fn create_contact_person() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"contact\":\"/contacts/0\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"function\":\"string\",\"phone\":\"string\",\"street\":\"string\",\"number\":\"string\",\"postalcode\":\"string\",\"city\":\"string\",\"state\":\"string\",\"country\":\"af\",\"mobilephone\":\"string\",\"email\":\"crew@example.test\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1166,10 +1600,13 @@ async fn create_contact_person() {
         .contact_persons(crate::Id::new(7))
         .create_as::<ContactPersonIdProjection>(&crate::model::ContactPersonPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/contacts/7/contactpersons");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ContactPersonPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1189,6 +1626,40 @@ async fn get_contact_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contacts/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contact_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contacts/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contacts()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contacts/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contacts/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1258,6 +1729,40 @@ async fn get_contact_file_collection() {
 }
 
 #[tokio::test]
+async fn get_contact_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contacts/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contacts()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contacts/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contacts/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contact_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -1323,6 +1828,40 @@ async fn get_contact_task_collection() {
 }
 
 #[tokio::test]
+async fn get_contact_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contacts/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contacts()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contacts/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contacts/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contact_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -1371,7 +1910,7 @@ async fn get_contact_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_contacts_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1379,10 +1918,13 @@ async fn post_contacts_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/contacts/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1397,6 +1939,39 @@ async fn get_contract_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contracts");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contract_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contracts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contracts()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contracts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contracts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1441,11 +2016,11 @@ async fn get_contract_collection_collection_errors() {
 #[tokio::test]
 async fn get_contract_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.contracts().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/contracts/7");
     assert_bearer_token(&request);
@@ -1468,6 +2043,40 @@ async fn get_contract_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/contracts/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_contract_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contracts/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contracts()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contracts/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contracts/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1537,6 +2146,40 @@ async fn get_contract_invoice_line_collection() {
 }
 
 #[tokio::test]
+async fn get_contract_invoice_line_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contracts/7/invoicelines?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contracts()
+        .invoice_lines(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contracts/7/invoicelines");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contracts/7/invoicelines");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contract_invoice_line_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -1602,6 +2245,40 @@ async fn get_contract_task_collection() {
 }
 
 #[tokio::test]
+async fn get_contract_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/contracts/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .contracts()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/contracts/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/contracts/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_contract_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -1650,7 +2327,7 @@ async fn get_contract_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_contracts_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1658,10 +2335,13 @@ async fn post_contracts_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/contracts/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1676,6 +2356,39 @@ async fn get_project_cost_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/costs");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/costs?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_costs()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/costs");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/costs");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1732,11 +2445,11 @@ async fn delete_project_cost() {
 #[tokio::test]
 async fn get_project_cost_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_costs().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/costs/7");
     assert_bearer_token(&request);
@@ -1746,7 +2459,7 @@ async fn get_project_cost_item() {
 #[tokio::test]
 async fn update_project_cost() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1756,10 +2469,13 @@ async fn update_project_cost() {
             &crate::model::ProjectCostPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/costs/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ProjectCostPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1774,6 +2490,39 @@ async fn get_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"street\":\"string\",\"housenumber\":\"string\",\"unit_number\":\"string\",\"district\":\"string\",\"city\":\"string\",\"postal_code\":\"string\",\"addressline2\":\"string\",\"extraaddressline\":\"string\",\"state\":\"string\",\"country\":\"af\",\"birthdate\":\"string\",\"passport_number\":\"string\",\"emergency_contact\":\"string\",\"remark\":\"string\",\"driving_license\":\"string\",\"contract\":0,\"bank\":\"string\",\"contract_date\":\"string\",\"company_name\":\"string\",\"vat_code\":\"string\",\"coc_code\":\"string\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"email\":\"crew@example.test\",\"phone\":\"string\",\"active\":true,\"avatar\":\"/files/0\",\"vt_fullname\":\"string\",\"default_warehouse\":\"/stocklocations/0\",\"external_reference\":\"string\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"street\":\"string\",\"housenumber\":\"string\",\"unit_number\":\"string\",\"district\":\"string\",\"city\":\"string\",\"postal_code\":\"string\",\"addressline2\":\"string\",\"extraaddressline\":\"string\",\"state\":\"string\",\"country\":\"af\",\"birthdate\":\"string\",\"passport_number\":\"string\",\"emergency_contact\":\"string\",\"remark\":\"string\",\"driving_license\":\"string\",\"contract\":0,\"bank\":\"string\",\"contract_date\":\"string\",\"company_name\":\"string\",\"vat_code\":\"string\",\"coc_code\":\"string\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"email\":\"crew@example.test\",\"phone\":\"string\",\"active\":true,\"avatar\":\"/files/0\",\"vt_fullname\":\"string\",\"default_warehouse\":\"/stocklocations/0\",\"external_reference\":\"string\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1818,11 +2567,11 @@ async fn get_crew_collection_collection_errors() {
 #[tokio::test]
 async fn get_crew_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"street\":\"string\",\"housenumber\":\"string\",\"unit_number\":\"string\",\"district\":\"string\",\"city\":\"string\",\"postal_code\":\"string\",\"addressline2\":\"string\",\"extraaddressline\":\"string\",\"state\":\"string\",\"country\":\"af\",\"birthdate\":\"string\",\"passport_number\":\"string\",\"emergency_contact\":\"string\",\"remark\":\"string\",\"driving_license\":\"string\",\"contract\":0,\"bank\":\"string\",\"contract_date\":\"string\",\"company_name\":\"string\",\"vat_code\":\"string\",\"coc_code\":\"string\",\"firstname\":\"string\",\"middle_name\":\"string\",\"lastname\":\"string\",\"email\":\"crew@example.test\",\"phone\":\"string\",\"active\":true,\"avatar\":\"/files/0\",\"vt_fullname\":\"string\",\"default_warehouse\":\"/stocklocations/0\",\"external_reference\":\"string\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.crew().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/crew/7");
     assert_bearer_token(&request);
@@ -1845,6 +2594,40 @@ async fn get_crew_appointment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crew/7/appointments");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_appointment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/appointments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"color\":\"string\",\"location\":\"string\",\"remark\":\"string\",\"is_public\":true,\"is_plannable\":true,\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrence_group\":0,\"recurrence_weekdays\":\"string\",\"synchronization_id\":\"string\",\"synchronisation_uri\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .appointments(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/appointments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/appointments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -1914,6 +2697,40 @@ async fn get_crew_crew_availability_collection() {
 }
 
 #[tokio::test]
+async fn get_crew_crew_availability_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/crewavailability?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .crew_availability(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/crewavailability");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/crewavailability");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_crew_crew_availability_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -1962,7 +2779,7 @@ async fn get_crew_crew_availability_collection_collection_errors() {
 #[tokio::test]
 async fn create_crew_availability() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -1973,10 +2790,16 @@ async fn create_crew_availability() {
             chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/crew/7/crewavailability");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::CrewAvailabilityPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -1996,6 +2819,40 @@ async fn get_crew_crew_rates_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crew/7/crewrates");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_crew_rates_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"naam\":\"string\",\"cost_rate\":\"/rates/0\",\"medewerker\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/crewrates?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"naam\":\"string\",\"cost_rate\":\"/rates/0\",\"medewerker\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .crew_rates(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/crewrates");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/crewrates");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2065,6 +2922,40 @@ async fn get_crew_file_folder_collection() {
 }
 
 #[tokio::test]
+async fn get_crew_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_crew_file_folder_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -2121,6 +3012,40 @@ async fn get_crew_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crew/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2190,6 +3115,40 @@ async fn get_crew_invitations_collection() {
 }
 
 #[tokio::test]
+async fn get_crew_invitations_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"availability\",\"accepted\":true,\"responded_timestamp\":\"2019-08-24T14:15:22Z\",\"expiration_date\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"function\":\"/projectfunctions/0\",\"projectcrew\":\"/projectcrew/0\",\"crewmember\":\"/crew/0\",\"remark\":\"string\",\"emailstatus\":\"pending\",\"last_reminder\":\"2019-08-24T14:15:22Z\",\"location_details\":\"string\",\"auto_reminder_date\":\"2019-08-24T14:15:22Z\",\"auto_reminder_sent\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/invitations?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"availability\",\"accepted\":true,\"responded_timestamp\":\"2019-08-24T14:15:22Z\",\"expiration_date\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"function\":\"/projectfunctions/0\",\"projectcrew\":\"/projectcrew/0\",\"crewmember\":\"/crew/0\",\"remark\":\"string\",\"emailstatus\":\"pending\",\"last_reminder\":\"2019-08-24T14:15:22Z\",\"location_details\":\"string\",\"auto_reminder_date\":\"2019-08-24T14:15:22Z\",\"auto_reminder_sent\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .invitations(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/invitations");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/invitations");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_crew_invitations_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -2250,6 +3209,40 @@ async fn get_crew_task_collection() {
 }
 
 #[tokio::test]
+async fn get_crew_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crew/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crew/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crew/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_crew_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -2298,7 +3291,7 @@ async fn get_crew_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_crew_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2306,10 +3299,13 @@ async fn post_crew_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/crew/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2324,6 +3320,39 @@ async fn get_crew_availability_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crewavailability");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_availability_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crewavailability?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew_availability()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crewavailability");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crewavailability");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2385,11 +3414,11 @@ async fn delete_crew_availability() {
 #[tokio::test]
 async fn get_crew_availability_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.crew_availability().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/crewavailability/7");
     assert_bearer_token(&request);
@@ -2399,7 +3428,7 @@ async fn get_crew_availability_item() {
 #[tokio::test]
 async fn update_crew_availability() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"last_updater\":\"/crew/0\",\"last_updated\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"crewmember\":\"/crew/0\",\"status\":\"B\",\"remark\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_enddate\":\"string\",\"recurrence_interval\":0,\"recurrent_group\":0,\"recurrence_weekdays\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2412,10 +3441,16 @@ async fn update_crew_availability() {
             ),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/crewavailability/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::CrewAvailabilityPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2430,6 +3465,39 @@ async fn get_crew_rates_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/crewrates");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_rates_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"naam\":\"string\",\"cost_rate\":\"/rates/0\",\"medewerker\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/crewrates?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"naam\":\"string\",\"cost_rate\":\"/rates/0\",\"medewerker\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .crew_rates()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/crewrates");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/crewrates");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2474,11 +3542,11 @@ async fn get_crew_rates_collection_collection_errors() {
 #[tokio::test]
 async fn get_crew_rates_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"naam\":\"string\",\"cost_rate\":\"/rates/0\",\"medewerker\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.crew_rates().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/crewrates/7");
     assert_bearer_token(&request);
@@ -2496,6 +3564,39 @@ async fn get_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"code\":\"string\",\"factor_group\":\"/factorgroups/0\",\"name\":\"string\",\"internal_remark\":\"string\",\"external_remark\":\"string\",\"unit\":\"string\",\"in_shop\":true,\"surface_article\":true,\"shop_description_short\":\"string\",\"shop_description_long\":\"string\",\"shop_seo_title\":\"string\",\"shop_seo_keyword\":\"string\",\"shop_seo_description\":\"string\",\"shop_featured\":true,\"price\":1,\"subrental_costs\":1,\"critical_stock_level\":0,\"type\":\"set\",\"rental_sales\":\"Sale\",\"temporary\":true,\"in_planner\":true,\"in_archive\":true,\"stock_management\":\"Exclude from stock tracking\",\"taxclass\":\"/taxclasses/0\",\"list_price\":1,\"volume\":1,\"packed_per\":0,\"height\":1,\"width\":1,\"length\":1,\"weight\":1,\"empty_weight\":1,\"power\":1,\"current\":1,\"country_of_origin\":\"oo\",\"image\":\"/files/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"defaultgroup\":\"string\",\"is_combination\":true,\"is_physical\":\"Virtual package\",\"can_edit_content_during_planning\":true,\"strict_container_content\":\"Unrestricted\",\"qrcodes\":\"string\",\"qrcodes_of_serial_numbers\":\"string\",\"tags\":\"string\",\"current_quantity_excl_cases\":0,\"current_quantity\":0,\"quantity_in_cases\":0,\"location_in_warehouse\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"code\":\"string\",\"factor_group\":\"/factorgroups/0\",\"name\":\"string\",\"internal_remark\":\"string\",\"external_remark\":\"string\",\"unit\":\"string\",\"in_shop\":true,\"surface_article\":true,\"shop_description_short\":\"string\",\"shop_description_long\":\"string\",\"shop_seo_title\":\"string\",\"shop_seo_keyword\":\"string\",\"shop_seo_description\":\"string\",\"shop_featured\":true,\"price\":1,\"subrental_costs\":1,\"critical_stock_level\":0,\"type\":\"set\",\"rental_sales\":\"Sale\",\"temporary\":true,\"in_planner\":true,\"in_archive\":true,\"stock_management\":\"Exclude from stock tracking\",\"taxclass\":\"/taxclasses/0\",\"list_price\":1,\"volume\":1,\"packed_per\":0,\"height\":1,\"width\":1,\"length\":1,\"weight\":1,\"empty_weight\":1,\"power\":1,\"current\":1,\"country_of_origin\":\"oo\",\"image\":\"/files/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"defaultgroup\":\"string\",\"is_combination\":true,\"is_physical\":\"Virtual package\",\"can_edit_content_during_planning\":true,\"strict_container_content\":\"Unrestricted\",\"qrcodes\":\"string\",\"qrcodes_of_serial_numbers\":\"string\",\"tags\":\"string\",\"current_quantity_excl_cases\":0,\"current_quantity\":0,\"quantity_in_cases\":0,\"location_in_warehouse\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2540,28 +3641,30 @@ async fn get_equipment_collection_collection_errors() {
 #[tokio::test]
 async fn create_equipment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"code\":\"string\",\"factor_group\":\"/factorgroups/0\",\"name\":\"string\",\"internal_remark\":\"string\",\"external_remark\":\"string\",\"unit\":\"string\",\"in_shop\":true,\"surface_article\":true,\"shop_description_short\":\"string\",\"shop_description_long\":\"string\",\"shop_seo_title\":\"string\",\"shop_seo_keyword\":\"string\",\"shop_seo_description\":\"string\",\"shop_featured\":true,\"price\":1,\"subrental_costs\":1,\"critical_stock_level\":0,\"type\":\"set\",\"rental_sales\":\"Sale\",\"temporary\":true,\"in_planner\":true,\"in_archive\":true,\"stock_management\":\"Exclude from stock tracking\",\"taxclass\":\"/taxclasses/0\",\"list_price\":1,\"volume\":1,\"packed_per\":0,\"height\":1,\"width\":1,\"length\":1,\"weight\":1,\"empty_weight\":1,\"power\":1,\"current\":1,\"country_of_origin\":\"oo\",\"image\":\"/files/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"defaultgroup\":\"string\",\"is_combination\":true,\"is_physical\":\"Virtual package\",\"can_edit_content_during_planning\":true,\"strict_container_content\":\"Unrestricted\",\"qrcodes\":\"string\",\"qrcodes_of_serial_numbers\":\"string\",\"tags\":\"string\",\"current_quantity_excl_cases\":0,\"current_quantity\":0,\"quantity_in_cases\":0,\"location_in_warehouse\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .equipment()
         .create_as::<EquipmentIdProjection>(&crate::model::EquipmentPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::EquipmentPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn get_equipment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"code\":\"string\",\"factor_group\":\"/factorgroups/0\",\"name\":\"string\",\"internal_remark\":\"string\",\"external_remark\":\"string\",\"unit\":\"string\",\"in_shop\":true,\"surface_article\":true,\"shop_description_short\":\"string\",\"shop_description_long\":\"string\",\"shop_seo_title\":\"string\",\"shop_seo_keyword\":\"string\",\"shop_seo_description\":\"string\",\"shop_featured\":true,\"price\":1,\"subrental_costs\":1,\"critical_stock_level\":0,\"type\":\"set\",\"rental_sales\":\"Sale\",\"temporary\":true,\"in_planner\":true,\"in_archive\":true,\"stock_management\":\"Exclude from stock tracking\",\"taxclass\":\"/taxclasses/0\",\"list_price\":1,\"volume\":1,\"packed_per\":0,\"height\":1,\"width\":1,\"length\":1,\"weight\":1,\"empty_weight\":1,\"power\":1,\"current\":1,\"country_of_origin\":\"oo\",\"image\":\"/files/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"defaultgroup\":\"string\",\"is_combination\":true,\"is_physical\":\"Virtual package\",\"can_edit_content_during_planning\":true,\"strict_container_content\":\"Unrestricted\",\"qrcodes\":\"string\",\"qrcodes_of_serial_numbers\":\"string\",\"tags\":\"string\",\"current_quantity_excl_cases\":0,\"current_quantity\":0,\"quantity_in_cases\":0,\"location_in_warehouse\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.equipment().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7");
     assert_bearer_token(&request);
@@ -2571,7 +3674,7 @@ async fn get_equipment_item() {
 #[tokio::test]
 async fn update_equipment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"code\":\"string\",\"factor_group\":\"/factorgroups/0\",\"name\":\"string\",\"internal_remark\":\"string\",\"external_remark\":\"string\",\"unit\":\"string\",\"in_shop\":true,\"surface_article\":true,\"shop_description_short\":\"string\",\"shop_description_long\":\"string\",\"shop_seo_title\":\"string\",\"shop_seo_keyword\":\"string\",\"shop_seo_description\":\"string\",\"shop_featured\":true,\"price\":1,\"subrental_costs\":1,\"critical_stock_level\":0,\"type\":\"set\",\"rental_sales\":\"Sale\",\"temporary\":true,\"in_planner\":true,\"in_archive\":true,\"stock_management\":\"Exclude from stock tracking\",\"taxclass\":\"/taxclasses/0\",\"list_price\":1,\"volume\":1,\"packed_per\":0,\"height\":1,\"width\":1,\"length\":1,\"weight\":1,\"empty_weight\":1,\"power\":1,\"current\":1,\"country_of_origin\":\"oo\",\"image\":\"/files/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"defaultgroup\":\"string\",\"is_combination\":true,\"is_physical\":\"Virtual package\",\"can_edit_content_during_planning\":true,\"strict_container_content\":\"Unrestricted\",\"qrcodes\":\"string\",\"qrcodes_of_serial_numbers\":\"string\",\"tags\":\"string\",\"current_quantity_excl_cases\":0,\"current_quantity\":0,\"quantity_in_cases\":0,\"location_in_warehouse\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2581,10 +3684,12 @@ async fn update_equipment() {
             &crate::model::EquipmentPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/equipment/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::EquipmentPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2604,6 +3709,40 @@ async fn get_equipment_accessory_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/accessories");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_accessory_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/accessories?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .accessories(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/accessories");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/accessories");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2656,7 +3795,7 @@ async fn get_equipment_accessory_collection_collection_errors() {
 #[tokio::test]
 async fn create_accessory() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent_equipment\":\"/equipment/0\",\"equipment\":\"/equipment/0\",\"quantity\":0,\"automatic\":true,\"skip\":true,\"is_free\":true,\"order\":0,\"add_as_new_line\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2664,10 +3803,12 @@ async fn create_accessory() {
         .accessories(crate::Id::new(7))
         .create_as::<AccessoryIdProjection>(&crate::model::AccessoryPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/accessories");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::AccessoryPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2687,6 +3828,40 @@ async fn get_equipment_alternative_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/alternatives");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_alternative_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/alternatives?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .alternatives(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/alternatives");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/alternatives");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2739,7 +3914,7 @@ async fn get_equipment_alternative_collection_collection_errors() {
 #[tokio::test]
 async fn create_alternative() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"alternative\":\"/equipment/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2749,10 +3924,13 @@ async fn create_alternative() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/alternatives");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::AlternativePayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2772,6 +3950,40 @@ async fn get_equipment_equipment_set_content_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/equipmentsetscontent");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_equipment_set_content_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/equipmentsetscontent?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .equipment_set_content(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/equipmentsetscontent");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/equipmentsetscontent");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2833,7 +4045,7 @@ async fn get_equipment_equipment_set_content_collection_collection_errors() {
 #[tokio::test]
 async fn create_equipment_set_content() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -2843,10 +4055,15 @@ async fn create_equipment_set_content() {
             &crate::model::EquipmentSetContentPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/equipmentsetscontent");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::EquipmentSetContentPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -2866,6 +4083,40 @@ async fn get_equipment_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -2935,6 +4186,40 @@ async fn get_equipment_file_collection() {
 }
 
 #[tokio::test]
+async fn get_equipment_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_equipment_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -2996,6 +4281,40 @@ async fn get_equipment_repair_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/repairs");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_repair_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"internal_name\":\"string\",\"equipment\":\"/equipment/0\",\"serialnumber\":\"/serialnumbers/0\",\"reporter\":\"/crew/0\",\"assignee\":\"/crew/0\",\"external_repairer\":\"/contacts/0\",\"number\":0,\"repairperiod_start\":\"2019-08-24T14:15:22Z\",\"repairperiod_end\":\"2019-08-24T14:15:22Z\",\"amount\":0,\"remark\":\"string\",\"repair_costs\":1,\"is_usable\":\"take_from_stock\",\"costs_charged_to_customer\":\"/costs/0\",\"subproject\":\"/subprojects/0\",\"stock_location\":\"/stocklocations/0\",\"repair_status\":\"in-progress\",\"unrepairable_of\":\"/repairs/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/repairs?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"internal_name\":\"string\",\"equipment\":\"/equipment/0\",\"serialnumber\":\"/serialnumbers/0\",\"reporter\":\"/crew/0\",\"assignee\":\"/crew/0\",\"external_repairer\":\"/contacts/0\",\"number\":0,\"repairperiod_start\":\"2019-08-24T14:15:22Z\",\"repairperiod_end\":\"2019-08-24T14:15:22Z\",\"amount\":0,\"remark\":\"string\",\"repair_costs\":1,\"is_usable\":\"take_from_stock\",\"costs_charged_to_customer\":\"/costs/0\",\"subproject\":\"/subprojects/0\",\"stock_location\":\"/stocklocations/0\",\"repair_status\":\"in-progress\",\"unrepairable_of\":\"/repairs/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .repairs(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/repairs");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/repairs");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3065,6 +4384,40 @@ async fn get_equipment_serial_number_collection() {
 }
 
 #[tokio::test]
+async fn get_equipment_serial_number_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/serialnumbers?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .serial_numbers(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/serialnumbers");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/serialnumbers");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_equipment_serial_number_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -3122,7 +4475,7 @@ async fn get_equipment_serial_number_collection_collection_errors() {
 #[tokio::test]
 async fn create_serial_number() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -3130,10 +4483,12 @@ async fn create_serial_number() {
         .serial_numbers(crate::Id::new(7))
         .create_as::<SerialNumberIdProjection>(&crate::model::SerialNumberPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/serialnumbers");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SerialNumberPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -3153,6 +4508,40 @@ async fn get_equipment_stock_movement_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/stockmovements");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_stock_movement_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/stockmovements?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .stock_movements(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/stockmovements");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/stockmovements");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3214,7 +4603,7 @@ async fn get_equipment_stock_movement_collection_collection_errors() {
 #[tokio::test]
 async fn create_stock_movement() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -3224,10 +4613,15 @@ async fn create_stock_movement() {
             chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/stockmovements");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::StockMovementPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -3247,6 +4641,40 @@ async fn get_equipment_supplier_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/suppliers");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_supplier_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/suppliers?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .suppliers(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/suppliers");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/suppliers");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3299,7 +4727,7 @@ async fn get_equipment_supplier_collection_collection_errors() {
 #[tokio::test]
 async fn create_supplier() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -3307,10 +4735,13 @@ async fn create_supplier() {
         .suppliers(crate::Id::new(7))
         .create_as::<SupplierIdProjection>(&crate::model::SupplierPayload::new(crate::Id::new(1)))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/suppliers");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::SupplierPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -3330,6 +4761,40 @@ async fn get_equipment_task_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipment/7/tasks");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipment/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipment/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipment/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3382,7 +4847,7 @@ async fn get_equipment_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_equipment_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -3390,10 +4855,13 @@ async fn post_equipment_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/equipment/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -3408,6 +4876,39 @@ async fn get_equipment_assigned_serials_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipmentassignedserials");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_assigned_serials_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"combination\":\"/serialnumbers/0\",\"serialnumber\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipmentassignedserials?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"combination\":\"/serialnumbers/0\",\"serialnumber\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment_assigned_serials()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipmentassignedserials");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipmentassignedserials");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3466,14 +4967,14 @@ async fn get_equipment_assigned_serials_collection_collection_errors() {
 #[tokio::test]
 async fn get_equipment_assigned_serials_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"combination\":\"/serialnumbers/0\",\"serialnumber\":\"/serialnumbers/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .equipment_assigned_serials()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/equipmentassignedserials/7");
     assert_bearer_token(&request);
@@ -3491,6 +4992,39 @@ async fn get_equipment_set_content_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/equipmentsetscontent");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_equipment_set_content_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/equipmentsetscontent?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .equipment_set_content()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/equipmentsetscontent");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/equipmentsetscontent");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3555,11 +5089,11 @@ async fn delete_equipment_set_content() {
 #[tokio::test]
 async fn get_equipment_set_content_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.equipment_set_content().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/equipmentsetscontent/7");
     assert_bearer_token(&request);
@@ -3569,7 +5103,7 @@ async fn get_equipment_set_content_item() {
 #[tokio::test]
 async fn update_equipment_set_content() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"parent_equipment\":\"/equipment/0\",\"order\":0,\"equipment\":\"/equipment/0\",\"is_fixed\":\"Available outside this combination\",\"is_physically_connected\":\"Will be removed when emptying combinations\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -3579,10 +5113,15 @@ async fn update_equipment_set_content() {
             &crate::model::EquipmentSetContentPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/equipmentsetscontent/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::EquipmentSetContentPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -3597,6 +5136,39 @@ async fn get_extra_input_field_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/extrainputfields");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_extra_input_field_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"itemtype\":\"Contact\",\"linkedItemType\":\"Contact\",\"parent\":\"/extrainputfields/0\",\"type\":\"bool\",\"order\":0,\"hidden\":true,\"classified\":true,\"search_include\":true,\"search_minlength\":0,\"is_customfield_mandatory\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/extrainputfields?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"itemtype\":\"Contact\",\"linkedItemType\":\"Contact\",\"parent\":\"/extrainputfields/0\",\"type\":\"bool\",\"order\":0,\"hidden\":true,\"classified\":true,\"search_include\":true,\"search_minlength\":0,\"is_customfield_mandatory\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .extra_input_fields()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/extrainputfields");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/extrainputfields");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3646,11 +5218,11 @@ async fn get_extra_input_field_collection_collection_errors() {
 #[tokio::test]
 async fn get_extra_input_field_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"itemtype\":\"Contact\",\"linkedItemType\":\"Contact\",\"parent\":\"/extrainputfields/0\",\"type\":\"bool\",\"order\":0,\"hidden\":true,\"classified\":true,\"search_include\":true,\"search_minlength\":0,\"is_customfield_mandatory\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.extra_input_fields().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/extrainputfields/7");
     assert_bearer_token(&request);
@@ -3668,6 +5240,39 @@ async fn get_factor_groups_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/factorgroups");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_factor_groups_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/factorgroups?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .factor_groups()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/factorgroups");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/factorgroups");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3712,11 +5317,11 @@ async fn get_factor_groups_collection_collection_errors() {
 #[tokio::test]
 async fn get_factor_groups_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.factor_groups().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/factorgroups/7");
     assert_bearer_token(&request);
@@ -3739,6 +5344,40 @@ async fn get_factor_groups_factors_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/factorgroups/7/factors");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_factor_groups_factors_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"from_days\":0,\"to_days\":0,\"factor\":1,\"factor_group\":\"/factorgroups/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/factorgroups/7/factors?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"from_days\":0,\"to_days\":0,\"factor\":1,\"factor_group\":\"/factorgroups/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .factor_groups()
+        .factors(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/factorgroups/7/factors");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/factorgroups/7/factors");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3803,6 +5442,39 @@ async fn get_factors_collection() {
 }
 
 #[tokio::test]
+async fn get_factors_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"from_days\":0,\"to_days\":0,\"factor\":1,\"factor_group\":\"/factorgroups/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/factors?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"from_days\":0,\"to_days\":0,\"factor\":1,\"factor_group\":\"/factorgroups/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .factors()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/factors");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/factors");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_factors_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -3843,11 +5515,11 @@ async fn get_factors_collection_collection_errors() {
 #[tokio::test]
 async fn get_factors_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"from_days\":0,\"to_days\":0,\"factor\":1,\"factor_group\":\"/factorgroups/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.factors().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/factors/7");
     assert_bearer_token(&request);
@@ -3865,6 +5537,39 @@ async fn get_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .file_folders()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3909,11 +5614,11 @@ async fn get_file_folder_collection_collection_errors() {
 #[tokio::test]
 async fn get_file_folder_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.file_folders().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/file_folders/7");
     assert_bearer_token(&request);
@@ -3931,6 +5636,39 @@ async fn get_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .files()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -3975,11 +5713,11 @@ async fn get_file_collection_collection_errors() {
 #[tokio::test]
 async fn get_file_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.files().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/files/7");
     assert_bearer_token(&request);
@@ -3997,6 +5735,39 @@ async fn get_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/folders/0\",\"name\":\"string\",\"order\":0,\"itemtype\":\"equipment\",\"path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/folders/0\",\"name\":\"string\",\"order\":0,\"itemtype\":\"equipment\",\"path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .folders()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4041,28 +5812,30 @@ async fn get_folder_collection_collection_errors() {
 #[tokio::test]
 async fn create_folder() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/folders/0\",\"name\":\"string\",\"order\":0,\"itemtype\":\"equipment\",\"path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .folders()
         .create_as::<FolderIdProjection>(&crate::model::FolderPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/folders");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::FolderPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn get_folder_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/folders/0\",\"name\":\"string\",\"order\":0,\"itemtype\":\"equipment\",\"path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.folders().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/folders/7");
     assert_bearer_token(&request);
@@ -4072,17 +5845,19 @@ async fn get_folder_item() {
 #[tokio::test]
 async fn update_folder() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/folders/0\",\"name\":\"string\",\"order\":0,\"itemtype\":\"equipment\",\"path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .folders()
         .update_as::<FolderIdProjection>(crate::Id::new(7), &crate::model::FolderPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/folders/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::FolderPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -4097,6 +5872,39 @@ async fn get_invitations_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/invitations");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_invitations_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"availability\",\"accepted\":true,\"responded_timestamp\":\"2019-08-24T14:15:22Z\",\"expiration_date\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"function\":\"/projectfunctions/0\",\"projectcrew\":\"/projectcrew/0\",\"crewmember\":\"/crew/0\",\"remark\":\"string\",\"emailstatus\":\"pending\",\"last_reminder\":\"2019-08-24T14:15:22Z\",\"location_details\":\"string\",\"auto_reminder_date\":\"2019-08-24T14:15:22Z\",\"auto_reminder_sent\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invitations?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"availability\",\"accepted\":true,\"responded_timestamp\":\"2019-08-24T14:15:22Z\",\"expiration_date\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"function\":\"/projectfunctions/0\",\"projectcrew\":\"/projectcrew/0\",\"crewmember\":\"/crew/0\",\"remark\":\"string\",\"emailstatus\":\"pending\",\"last_reminder\":\"2019-08-24T14:15:22Z\",\"location_details\":\"string\",\"auto_reminder_date\":\"2019-08-24T14:15:22Z\",\"auto_reminder_sent\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invitations()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invitations");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invitations");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4141,11 +5949,11 @@ async fn get_invitations_collection_collection_errors() {
 #[tokio::test]
 async fn get_invitations_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"availability\",\"accepted\":true,\"responded_timestamp\":\"2019-08-24T14:15:22Z\",\"expiration_date\":\"2019-08-24T14:15:22Z\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"function\":\"/projectfunctions/0\",\"projectcrew\":\"/projectcrew/0\",\"crewmember\":\"/crew/0\",\"remark\":\"string\",\"emailstatus\":\"pending\",\"last_reminder\":\"2019-08-24T14:15:22Z\",\"location_details\":\"string\",\"auto_reminder_date\":\"2019-08-24T14:15:22Z\",\"auto_reminder_sent\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.invitations().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/invitations/7");
     assert_bearer_token(&request);
@@ -4163,6 +5971,39 @@ async fn get_invoice_line_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/invoicelines");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_invoice_line_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoicelines?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoice_lines()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoicelines");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoicelines");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4207,11 +6048,11 @@ async fn get_invoice_line_collection_collection_errors() {
 #[tokio::test]
 async fn get_invoice_line_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.invoice_lines().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/invoicelines/7");
     assert_bearer_token(&request);
@@ -4229,6 +6070,39 @@ async fn get_factuur_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/invoices");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_factuur_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"customer\":\"/contacts/0\",\"account_manager\":\"/crew/0\",\"contact\":\"/contactpersons/0\",\"expiration\":\"string\",\"date\":\"string\",\"number\":\"string\",\"procent\":1,\"from_project\":true,\"subject\":\"string\",\"finalized\":true,\"integration_reference_id\":\"string\",\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"sum_factuurregels\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"invoicetype\":\"C\",\"outstanding_balance\":1,\"total_paid\":1,\"is_paid\":true,\"date_sent\":\"2019-08-24T14:15:22Z\",\"payment_reminder_sent\":0,\"final_payment_reminder_sent\":\"2019-08-24T14:15:22Z\",\"payment_date\":\"string\",\"days_after_expiry\":0,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoices?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"customer\":\"/contacts/0\",\"account_manager\":\"/crew/0\",\"contact\":\"/contactpersons/0\",\"expiration\":\"string\",\"date\":\"string\",\"number\":\"string\",\"procent\":1,\"from_project\":true,\"subject\":\"string\",\"finalized\":true,\"integration_reference_id\":\"string\",\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"sum_factuurregels\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"invoicetype\":\"C\",\"outstanding_balance\":1,\"total_paid\":1,\"is_paid\":true,\"date_sent\":\"2019-08-24T14:15:22Z\",\"payment_reminder_sent\":0,\"final_payment_reminder_sent\":\"2019-08-24T14:15:22Z\",\"payment_date\":\"string\",\"days_after_expiry\":0,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoices()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoices");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoices");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4273,11 +6147,11 @@ async fn get_factuur_collection_collection_errors() {
 #[tokio::test]
 async fn get_factuur_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"customer\":\"/contacts/0\",\"account_manager\":\"/crew/0\",\"contact\":\"/contactpersons/0\",\"expiration\":\"string\",\"date\":\"string\",\"number\":\"string\",\"procent\":1,\"from_project\":true,\"subject\":\"string\",\"finalized\":true,\"integration_reference_id\":\"string\",\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"sum_factuurregels\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"invoicetype\":\"C\",\"outstanding_balance\":1,\"total_paid\":1,\"is_paid\":true,\"date_sent\":\"2019-08-24T14:15:22Z\",\"payment_reminder_sent\":0,\"final_payment_reminder_sent\":\"2019-08-24T14:15:22Z\",\"payment_date\":\"string\",\"days_after_expiry\":0,\"tags\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.invoices().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/invoices/7");
     assert_bearer_token(&request);
@@ -4300,6 +6174,40 @@ async fn get_factuur_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/invoices/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_factuur_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoices/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoices()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoices/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoices/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4369,6 +6277,40 @@ async fn get_factuur_invoice_line_collection() {
 }
 
 #[tokio::test]
+async fn get_factuur_invoice_line_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoices/7/invoicelines?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoices()
+        .invoice_lines(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoices/7/invoicelines");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoices/7/invoicelines");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_factuur_invoice_line_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -4434,6 +6376,40 @@ async fn get_factuur_payment_collection() {
 }
 
 #[tokio::test]
+async fn get_factuur_payment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoices/7/payments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoices()
+        .payments(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoices/7/payments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoices/7/payments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_factuur_payment_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -4482,7 +6458,7 @@ async fn get_factuur_payment_collection_collection_errors() {
 #[tokio::test]
 async fn create_payment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -4492,10 +6468,15 @@ async fn create_payment() {
             chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/invoices/7/payments");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::PaymentPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -4515,6 +6496,40 @@ async fn get_factuur_task_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/invoices/7/tasks");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_factuur_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/invoices/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .invoices()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/invoices/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/invoices/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4567,7 +6582,7 @@ async fn get_factuur_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_invoices_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -4575,10 +6590,13 @@ async fn post_invoices_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/invoices/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -4593,6 +6611,39 @@ async fn get_leave_mutations_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/leavemutation");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_leave_mutations_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"duration\":1,\"crewmember\":\"/crew/0\",\"leavetype\":\"/leavetypes/0\",\"mutation_date\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/leavemutation?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"duration\":1,\"crewmember\":\"/crew/0\",\"leavetype\":\"/leavetypes/0\",\"mutation_date\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .leave_mutations()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/leavemutation");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/leavemutation");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4637,7 +6688,7 @@ async fn get_leave_mutations_collection_collection_errors() {
 #[tokio::test]
 async fn create_leave_mutations() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"duration\":1,\"crewmember\":\"/crew/0\",\"leavetype\":\"/leavetypes/0\",\"mutation_date\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -4647,21 +6698,27 @@ async fn create_leave_mutations() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/leavemutation");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::LeaveMutationPayload::new(
+        crate::Id::new(1),
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn get_leave_mutations_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"duration\":1,\"crewmember\":\"/crew/0\",\"leavetype\":\"/leavetypes/0\",\"mutation_date\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.leave_mutations().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/leavemutation/7");
     assert_bearer_token(&request);
@@ -4679,6 +6736,39 @@ async fn get_leave_request_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/leaverequest");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_leave_request_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"approval_status\":\"pending\",\"requested_for\":\"/crew/0\",\"reviewed_on\":\"2019-08-24T14:15:22Z\",\"reviewer\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/leaverequest?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"approval_status\":\"pending\",\"requested_for\":\"/crew/0\",\"reviewed_on\":\"2019-08-24T14:15:22Z\",\"reviewer\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .leave_requests()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/leaverequest");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/leaverequest");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4723,7 +6813,7 @@ async fn get_leave_request_collection_collection_errors() {
 #[tokio::test]
 async fn create_leave_request() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"approval_status\":\"pending\",\"requested_for\":\"/crew/0\",\"reviewed_on\":\"2019-08-24T14:15:22Z\",\"reviewer\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -4732,21 +6822,24 @@ async fn create_leave_request() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/leaverequest");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::LeaveRequestPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn get_leave_request_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"approval_status\":\"pending\",\"requested_for\":\"/crew/0\",\"reviewed_on\":\"2019-08-24T14:15:22Z\",\"reviewer\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.leave_requests().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/leaverequest/7");
     assert_bearer_token(&request);
@@ -4756,7 +6849,7 @@ async fn get_leave_request_item() {
 #[tokio::test]
 async fn update_leave_request() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"description\":\"string\",\"approval_status\":\"pending\",\"requested_for\":\"/crew/0\",\"reviewed_on\":\"2019-08-24T14:15:22Z\",\"reviewer\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -4766,10 +6859,13 @@ async fn update_leave_request() {
             &crate::model::LeaveRequestPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/leaverequest/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::LeaveRequestPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -4789,6 +6885,40 @@ async fn get_leave_request_time_registration_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/leaverequest/7/timeregistration");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_leave_request_time_registration_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/leaverequest/7/timeregistration?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .leave_requests()
+        .time_registrations(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/leaverequest/7/timeregistration");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/leaverequest/7/timeregistration");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4850,7 +6980,7 @@ async fn get_leave_request_time_registration_collection_collection_errors() {
 #[tokio::test]
 async fn create_time_registration() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result =
@@ -4861,10 +6991,13 @@ async fn create_time_registration() {
                 &crate::model::TimeRegistrationPayload::default(),
             )
             .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/leaverequest/7/timeregistration");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TimeRegistrationPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -4879,6 +7012,39 @@ async fn get_leave_types_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/leavetypes");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_leave_types_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"C\",\"name\":\"string\",\"payroll_code\":\"string\",\"color\":\"string\",\"requires_approval\":true,\"affects_availability\":true,\"has_balance\":true,\"balance_start_date\":\"string\",\"is_labor\":\"leave\",\"has_calculated_duration\":true,\"can_have_activities\":true,\"counts_in_totals\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/leavetypes?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"C\",\"name\":\"string\",\"payroll_code\":\"string\",\"color\":\"string\",\"requires_approval\":true,\"affects_availability\":true,\"has_balance\":true,\"balance_start_date\":\"string\",\"is_labor\":\"leave\",\"has_calculated_duration\":true,\"can_have_activities\":true,\"counts_in_totals\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .leave_types()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/leavetypes");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/leavetypes");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4923,11 +7089,11 @@ async fn get_leave_types_collection_collection_errors() {
 #[tokio::test]
 async fn get_leave_types_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"type\":\"C\",\"name\":\"string\",\"payroll_code\":\"string\",\"color\":\"string\",\"requires_approval\":true,\"affects_availability\":true,\"has_balance\":true,\"balance_start_date\":\"string\",\"is_labor\":\"leave\",\"has_calculated_duration\":true,\"can_have_activities\":true,\"counts_in_totals\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.leave_types().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/leavetypes/7");
     assert_bearer_token(&request);
@@ -4945,6 +7111,39 @@ async fn get_ledger_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/ledgercodes");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_ledger_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"code\":\"string\",\"is_credit\":true,\"is_debit\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/ledgercodes?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"code\":\"string\",\"is_credit\":true,\"is_debit\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .ledger_codes()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/ledgercodes");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/ledgercodes");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -4989,11 +7188,11 @@ async fn get_ledger_collection_collection_errors() {
 #[tokio::test]
 async fn get_ledger_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"code\":\"string\",\"is_credit\":true,\"is_debit\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.ledger_codes().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/ledgercodes/7");
     assert_bearer_token(&request);
@@ -5011,6 +7210,39 @@ async fn get_payment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/payments");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_payment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/payments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .payments()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/payments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/payments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5055,11 +7287,11 @@ async fn get_payment_collection_collection_errors() {
 #[tokio::test]
 async fn get_payment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.payments().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/payments/7");
     assert_bearer_token(&request);
@@ -5069,7 +7301,7 @@ async fn get_payment_item() {
 #[tokio::test]
 async fn update_payment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"invoice\":\"/invoices/0\",\"moment\":\"2019-08-24T14:15:22Z\",\"amount\":1,\"description\":\"string\",\"payment_import_source\":\"none\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -5081,10 +7313,15 @@ async fn update_payment() {
             ),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/payments/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::PaymentPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -5099,6 +7336,39 @@ async fn get_project_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectcrew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_crew()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5143,11 +7413,11 @@ async fn get_project_crew_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_crew_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_crew().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectcrew/7");
     assert_bearer_token(&request);
@@ -5165,6 +7435,39 @@ async fn get_project_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectequipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_equipment()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5214,11 +7517,11 @@ async fn get_project_equipment_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_equipment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_equipment().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectequipment/7");
     assert_bearer_token(&request);
@@ -5236,6 +7539,39 @@ async fn get_project_equipment_group_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectequipmentgroup");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_equipment_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectequipmentgroup?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_equipment_groups()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectequipmentgroup");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectequipmentgroup");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5294,14 +7630,14 @@ async fn get_project_equipment_group_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_equipment_group_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .project_equipment_groups()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectequipmentgroup/7");
     assert_bearer_token(&request);
@@ -5324,6 +7660,40 @@ async fn get_project_equipment_group_project_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectequipmentgroup/7/projectequipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_equipment_group_project_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectequipmentgroup/7/projectequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_equipment_groups()
+        .project_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectequipmentgroup/7/projectequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectequipmentgroup/7/projectequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5397,6 +7767,39 @@ async fn get_project_function_group_collection() {
 }
 
 #[tokio::test]
+async fn get_project_function_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectfunctiongroups?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_function_groups()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectfunctiongroups");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectfunctiongroups");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_function_group_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -5442,14 +7845,14 @@ async fn get_project_function_group_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_function_group_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .project_function_groups()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectfunctiongroups/7");
     assert_bearer_token(&request);
@@ -5472,6 +7875,40 @@ async fn get_project_function_group_project_function_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectfunctiongroups/7/projectfunctions");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_function_group_project_function_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectfunctiongroups/7/projectfunctions?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_function_groups()
+        .project_functions(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectfunctiongroups/7/projectfunctions");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectfunctiongroups/7/projectfunctions");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5545,6 +7982,39 @@ async fn get_project_function_collection() {
 }
 
 #[tokio::test]
+async fn get_project_function_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectfunctions?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_functions()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectfunctions");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectfunctions");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_function_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -5590,11 +8060,11 @@ async fn get_project_function_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_function_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_functions().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectfunctions/7");
     assert_bearer_token(&request);
@@ -5617,6 +8087,40 @@ async fn get_project_function_project_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectfunctions/7/projectcrew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_function_project_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectfunctions/7/projectcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_functions()
+        .project_crew(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectfunctions/7/projectcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectfunctions/7/projectcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5695,6 +8199,40 @@ async fn get_project_function_project_vehicle_collection() {
 }
 
 #[tokio::test]
+async fn get_project_function_project_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectfunctions/7/projectvehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_functions()
+        .project_vehicles(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectfunctions/7/projectvehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectfunctions/7/projectvehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_function_project_vehicle_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -5760,6 +8298,39 @@ async fn get_project_request_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectrequestequipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_request_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectrequestequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_request_equipment()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectrequestequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectrequestequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5833,14 +8404,14 @@ async fn delete_project_request_equipment() {
 #[tokio::test]
 async fn get_project_request_equipment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .project_request_equipment()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectrequestequipment/7");
     assert_bearer_token(&request);
@@ -5850,7 +8421,7 @@ async fn get_project_request_equipment_item() {
 #[tokio::test]
 async fn update_project_request_equipment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -5860,10 +8431,13 @@ async fn update_project_request_equipment() {
             &crate::model::ProjectRequestEquipmentPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/projectrequestequipment/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ProjectRequestEquipmentPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -5878,6 +8452,39 @@ async fn get_project_request_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectrequests");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_request_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"linked_contact\":\"/contacts/0\",\"contact_mailing_number\":\"string\",\"contact_mailing_country\":\"string\",\"contact_name\":\"string\",\"contact_mailing_postalcode\":\"string\",\"contact_phone\":\"string\",\"contact_mailing_city\":\"string\",\"contact_mailing_street\":\"string\",\"linked_contact_person\":\"/contactpersons/0\",\"contact_person_lastname\":\"string\",\"contact_person_email\":\"crew@example.test\",\"contact_person_middle_name\":\"string\",\"contact_person_first_name\":\"string\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"is_paid\":true,\"language\":\"string\",\"in\":\"2019-08-24T14:15:22Z\",\"out\":\"2019-08-24T14:15:22Z\",\"linked_location\":\"/contacts/0\",\"location_mailing_number\":\"string\",\"location_mailing_country\":\"string\",\"location_name\":\"string\",\"location_mailing_postalcode\":\"string\",\"location_mailing_city\":\"string\",\"location_mailing_street\":\"string\",\"location_phone\":\"string\",\"name\":\"string\",\"external_reference\":0,\"remark\":\"string\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"price\":1,\"linked_project\":\"/projects/0\",\"source\":\"rentaround\",\"status\":\"accepted\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectrequests?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"linked_contact\":\"/contacts/0\",\"contact_mailing_number\":\"string\",\"contact_mailing_country\":\"string\",\"contact_name\":\"string\",\"contact_mailing_postalcode\":\"string\",\"contact_phone\":\"string\",\"contact_mailing_city\":\"string\",\"contact_mailing_street\":\"string\",\"linked_contact_person\":\"/contactpersons/0\",\"contact_person_lastname\":\"string\",\"contact_person_email\":\"crew@example.test\",\"contact_person_middle_name\":\"string\",\"contact_person_first_name\":\"string\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"is_paid\":true,\"language\":\"string\",\"in\":\"2019-08-24T14:15:22Z\",\"out\":\"2019-08-24T14:15:22Z\",\"linked_location\":\"/contacts/0\",\"location_mailing_number\":\"string\",\"location_mailing_country\":\"string\",\"location_name\":\"string\",\"location_mailing_postalcode\":\"string\",\"location_mailing_city\":\"string\",\"location_mailing_street\":\"string\",\"location_phone\":\"string\",\"name\":\"string\",\"external_reference\":0,\"remark\":\"string\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"price\":1,\"linked_project\":\"/projects/0\",\"source\":\"rentaround\",\"status\":\"accepted\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_requests()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectrequests");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectrequests");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -5922,7 +8529,7 @@ async fn get_project_request_collection_collection_errors() {
 #[tokio::test]
 async fn create_project_request() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"linked_contact\":\"/contacts/0\",\"contact_mailing_number\":\"string\",\"contact_mailing_country\":\"string\",\"contact_name\":\"string\",\"contact_mailing_postalcode\":\"string\",\"contact_phone\":\"string\",\"contact_mailing_city\":\"string\",\"contact_mailing_street\":\"string\",\"linked_contact_person\":\"/contactpersons/0\",\"contact_person_lastname\":\"string\",\"contact_person_email\":\"crew@example.test\",\"contact_person_middle_name\":\"string\",\"contact_person_first_name\":\"string\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"is_paid\":true,\"language\":\"string\",\"in\":\"2019-08-24T14:15:22Z\",\"out\":\"2019-08-24T14:15:22Z\",\"linked_location\":\"/contacts/0\",\"location_mailing_number\":\"string\",\"location_mailing_country\":\"string\",\"location_name\":\"string\",\"location_mailing_postalcode\":\"string\",\"location_mailing_city\":\"string\",\"location_mailing_street\":\"string\",\"location_phone\":\"string\",\"name\":\"string\",\"external_reference\":0,\"remark\":\"string\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"price\":1,\"linked_project\":\"/projects/0\",\"source\":\"rentaround\",\"status\":\"accepted\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -5932,10 +8539,16 @@ async fn create_project_request() {
             chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projectrequests");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectRequestPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -5954,11 +8567,11 @@ async fn delete_project_request() {
 #[tokio::test]
 async fn get_project_request_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"linked_contact\":\"/contacts/0\",\"contact_mailing_number\":\"string\",\"contact_mailing_country\":\"string\",\"contact_name\":\"string\",\"contact_mailing_postalcode\":\"string\",\"contact_phone\":\"string\",\"contact_mailing_city\":\"string\",\"contact_mailing_street\":\"string\",\"linked_contact_person\":\"/contactpersons/0\",\"contact_person_lastname\":\"string\",\"contact_person_email\":\"crew@example.test\",\"contact_person_middle_name\":\"string\",\"contact_person_first_name\":\"string\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"is_paid\":true,\"language\":\"string\",\"in\":\"2019-08-24T14:15:22Z\",\"out\":\"2019-08-24T14:15:22Z\",\"linked_location\":\"/contacts/0\",\"location_mailing_number\":\"string\",\"location_mailing_country\":\"string\",\"location_name\":\"string\",\"location_mailing_postalcode\":\"string\",\"location_mailing_city\":\"string\",\"location_mailing_street\":\"string\",\"location_phone\":\"string\",\"name\":\"string\",\"external_reference\":0,\"remark\":\"string\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"price\":1,\"linked_project\":\"/projects/0\",\"source\":\"rentaround\",\"status\":\"accepted\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_requests().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectrequests/7");
     assert_bearer_token(&request);
@@ -5968,7 +8581,7 @@ async fn get_project_request_item() {
 #[tokio::test]
 async fn update_project_request() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"linked_contact\":\"/contacts/0\",\"contact_mailing_number\":\"string\",\"contact_mailing_country\":\"string\",\"contact_name\":\"string\",\"contact_mailing_postalcode\":\"string\",\"contact_phone\":\"string\",\"contact_mailing_city\":\"string\",\"contact_mailing_street\":\"string\",\"linked_contact_person\":\"/contactpersons/0\",\"contact_person_lastname\":\"string\",\"contact_person_email\":\"crew@example.test\",\"contact_person_middle_name\":\"string\",\"contact_person_first_name\":\"string\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"is_paid\":true,\"language\":\"string\",\"in\":\"2019-08-24T14:15:22Z\",\"out\":\"2019-08-24T14:15:22Z\",\"linked_location\":\"/contacts/0\",\"location_mailing_number\":\"string\",\"location_mailing_country\":\"string\",\"location_name\":\"string\",\"location_mailing_postalcode\":\"string\",\"location_mailing_city\":\"string\",\"location_mailing_street\":\"string\",\"location_phone\":\"string\",\"name\":\"string\",\"external_reference\":0,\"remark\":\"string\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"price\":1,\"linked_project\":\"/projects/0\",\"source\":\"rentaround\",\"status\":\"accepted\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -5981,10 +8594,16 @@ async fn update_project_request() {
             ),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/projectrequests/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectRequestPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6008,6 +8627,40 @@ async fn get_project_request_project_request_equipment_collection() {
         "/projectrequests/7/projectrequestequipment",
     );
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_request_project_request_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectrequests/7/projectrequestequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_requests()
+        .project_request_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectrequests/7/projectrequestequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectrequests/7/projectrequestequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6081,7 +8734,7 @@ async fn get_project_request_project_request_equipment_collection_collection_err
 #[tokio::test]
 async fn create_project_request_equipment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"quantity\":0,\"quantity_total\":0,\"is_comment\":true,\"is_kit\":true,\"discount\":1,\"linked_equipment\":\"/equipment/0\",\"name\":\"string\",\"external_remark\":\"string\",\"parent\":\"/projectrequestequipment/0\",\"unit_price\":1,\"project_request\":\"/projectrequests/0\",\"factor\":1,\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6091,7 +8744,7 @@ async fn create_project_request_equipment() {
             &crate::model::ProjectRequestEquipmentPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(
         &request,
@@ -6099,6 +8752,9 @@ async fn create_project_request_equipment() {
         "/projectrequests/7/projectrequestequipment",
     );
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ProjectRequestEquipmentPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6113,6 +8769,39 @@ async fn get_project_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"location\":\"/contacts/0\",\"refundabledeposit\":1,\"deposit_status\":\"no_deposit_paid\",\"customer\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"cust_contact\":\"/contactpersons/0\",\"project_type\":\"/projecttypes/0\",\"name\":\"string\",\"reference\":\"string\",\"number\":0,\"account_manager\":\"/crew/0\",\"color\":\"string\",\"conditions\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"tags\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"purchasecosts\":1,\"volume\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"location\":\"/contacts/0\",\"refundabledeposit\":1,\"deposit_status\":\"no_deposit_paid\",\"customer\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"cust_contact\":\"/contactpersons/0\",\"project_type\":\"/projecttypes/0\",\"name\":\"string\",\"reference\":\"string\",\"number\":0,\"account_manager\":\"/crew/0\",\"color\":\"string\",\"conditions\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"tags\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"purchasecosts\":1,\"volume\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6157,24 +8846,26 @@ async fn get_project_collection_collection_errors() {
 #[tokio::test]
 async fn create_project() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"location\":\"/contacts/0\",\"refundabledeposit\":1,\"deposit_status\":\"no_deposit_paid\",\"customer\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"cust_contact\":\"/contactpersons/0\",\"project_type\":\"/projecttypes/0\",\"name\":\"string\",\"reference\":\"string\",\"number\":0,\"account_manager\":\"/crew/0\",\"color\":\"string\",\"conditions\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"tags\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"purchasecosts\":1,\"volume\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .projects()
         .create_as::<ProjectIdProjection>(&crate::model::ProjectPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn create_from_template() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"path\":\"/projects/42\",\"id\":7,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6184,21 +8875,27 @@ async fn create_from_template() {
             chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap(),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/:createFromTemplate");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectsCreateFromTemplatePayload::new(
+        crate::Id::new(1),
+        chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn get_project_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"location\":\"/contacts/0\",\"refundabledeposit\":1,\"deposit_status\":\"no_deposit_paid\",\"customer\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"cust_contact\":\"/contactpersons/0\",\"project_type\":\"/projecttypes/0\",\"name\":\"string\",\"reference\":\"string\",\"number\":0,\"account_manager\":\"/crew/0\",\"color\":\"string\",\"conditions\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"tags\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"purchasecosts\":1,\"volume\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.projects().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7");
     assert_bearer_token(&request);
@@ -6208,7 +8905,7 @@ async fn get_project_item() {
 #[tokio::test]
 async fn set_client() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"path\":\"/projects/42\",\"id\":7,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6218,17 +8915,22 @@ async fn set_client() {
             &crate::model::ProjectsSetClientPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/:setClient");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectsSetClientPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn set_location() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"path\":\"/projects/42\",\"id\":7,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6238,17 +8940,22 @@ async fn set_location() {
             &crate::model::ProjectsSetLocationPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/:setLocation");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectsSetLocationPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
 #[tokio::test]
 async fn set_type() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"path\":\"/projects/42\",\"id\":7,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6258,10 +8965,13 @@ async fn set_type() {
             &crate::model::ProjectsSetTypePayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/:setType");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ProjectsSetTypePayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6281,6 +8991,40 @@ async fn get_project_contract_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/contracts");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_contract_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/contracts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .contracts(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/contracts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/contracts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6350,6 +9094,40 @@ async fn get_project_project_cost_collection() {
 }
 
 #[tokio::test]
+async fn get_project_project_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/costs?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_costs(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/costs");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/costs");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_project_cost_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -6398,7 +9176,7 @@ async fn get_project_project_cost_collection_collection_errors() {
 #[tokio::test]
 async fn create_project_cost() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"remark\":\"string\",\"project\":\"/projects/0\",\"quantity\":0,\"discount\":1,\"order\":0,\"subproject\":\"/subprojects/0\",\"is_template\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"sale_price\":1,\"purchase_price\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6408,10 +9186,13 @@ async fn create_project_cost() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/costs");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::ProjectCostPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6431,6 +9212,40 @@ async fn get_project_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6500,6 +9315,40 @@ async fn get_project_file_collection() {
 }
 
 #[tokio::test]
+async fn get_project_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -6565,6 +9414,40 @@ async fn get_project_project_crew_collection() {
 }
 
 #[tokio::test]
+async fn get_project_project_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_crew(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_project_crew_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -6626,6 +9509,40 @@ async fn get_project_project_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/projectequipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_project_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6704,6 +9621,40 @@ async fn get_project_project_equipment_group_collection() {
 }
 
 #[tokio::test]
+async fn get_project_project_equipment_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectequipmentgroup?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_equipment_groups(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectequipmentgroup");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectequipmentgroup");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_project_equipment_group_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -6778,6 +9729,40 @@ async fn get_project_project_function_group_collection() {
 }
 
 #[tokio::test]
+async fn get_project_project_function_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectfunctiongroups?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_function_groups(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectfunctiongroups");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectfunctiongroups");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_project_function_group_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -6835,7 +9820,7 @@ async fn get_project_project_function_group_collection_collection_errors() {
 #[tokio::test]
 async fn create_project_function_group() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6845,10 +9830,15 @@ async fn create_project_function_group() {
             &crate::model::ProjectFunctionGroupPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/projectfunctiongroups");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectFunctionGroupPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6868,6 +9858,40 @@ async fn get_project_project_function_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/projectfunctions");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_project_function_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectfunctions?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_functions(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectfunctions");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectfunctions");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -6929,7 +9953,7 @@ async fn get_project_project_function_collection_collection_errors() {
 #[tokio::test]
 async fn create_project_function() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"price_rate\":\"/rates/0\",\"price_accommodation\":1,\"price_catering\":1,\"price_travel\":1,\"price_other\":1,\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"is_template\":true,\"group\":\"/projectfunctiongroups/0\",\"name_external\":\"string\",\"name\":\"string\",\"travel_time_before\":1,\"travel_time_after\":1,\"use_travel_time_from_location\":true,\"use_distance_from_location\":true,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_start_schedule_is_start\":\"End time\",\"usageperiod_start_schedule_is_start\":\"End time\",\"planperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end_schedule_is_start\":\"End time\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"type\":\"crew_function\",\"duration\":1,\"amount\":0,\"break\":1,\"distance\":1,\"twoway\":true,\"taxclass\":\"/taxclasses/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"order\":0,\"remark_client\":\"string\",\"remark_planner\":\"string\",\"remark_crew\":\"string\",\"in_financial\":true,\"in_planning\":true,\"is_plannable\":true,\"recurrence_group\":0,\"recurrence_enddate\":\"string\",\"recurrence_interval_unit\":\"once\",\"recurrence_interval\":0,\"recurrence_weekdays\":\"string\",\"price_fixed\":1,\"price_variable\":1,\"costs_fixed\":1,\"costs_variable\":1,\"price_total\":1,\"costs_total\":1,\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -6941,10 +9965,17 @@ async fn create_project_function() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/projectfunctions");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::ProjectFunctionPayload::new(
+        crate::Id::new(1),
+        crate::Id::new(1),
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -6964,6 +9995,40 @@ async fn get_project_project_vehicle_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/projectvehicles");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_project_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/projectvehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .project_vehicles(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/projectvehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/projectvehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7042,6 +10107,40 @@ async fn get_project_quotation_collection() {
 }
 
 #[tokio::test]
+async fn get_project_quotation_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/quotes?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .quotes(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/quotes");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/quotes");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_quotation_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -7107,6 +10206,40 @@ async fn get_project_subproject_collection() {
 }
 
 #[tokio::test]
+async fn get_project_subproject_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/subprojects?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .subprojects(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/subprojects");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/subprojects");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_project_subproject_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -7155,7 +10288,7 @@ async fn get_project_subproject_collection_collection_errors() {
 #[tokio::test]
 async fn create_subproject() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -7163,10 +10296,12 @@ async fn create_subproject() {
         .subprojects(crate::Id::new(7))
         .create_as::<SubprojectIdProjection>(&crate::model::SubprojectPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/subprojects");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SubprojectPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -7186,6 +10321,40 @@ async fn get_project_task_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projects/7/tasks");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projects/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .projects()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projects/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projects/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7238,7 +10407,7 @@ async fn get_project_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_projects_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -7246,10 +10415,13 @@ async fn post_projects_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/projects/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -7264,6 +10436,39 @@ async fn get_project_status_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectstatuses");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_status_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectstatuses?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_statuses()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectstatuses");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectstatuses");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7308,11 +10513,11 @@ async fn get_project_status_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_status_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_statuses().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectstatuses/7");
     assert_bearer_token(&request);
@@ -7330,6 +10535,39 @@ async fn get_project_template_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projecttemplates");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_template_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projecttemplates?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_templates()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projecttemplates");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projecttemplates");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7379,11 +10617,11 @@ async fn get_project_template_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_template_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_templates().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projecttemplates/7");
     assert_bearer_token(&request);
@@ -7401,6 +10639,39 @@ async fn get_project_type_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projecttypes");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_type_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"regular\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projecttypes?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"regular\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_types()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projecttypes");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projecttypes");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7445,11 +10716,11 @@ async fn get_project_type_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_type_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"regular\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_types().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projecttypes/7");
     assert_bearer_token(&request);
@@ -7467,6 +10738,39 @@ async fn get_project_vehicle_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/projectvehicles");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_project_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/projectvehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .project_vehicles()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/projectvehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/projectvehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7511,11 +10815,11 @@ async fn get_project_vehicle_collection_collection_errors() {
 #[tokio::test]
 async fn get_project_vehicle_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.project_vehicles().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/projectvehicles/7");
     assert_bearer_token(&request);
@@ -7533,6 +10837,39 @@ async fn get_purchase_order_cost_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseordercosts");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"costitem\":0,\"costitemtype\":\"Inhuur\",\"approved_amount\":1,\"project\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"quantity\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseordercosts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"costitem\":0,\"costitemtype\":\"Inhuur\",\"approved_amount\":1,\"project\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"quantity\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_order_costs()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseordercosts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseordercosts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7582,11 +10919,11 @@ async fn get_purchase_order_cost_collection_collection_errors() {
 #[tokio::test]
 async fn get_purchase_order_cost_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"costitem\":0,\"costitemtype\":\"Inhuur\",\"approved_amount\":1,\"project\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"quantity\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.purchase_order_costs().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseordercosts/7");
     assert_bearer_token(&request);
@@ -7604,6 +10941,39 @@ async fn get_purchase_order_global_cost_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorderglobalcosts");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_global_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"name\":\"string\",\"unit_purchase_cost\":1,\"quantity\":0,\"taxclass\":\"/taxclasses/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorderglobalcosts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"name\":\"string\",\"unit_purchase_cost\":1,\"quantity\":0,\"taxclass\":\"/taxclasses/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_order_global_costs()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorderglobalcosts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorderglobalcosts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7662,14 +11032,14 @@ async fn get_purchase_order_global_cost_collection_collection_errors() {
 #[tokio::test]
 async fn get_purchase_order_global_cost_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"name\":\"string\",\"unit_purchase_cost\":1,\"quantity\":0,\"taxclass\":\"/taxclasses/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .purchase_order_global_costs()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorderglobalcosts/7");
     assert_bearer_token(&request);
@@ -7687,6 +11057,39 @@ async fn get_purchase_order_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"filename\":\"string\",\"subject\":\"string\",\"owner\":\"/crew/0\",\"date_of_issue\":\"string\",\"delivery_date\":\"2019-08-24T14:15:22Z\",\"description\":\"string\",\"number\":\"string\",\"approval_status\":\"draft\",\"previous_status\":\"draft\",\"approved_amount\":1,\"supplier\":\"/contacts/0\",\"contact_person\":\"/contactpersons/0\",\"delivery_type\":\"Pick up\",\"delivery_location\":\"/contacts/0\",\"delivery_location_person\":\"/contactpersons/0\",\"delivery_warehouse\":\"/stocklocations/0\",\"accounting_code\":\"string\",\"export_status\":\"failed\",\"export_date\":\"2019-08-24T14:15:22Z\",\"export_message\":\"string\",\"tags\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"approved_by\":\"/crew/0\",\"approved_at\":\"string\",\"projects_json\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"filename\":\"string\",\"subject\":\"string\",\"owner\":\"/crew/0\",\"date_of_issue\":\"string\",\"delivery_date\":\"2019-08-24T14:15:22Z\",\"description\":\"string\",\"number\":\"string\",\"approval_status\":\"draft\",\"previous_status\":\"draft\",\"approved_amount\":1,\"supplier\":\"/contacts/0\",\"contact_person\":\"/contactpersons/0\",\"delivery_type\":\"Pick up\",\"delivery_location\":\"/contacts/0\",\"delivery_location_person\":\"/contactpersons/0\",\"delivery_warehouse\":\"/stocklocations/0\",\"accounting_code\":\"string\",\"export_status\":\"failed\",\"export_date\":\"2019-08-24T14:15:22Z\",\"export_message\":\"string\",\"tags\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"approved_by\":\"/crew/0\",\"approved_at\":\"string\",\"projects_json\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7731,11 +11134,11 @@ async fn get_purchase_order_collection_collection_errors() {
 #[tokio::test]
 async fn get_purchase_order_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"filename\":\"string\",\"subject\":\"string\",\"owner\":\"/crew/0\",\"date_of_issue\":\"string\",\"delivery_date\":\"2019-08-24T14:15:22Z\",\"description\":\"string\",\"number\":\"string\",\"approval_status\":\"draft\",\"previous_status\":\"draft\",\"approved_amount\":1,\"supplier\":\"/contacts/0\",\"contact_person\":\"/contactpersons/0\",\"delivery_type\":\"Pick up\",\"delivery_location\":\"/contacts/0\",\"delivery_location_person\":\"/contactpersons/0\",\"delivery_warehouse\":\"/stocklocations/0\",\"accounting_code\":\"string\",\"export_status\":\"failed\",\"export_date\":\"2019-08-24T14:15:22Z\",\"export_message\":\"string\",\"tags\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"approved_by\":\"/crew/0\",\"approved_at\":\"string\",\"projects_json\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.purchase_orders().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorders/7");
     assert_bearer_token(&request);
@@ -7758,6 +11161,40 @@ async fn get_purchase_order_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorders/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7836,6 +11273,40 @@ async fn get_purchase_order_file_collection() {
 }
 
 #[tokio::test]
+async fn get_purchase_order_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_purchase_order_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -7897,6 +11368,40 @@ async fn get_purchase_order_invoice_line_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/purchaseorders/7/invoicelines");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_invoice_line_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/invoicelines?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .invoice_lines(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/invoicelines");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/invoicelines");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -7975,6 +11480,40 @@ async fn get_purchase_order_purchase_order_cost_collection() {
 }
 
 #[tokio::test]
+async fn get_purchase_order_purchase_order_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"costitem\":0,\"costitemtype\":\"Inhuur\",\"approved_amount\":1,\"project\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"quantity\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/purchaseordercosts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"costitem\":0,\"costitemtype\":\"Inhuur\",\"approved_amount\":1,\"project\":\"string\",\"underlying_cost_amount\":1,\"underlying_cost_amount_tax\":1,\"underlying_cost_amount_with_tax\":1,\"quantity\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .purchase_order_costs(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/purchaseordercosts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/purchaseordercosts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_purchase_order_purchase_order_cost_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8049,6 +11588,40 @@ async fn get_purchase_order_purchase_order_global_cost_collection() {
         "/purchaseorders/7/purchaseorderglobalcosts",
     );
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_purchase_order_purchase_order_global_cost_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"name\":\"string\",\"unit_purchase_cost\":1,\"quantity\":0,\"taxclass\":\"/taxclasses/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/purchaseorderglobalcosts?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"purchase_order\":\"/purchaseorders/0\",\"name\":\"string\",\"unit_purchase_cost\":1,\"quantity\":0,\"taxclass\":\"/taxclasses/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .purchase_order_global_costs(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/purchaseorderglobalcosts");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/purchaseorderglobalcosts");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8139,6 +11712,40 @@ async fn get_purchase_order_task_collection() {
 }
 
 #[tokio::test]
+async fn get_purchase_order_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/purchaseorders/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .purchase_orders()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/purchaseorders/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/purchaseorders/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_purchase_order_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8187,7 +11794,7 @@ async fn get_purchase_order_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_purchaseorders_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -8195,10 +11802,13 @@ async fn post_purchaseorders_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/purchaseorders/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -8213,6 +11823,39 @@ async fn get_quotation_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/quotes");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_quotation_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/quotes?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"tags\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .quotes()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/quotes");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/quotes");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8257,11 +11900,11 @@ async fn get_quotation_collection_collection_errors() {
 #[tokio::test]
 async fn get_quotation_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"number\":\"string\",\"customer\":\"/contacts/0\",\"contact\":\"/contactpersons/0\",\"date\":\"string\",\"expiration_date\":\"string\",\"version\":0,\"subject\":\"string\",\"show_tax\":true,\"project\":\"/projects/0\",\"filename\":\"string\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"price\":1,\"price_invat\":1,\"vat_amount\":1,\"tags\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.quotes().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/quotes/7");
     assert_bearer_token(&request);
@@ -8279,6 +11922,40 @@ async fn get_quotation_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/quotes/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_quotation_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/quotes/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .quotes()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/quotes/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/quotes/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8348,6 +12025,40 @@ async fn get_quotation_invoice_line_collection() {
 }
 
 #[tokio::test]
+async fn get_quotation_invoice_line_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/quotes/7/invoicelines?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"item\":0,\"base\":1,\"ledger\":\"/ledgercodes/0\",\"vatrate\":1,\"vatamount\":1,\"priceincl\":1,\"ledgercode\":\"string\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .quotes()
+        .invoice_lines(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/quotes/7/invoicelines");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/quotes/7/invoicelines");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_quotation_invoice_line_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8408,6 +12119,40 @@ async fn get_quotation_task_collection() {
 }
 
 #[tokio::test]
+async fn get_quotation_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/quotes/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .quotes()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/quotes/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/quotes/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_quotation_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8456,7 +12201,7 @@ async fn get_quotation_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_quotes_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -8464,10 +12209,13 @@ async fn post_quotes_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/quotes/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -8482,6 +12230,39 @@ async fn get_crew_rate_factor_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/ratefactors");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_rate_factor_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"rate_id\":\"/rates/0\",\"from\":1,\"to\":1,\"variable\":1,\"fixed\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/ratefactors?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"rate_id\":\"/rates/0\",\"from\":1,\"to\":1,\"variable\":1,\"fixed\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .rate_factors()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/ratefactors");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/ratefactors");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8526,11 +12307,11 @@ async fn get_crew_rate_factor_collection_collection_errors() {
 #[tokio::test]
 async fn get_crew_rate_factor_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"rate_id\":\"/rates/0\",\"from\":1,\"to\":1,\"variable\":1,\"fixed\":1,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.rate_factors().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/ratefactors/7");
     assert_bearer_token(&request);
@@ -8548,6 +12329,39 @@ async fn get_crew_rate_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/rates");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_rate_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"archived\":true,\"type\":\"price\",\"subtype\":\"global\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/rates?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"archived\":true,\"type\":\"price\",\"subtype\":\"global\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .rates()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/rates");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/rates");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8592,11 +12406,11 @@ async fn get_crew_rate_collection_collection_errors() {
 #[tokio::test]
 async fn get_crew_rate_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"archived\":true,\"type\":\"price\",\"subtype\":\"global\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.rates().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/rates/7");
     assert_bearer_token(&request);
@@ -8619,6 +12433,40 @@ async fn get_crew_rate_crew_rate_factor_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/rates/7/ratefactors");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_crew_rate_crew_rate_factor_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"rate_id\":\"/rates/0\",\"from\":1,\"to\":1,\"variable\":1,\"fixed\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/rates/7/ratefactors?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"rate_id\":\"/rates/0\",\"from\":1,\"to\":1,\"variable\":1,\"fixed\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .rates()
+        .rate_factors(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/rates/7/ratefactors");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/rates/7/ratefactors");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8692,6 +12540,39 @@ async fn get_repair_collection() {
 }
 
 #[tokio::test]
+async fn get_repair_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"internal_name\":\"string\",\"equipment\":\"/equipment/0\",\"serialnumber\":\"/serialnumbers/0\",\"reporter\":\"/crew/0\",\"assignee\":\"/crew/0\",\"external_repairer\":\"/contacts/0\",\"number\":0,\"repairperiod_start\":\"2019-08-24T14:15:22Z\",\"repairperiod_end\":\"2019-08-24T14:15:22Z\",\"amount\":0,\"remark\":\"string\",\"repair_costs\":1,\"is_usable\":\"take_from_stock\",\"costs_charged_to_customer\":\"/costs/0\",\"subproject\":\"/subprojects/0\",\"stock_location\":\"/stocklocations/0\",\"repair_status\":\"in-progress\",\"unrepairable_of\":\"/repairs/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/repairs?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"internal_name\":\"string\",\"equipment\":\"/equipment/0\",\"serialnumber\":\"/serialnumbers/0\",\"reporter\":\"/crew/0\",\"assignee\":\"/crew/0\",\"external_repairer\":\"/contacts/0\",\"number\":0,\"repairperiod_start\":\"2019-08-24T14:15:22Z\",\"repairperiod_end\":\"2019-08-24T14:15:22Z\",\"amount\":0,\"remark\":\"string\",\"repair_costs\":1,\"is_usable\":\"take_from_stock\",\"costs_charged_to_customer\":\"/costs/0\",\"subproject\":\"/subprojects/0\",\"stock_location\":\"/stocklocations/0\",\"repair_status\":\"in-progress\",\"unrepairable_of\":\"/repairs/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .repairs()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/repairs");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/repairs");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_repair_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8732,11 +12613,11 @@ async fn get_repair_collection_collection_errors() {
 #[tokio::test]
 async fn get_repair_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"internal_name\":\"string\",\"equipment\":\"/equipment/0\",\"serialnumber\":\"/serialnumbers/0\",\"reporter\":\"/crew/0\",\"assignee\":\"/crew/0\",\"external_repairer\":\"/contacts/0\",\"number\":0,\"repairperiod_start\":\"2019-08-24T14:15:22Z\",\"repairperiod_end\":\"2019-08-24T14:15:22Z\",\"amount\":0,\"remark\":\"string\",\"repair_costs\":1,\"is_usable\":\"take_from_stock\",\"costs_charged_to_customer\":\"/costs/0\",\"subproject\":\"/subprojects/0\",\"stock_location\":\"/stocklocations/0\",\"repair_status\":\"in-progress\",\"unrepairable_of\":\"/repairs/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.repairs().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/repairs/7");
     assert_bearer_token(&request);
@@ -8759,6 +12640,40 @@ async fn get_repair_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/repairs/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_repair_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/repairs/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .repairs()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/repairs/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/repairs/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -8823,6 +12738,40 @@ async fn get_repair_file_collection() {
 }
 
 #[tokio::test]
+async fn get_repair_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/repairs/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .repairs()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/repairs/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/repairs/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_repair_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8883,6 +12832,40 @@ async fn get_repair_task_collection() {
 }
 
 #[tokio::test]
+async fn get_repair_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/repairs/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .repairs()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/repairs/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/repairs/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_repair_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -8931,7 +12914,7 @@ async fn get_repair_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_repairs_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -8939,10 +12922,13 @@ async fn post_repairs_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/repairs/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -8957,6 +12943,39 @@ async fn get_serial_number_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/serialnumbers");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_serial_number_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9013,11 +13032,11 @@ async fn delete_serial_number() {
 #[tokio::test]
 async fn get_serial_number_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.serial_numbers().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/serialnumbers/7");
     assert_bearer_token(&request);
@@ -9027,7 +13046,7 @@ async fn get_serial_number_item() {
 #[tokio::test]
 async fn update_serial_number() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"string\",\"purchasedate\":\"string\",\"depreciation_monthly\":1,\"book_value\":1,\"residual_value\":1,\"purchase_costs\":1,\"active\":true,\"remark\":\"string\",\"ref\":\"string\",\"asset_location\":\"/stocklocations/0\",\"image\":\"/files/0\",\"current_book_value\":1,\"next_inspection\":\"string\",\"qrcodes\":\"string\",\"tags\":\"string\",\"last_subproject\":\"/subprojects/0\",\"sealed\":true,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -9037,10 +13056,12 @@ async fn update_serial_number() {
             &crate::model::SerialNumberPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/serialnumbers/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SerialNumberPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -9060,6 +13081,40 @@ async fn get_serial_number_actual_content_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/serialnumbers/7/actualcontent");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_serial_number_actual_content_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"/serialnumbers/0\",\"quantity\":0,\"combination_serial\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers/7/actualcontent?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"serial\":\"/serialnumbers/0\",\"quantity\":0,\"combination_serial\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .actual_content(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers/7/actualcontent");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers/7/actualcontent");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9138,6 +13193,40 @@ async fn get_serial_number_equipment_assigned_serials_collection() {
 }
 
 #[tokio::test]
+async fn get_serial_number_equipment_assigned_serials_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"combination\":\"/serialnumbers/0\",\"serialnumber\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers/7/equipmentassignedserials?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"combination\":\"/serialnumbers/0\",\"serialnumber\":\"/serialnumbers/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .equipment_assigned_serials(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers/7/equipmentassignedserials");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers/7/equipmentassignedserials");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_serial_number_equipment_assigned_serials_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -9208,6 +13297,40 @@ async fn get_serial_number_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/serialnumbers/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_serial_number_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9286,6 +13409,40 @@ async fn get_serial_number_file_collection() {
 }
 
 #[tokio::test]
+async fn get_serial_number_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_serial_number_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -9351,6 +13508,40 @@ async fn get_serial_number_task_collection() {
 }
 
 #[tokio::test]
+async fn get_serial_number_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/serialnumbers/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .serial_numbers()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/serialnumbers/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/serialnumbers/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_serial_number_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -9399,7 +13590,7 @@ async fn get_serial_number_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_serialnumbers_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -9407,10 +13598,13 @@ async fn post_serialnumbers_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/serialnumbers/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -9425,6 +13619,39 @@ async fn get_status_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/statuses");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_status_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/statuses?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .statuses()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/statuses");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/statuses");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9469,11 +13696,11 @@ async fn get_status_collection_collection_errors() {
 #[tokio::test]
 async fn get_status_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.statuses().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/statuses/7");
     assert_bearer_token(&request);
@@ -9491,6 +13718,39 @@ async fn get_stock_location_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/stocklocations");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_stock_location_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"city\":\"string\",\"street\":\"string\",\"house_number\":\"string\",\"postal_code\":\"string\",\"state_province\":\"string\",\"country\":\"af\",\"active\":true,\"type\":\"plannable\",\"color\":\"string\",\"in_archive\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/stocklocations?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"city\":\"string\",\"street\":\"string\",\"house_number\":\"string\",\"postal_code\":\"string\",\"state_province\":\"string\",\"country\":\"af\",\"active\":true,\"type\":\"plannable\",\"color\":\"string\",\"in_archive\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .stock_locations()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/stocklocations");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/stocklocations");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9535,11 +13795,11 @@ async fn get_stock_location_collection_collection_errors() {
 #[tokio::test]
 async fn get_stock_location_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"city\":\"string\",\"street\":\"string\",\"house_number\":\"string\",\"postal_code\":\"string\",\"state_province\":\"string\",\"country\":\"af\",\"active\":true,\"type\":\"plannable\",\"color\":\"string\",\"in_archive\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.stock_locations().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/stocklocations/7");
     assert_bearer_token(&request);
@@ -9562,6 +13822,40 @@ async fn get_stock_location_vehicle_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/stocklocations/7/vehicles");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_stock_location_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/stocklocations/7/vehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .stock_locations()
+        .vehicles(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/stocklocations/7/vehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/stocklocations/7/vehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9614,7 +13908,7 @@ async fn get_stock_location_vehicle_collection_collection_errors() {
 #[tokio::test]
 async fn create_vehicle() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -9622,10 +13916,12 @@ async fn create_vehicle() {
         .vehicles(crate::Id::new(7))
         .create_as::<VehicleIdProjection>(&crate::model::VehiclePayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/stocklocations/7/vehicles");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::VehiclePayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -9640,6 +13936,39 @@ async fn get_stock_movement_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/stockmovements");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_stock_movement_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/stockmovements?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .stock_movements()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/stockmovements");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/stockmovements");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9696,11 +14025,11 @@ async fn delete_stock_movement() {
 #[tokio::test]
 async fn get_stock_movement_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.stock_movements().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/stockmovements/7");
     assert_bearer_token(&request);
@@ -9710,7 +14039,7 @@ async fn get_stock_movement_item() {
 #[tokio::test]
 async fn update_stock_movement() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"amount\":0,\"equipment\":\"/equipment/0\",\"projectequipment\":\"/projectequipment/0\",\"description\":\"string\",\"details\":\"string\",\"date\":\"2019-08-24T14:15:22Z\",\"type\":\"manual\",\"stock_location\":\"/stocklocations/0\",\"api_client\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -9722,10 +14051,15 @@ async fn update_stock_movement() {
             ),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/stockmovements/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::StockMovementPayload::new(
+        chrono::DateTime::parse_from_rfc3339("2026-01-01T00:00:00+00:00").unwrap(),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -9740,6 +14074,39 @@ async fn get_subproject_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subprojects");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subproject_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9784,11 +14151,11 @@ async fn get_subproject_collection_collection_errors() {
 #[tokio::test]
 async fn get_subproject_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"order\":0,\"name\":\"string\",\"status\":\"/statuses/0\",\"is_template\":true,\"location\":\"/contacts/0\",\"loc_contact\":\"/contactpersons/0\",\"insurance_rate\":1,\"discount_rental\":1,\"discount_sale\":1,\"discount_crew\":1,\"discount_transport\":1,\"discount_additional_costs\":1,\"discount_services\":1,\"discount_subproject\":1,\"discount_fixed\":true,\"discount_fixed_amount\":1,\"fixed_price\":true,\"in_planning\":true,\"in_financial\":true,\"asset_location_from\":\"/stocklocations/0\",\"project_total_price\":1,\"project_total_price_cancelled\":1,\"project_rental_price\":1,\"project_sale_price\":1,\"project_crew_price\":1,\"project_transport_price\":1,\"project_other_price\":1,\"project_insurance_price\":1,\"project_services_price\":1,\"estimated_cost\":1,\"planned_cost\":1,\"actual_cost\":1,\"already_invoiced\":1,\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"weight\":1,\"power\":1,\"current\":1,\"purchasecosts\":1,\"volume\":1,\"equipment_period_from\":\"2019-08-24T14:15:22Z\",\"equipment_period_to\":\"2019-08-24T14:15:22Z\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.subprojects().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/subprojects/7");
     assert_bearer_token(&request);
@@ -9798,7 +14165,7 @@ async fn get_subproject_item() {
 #[tokio::test]
 async fn post_subprojects_id_set_location() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"path\":\"/subprojects/42\",\"id\":7,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -9808,10 +14175,15 @@ async fn post_subprojects_id_set_location() {
             &crate::model::SubprojectsSetLocationPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/subprojects/7/:setLocation");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SubprojectsSetLocationPayload::new(
+        crate::Id::new(1),
+    ))
+    .unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -9831,6 +14203,40 @@ async fn get_subproject_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subprojects/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subproject_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9896,6 +14302,40 @@ async fn get_subproject_project_crew_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subprojects/7/projectcrew");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subproject_project_crew_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/projectcrew?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"cost_accommodation\":1,\"cost_catering\":1,\"cost_travel\":1,\"cost_other\":1,\"function\":\"/projectfunctions/0\",\"crewmember\":\"/crew/0\",\"visible\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"transport\":\"no_transport\",\"remark\":\"string\",\"remark_planner\":\"string\",\"invoice_reference\":\"string\",\"project_leader\":true,\"is_visible_on_dashboard\":true,\"costs\":1,\"cost_actual\":1,\"hours_registered\":1,\"hours_planned\":1,\"cost_planned\":1,\"diff_cost\":1,\"diff_hours\":1,\"activity_status\":\"no_registration\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .project_crew(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/projectcrew");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/projectcrew");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -9974,6 +14414,40 @@ async fn get_subproject_project_equipment_collection() {
 }
 
 #[tokio::test]
+async fn get_subproject_project_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/projectequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"parent\":\"/projectequipment/0\",\"ledger\":\"/ledgercodes/0\",\"ledger_debit\":\"/ledgercodes/0\",\"quantity\":0,\"quantity_total\":0,\"equipment_group\":\"/projectequipmentgroup/0\",\"discount\":1,\"is_option\":true,\"factor\":1,\"order\":0,\"unit_price\":1,\"name\":\"string\",\"external_remark\":\"string\",\"internal_remark\":\"string\",\"delay_notified\":true,\"duration\":1,\"is_delayed\":true,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"has_missings\":true,\"warehouse_reservations\":0,\"subrent_reservations\":0,\"serial_number_ids\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .project_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/projectequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/projectequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subproject_project_equipment_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10044,6 +14518,40 @@ async fn get_subproject_project_equipment_group_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subprojects/7/projectequipmentgroup");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subproject_project_equipment_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/projectequipmentgroup?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"additional_scanned\":true,\"name\":\"string\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"duration\":1,\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"is_delayed\":true,\"order\":0,\"in_price_calculation\":true,\"remark\":\"string\",\"weight\":1,\"power\":1,\"current\":1,\"volume\":1,\"total_new_price\":1,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .project_equipment_groups(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/projectequipmentgroup");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/projectequipmentgroup");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10122,6 +14630,40 @@ async fn get_subproject_project_function_group_collection() {
 }
 
 #[tokio::test]
+async fn get_subproject_project_function_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/projectfunctiongroups?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"project\":\"/projects/0\",\"subproject\":\"/subprojects/0\",\"duration\":1,\"planperiod_start_schedule_is_start\":\"is_end\",\"usageperiod_start_schedule_is_start\":\"is_end\",\"planperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_end_schedule_is_start\":\"is_end\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .project_function_groups(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/projectfunctiongroups");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/projectfunctiongroups");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subproject_project_function_group_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10196,6 +14738,40 @@ async fn get_subproject_project_vehicle_collection() {
 }
 
 #[tokio::test]
+async fn get_subproject_project_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subprojects/7/projectvehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"cost_rate\":\"/rates/0\",\"function\":\"/projectfunctions/0\",\"transport\":\"No transport\",\"vehicle\":\"/vehicles/0\",\"planningperiod_start\":\"2019-08-24T14:15:22Z\",\"planningperiod_end\":\"2019-08-24T14:15:22Z\",\"remark\":\"string\",\"remark_planner\":\"string\",\"costs\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subprojects()
+        .project_vehicles(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subprojects/7/projectvehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subprojects/7/projectvehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subproject_project_vehicle_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10265,6 +14841,39 @@ async fn get_subrental_equipment_collection() {
 }
 
 #[tokio::test]
+async fn get_subrental_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentalequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrental_equipment()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentalequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentalequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subrental_equipment_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10310,11 +14919,11 @@ async fn get_subrental_equipment_collection_collection_errors() {
 #[tokio::test]
 async fn get_subrental_equipment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.subrental_equipment().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentalequipment/7");
     assert_bearer_token(&request);
@@ -10332,6 +14941,39 @@ async fn get_subrental_equipment_group_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentalequipmentgroup");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subrental_equipment_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental\":\"/subrentals/0\",\"name\":\"string\",\"order\":0,\"supplier_category\":\"/projectequipmentgroup/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentalequipmentgroup?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental\":\"/subrentals/0\",\"name\":\"string\",\"order\":0,\"supplier_category\":\"/projectequipmentgroup/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrental_equipment_groups()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentalequipmentgroup");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentalequipmentgroup");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10390,14 +15032,14 @@ async fn get_subrental_equipment_group_collection_collection_errors() {
 #[tokio::test]
 async fn get_subrental_equipment_group_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental\":\"/subrentals/0\",\"name\":\"string\",\"order\":0,\"supplier_category\":\"/projectequipmentgroup/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .subrental_equipment_groups()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentalequipmentgroup/7");
     assert_bearer_token(&request);
@@ -10424,6 +15066,48 @@ async fn get_subrental_equipment_group_subrental_equipment_collection() {
         "/subrentalequipmentgroup/7/subrentalequipment",
     );
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subrental_equipment_group_subrental_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentalequipmentgroup/7/subrentalequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrental_equipment_groups()
+        .subrental_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(
+        &first,
+        "GET",
+        "/subrentalequipmentgroup/7/subrentalequipment",
+    );
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(
+        &second,
+        "GET",
+        "/subrentalequipmentgroup/7/subrentalequipment",
+    );
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10509,6 +15193,39 @@ async fn get_subrental_collection() {
 }
 
 #[tokio::test]
+async fn get_subrental_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"accountmanager\":\"/crew/0\",\"reference\":\"string\",\"supplier\":\"/contacts/0\",\"number\":0,\"contactperson\":\"/contactpersons/0\",\"location\":\"/contacts/0\",\"location_contact\":\"/contactpersons/0\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"delivery_in\":\"2019-08-24T14:15:22Z\",\"delivery_out\":\"2019-08-24T14:15:22Z\",\"equipment_cost\":1,\"price\":1,\"extra_cost\":1,\"auto_update_costs\":true,\"remark\":\"string\",\"type\":\"Pick up\",\"status\":\"/statuses/0\",\"sent\":\"2019-08-24T14:15:22Z\",\"asset_location_to\":\"/stocklocations/0\",\"asset_location_from\":\"/stocklocations/0\",\"is_internal\":true,\"supplier_project\":\"/projects/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"accountmanager\":\"/crew/0\",\"reference\":\"string\",\"supplier\":\"/contacts/0\",\"number\":0,\"contactperson\":\"/contactpersons/0\",\"location\":\"/contacts/0\",\"location_contact\":\"/contactpersons/0\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"delivery_in\":\"2019-08-24T14:15:22Z\",\"delivery_out\":\"2019-08-24T14:15:22Z\",\"equipment_cost\":1,\"price\":1,\"extra_cost\":1,\"auto_update_costs\":true,\"remark\":\"string\",\"type\":\"Pick up\",\"status\":\"/statuses/0\",\"sent\":\"2019-08-24T14:15:22Z\",\"asset_location_to\":\"/stocklocations/0\",\"asset_location_from\":\"/stocklocations/0\",\"is_internal\":true,\"supplier_project\":\"/projects/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subrental_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10549,11 +15266,11 @@ async fn get_subrental_collection_collection_errors() {
 #[tokio::test]
 async fn get_subrental_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"accountmanager\":\"/crew/0\",\"reference\":\"string\",\"supplier\":\"/contacts/0\",\"number\":0,\"contactperson\":\"/contactpersons/0\",\"location\":\"/contacts/0\",\"location_contact\":\"/contactpersons/0\",\"usageperiod_start\":\"2019-08-24T14:15:22Z\",\"usageperiod_end\":\"2019-08-24T14:15:22Z\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"delivery_in\":\"2019-08-24T14:15:22Z\",\"delivery_out\":\"2019-08-24T14:15:22Z\",\"equipment_cost\":1,\"price\":1,\"extra_cost\":1,\"auto_update_costs\":true,\"remark\":\"string\",\"type\":\"Pick up\",\"status\":\"/statuses/0\",\"sent\":\"2019-08-24T14:15:22Z\",\"asset_location_to\":\"/stocklocations/0\",\"asset_location_from\":\"/stocklocations/0\",\"is_internal\":true,\"supplier_project\":\"/projects/0\",\"tags\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.subrentals().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentals/7");
     assert_bearer_token(&request);
@@ -10576,6 +15293,40 @@ async fn get_subrental_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentals/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subrental_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10645,6 +15396,40 @@ async fn get_subrental_file_collection() {
 }
 
 #[tokio::test]
+async fn get_subrental_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subrental_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10706,6 +15491,40 @@ async fn get_subrental_subrental_equipment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subrentals/7/subrentalequipment");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subrental_subrental_equipment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals/7/subrentalequipment?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental_group\":\"/subrentalequipmentgroup/0\",\"equipment\":\"/equipment/0\",\"parent\":\"/subrentalequipment/0\",\"planperiod_start\":\"2019-08-24T14:15:22Z\",\"planperiod_end\":\"2019-08-24T14:15:22Z\",\"name\":\"string\",\"quantity\":0,\"quantity_total\":0,\"unit_price\":1,\"discount\":1,\"factor\":1,\"order\":0,\"remark\":\"string\",\"lineprice\":1,\"supplier_planningmateriaal\":\"/projectequipment/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .subrental_equipment(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals/7/subrentalequipment");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals/7/subrentalequipment");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10784,6 +15603,40 @@ async fn get_subrental_subrental_equipment_group_collection() {
 }
 
 #[tokio::test]
+async fn get_subrental_subrental_equipment_group_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental\":\"/subrentals/0\",\"name\":\"string\",\"order\":0,\"supplier_category\":\"/projectequipmentgroup/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals/7/subrentalequipmentgroup?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"subrental\":\"/subrentals/0\",\"name\":\"string\",\"order\":0,\"supplier_category\":\"/projectequipmentgroup/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .subrental_equipment_groups(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals/7/subrentalequipmentgroup");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals/7/subrentalequipmentgroup");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subrental_subrental_equipment_group_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10858,6 +15711,40 @@ async fn get_subrental_task_collection() {
 }
 
 #[tokio::test]
+async fn get_subrental_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subrentals/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subrentals()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subrentals/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subrentals/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_subrental_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -10906,7 +15793,7 @@ async fn get_subrental_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_subrentals_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -10914,10 +15801,13 @@ async fn post_subrentals_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/subrentals/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -10932,6 +15822,39 @@ async fn get_subtask_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/subtasks");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_subtask_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/subtasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .subtasks()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/subtasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/subtasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -10988,11 +15911,11 @@ async fn delete_subtask() {
 #[tokio::test]
 async fn get_subtask_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.subtasks().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/subtasks/7");
     assert_bearer_token(&request);
@@ -11002,7 +15925,7 @@ async fn get_subtask_item() {
 #[tokio::test]
 async fn update_subtask() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11012,10 +15935,12 @@ async fn update_subtask() {
             &crate::model::SubtaskPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/subtasks/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SubtaskPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11030,6 +15955,39 @@ async fn get_supplier_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/suppliers");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_supplier_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/suppliers?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .suppliers()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/suppliers");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/suppliers");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11086,11 +16044,11 @@ async fn delete_supplier() {
 #[tokio::test]
 async fn get_supplier_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.suppliers().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/suppliers/7");
     assert_bearer_token(&request);
@@ -11100,7 +16058,7 @@ async fn get_supplier_item() {
 #[tokio::test]
 async fn update_supplier() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"equipment\":\"/equipment/0\",\"contact\":\"/contacts/0\",\"contactperson\":\"/contactpersons/0\",\"price\":1,\"details\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11110,10 +16068,13 @@ async fn update_supplier() {
             &crate::model::SupplierPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/suppliers/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::SupplierPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11133,6 +16094,40 @@ async fn get_supplier_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/suppliers/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_supplier_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/suppliers/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .suppliers()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/suppliers/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/suppliers/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11202,6 +16197,40 @@ async fn get_supplier_file_collection() {
 }
 
 #[tokio::test]
+async fn get_supplier_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/suppliers/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .suppliers()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/suppliers/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/suppliers/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_supplier_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -11267,6 +16296,40 @@ async fn get_supplier_task_collection() {
 }
 
 #[tokio::test]
+async fn get_supplier_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/suppliers/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .suppliers()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/suppliers/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/suppliers/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_supplier_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -11315,7 +16378,7 @@ async fn get_supplier_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_suppliers_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11323,10 +16386,13 @@ async fn post_suppliers_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/suppliers/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11341,6 +16407,39 @@ async fn get_task_assignment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/taskassignments");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_assignment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/taskassignments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .task_assignments()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/taskassignments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/taskassignments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11397,11 +16496,11 @@ async fn delete_task_assignment() {
 #[tokio::test]
 async fn get_task_assignment_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.task_assignments().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/taskassignments/7");
     assert_bearer_token(&request);
@@ -11411,7 +16510,7 @@ async fn get_task_assignment_item() {
 #[tokio::test]
 async fn update_task_assignment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11421,10 +16520,13 @@ async fn update_task_assignment() {
             &crate::model::TaskAssignmentPayload::new(crate::Id::new(1)),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/taskassignments/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskAssignmentPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11439,6 +16541,39 @@ async fn get_task_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/tasks");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tasks()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11483,17 +16618,20 @@ async fn get_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .tasks()
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11512,11 +16650,11 @@ async fn delete_task() {
 #[tokio::test]
 async fn get_task_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.tasks().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/tasks/7");
     assert_bearer_token(&request);
@@ -11526,7 +16664,7 @@ async fn get_task_item() {
 #[tokio::test]
 async fn update_task() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11536,10 +16674,13 @@ async fn update_task() {
             &crate::model::TaskPayload::new(String::from("x")),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/tasks/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11559,6 +16700,40 @@ async fn get_task_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/tasks/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/tasks/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tasks()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/tasks/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/tasks/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11619,6 +16794,40 @@ async fn get_task_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/tasks/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/tasks/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tasks()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/tasks/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/tasks/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11688,6 +16897,40 @@ async fn get_task_subtask_collection() {
 }
 
 #[tokio::test]
+async fn get_task_subtask_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/tasks/7/subtasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tasks()
+        .subtasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/tasks/7/subtasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/tasks/7/subtasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_task_subtask_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -11736,7 +16979,7 @@ async fn get_task_subtask_collection_collection_errors() {
 #[tokio::test]
 async fn create_subtask() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"title\":\"string\",\"completed\":true,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11744,10 +16987,12 @@ async fn create_subtask() {
         .subtasks(crate::Id::new(7))
         .create_as::<SubtaskIdProjection>(&crate::model::SubtaskPayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/tasks/7/subtasks");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::SubtaskPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11767,6 +17012,40 @@ async fn get_task_task_assignment_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/tasks/7/taskassignments");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_task_assignment_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/tasks/7/taskassignments?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tasks()
+        .task_assignments(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/tasks/7/taskassignments");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/tasks/7/taskassignments");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11819,7 +17098,7 @@ async fn get_task_task_assignment_collection_collection_errors() {
 #[tokio::test]
 async fn create_task_assignment() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"task\":\"/tasks/0\",\"crew\":\"/crew/0\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11829,10 +17108,13 @@ async fn create_task_assignment() {
             crate::Id::new(1),
         ))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/tasks/7/taskassignments");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskAssignmentPayload::new(crate::Id::new(1))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11847,6 +17129,39 @@ async fn get_task_status_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/taskstatuses");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_task_status_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"todo\",\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/taskstatuses?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"todo\",\"order\":0,\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .task_statuses()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/taskstatuses");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/taskstatuses");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -11891,7 +17206,7 @@ async fn get_task_status_collection_collection_errors() {
 #[tokio::test]
 async fn create_task_status() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"todo\",\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11900,10 +17215,13 @@ async fn create_task_status() {
             "x",
         )))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/taskstatuses");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskStatusPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11922,11 +17240,11 @@ async fn delete_task_status() {
 #[tokio::test]
 async fn get_task_status_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"todo\",\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.task_statuses().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/taskstatuses/7");
     assert_bearer_token(&request);
@@ -11936,7 +17254,7 @@ async fn get_task_status_item() {
 #[tokio::test]
 async fn update_task_status() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"color\":\"string\",\"type\":\"todo\",\"order\":0,\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -11946,10 +17264,13 @@ async fn update_task_status() {
             &crate::model::TaskStatusPayload::new(String::from("x")),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/taskstatuses/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskStatusPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -11964,6 +17285,39 @@ async fn get_tax_class_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/taxclasses");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_tax_class_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"code\":\"string\",\"type\":\"vat\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/taxclasses?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"code\":\"string\",\"type\":\"vat\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .tax_classes()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/taxclasses");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/taxclasses");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12008,11 +17362,11 @@ async fn get_tax_class_collection_collection_errors() {
 #[tokio::test]
 async fn get_tax_class_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"code\":\"string\",\"type\":\"vat\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.tax_classes().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/taxclasses/7");
     assert_bearer_token(&request);
@@ -12030,6 +17384,39 @@ async fn get_time_registration_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/timeregistration");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_time_registration_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/timeregistration?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .time_registrations()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/timeregistration");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/timeregistration");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12079,7 +17466,7 @@ async fn get_time_registration_collection_collection_errors() {
 #[tokio::test]
 async fn post_timeregistration() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result =
@@ -12089,10 +17476,13 @@ async fn post_timeregistration() {
                 &crate::model::TimeRegistrationPayload::default(),
             )
             .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/timeregistration");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TimeRegistrationPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -12111,11 +17501,11 @@ async fn delete_time_registration() {
 #[tokio::test]
 async fn get_time_registration_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.time_registrations().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/timeregistration/7");
     assert_bearer_token(&request);
@@ -12125,7 +17515,7 @@ async fn get_time_registration_item() {
 #[tokio::test]
 async fn update_time_registration() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"crewmember\":\"/crew/0\",\"start\":\"2019-08-24T14:15:22Z\",\"end\":\"2019-08-24T14:15:22Z\",\"distance\":1,\"is_lunch_included\":true,\"leavetype\":\"/leavetypes/0\",\"leaverequest\":\"/leaverequest/0\",\"duration\":1,\"break_duration\":1,\"travel_time\":1,\"correction_duration\":1,\"remark\":\"string\",\"status\":\"pending\",\"break_duration_with_start_end\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -12135,10 +17525,13 @@ async fn update_time_registration() {
             &crate::model::TimeRegistrationPayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/timeregistration/7");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TimeRegistrationPayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -12158,6 +17551,40 @@ async fn get_time_registration_file_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/timeregistration/7/files");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_time_registration_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/timeregistration/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .time_registrations()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/timeregistration/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/timeregistration/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12227,6 +17654,48 @@ async fn get_time_registration_time_registration_activity_collection() {
         "/timeregistration/7/timeregistrationactivities",
     );
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_time_registration_time_registration_activity_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"time_registration\":\"/timeregistration/0\",\"project_function\":\"/projectfunctions/0\",\"subproject_function\":\"/subprojects/0\",\"description\":\"string\",\"duration\":1,\"is_activity\":true,\"from\":\"2019-08-24T14:15:22Z\",\"to\":\"2019-08-24T14:15:22Z\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/timeregistration/7/timeregistrationactivities?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"time_registration\":\"/timeregistration/0\",\"project_function\":\"/projectfunctions/0\",\"subproject_function\":\"/subprojects/0\",\"description\":\"string\",\"duration\":1,\"is_activity\":true,\"from\":\"2019-08-24T14:15:22Z\",\"to\":\"2019-08-24T14:15:22Z\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .time_registrations()
+        .time_registration_activities(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(
+        &first,
+        "GET",
+        "/timeregistration/7/timeregistrationactivities",
+    );
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(
+        &second,
+        "GET",
+        "/timeregistration/7/timeregistrationactivities",
+    );
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12312,6 +17781,39 @@ async fn get_time_registration_activity_collection() {
 }
 
 #[tokio::test]
+async fn get_time_registration_activity_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"time_registration\":\"/timeregistration/0\",\"project_function\":\"/projectfunctions/0\",\"subproject_function\":\"/subprojects/0\",\"description\":\"string\",\"duration\":1,\"is_activity\":true,\"from\":\"2019-08-24T14:15:22Z\",\"to\":\"2019-08-24T14:15:22Z\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/timeregistrationactivities?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"time_registration\":\"/timeregistration/0\",\"project_function\":\"/projectfunctions/0\",\"subproject_function\":\"/subprojects/0\",\"description\":\"string\",\"duration\":1,\"is_activity\":true,\"from\":\"2019-08-24T14:15:22Z\",\"to\":\"2019-08-24T14:15:22Z\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .time_registration_activities()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/timeregistrationactivities");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/timeregistrationactivities");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_time_registration_activity_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -12366,14 +17868,14 @@ async fn get_time_registration_activity_collection_collection_errors() {
 #[tokio::test]
 async fn get_time_registration_activity_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"time_registration\":\"/timeregistration/0\",\"project_function\":\"/projectfunctions/0\",\"subproject_function\":\"/subprojects/0\",\"description\":\"string\",\"duration\":1,\"is_activity\":true,\"from\":\"2019-08-24T14:15:22Z\",\"to\":\"2019-08-24T14:15:22Z\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .time_registration_activities()
         .get(crate::Id::new(7))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/timeregistrationactivities/7");
     assert_bearer_token(&request);
@@ -12391,6 +17893,39 @@ async fn get_vehicle_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/vehicles");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_vehicle_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/vehicles?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .vehicles()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/vehicles");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/vehicles");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12435,17 +17970,19 @@ async fn get_vehicle_collection_collection_errors() {
 #[tokio::test]
 async fn post_vehicles() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
         .vehicles()
         .create_as::<VehicleIdProjection>(&crate::model::VehiclePayload::default())
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/vehicles");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::VehiclePayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -12464,11 +18001,11 @@ async fn delete_vehicle() {
 #[tokio::test]
 async fn get_vehicle_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.vehicles().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/vehicles/7");
     assert_bearer_token(&request);
@@ -12478,7 +18015,7 @@ async fn get_vehicle_item() {
 #[tokio::test]
 async fn update_vehicle() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"folder\":\"/folders/0\",\"name\":\"string\",\"cost_rate\":\"/rates/0\",\"in_planner\":true,\"height\":1,\"length\":1,\"width\":1,\"seats\":0,\"inspection_date\":\"string\",\"licenseplate\":\"string\",\"remark\":\"string\",\"payload_capacity\":1,\"surface_area\":\"string\",\"multiple\":\"plannable_once\",\"image\":\"/files/0\",\"asset_location\":\"/stocklocations/0\",\"tags\":\"string\",\"distance_cost\":1,\"fixed_cost\":1,\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -12488,10 +18025,12 @@ async fn update_vehicle() {
             &crate::model::VehiclePayload::default(),
         )
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "PUT", "/vehicles/7");
     assert_bearer_token(&request);
+    let expected_body = serde_json::to_value(crate::model::VehiclePayload::default()).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -12511,6 +18050,40 @@ async fn get_vehicle_file_folder_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/vehicles/7/file_folders");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_vehicle_file_folder_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/vehicles/7/file_folders?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"parent\":\"/file_folders/0\",\"name\":\"string\",\"classified\":true,\"item\":0,\"itemtype\":\"Contact\",\"is_template\":true,\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .vehicles()
+        .file_folders(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/vehicles/7/file_folders");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/vehicles/7/file_folders");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12580,6 +18153,40 @@ async fn get_vehicle_file_collection() {
 }
 
 #[tokio::test]
+async fn get_vehicle_file_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/vehicles/7/files?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"readable_name\":\"string\",\"expiration\":\"string\",\"size\":0,\"image\":true,\"item\":0,\"itemtype\":\"Contact\",\"description\":\"string\",\"in_documents\":true,\"in_webshop\":true,\"classified\":true,\"public\":true,\"type\":\"string\",\"preview_of\":\"/files/0\",\"previewstatus\":\"no\",\"file_item\":0,\"file_itemtype\":\"string\",\"folder\":\"/file_folders/0\",\"path\":\"string\",\"path_without_file_name\":\"string\",\"path_with_file_folders\":\"string\",\"name_without_extension\":\"string\",\"friendly_name_without_extension\":\"string\",\"extension\":\"string\",\"url\":\"https://example.test/\",\"proxy_url\":\"https://example.test/\",\"parent_api_path\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .vehicles()
+        .files(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/vehicles/7/files");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/vehicles/7/files");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_vehicle_file_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -12645,6 +18252,40 @@ async fn get_vehicle_task_collection() {
 }
 
 #[tokio::test]
+async fn get_vehicle_task_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/vehicles/7/tasks?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .vehicles()
+        .tasks(crate::Id::new(7))
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/vehicles/7/tasks");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/vehicles/7/tasks");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
 async fn get_vehicle_task_collection_collection_errors() {
     let server = spawn_server(vec![
         text_response("HTTP/1.1 400 Bad Request", "rejected"),
@@ -12693,7 +18334,7 @@ async fn get_vehicle_task_collection_collection_errors() {
 #[tokio::test]
 async fn post_vehicles_id_tasks() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"recurhoe\":\"once\",\"recureind\":\"string\",\"recurperiode\":0,\"is_template\":true,\"name\":\"string\",\"details\":\"string\",\"color\":\"string\",\"priority\":\"no_priority\",\"order\":0,\"deadline\":\"2019-08-24T14:15:22Z\",\"deadline_type\":\"specific_date\",\"deadline_relative_offset_base\":\"start_of_period\",\"deadline_relative_offset_amount\":0,\"deadline_relative_offset_unit\":\"days\",\"deadline_relative_offset_direction\":\"before\",\"completed_at\":\"2019-08-24T14:15:22Z\",\"status\":\"/taskstatuses/0\",\"item\":0,\"itemtype\":\"Contact\",\"synchronization_id\":\"string\",\"synchronization_uri\":\"string\",\"public\":0,\"assignment_type\":\"all_crewmembers\",\"completed_by\":\"/crew/0\",\"expiry_notification_date\":\"2019-08-24T14:15:22Z\",\"time_budget\":1,\"tags\":\"string\",\"parent_api_path\":\"string\",\"custom\":{\"custom_1\":\"string\",\"custom_2\":2},\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client
@@ -12701,10 +18342,13 @@ async fn post_vehicles_id_tasks() {
         .tasks(crate::Id::new(7))
         .create_as::<TaskIdProjection>(&crate::model::TaskPayload::new(String::from("x")))
         .await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "POST", "/vehicles/7/tasks");
     assert_bearer_token(&request);
+    let expected_body =
+        serde_json::to_value(crate::model::TaskPayload::new(String::from("x"))).unwrap();
+    assert_eq!(request.json_body(), expected_body);
     server.assert_no_more_requests();
 }
 
@@ -12719,6 +18363,39 @@ async fn get_warehouse_status_collection() {
     let request = server.next_request();
     assert_request(&request, "GET", "/warehousestatuses");
     assert_bearer_token(&request);
+    server.assert_no_more_requests();
+}
+
+#[tokio::test]
+async fn get_warehouse_status_collection_follows_pages() {
+    let server = spawn_server(vec![
+        json_response(
+            "{\"data\":[{\"id\":1,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":2,\"limit\":2,\"next_page_url\":\"{base}/warehousestatuses?cursor=next\"}",
+        ),
+        json_response(
+            "{\"data\":[{\"id\":2,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}],\"itemCount\":1,\"limit\":2,\"next_page_url\":null}",
+        ),
+    ]);
+    let client = client(&server);
+    let items = client
+        .warehouse_statuses()
+        .list()
+        .page_size(crate::PageSize::new(2).unwrap())
+        .all()
+        .await
+        .unwrap();
+    assert_eq!(items.len(), 2);
+    let first = server.next_request();
+    assert_request(&first, "GET", "/warehousestatuses");
+    assert_bearer_token(&first);
+    assert_eq!(first.query_value("limit").as_deref(), Some("2"));
+    assert_eq!(first.query_value("offset").as_deref(), Some("0"));
+    let second = server.next_request();
+    assert_request(&second, "GET", "/warehousestatuses");
+    assert_bearer_token(&second);
+    assert_eq!(second.query_value("cursor").as_deref(), Some("next"));
+    assert_eq!(second.query_value("limit"), None);
+    assert_eq!(second.query_value("offset"), None);
     server.assert_no_more_requests();
 }
 
@@ -12768,11 +18445,11 @@ async fn get_warehouse_status_collection_collection_errors() {
 #[tokio::test]
 async fn get_warehouse_status_item() {
     let server = spawn_server(vec![json_response(
-        r#"{"data":{"id":7,"updateHash":"test","created":null,"modified":null,"creator":null}}"#,
+        "{\"data\":{\"id\":7,\"created\":\"2019-08-24T14:15:22Z\",\"modified\":\"2019-08-24T14:15:22Z\",\"creator\":\"/crew/0\",\"displayname\":\"string\",\"name\":\"string\",\"updateHash\":\"test\"}}",
     )]);
     let client = client(&server);
     let result = client.warehouse_statuses().get(crate::Id::new(7)).await;
-    let _ = result; // only the outgoing request is checked here
+    assert!(result.is_ok(), "sample response decodes");
     let request = server.next_request();
     assert_request(&request, "GET", "/warehousestatuses/7");
     assert_bearer_token(&request);

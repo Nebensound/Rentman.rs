@@ -18,3 +18,7 @@ target/
 
 # Local secrets (e.g. RENTMAN_API_TOKEN for the live API tests)
 .env
+.agents/
+.claude/
+.continue/
+skills/

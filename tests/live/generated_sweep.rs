@@ -27,6 +27,18 @@ async fn get_accessory_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_accessory_collection_all_pages_live() {
+    check(
+        "getAccessoryCollection",
+        live_client().accessories().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -34,6 +46,18 @@ async fn get_actual_content_collection() {
     check(
         "getActualContentCollection",
         live_client().actual_content().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_actual_content_collection_all_pages_live() {
+    check(
+        "getActualContentCollection",
+        live_client().actual_content().list().all().await,
     );
 }
 
@@ -51,6 +75,18 @@ async fn get_alternative_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_alternative_collection_all_pages_live() {
+    check(
+        "getAlternativeCollection",
+        live_client().alternatives().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -58,6 +94,18 @@ async fn get_appointment_crew_collection() {
     check(
         "getAppointmentCrewCollection",
         live_client().appointment_crew().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_appointment_crew_collection_all_pages_live() {
+    check(
+        "getAppointmentCrewCollection",
+        live_client().appointment_crew().list().all().await,
     );
 }
 
@@ -75,6 +123,18 @@ async fn get_appointment_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_appointment_collection_all_pages_live() {
+    check(
+        "getAppointmentCollection",
+        live_client().appointments().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -82,6 +142,18 @@ async fn get_contact_person_collection() {
     check(
         "getContactPersonCollection",
         live_client().contact_persons().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_contact_person_collection_all_pages_live() {
+    check(
+        "getContactPersonCollection",
+        live_client().contact_persons().list().all().await,
     );
 }
 
@@ -99,6 +171,18 @@ async fn get_contact_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_contact_collection_all_pages_live() {
+    check(
+        "getContactCollection",
+        live_client().contacts().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -106,6 +190,18 @@ async fn get_contract_collection() {
     check(
         "getContractCollection",
         live_client().contracts().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_contract_collection_all_pages_live() {
+    check(
+        "getContractCollection",
+        live_client().contracts().list().all().await,
     );
 }
 
@@ -123,6 +219,18 @@ async fn get_project_cost_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_cost_collection_all_pages_live() {
+    check(
+        "getProjectCostCollection",
+        live_client().project_costs().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -135,6 +243,15 @@ async fn get_crew_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_crew_collection_all_pages_live() {
+    check("getCrewCollection", live_client().crew().list().all().await);
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -142,6 +259,18 @@ async fn get_crew_availability_collection() {
     check(
         "getCrewAvailabilityCollection",
         live_client().crew_availability().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_crew_availability_collection_all_pages_live() {
+    check(
+        "getCrewAvailabilityCollection",
+        live_client().crew_availability().list().all().await,
     );
 }
 
@@ -159,6 +288,18 @@ async fn get_crew_rates_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_crew_rates_collection_all_pages_live() {
+    check(
+        "getCrewRatesCollection",
+        live_client().crew_rates().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -166,6 +307,18 @@ async fn get_equipment_collection() {
     check(
         "getEquipmentCollection",
         live_client().equipment().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_equipment_collection_all_pages_live() {
+    check(
+        "getEquipmentCollection",
+        live_client().equipment().list().all().await,
     );
 }
 
@@ -187,6 +340,22 @@ async fn get_equipment_assigned_serials_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_equipment_assigned_serials_collection_all_pages_live() {
+    check(
+        "getEquipmentAssignedSerialsCollection",
+        live_client()
+            .equipment_assigned_serials()
+            .list()
+            .all()
+            .await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -194,6 +363,18 @@ async fn get_equipment_set_content_collection() {
     check(
         "getEquipmentSetContentCollection",
         live_client().equipment_set_content().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_equipment_set_content_collection_all_pages_live() {
+    check(
+        "getEquipmentSetContentCollection",
+        live_client().equipment_set_content().list().all().await,
     );
 }
 
@@ -211,6 +392,18 @@ async fn get_extra_input_field_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_extra_input_field_collection_all_pages_live() {
+    check(
+        "getExtraInputFieldCollection",
+        live_client().extra_input_fields().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -218,6 +411,18 @@ async fn get_factor_groups_collection() {
     check(
         "getFactorGroupsCollection",
         live_client().factor_groups().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_factor_groups_collection_all_pages_live() {
+    check(
+        "getFactorGroupsCollection",
+        live_client().factor_groups().list().all().await,
     );
 }
 
@@ -235,6 +440,18 @@ async fn get_factors_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_factors_collection_all_pages_live() {
+    check(
+        "getFactorsCollection",
+        live_client().factors().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -242,6 +459,18 @@ async fn get_file_folder_collection() {
     check(
         "getFileFolderCollection",
         live_client().file_folders().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_file_folder_collection_all_pages_live() {
+    check(
+        "getFileFolderCollection",
+        live_client().file_folders().list().all().await,
     );
 }
 
@@ -259,6 +488,18 @@ async fn get_file_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_file_collection_all_pages_live() {
+    check(
+        "getFileCollection",
+        live_client().files().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -266,6 +507,18 @@ async fn get_folder_collection() {
     check(
         "getFolderCollection",
         live_client().folders().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_folder_collection_all_pages_live() {
+    check(
+        "getFolderCollection",
+        live_client().folders().list().all().await,
     );
 }
 
@@ -283,6 +536,18 @@ async fn get_invitations_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_invitations_collection_all_pages_live() {
+    check(
+        "getInvitationsCollection",
+        live_client().invitations().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -290,6 +555,18 @@ async fn get_invoice_line_collection() {
     check(
         "getInvoiceLineCollection",
         live_client().invoice_lines().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_invoice_line_collection_all_pages_live() {
+    check(
+        "getInvoiceLineCollection",
+        live_client().invoice_lines().list().all().await,
     );
 }
 
@@ -307,6 +584,18 @@ async fn get_factuur_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_factuur_collection_all_pages_live() {
+    check(
+        "getFactuurCollection",
+        live_client().invoices().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -314,6 +603,18 @@ async fn get_leave_mutations_collection() {
     check(
         "getLeaveMutationsCollection",
         live_client().leave_mutations().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_leave_mutations_collection_all_pages_live() {
+    check(
+        "getLeaveMutationsCollection",
+        live_client().leave_mutations().list().all().await,
     );
 }
 
@@ -331,6 +632,18 @@ async fn get_leave_request_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_leave_request_collection_all_pages_live() {
+    check(
+        "getLeaveRequestCollection",
+        live_client().leave_requests().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -338,6 +651,18 @@ async fn get_leave_types_collection() {
     check(
         "getLeaveTypesCollection",
         live_client().leave_types().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_leave_types_collection_all_pages_live() {
+    check(
+        "getLeaveTypesCollection",
+        live_client().leave_types().list().all().await,
     );
 }
 
@@ -355,6 +680,18 @@ async fn get_ledger_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_ledger_collection_all_pages_live() {
+    check(
+        "getLedgerCollection",
+        live_client().ledger_codes().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -362,6 +699,18 @@ async fn get_payment_collection() {
     check(
         "getPaymentCollection",
         live_client().payments().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_payment_collection_all_pages_live() {
+    check(
+        "getPaymentCollection",
+        live_client().payments().list().all().await,
     );
 }
 
@@ -379,6 +728,18 @@ async fn get_project_crew_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_crew_collection_all_pages_live() {
+    check(
+        "getProjectCrewCollection",
+        live_client().project_crew().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -386,6 +747,18 @@ async fn get_project_equipment_collection() {
     check(
         "getProjectEquipmentCollection",
         live_client().project_equipment().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_equipment_collection_all_pages_live() {
+    check(
+        "getProjectEquipmentCollection",
+        live_client().project_equipment().list().all().await,
     );
 }
 
@@ -407,6 +780,18 @@ async fn get_project_equipment_group_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_equipment_group_collection_all_pages_live() {
+    check(
+        "getProjectEquipmentGroupCollection",
+        live_client().project_equipment_groups().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -423,6 +808,18 @@ async fn get_project_function_group_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_function_group_collection_all_pages_live() {
+    check(
+        "getProjectFunctionGroupCollection",
+        live_client().project_function_groups().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -430,6 +827,18 @@ async fn get_project_function_collection() {
     check(
         "getProjectFunctionCollection",
         live_client().project_functions().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_function_collection_all_pages_live() {
+    check(
+        "getProjectFunctionCollection",
+        live_client().project_functions().list().all().await,
     );
 }
 
@@ -451,6 +860,18 @@ async fn get_project_request_equipment_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_request_equipment_collection_all_pages_live() {
+    check(
+        "getProjectRequestEquipmentCollection",
+        live_client().project_request_equipment().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -458,6 +879,18 @@ async fn get_project_request_collection() {
     check(
         "getProjectRequestCollection",
         live_client().project_requests().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_request_collection_all_pages_live() {
+    check(
+        "getProjectRequestCollection",
+        live_client().project_requests().list().all().await,
     );
 }
 
@@ -475,6 +908,18 @@ async fn get_project_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_collection_all_pages_live() {
+    check(
+        "getProjectCollection",
+        live_client().projects().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -482,6 +927,18 @@ async fn get_project_status_collection() {
     check(
         "getProjectStatusCollection",
         live_client().project_statuses().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_status_collection_all_pages_live() {
+    check(
+        "getProjectStatusCollection",
+        live_client().project_statuses().list().all().await,
     );
 }
 
@@ -499,6 +956,18 @@ async fn get_project_template_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_template_collection_all_pages_live() {
+    check(
+        "getProjectTemplateCollection",
+        live_client().project_templates().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -506,6 +975,18 @@ async fn get_project_type_collection() {
     check(
         "getProjectTypeCollection",
         live_client().project_types().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_type_collection_all_pages_live() {
+    check(
+        "getProjectTypeCollection",
+        live_client().project_types().list().all().await,
     );
 }
 
@@ -523,6 +1004,18 @@ async fn get_project_vehicle_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_project_vehicle_collection_all_pages_live() {
+    check(
+        "getProjectVehicleCollection",
+        live_client().project_vehicles().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -530,6 +1023,18 @@ async fn get_purchase_order_cost_collection() {
     check(
         "getPurchaseOrderCostCollection",
         live_client().purchase_order_costs().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_purchase_order_cost_collection_all_pages_live() {
+    check(
+        "getPurchaseOrderCostCollection",
+        live_client().purchase_order_costs().list().all().await,
     );
 }
 
@@ -551,6 +1056,22 @@ async fn get_purchase_order_global_cost_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_purchase_order_global_cost_collection_all_pages_live() {
+    check(
+        "getPurchaseOrderGlobalCostCollection",
+        live_client()
+            .purchase_order_global_costs()
+            .list()
+            .all()
+            .await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -558,6 +1079,18 @@ async fn get_purchase_order_collection() {
     check(
         "getPurchaseOrderCollection",
         live_client().purchase_orders().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_purchase_order_collection_all_pages_live() {
+    check(
+        "getPurchaseOrderCollection",
+        live_client().purchase_orders().list().all().await,
     );
 }
 
@@ -575,6 +1108,18 @@ async fn get_quotation_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_quotation_collection_all_pages_live() {
+    check(
+        "getQuotationCollection",
+        live_client().quotes().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -582,6 +1127,18 @@ async fn get_crew_rate_factor_collection() {
     check(
         "getCrewRateFactorCollection",
         live_client().rate_factors().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_crew_rate_factor_collection_all_pages_live() {
+    check(
+        "getCrewRateFactorCollection",
+        live_client().rate_factors().list().all().await,
     );
 }
 
@@ -599,6 +1156,18 @@ async fn get_crew_rate_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_crew_rate_collection_all_pages_live() {
+    check(
+        "getCrewRateCollection",
+        live_client().rates().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -606,6 +1175,18 @@ async fn get_repair_collection() {
     check(
         "getRepairCollection",
         live_client().repairs().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_repair_collection_all_pages_live() {
+    check(
+        "getRepairCollection",
+        live_client().repairs().list().all().await,
     );
 }
 
@@ -623,6 +1204,18 @@ async fn get_serial_number_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_serial_number_collection_all_pages_live() {
+    check(
+        "getSerialNumberCollection",
+        live_client().serial_numbers().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -630,6 +1223,18 @@ async fn get_status_collection() {
     check(
         "getStatusCollection",
         live_client().statuses().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_status_collection_all_pages_live() {
+    check(
+        "getStatusCollection",
+        live_client().statuses().list().all().await,
     );
 }
 
@@ -647,6 +1252,18 @@ async fn get_stock_location_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_stock_location_collection_all_pages_live() {
+    check(
+        "getStockLocationCollection",
+        live_client().stock_locations().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -654,6 +1271,18 @@ async fn get_stock_movement_collection() {
     check(
         "getStockMovementCollection",
         live_client().stock_movements().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_stock_movement_collection_all_pages_live() {
+    check(
+        "getStockMovementCollection",
+        live_client().stock_movements().list().all().await,
     );
 }
 
@@ -671,6 +1300,18 @@ async fn get_subproject_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_subproject_collection_all_pages_live() {
+    check(
+        "getSubprojectCollection",
+        live_client().subprojects().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -678,6 +1319,18 @@ async fn get_subrental_equipment_collection() {
     check(
         "getSubrentalEquipmentCollection",
         live_client().subrental_equipment().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_subrental_equipment_collection_all_pages_live() {
+    check(
+        "getSubrentalEquipmentCollection",
+        live_client().subrental_equipment().list().all().await,
     );
 }
 
@@ -699,6 +1352,22 @@ async fn get_subrental_equipment_group_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_subrental_equipment_group_collection_all_pages_live() {
+    check(
+        "getSubrentalEquipmentGroupCollection",
+        live_client()
+            .subrental_equipment_groups()
+            .list()
+            .all()
+            .await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -706,6 +1375,18 @@ async fn get_subrental_collection() {
     check(
         "getSubrentalCollection",
         live_client().subrentals().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_subrental_collection_all_pages_live() {
+    check(
+        "getSubrentalCollection",
+        live_client().subrentals().list().all().await,
     );
 }
 
@@ -723,6 +1404,18 @@ async fn get_subtask_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_subtask_collection_all_pages_live() {
+    check(
+        "getSubtaskCollection",
+        live_client().subtasks().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -730,6 +1423,18 @@ async fn get_supplier_collection() {
     check(
         "getSupplierCollection",
         live_client().suppliers().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_supplier_collection_all_pages_live() {
+    check(
+        "getSupplierCollection",
+        live_client().suppliers().list().all().await,
     );
 }
 
@@ -747,6 +1452,18 @@ async fn get_task_assignment_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_task_assignment_collection_all_pages_live() {
+    check(
+        "getTaskAssignmentCollection",
+        live_client().task_assignments().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -754,6 +1471,18 @@ async fn get_task_collection() {
     check(
         "getTaskCollection",
         live_client().tasks().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_task_collection_all_pages_live() {
+    check(
+        "getTaskCollection",
+        live_client().tasks().list().all().await,
     );
 }
 
@@ -771,6 +1500,18 @@ async fn get_task_status_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_task_status_collection_all_pages_live() {
+    check(
+        "getTaskStatusCollection",
+        live_client().task_statuses().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -783,6 +1524,18 @@ async fn get_tax_class_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_tax_class_collection_all_pages_live() {
+    check(
+        "getTaxClassCollection",
+        live_client().tax_classes().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -790,6 +1543,18 @@ async fn get_time_registration_collection() {
     check(
         "getTimeRegistrationCollection",
         live_client().time_registrations().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_time_registration_collection_all_pages_live() {
+    check(
+        "getTimeRegistrationCollection",
+        live_client().time_registrations().list().all().await,
     );
 }
 
@@ -811,6 +1576,22 @@ async fn get_time_registration_activity_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_time_registration_activity_collection_all_pages_live() {
+    check(
+        "getTimeRegistrationActivityCollection",
+        live_client()
+            .time_registration_activities()
+            .list()
+            .all()
+            .await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -823,6 +1604,18 @@ async fn get_vehicle_collection() {
 
 #[tokio::test]
 #[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_vehicle_collection_all_pages_live() {
+    check(
+        "getVehicleCollection",
+        live_client().vehicles().list().all().await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
     not(live_api_tests_enabled),
     ignore = "calls the real Rentman API; requires RENTMAN_API_TOKEN"
 )]
@@ -830,5 +1623,17 @@ async fn get_warehouse_status_collection() {
     check(
         "getWarehouseStatusCollection",
         live_client().warehouse_statuses().list().first(1).await,
+    );
+}
+
+#[tokio::test]
+#[cfg_attr(
+    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),
+    ignore = "requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page"
+)]
+async fn get_warehouse_status_collection_all_pages_live() {
+    check(
+        "getWarehouseStatusCollection",
+        live_client().warehouse_statuses().list().all().await,
     );
 }

@@ -167,7 +167,7 @@ pub fn sample_value(
     Ok(expression)
 }
 
-fn sample_wire(
+pub(crate) fn sample_wire(
     context: &Context<'_>,
     rust_type: &str,
     schema_name: &str,

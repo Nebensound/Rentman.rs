@@ -12,8 +12,8 @@ pub fn generate(context: &Context<'_>, operations: &[Operation]) -> Result<Strin
     }) {
         let collection = operation.path.trim_matches('/');
         let resource = context.resource_for_collection(collection, &operation.path)?;
-        writeln!(output, "#[tokio::test]\n#[cfg_attr(\n    not(live_api_tests_enabled),\n    ignore = \"calls the real Rentman API; requires RENTMAN_API_TOKEN\"\n)]\nasync fn {}() {{\n    check(\"{}\", live_client().{}().list().first(1).await);\n}}\n",
-            rust_field(&operation.operation_id), operation.operation_id, accessor_name(resource)).unwrap();
+        writeln!(output, "#[tokio::test]\n#[cfg_attr(\n    not(live_api_tests_enabled),\n    ignore = \"calls the real Rentman API; requires RENTMAN_API_TOKEN\"\n)]\nasync fn {}() {{\n    check(\"{}\", live_client().{}().list().first(1).await);\n}}\n\n#[tokio::test]\n#[cfg_attr(\n    not(all(live_api_tests_enabled, live_api_full_collection_tests_enabled)),\n    ignore = \"requires RENTMAN_API_TOKEN and RENTMAN_LIVE_FULL_COLLECTIONS=1; reads every page\"\n)]\nasync fn {}_all_pages_live() {{\n    check(\"{}\", live_client().{}().list().all().await);\n}}\n",
+            rust_field(&operation.operation_id), operation.operation_id, accessor_name(resource), rust_field(&operation.operation_id), operation.operation_id, accessor_name(resource)).unwrap();
     }
     Ok(output)
 }
@@ -61,6 +61,8 @@ mod tests {
         assert!(sweep.contains("async fn get_widget_collection() {\n    check(\"getWidgetCollection\", live_client().widgets().list().first(1).await);"));
         assert!(sweep.contains("live_client().parts()"));
         assert!(!sweep.contains("getWidgetPartCollection"));
+        assert!(sweep.contains("async fn get_widget_collection_all_pages_live()"));
+        assert!(sweep.contains("live_client().widgets().list().all().await"));
     }
 
     #[test]
