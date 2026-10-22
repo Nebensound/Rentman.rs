@@ -107,6 +107,22 @@ mod tests {
     }
 
     #[test]
+    fn full_collection_tests_stay_off_without_a_readable_dotenv() {
+        let missing = Fixture::new("");
+        assert!(!live_full_collection_tests_enabled(
+            None,
+            &missing.0.with_extension("missing")
+        ));
+        for contents in [
+            "OTHER_SETTING=value\n",
+            "invalid dotenv\nRENTMAN_LIVE_FULL_COLLECTIONS=1\n",
+        ] {
+            let dotenv = Fixture::new(contents);
+            assert!(!live_full_collection_tests_enabled(None, &dotenv.0));
+        }
+    }
+
+    #[test]
     fn environment_takes_precedence_even_when_empty() {
         let dotenv = Fixture::new("RENTMAN_API_TOKEN=dotenv-token\n");
         for (token, enabled) in [("environment-token", true), ("", false), ("  ", false)] {

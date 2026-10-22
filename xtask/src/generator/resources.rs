@@ -22,6 +22,7 @@ pub fn generate(
     let mut reachable = Vec::new();
     let mut tests = Vec::new();
     let mut sealed = BTreeSet::new();
+    let samples = response_samples(context, operations)?;
 
     for operation in operations {
         let path = operation.path.as_str();
@@ -67,12 +68,12 @@ pub fn generate(
                         &test_name,
                         path,
                         &format!("{base}.list()"),
-                        context,
+                        &samples,
                         operation
                             .response
                             .schema()
                             .expect("collection has item schema"),
-                    )?;
+                    );
                     add_collection_errors(
                         &mut tests,
                         &test_name,
@@ -95,7 +96,7 @@ pub fn generate(
                         "crate::",
                     )?;
                     let response =
-                        item_response_expression(context, operation.response.schema().unwrap(), 7)?;
+                        item_response_expression(&samples, operation.response.schema().unwrap(), 7);
                     tests.push(test_source(
                         &test_name,
                         &response,
@@ -153,10 +154,10 @@ pub fn generate(
             let (response, call, body, check) = match trait_name {
                 "Get" => (
                     item_response_expression(
-                        context,
+                        &samples,
                         operation.response.schema().expect("item GET has schema"),
                         7,
-                    )?,
+                    ),
                     format!("{base}.get(crate::Id::new(7))"),
                     None,
                     SENT_ONCE.to_owned(),
@@ -169,10 +170,10 @@ pub fn generate(
                     )?;
                     (
                         item_response_expression(
-                            context,
+                            &samples,
                             operation.response.schema().expect("item update has schema"),
                             7,
-                        )?,
+                        ),
                         format!(
                             "{base}.update_as::<{owner}IdProjection>(crate::Id::new(7), &{expression})"
                         ),
@@ -265,12 +266,12 @@ pub fn generate(
                         &test_name,
                         &concrete,
                         &format!("{base}.list()"),
-                        context,
+                        &samples,
                         operation
                             .response
                             .schema()
                             .expect("nested GET has item schema"),
-                    )?;
+                    );
                     add_collection_errors(
                         &mut tests,
                         &test_name,
@@ -293,7 +294,7 @@ pub fn generate(
                         "crate::",
                     )?;
                     let response =
-                        item_response_expression(context, operation.response.schema().unwrap(), 7)?;
+                        item_response_expression(&samples, operation.response.schema().unwrap(), 7);
                     tests.push(test_source(
                         &test_name,
                         &response,
@@ -328,10 +329,10 @@ pub fn generate(
             let payload_type = payload.ok_or("action has no request schema")?;
             let item_type = item.ok_or("action has no response schema")?;
             let response = item_response_expression(
-                context,
+                &samples,
                 operation.response.schema().expect("action has item schema"),
                 7,
-            )?;
+            );
             let payload =
                 payload_expression(context, operation.request.as_deref().unwrap(), "crate::")?;
             let example_payload = payload.replace("crate::", "rentman_client::");
@@ -437,20 +438,33 @@ pub fn generate(
 const EMPTY_PAGE: &str = "json_response(r#\"{\"data\":[],\"itemCount\":0,\"limit\":300}\"#)";
 const SENT_ONCE: &str = "assert!(result.is_ok(), \"sample response decodes\");";
 
-fn item_response_expression(
+/// One sample wire item per response schema, built before any test so a schema
+/// the generator cannot sample fails once instead of at every operation.
+fn response_samples<'a>(
     context: &Context<'_>,
-    schema_name: &str,
-    id: u64,
-) -> Result<String, String> {
-    let data = response_item_wire(context, schema_name, id)?;
-    Ok(json_response_expression(&json!({"data": data})))
+    operations: &'a [Operation],
+) -> Result<BTreeMap<&'a str, Value>, String> {
+    operations
+        .iter()
+        .filter_map(|operation| operation.response.schema())
+        .map(|schema_name| response_item_wire(context, schema_name).map(|item| (schema_name, item)))
+        .collect()
 }
 
-fn response_item_wire(context: &Context<'_>, schema_name: &str, id: u64) -> Result<Value, String> {
-    let schema = context
-        .schemas
-        .get(schema_name)
-        .ok_or_else(|| format!("missing response schema {schema_name}"))?;
+fn sample_with_id(samples: &BTreeMap<&str, Value>, schema_name: &str, id: u64) -> Value {
+    let mut item = samples[schema_name].clone();
+    item["id"] = json!(id);
+    item
+}
+
+fn item_response_expression(samples: &BTreeMap<&str, Value>, schema_name: &str, id: u64) -> String {
+    let data = sample_with_id(samples, schema_name, id);
+    json_response_expression(&json!({"data": data}))
+}
+
+fn response_item_wire(context: &Context<'_>, schema_name: &str) -> Result<Value, String> {
+    // Operations only reference schemas the context resolved.
+    let schema = &context.schemas[schema_name];
     let required = context.effective_required(schema_name, schema);
     let mut item = Map::new();
     for (field, field_schema) in properties(schema) {
@@ -459,7 +473,7 @@ fn response_item_wire(context: &Context<'_>, schema_name: &str, id: u64) -> Resu
         } else if field == "custom" {
             json!({})
         } else if field == "id" {
-            json!(id)
+            json!(0)
         } else {
             let rust_type = context.field_type(schema_name, field, &required);
             let rust_type = rust_type
@@ -475,7 +489,7 @@ fn response_item_wire(context: &Context<'_>, schema_name: &str, id: u64) -> Resu
         };
         item.insert(field.clone(), value);
     }
-    item.insert("id".to_owned(), json!(id));
+    item.insert("id".to_owned(), json!(0));
     item.insert("updateHash".to_owned(), json!("test"));
     Ok(Value::Object(item))
 }
@@ -490,11 +504,11 @@ fn add_paged_collection_test(
     name: &str,
     path: &str,
     list_call: &str,
-    context: &Context<'_>,
+    samples: &BTreeMap<&str, Value>,
     schema_name: &str,
-) -> Result<(), String> {
-    let first_item = response_item_wire(context, schema_name, 1)?;
-    let second_item = response_item_wire(context, schema_name, 2)?;
+) {
+    let first_item = sample_with_id(samples, schema_name, 1);
+    let second_item = sample_with_id(samples, schema_name, 2);
     let first_page = json!({
         "data": [first_item],
         "itemCount": 2,
@@ -518,7 +532,6 @@ fn add_paged_collection_test(
     )
     .unwrap();
     tests.push(test);
-    Ok(())
 }
 
 fn seal(impls: &mut Vec<String>, sealed: &mut BTreeSet<String>, marker: &str) {
@@ -724,13 +737,37 @@ mod tests {
             json!(["string", "null"]);
         let (context, _) = context(&spec).unwrap();
 
-        let item = response_item_wire(&context, "WidgetResponse", 7).unwrap();
+        let samples = BTreeMap::from([(
+            "WidgetResponse",
+            response_item_wire(&context, "WidgetResponse").unwrap(),
+        )]);
+        let item = sample_with_id(&samples, "WidgetResponse", 7);
 
         assert_eq!(item["id"], 7);
         assert_eq!(item["name"], "Widget sample");
         assert_eq!(item["part"], "/parts/1");
         assert_eq!(item["created"], "2019-08-24T14:15:22Z");
         assert_eq!(item["updateHash"], "test");
+    }
+
+    #[test]
+    fn response_fixtures_need_a_wire_sample_for_every_field() {
+        let spec = spec();
+        let config = crate::test_support::config_with(|config| {
+            config
+                .response_type_overrides
+                .push(crate::openapi::FieldOverride {
+                    schema: "PartResponse".to_owned(),
+                    field: "name".to_owned(),
+                    rust_type: "Vec<String>".to_owned(),
+                });
+        });
+        let context = Context::with_config(&spec, config).unwrap();
+        let operations = crate::openapi::collect_operations(&context).unwrap();
+        assert_eq!(
+            generate(&context, &operations).unwrap_err(),
+            "no sample wire value for PartResponse.name: Vec<String>"
+        );
     }
 
     #[test]
