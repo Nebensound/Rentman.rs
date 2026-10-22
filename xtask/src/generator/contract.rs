@@ -106,7 +106,7 @@ pub fn revision_tests(context: &Context<'_>) -> Result<String, String> {
             );
         }
         let wire = Value::Object(item).to_string();
-        writeln!(output, "#[test]\nfn {}() {{\n    assert_carries_revision::<model::{resource}, projection_fields::{resource}::{revision_field}>(\n        r#\"{wire}\"#,\n        {},\n    );\n}}\n",
+        writeln!(output, "#[test]\nfn {}() {{\n    assert_carries_revision::<model::{resource}, projection_fields::{resource}::revision>(\n        r#\"{wire}\"#,\n        {},\n    );\n}}\n",
             rust_field(resource), properties(schema).contains_key("custom")).unwrap();
     }
     Ok(output)

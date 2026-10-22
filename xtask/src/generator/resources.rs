@@ -178,9 +178,29 @@ pub fn generate(
                     format!("/// The {} of one [`{parent}`]: `/{parent_collection}/{{id}}/{child_collection}`.", child_accessor.replace('_', " ")),
                     "#[derive(Debug, Clone, Copy, PartialEq, Eq)]".to_owned(), format!("pub struct {marker};"), String::new(),
                 ]);
+                let parent_accessor = accessor_name(parent);
+                // A collection without GET is shown with `create`; an invalid
+                // payload is reported by the POST arm below.
+                let create_only = context.spec["paths"][path].get("get").is_none();
+                let create_payload = operation
+                    .request
+                    .as_deref()
+                    .filter(|_| create_only)
+                    .and_then(|request| {
+                        payload_expression(context, request, "rentman_client::").ok()
+                    });
+                let call = match create_payload {
+                    Some(payload) => format!(
+                        "let payload = {payload};\nlet created = client.{parent_accessor}().{child_accessor}(rentman_client::Id::new(12)).create(&payload).await?;"
+                    ),
+                    None => format!(
+                        "let items = client.{parent_accessor}().{child_accessor}(rentman_client::Id::new(12)).list().all().await?;"
+                    ),
+                };
                 let methods = collection_methods.entry(parent.to_owned()).or_default();
                 methods.extend([
                     format!("    /// The {} of one item: `/{parent_collection}/{{id}}/{child_collection}`.", child_accessor.replace('_', " ")),
+                    doc_example(&call),
                     format!("    pub fn {child_accessor}(&self, {}: Id<{parent}>) -> Collection<{marker}> {{", rust_field(parent)),
                     format!("        Collection::new(&self.client, Some({}.get()))", rust_field(parent)), "    }".to_owned(), String::new(),
                 ]);
@@ -263,11 +283,14 @@ pub fn generate(
             let item_type = item.ok_or("action has no response schema")?;
             let payload =
                 payload_expression(context, operation.request.as_deref().unwrap(), "crate::")?;
+            let example_payload = payload.replace("crate::", "rentman_client::");
+            let owner_accessor = accessor_name(owner);
             let methods = collection_methods.entry(owner.to_owned()).or_default();
             if captures.get(2).is_some() {
                 let id_param = rust_field(owner);
                 methods.extend([
                     format!("    /// {doc}"), "    ///".to_owned(), "    /// Sent exactly once, like [`Collection::create`].".to_owned(),
+                    doc_example(&format!("let payload = {example_payload};\nlet result = client.{owner_accessor}().{action}(rentman_client::Id::new(12), &payload).await?;")),
                     format!("    pub async fn {action}(&self, {id_param}: Id<{owner}>, payload: &{payload_type}) -> Result<{item_type}> {{"),
                     format!("        self.item_action({const_name}, {id_param}, payload).await"), "    }".to_owned(), String::new(),
                 ]);
@@ -286,6 +309,7 @@ pub fn generate(
             } else {
                 methods.extend([
                     format!("    /// {doc}"), "    ///".to_owned(), "    /// Sent exactly once, like [`Collection::create`].".to_owned(),
+                    doc_example(&format!("let payload = {example_payload};\nlet result = client.{owner_accessor}().{action}(&payload).await?;")),
                     format!("    pub async fn {action}(&self, payload: &{payload_type}) -> Result<{item_type}> {{"),
                     format!("        self.collection_action({const_name}, payload).await"), "    }".to_owned(), String::new(),
                 ]);
@@ -308,7 +332,15 @@ pub fn generate(
     resources.sort_by_key(|(_, resource)| accessor_name(resource));
     let accessors = resources.into_iter().map(|(collection, owner)| {
         let accessor = accessor_name(owner);
-        format!("    /// All [`{owner}`] items: `/{collection}`.\n    pub fn {accessor}(&self) -> Collection<{owner}> {{\n        Collection::new(self, None)\n    }}\n\n")
+        let (schema, _) = context.resource_schema(owner);
+        let paths = &context.spec["paths"];
+        let example = if paths[format!("/{collection}")].get("get").is_some() {
+            doc_example(&format!("let first: Vec<rentman_client::model::{owner}> = client.{accessor}().list().first(10).await?;"))
+        } else {
+            // Every resource is defined by its item GET, so `get` always exists.
+            doc_example(&format!("let item: rentman_client::model::{owner} = client.{accessor}().get(rentman_client::Id::new(12)).await?;"))
+        };
+        format!("    /// All [`{owner}`] items: `/{collection}`.\n    ///\n    /// OpenAPI response schema: `{schema}`; Rust resource: [`{owner}`].\n    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).\n{example}\n    pub fn {accessor}(&self) -> Collection<{owner}> {{\n        Collection::new(self, None)\n    }}\n\n")
     }).collect::<Vec<_>>().join("");
 
     let mut output = String::from(
@@ -406,7 +438,7 @@ fn add_collection_errors(
     tests.push(test);
 }
 
-fn payload_expression(
+pub(crate) fn payload_expression(
     context: &Context<'_>,
     schema_name: &str,
     prefix: &str,
@@ -435,6 +467,22 @@ fn payload_expression(
         "{prefix}model::{rust_name}::new({})",
         args.join(", ")
     ))
+}
+
+/// A compile-checked rustdoc example of `body`, indented as a method doc.
+fn doc_example(body: &str) -> String {
+    let mut lines = vec![
+        "    ///".to_owned(),
+        "    /// ```".to_owned(),
+        "    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {".to_owned(),
+    ];
+    lines.extend(body.lines().map(|line| format!("    /// {line}")));
+    lines.extend([
+        "    /// # Ok(())".to_owned(),
+        "    /// # }".to_owned(),
+        "    /// ```".to_owned(),
+    ]);
+    lines.join("\n")
 }
 
 fn pascal(snake: &str) -> String {
@@ -520,6 +568,33 @@ mod tests {
             "struct PartIdProjection from Part { id }",
         ] {
             assert!(tests.contains(expected), "missing {expected:?}");
+        }
+    }
+
+    #[test]
+    fn documents_each_collection_with_an_operation_it_supports() {
+        let (code, _) = generated();
+        for expected in [
+            "    /// let first: Vec<rentman_client::model::Widget> = client.widgets().list().first(10).await?;",
+            "    /// let items = client.widgets().parts(rentman_client::Id::new(12)).list().all().await?;",
+            "    /// let result = client.widgets().archive(rentman_client::Id::new(12), &payload).await?;",
+            "    /// let result = client.widgets().bulk(&payload).await?;",
+        ] {
+            assert!(code.contains(expected), "missing {expected:?}");
+        }
+
+        let mut spec = spec();
+        let paths = spec["paths"].as_object_mut().unwrap();
+        for path in ["/widgets/{id}/parts", "/parts"] {
+            paths[path].as_object_mut().unwrap().remove("get");
+        }
+        let (context, operations) = context(&spec).unwrap();
+        let (code, _) = generate(&context, &operations).unwrap();
+        for expected in [
+            "    /// let payload = rentman_client::model::PartPayload::new(String::from(\"x\"));\n    /// let created = client.widgets().parts(rentman_client::Id::new(12)).create(&payload).await?;",
+            "    /// let item: rentman_client::model::Part = client.parts().get(rentman_client::Id::new(12)).await?;",
+        ] {
+            assert!(code.contains(expected), "missing {expected:?}");
         }
     }
 

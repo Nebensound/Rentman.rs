@@ -15,6 +15,15 @@ pub trait CustomFieldsResource: Resource {
 }
 
 /// Definition of one account-specific custom field.
+///
+/// ```
+/// use rentman_client::{CustomFieldDefinition, model::{Equipment, ExtraInputFieldType}};
+///
+/// let definition = CustomFieldDefinition::new::<Equipment>(8, ExtraInputFieldType::Text);
+/// assert_eq!(definition.id(), 8);
+/// assert_eq!(definition.collection(), "equipment");
+/// assert_eq!(definition.field_type(), &ExtraInputFieldType::Text);
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CustomFieldDefinition {
     collection: &'static str,
@@ -27,6 +36,19 @@ impl CustomFieldDefinition {
     ///
     /// Obtain `id`, `field_type`, and the resource association from Rentman's
     /// `extra_input_fields()` collection.
+    /// The ID identifies a custom-field definition, not an item of `R`.
+    /// Definitions are account-specific: do not reuse example IDs across accounts
+    /// without checking them. This only configures local validation; it sends
+    /// no HTTP request and does not create a field in Rentman. See the
+    /// [initialization guide](crate#initializing-custom-fields).
+    ///
+    /// ```
+    /// use rentman_client::{CustomFieldDefinition, model::{Crew, ExtraInputFieldType}};
+    ///
+    /// // Definition 12 is a yes/no field on crew members in this account.
+    /// let has_license = CustomFieldDefinition::new::<Crew>(12, ExtraInputFieldType::Bool);
+    /// # let _ = has_license;
+    /// ```
     pub fn new<R: Resource>(id: u64, field_type: ExtraInputFieldType) -> Self {
         Self {
             collection: R::COLLECTION,
@@ -36,16 +58,35 @@ impl CustomFieldDefinition {
     }
 
     /// Numeric ID from the `ExtraInputField` resource.
+    ///
+    /// ```
+    /// use rentman_client::{CustomFieldDefinition, model::{Crew, ExtraInputFieldType}};
+    ///
+    /// assert_eq!(CustomFieldDefinition::new::<Crew>(12, ExtraInputFieldType::Bool).id(), 12);
+    /// ```
     pub fn id(&self) -> u64 {
         self.id
     }
 
     /// Resource collection this custom field belongs to.
+    ///
+    /// ```
+    /// use rentman_client::{CustomFieldDefinition, model::{Crew, ExtraInputFieldType}};
+    ///
+    /// assert_eq!(CustomFieldDefinition::new::<Crew>(12, ExtraInputFieldType::Bool).collection(), "crew");
+    /// ```
     pub fn collection(&self) -> &'static str {
         self.collection
     }
 
     /// Rentman custom-field value type.
+    ///
+    /// ```
+    /// use rentman_client::{CustomFieldDefinition, model::{Crew, ExtraInputFieldType}};
+    ///
+    /// let definition = CustomFieldDefinition::new::<Crew>(12, ExtraInputFieldType::Bool);
+    /// assert_eq!(definition.field_type(), &ExtraInputFieldType::Bool);
+    /// ```
     pub fn field_type(&self) -> &ExtraInputFieldType {
         &self.field_type
     }
@@ -56,6 +97,36 @@ impl CustomFieldDefinition {
 }
 
 /// Invalid custom-field registry configuration or response value.
+///
+/// Registering a definition twice fails while building the registry:
+///
+/// ```
+/// use rentman_client::{CustomFieldDefinition, CustomFieldError, CustomFieldRegistry, model::{Crew, ExtraInputFieldType}};
+///
+/// let definition = CustomFieldDefinition::new::<Crew>(12, ExtraInputFieldType::Bool);
+/// let error = CustomFieldRegistry::new([definition.clone(), definition]).unwrap_err();
+/// assert_eq!(error, CustomFieldError::DuplicateDefinition { collection: "crew", id: 12 });
+/// ```
+///
+/// Response problems arrive as [`ErrorKind::CustomField`](crate::ErrorKind::CustomField):
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) {
+/// use rentman_client::{CustomFieldError, ErrorKind, model::CrewId};
+///
+/// if let Err(error) = client.crew().get(CrewId::new(12)).await {
+///     match error.kind() {
+///         ErrorKind::CustomField(CustomFieldError::MissingValue { id, .. }) => {
+///             println!("custom_{id} is not in the response; check the registry");
+///         }
+///         ErrorKind::CustomField(CustomFieldError::TypeMismatch { id, expected, actual, .. }) => {
+///             println!("custom_{id} is {actual}, registered as {expected}");
+///         }
+///         _ => {}
+///     }
+/// }
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[non_exhaustive]
 pub enum CustomFieldError {
@@ -90,6 +161,16 @@ pub enum CustomFieldError {
 }
 
 /// Failed to read or write a dynamically typed custom-field value.
+///
+/// ```
+/// use rentman_client::{CustomFieldValueError, model::CustomFields};
+///
+/// let mut custom = CustomFields::default();
+/// custom.set(8, &"text")?;
+/// assert!(matches!(custom.get::<String>(9), Err(CustomFieldValueError::Missing { id: 9 })));
+/// assert!(matches!(custom.get::<bool>(8), Err(CustomFieldValueError::Json(_))));
+/// # Ok::<(), CustomFieldValueError>(())
+/// ```
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum CustomFieldValueError {
@@ -105,6 +186,17 @@ pub enum CustomFieldValueError {
 }
 
 /// Account-specific custom-field definitions supplied when configuring a client.
+///
+/// ```
+/// use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model::{Crew, Equipment, ExtraInputFieldType}};
+///
+/// let registry = CustomFieldRegistry::new([
+///     CustomFieldDefinition::new::<Equipment>(8, ExtraInputFieldType::Text),
+///     CustomFieldDefinition::new::<Crew>(8, ExtraInputFieldType::Bool), // same ID, other resource
+/// ])?;
+/// let client = RentmanClient::new(RentmanApiToken::new("token")).with_custom_fields(registry);
+/// # Ok::<(), rentman_client::CustomFieldError>(())
+/// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct CustomFieldRegistry {
     definitions: Vec<CustomFieldDefinition>,
@@ -112,6 +204,14 @@ pub struct CustomFieldRegistry {
 
 impl CustomFieldRegistry {
     /// Builds a registry and rejects duplicate `(resource, field ID)` pairs.
+    ///
+    /// Supply all definitions used by the application, then pass the registry
+    /// to [`RentmanClient::with_custom_fields`](crate::RentmanClient::with_custom_fields).
+    /// The same ID may occur for different resources. Each registered response
+    /// key must be present, but null is accepted; other custom keys are removed.
+    /// Validation checks JSON categories, not date/URL syntax or enum choices.
+    /// `Item` and unknown field types accept any shape. See the
+    /// [initialization guide](crate#initializing-custom-fields) for the type table.
     pub fn new(
         definitions: impl IntoIterator<Item = CustomFieldDefinition>,
     ) -> std::result::Result<Self, CustomFieldError> {

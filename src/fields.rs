@@ -94,62 +94,133 @@ impl EnumFilterValue for VehicleMultiple {}
 pub mod accessory {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Accessory>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `AccessoryResponse.id`).
     pub const ID: Field<Accessory, Id<Accessory>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `AccessoryResponse.created`).
     pub const CREATED: Field<Accessory, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `AccessoryResponse.modified`).
     pub const MODIFIED: Field<Accessory, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `AccessoryResponse.creator`).
     pub const CREATOR: Field<Accessory, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
     /// `parent_equipment`: The equipment that this item is an accessory of.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent_equipment`, documented type `string` (OpenAPI `AccessoryResponse.parent_equipment`).
     pub const PARENT_EQUIPMENT: Field<Accessory, Id<Equipment>> = Field {
         name: "parent_equipment",
         types: PhantomData,
     };
     /// `equipment`: The equipment that is represented by this accessory.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `AccessoryResponse.equipment`).
     pub const EQUIPMENT: Field<Accessory, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `integer` (OpenAPI `AccessoryResponse.quantity`).
     pub const QUANTITY: Field<Accessory, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
     /// `automatic`: Automatically add the accessory as soon as the equipment is added to the project.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `automatic`, documented type `boolean` (OpenAPI `AccessoryResponse.automatic`).
     pub const AUTOMATIC: Field<Accessory, bool> = Field {
         name: "automatic",
         types: PhantomData,
     };
     /// `skip`: Do not add again if this accessory is already present in the project.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `skip`, documented type `boolean` (OpenAPI `AccessoryResponse.skip`).
     pub const SKIP: Field<Accessory, bool> = Field {
         name: "skip",
         types: PhantomData,
     };
     /// `is_free`: Adding the accessory to the project with zero as price.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_free`, documented type `boolean` (OpenAPI `AccessoryResponse.is_free`).
     pub const IS_FREE: Field<Accessory, bool> = Field {
         name: "is_free",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `AccessoryResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<Accessory, i64> = Field {
         name: "order",
         types: PhantomData,
     };
     /// `add_as_new_line`: The accessory is always added as a new line in the project as opposed to merging with the same accessory.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `add_as_new_line`, documented type `boolean` (OpenAPI `AccessoryResponse.add_as_new_line`).
     pub const ADD_AS_NEW_LINE: Field<Accessory, bool> = Field {
         name: "add_as_new_line",
         types: PhantomData,
@@ -160,37 +231,79 @@ pub mod accessory {
 pub mod actual_content {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ActualContent>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ActualContentResponse.id`).
     pub const ID: Field<ActualContent, Id<ActualContent>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ActualContentResponse.created`).
     pub const CREATED: Field<ActualContent, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ActualContentResponse.modified`).
     pub const MODIFIED: Field<ActualContent, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ActualContentResponse.creator`).
     pub const CREATOR: Field<ActualContent, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `ActualContentResponse.equipment`).
     pub const EQUIPMENT: Field<ActualContent, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `serial`: Rentman field `serial`.
+    /// `serial`: Value of `serial`.
+    ///
+    /// Rust value: `Id<SerialNumber>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `serial`, documented type `string` (OpenAPI `ActualContentResponse.serial`).
     pub const SERIAL: Field<ActualContent, Id<SerialNumber>> = Field {
         name: "serial",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `string` (OpenAPI `ActualContentResponse.quantity`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const QUANTITY: Field<ActualContent, i64> = Field {
         name: "quantity",
         types: PhantomData,
@@ -201,32 +314,68 @@ pub mod actual_content {
 pub mod alternative {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Alternative>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `AlternativeResponse.id`).
     pub const ID: Field<Alternative, Id<Alternative>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `AlternativeResponse.created`).
     pub const CREATED: Field<Alternative, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `AlternativeResponse.modified`).
     pub const MODIFIED: Field<Alternative, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `AlternativeResponse.creator`).
     pub const CREATOR: Field<Alternative, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `AlternativeResponse.equipment`).
     pub const EQUIPMENT: Field<Alternative, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `alternative`: Rentman field `alternative`.
+    /// `alternative`: Value of `alternative`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `alternative`, documented type `string` (OpenAPI `AlternativeResponse.alternative`).
     pub const ALTERNATIVE: Field<Alternative, Id<Equipment>> = Field {
         name: "alternative",
         types: PhantomData,
@@ -237,93 +386,193 @@ pub mod alternative {
 pub mod appointment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Appointment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `AppointmentResponse.id`).
     pub const ID: Field<Appointment, Id<Appointment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `AppointmentResponse.created`).
     pub const CREATED: Field<Appointment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `AppointmentResponse.modified`).
     pub const MODIFIED: Field<Appointment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `AppointmentResponse.creator`).
     pub const CREATOR: Field<Appointment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `AppointmentResponse.name`).
     pub const NAME: Field<Appointment, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `start`: Rentman field `start`.
+    /// `start`: Value of `start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `start`, documented type `string` (OpenAPI `AppointmentResponse.start`).
     pub const START: Field<Appointment, DateTime<FixedOffset>> = Field {
         name: "start",
         types: PhantomData,
     };
-    /// `end`: Rentman field `end`.
+    /// `end`: Value of `end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `end`, documented type `string` (OpenAPI `AppointmentResponse.end`).
     pub const END: Field<Appointment, DateTime<FixedOffset>> = Field {
         name: "end",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `AppointmentResponse.color`).
     pub const COLOR: Field<Appointment, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `location`: Rentman field `location`.
+    /// `location`: Value of `location`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location`, documented type `string` (OpenAPI `AppointmentResponse.location`).
     pub const LOCATION: Field<Appointment, String> = Field {
         name: "location",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `AppointmentResponse.remark`).
     pub const REMARK: Field<Appointment, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `is_public`: Rentman field `is_public`.
+    /// `is_public`: Value of `is_public`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_public`, documented type `boolean` (OpenAPI `AppointmentResponse.is_public`).
     pub const IS_PUBLIC: Field<Appointment, bool> = Field {
         name: "is_public",
         types: PhantomData,
     };
     /// `is_plannable`: If yes, employees can be scheduled during this appointment.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_plannable`, documented type `boolean` (OpenAPI `AppointmentResponse.is_plannable`).
     pub const IS_PLANNABLE: Field<Appointment, bool> = Field {
         name: "is_plannable",
         types: PhantomData,
     };
     /// `recurrence_interval_unit`: Period between each recurrence. E.g. every x day/week/month/year.
+    ///
+    /// Rust value: `AppointmentRecurrenceIntervalUnit`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`AppointmentRecurrenceIntervalUnit`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval_unit`, documented type `string` (OpenAPI `AppointmentResponse.recurrence_interval_unit`).
     pub const RECURRENCE_INTERVAL_UNIT: Field<Appointment, AppointmentRecurrenceIntervalUnit> =
         Field {
             name: "recurrence_interval_unit",
             types: PhantomData,
         };
     /// `recurrence_enddate`: Date the recurrence ends.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_enddate`, documented type `string` (OpenAPI `AppointmentResponse.recurrence_enddate`).
     pub const RECURRENCE_ENDDATE: Field<Appointment, String> = Field {
         name: "recurrence_enddate",
         types: PhantomData,
     };
     /// `recurrence_interval`: Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval`, documented type `integer` (OpenAPI `AppointmentResponse.recurrence_interval`).
     pub const RECURRENCE_INTERVAL: Field<Appointment, i64> = Field {
         name: "recurrence_interval",
         types: PhantomData,
     };
     /// `recurrence_group`: Identification which recurrences belong together.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_group`, documented type `integer` (OpenAPI `AppointmentResponse.recurrence_group`).
     pub const RECURRENCE_GROUP: Field<Appointment, i64> = Field {
         name: "recurrence_group",
         types: PhantomData,
     };
-    /// `synchronization_id`: Rentman field `synchronization_id`.
+    /// `synchronization_id`: Value of `synchronization_id`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `synchronization_id`, documented type `string` (OpenAPI `AppointmentResponse.synchronization_id`).
     pub const SYNCHRONIZATION_ID: Field<Appointment, String> = Field {
         name: "synchronization_id",
         types: PhantomData,
     };
-    /// `synchronisation_uri`: Rentman field `synchronisation_uri`.
+    /// `synchronisation_uri`: Value of `synchronisation_uri`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `synchronisation_uri`, documented type `string` (OpenAPI `AppointmentResponse.synchronisation_uri`).
     pub const SYNCHRONISATION_URI: Field<Appointment, String> = Field {
         name: "synchronisation_uri",
         types: PhantomData,
@@ -334,32 +583,68 @@ pub mod appointment {
 pub mod appointment_crew {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<AppointmentCrew>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `AppointmentCrewResponse.id`).
     pub const ID: Field<AppointmentCrew, Id<AppointmentCrew>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `AppointmentCrewResponse.created`).
     pub const CREATED: Field<AppointmentCrew, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `AppointmentCrewResponse.modified`).
     pub const MODIFIED: Field<AppointmentCrew, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `AppointmentCrewResponse.creator`).
     pub const CREATOR: Field<AppointmentCrew, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `appointment`: Rentman field `appointment`.
+    /// `appointment`: Value of `appointment`.
+    ///
+    /// Rust value: `Id<Appointment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `appointment`, documented type `string` (OpenAPI `AppointmentCrewResponse.appointment`).
     pub const APPOINTMENT: Field<AppointmentCrew, Id<Appointment>> = Field {
         name: "appointment",
         types: PhantomData,
     };
-    /// `crew`: Rentman field `crew`.
+    /// `crew`: Value of `crew`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crew`, documented type `string` (OpenAPI `AppointmentCrewResponse.crew`).
     pub const CREW: Field<AppointmentCrew, Id<Crew>> = Field {
         name: "crew",
         types: PhantomData,
@@ -370,347 +655,721 @@ pub mod appointment_crew {
 pub mod contact {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ContactResponse.id`).
     pub const ID: Field<Contact, Id<Contact>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ContactResponse.created`).
     pub const CREATED: Field<Contact, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ContactResponse.modified`).
     pub const MODIFIED: Field<Contact, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ContactResponse.creator`).
     pub const CREATOR: Field<Contact, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `folder`: Rentman field `folder`.
+    /// `folder`: Value of `folder`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `folder`, documented type `string` (OpenAPI `ContactResponse.folder`).
     pub const FOLDER: Field<Contact, Id<Folder>> = Field {
         name: "folder",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `ContactType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ContactType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `ContactResponse.type`).
     pub const TYPE: Field<Contact, ContactType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `ext_name_line`: Rentman field `ext_name_line`.
+    /// `ext_name_line`: Value of `ext_name_line`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ext_name_line`, documented type `string` (OpenAPI `ContactResponse.ext_name_line`).
     pub const EXT_NAME_LINE: Field<Contact, String> = Field {
         name: "ext_name_line",
         types: PhantomData,
     };
-    /// `firstname`: Rentman field `firstname`.
+    /// `firstname`: Value of `firstname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `firstname`, documented type `string` (OpenAPI `ContactResponse.firstname`).
     pub const FIRSTNAME: Field<Contact, String> = Field {
         name: "firstname",
         types: PhantomData,
     };
     /// `distance`: Distance from warehouse to visiting address.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `distance`, documented type `number` (OpenAPI `ContactResponse.distance`).
     pub const DISTANCE: Field<Contact, Decimal> = Field {
         name: "distance",
         types: PhantomData,
     };
     /// `travel_time`: Travel time (in minutes) from warehouse to visiting address.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `travel_time`, documented type `number` (OpenAPI `ContactResponse.travel_time`).
     pub const TRAVEL_TIME: Field<Contact, Decimal> = Field {
         name: "travel_time",
         types: PhantomData,
     };
-    /// `surfix`: Rentman field `surfix`.
+    /// `surfix`: Value of `surfix`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `surfix`, documented type `string` (OpenAPI `ContactResponse.surfix`).
     pub const SURFIX: Field<Contact, String> = Field {
         name: "surfix",
         types: PhantomData,
     };
-    /// `surname`: Rentman field `surname`.
+    /// `surname`: Value of `surname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `surname`, documented type `string` (OpenAPI `ContactResponse.surname`).
     pub const SURNAME: Field<Contact, String> = Field {
         name: "surname",
         types: PhantomData,
     };
-    /// `longitude`: Rentman field `longitude`.
+    /// `longitude`: Value of `longitude`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `longitude`, documented type `number` (OpenAPI `ContactResponse.longitude`).
     pub const LONGITUDE: Field<Contact, Decimal> = Field {
         name: "longitude",
         types: PhantomData,
     };
-    /// `latitude`: Rentman field `latitude`.
+    /// `latitude`: Value of `latitude`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `latitude`, documented type `number` (OpenAPI `ContactResponse.latitude`).
     pub const LATITUDE: Field<Contact, Decimal> = Field {
         name: "latitude",
         types: PhantomData,
     };
     /// `code`: Automatically generated if left empty.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `code`, documented type `string` (OpenAPI `ContactResponse.code`).
     pub const CODE: Field<Contact, String> = Field {
         name: "code",
         types: PhantomData,
     };
     /// `accounting_code`: External identifier used for integrations with accounting software.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `accounting_code`, documented type `string` (OpenAPI `ContactResponse.accounting_code`).
     pub const ACCOUNTING_CODE: Field<Contact, String> = Field {
         name: "accounting_code",
         types: PhantomData,
     };
     /// `vendor_accounting_code`: External identifier used for integrations with accounting software.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `vendor_accounting_code`, documented type `string` (OpenAPI `ContactResponse.vendor_accounting_code`).
     pub const VENDOR_ACCOUNTING_CODE: Field<Contact, String> = Field {
         name: "vendor_accounting_code",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ContactResponse.name`).
     pub const NAME: Field<Contact, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `gender`: Rentman field `gender`.
+    /// `gender`: Value of `gender`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `gender`, documented type `string` (OpenAPI `ContactResponse.gender`).
     pub const GENDER: Field<Contact, String> = Field {
         name: "gender",
         types: PhantomData,
     };
-    /// `mailing_city`: Rentman field `mailing_city`.
+    /// `mailing_city`: Value of `mailing_city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_city`, documented type `string` (OpenAPI `ContactResponse.mailing_city`).
     pub const MAILING_CITY: Field<Contact, String> = Field {
         name: "mailing_city",
         types: PhantomData,
     };
-    /// `mailing_street`: Rentman field `mailing_street`.
+    /// `mailing_street`: Value of `mailing_street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_street`, documented type `string` (OpenAPI `ContactResponse.mailing_street`).
     pub const MAILING_STREET: Field<Contact, String> = Field {
         name: "mailing_street",
         types: PhantomData,
     };
-    /// `mailing_number`: Rentman field `mailing_number`.
+    /// `mailing_number`: Value of `mailing_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_number`, documented type `string` (OpenAPI `ContactResponse.mailing_number`).
     pub const MAILING_NUMBER: Field<Contact, String> = Field {
         name: "mailing_number",
         types: PhantomData,
     };
-    /// `mailing_unit_number`: Rentman field `mailing_unit_number`.
+    /// `mailing_unit_number`: Value of `mailing_unit_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_unit_number`, documented type `string` (OpenAPI `ContactResponse.mailing_unit_number`).
     pub const MAILING_UNIT_NUMBER: Field<Contact, String> = Field {
         name: "mailing_unit_number",
         types: PhantomData,
     };
-    /// `mailing_district`: Rentman field `mailing_district`.
+    /// `mailing_district`: Value of `mailing_district`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_district`, documented type `string` (OpenAPI `ContactResponse.mailing_district`).
     pub const MAILING_DISTRICT: Field<Contact, String> = Field {
         name: "mailing_district",
         types: PhantomData,
     };
-    /// `mailing_extra_address_line`: Rentman field `mailing_extra_address_line`.
+    /// `mailing_extra_address_line`: Value of `mailing_extra_address_line`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_extra_address_line`, documented type `string` (OpenAPI `ContactResponse.mailing_extra_address_line`).
     pub const MAILING_EXTRA_ADDRESS_LINE: Field<Contact, String> = Field {
         name: "mailing_extra_address_line",
         types: PhantomData,
     };
-    /// `mailing_postalcode`: Rentman field `mailing_postalcode`.
+    /// `mailing_postalcode`: Value of `mailing_postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_postalcode`, documented type `string` (OpenAPI `ContactResponse.mailing_postalcode`).
     pub const MAILING_POSTALCODE: Field<Contact, String> = Field {
         name: "mailing_postalcode",
         types: PhantomData,
     };
-    /// `mailing_state`: Rentman field `mailing_state`.
+    /// `mailing_state`: Value of `mailing_state`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_state`, documented type `string` (OpenAPI `ContactResponse.mailing_state`).
     pub const MAILING_STATE: Field<Contact, String> = Field {
         name: "mailing_state",
         types: PhantomData,
     };
-    /// `mailing_country`: Rentman field `mailing_country`.
+    /// `mailing_country`: Value of `mailing_country`.
+    ///
+    /// Rust value: `ContactMailingCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ContactMailingCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mailing_country`, documented type `string` (OpenAPI `ContactResponse.mailing_country`).
     pub const MAILING_COUNTRY: Field<Contact, ContactMailingCountry> = Field {
         name: "mailing_country",
         types: PhantomData,
     };
-    /// `visit_city`: Rentman field `visit_city`.
+    /// `visit_city`: Value of `visit_city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_city`, documented type `string` (OpenAPI `ContactResponse.visit_city`).
     pub const VISIT_CITY: Field<Contact, String> = Field {
         name: "visit_city",
         types: PhantomData,
     };
-    /// `visit_street`: Rentman field `visit_street`.
+    /// `visit_street`: Value of `visit_street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_street`, documented type `string` (OpenAPI `ContactResponse.visit_street`).
     pub const VISIT_STREET: Field<Contact, String> = Field {
         name: "visit_street",
         types: PhantomData,
     };
-    /// `visit_number`: Rentman field `visit_number`.
+    /// `visit_number`: Value of `visit_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_number`, documented type `string` (OpenAPI `ContactResponse.visit_number`).
     pub const VISIT_NUMBER: Field<Contact, String> = Field {
         name: "visit_number",
         types: PhantomData,
     };
-    /// `visit_unit_number`: Rentman field `visit_unit_number`.
+    /// `visit_unit_number`: Value of `visit_unit_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_unit_number`, documented type `string` (OpenAPI `ContactResponse.visit_unit_number`).
     pub const VISIT_UNIT_NUMBER: Field<Contact, String> = Field {
         name: "visit_unit_number",
         types: PhantomData,
     };
-    /// `visit_district`: Rentman field `visit_district`.
+    /// `visit_district`: Value of `visit_district`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_district`, documented type `string` (OpenAPI `ContactResponse.visit_district`).
     pub const VISIT_DISTRICT: Field<Contact, String> = Field {
         name: "visit_district",
         types: PhantomData,
     };
-    /// `visit_extra_address_line`: Rentman field `visit_extra_address_line`.
+    /// `visit_extra_address_line`: Value of `visit_extra_address_line`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_extra_address_line`, documented type `string` (OpenAPI `ContactResponse.visit_extra_address_line`).
     pub const VISIT_EXTRA_ADDRESS_LINE: Field<Contact, String> = Field {
         name: "visit_extra_address_line",
         types: PhantomData,
     };
-    /// `visit_postalcode`: Rentman field `visit_postalcode`.
+    /// `visit_postalcode`: Value of `visit_postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_postalcode`, documented type `string` (OpenAPI `ContactResponse.visit_postalcode`).
     pub const VISIT_POSTALCODE: Field<Contact, String> = Field {
         name: "visit_postalcode",
         types: PhantomData,
     };
-    /// `visit_state`: Rentman field `visit_state`.
+    /// `visit_state`: Value of `visit_state`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visit_state`, documented type `string` (OpenAPI `ContactResponse.visit_state`).
     pub const VISIT_STATE: Field<Contact, String> = Field {
         name: "visit_state",
         types: PhantomData,
     };
-    /// `country`: Rentman field `country`.
+    /// `country`: Value of `country`.
+    ///
+    /// Rust value: `ContactCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ContactCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `country`, documented type `string` (OpenAPI `ContactResponse.country`).
     pub const COUNTRY: Field<Contact, ContactCountry> = Field {
         name: "country",
         types: PhantomData,
     };
-    /// `invoice_city`: Rentman field `invoice_city`.
+    /// `invoice_city`: Value of `invoice_city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_city`, documented type `string` (OpenAPI `ContactResponse.invoice_city`).
     pub const INVOICE_CITY: Field<Contact, String> = Field {
         name: "invoice_city",
         types: PhantomData,
     };
-    /// `invoice_street`: Rentman field `invoice_street`.
+    /// `invoice_street`: Value of `invoice_street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_street`, documented type `string` (OpenAPI `ContactResponse.invoice_street`).
     pub const INVOICE_STREET: Field<Contact, String> = Field {
         name: "invoice_street",
         types: PhantomData,
     };
-    /// `invoice_number`: Rentman field `invoice_number`.
+    /// `invoice_number`: Value of `invoice_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_number`, documented type `string` (OpenAPI `ContactResponse.invoice_number`).
     pub const INVOICE_NUMBER: Field<Contact, String> = Field {
         name: "invoice_number",
         types: PhantomData,
     };
-    /// `invoice_unit_number`: Rentman field `invoice_unit_number`.
+    /// `invoice_unit_number`: Value of `invoice_unit_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_unit_number`, documented type `string` (OpenAPI `ContactResponse.invoice_unit_number`).
     pub const INVOICE_UNIT_NUMBER: Field<Contact, String> = Field {
         name: "invoice_unit_number",
         types: PhantomData,
     };
-    /// `invoice_district`: Rentman field `invoice_district`.
+    /// `invoice_district`: Value of `invoice_district`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_district`, documented type `string` (OpenAPI `ContactResponse.invoice_district`).
     pub const INVOICE_DISTRICT: Field<Contact, String> = Field {
         name: "invoice_district",
         types: PhantomData,
     };
-    /// `invoice_extra_address_line`: Rentman field `invoice_extra_address_line`.
+    /// `invoice_extra_address_line`: Value of `invoice_extra_address_line`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_extra_address_line`, documented type `string` (OpenAPI `ContactResponse.invoice_extra_address_line`).
     pub const INVOICE_EXTRA_ADDRESS_LINE: Field<Contact, String> = Field {
         name: "invoice_extra_address_line",
         types: PhantomData,
     };
-    /// `invoice_postalcode`: Rentman field `invoice_postalcode`.
+    /// `invoice_postalcode`: Value of `invoice_postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_postalcode`, documented type `string` (OpenAPI `ContactResponse.invoice_postalcode`).
     pub const INVOICE_POSTALCODE: Field<Contact, String> = Field {
         name: "invoice_postalcode",
         types: PhantomData,
     };
-    /// `invoice_state`: Rentman field `invoice_state`.
+    /// `invoice_state`: Value of `invoice_state`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_state`, documented type `string` (OpenAPI `ContactResponse.invoice_state`).
     pub const INVOICE_STATE: Field<Contact, String> = Field {
         name: "invoice_state",
         types: PhantomData,
     };
-    /// `invoice_country`: Rentman field `invoice_country`.
+    /// `invoice_country`: Value of `invoice_country`.
+    ///
+    /// Rust value: `ContactInvoiceCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ContactInvoiceCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_country`, documented type `string` (OpenAPI `ContactResponse.invoice_country`).
     pub const INVOICE_COUNTRY: Field<Contact, ContactInvoiceCountry> = Field {
         name: "invoice_country",
         types: PhantomData,
     };
-    /// `phone_1`: Rentman field `phone_1`.
+    /// `phone_1`: Value of `phone_1`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `phone_1`, documented type `string` (OpenAPI `ContactResponse.phone_1`).
     pub const PHONE_1: Field<Contact, String> = Field {
         name: "phone_1",
         types: PhantomData,
     };
-    /// `phone_2`: Rentman field `phone_2`.
+    /// `phone_2`: Value of `phone_2`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `phone_2`, documented type `string` (OpenAPI `ContactResponse.phone_2`).
     pub const PHONE_2: Field<Contact, String> = Field {
         name: "phone_2",
         types: PhantomData,
     };
-    /// `email_1`: Rentman field `email_1`.
+    /// `email_1`: Value of `email_1`.
+    ///
+    /// Rust value: `EmailAddress`.
+    /// An email string using [`EmailAddress`]; empty addresses are allowed.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `email_1`, documented type `string` (OpenAPI `ContactResponse.email_1`).
     pub const EMAIL_1: Field<Contact, EmailAddress> = Field {
         name: "email_1",
         types: PhantomData,
     };
-    /// `email_2`: Rentman field `email_2`.
+    /// `email_2`: Value of `email_2`.
+    ///
+    /// Rust value: `EmailAddress`.
+    /// An email string using [`EmailAddress`]; empty addresses are allowed.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `email_2`, documented type `string` (OpenAPI `ContactResponse.email_2`).
     pub const EMAIL_2: Field<Contact, EmailAddress> = Field {
         name: "email_2",
         types: PhantomData,
     };
-    /// `website`: Rentman field `website`.
+    /// `website`: Value of `website`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `website`, documented type `string` (OpenAPI `ContactResponse.website`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const WEBSITE: Field<Contact, String> = Field {
         name: "website",
         types: PhantomData,
     };
-    /// `VAT_code`: Rentman field `VAT_code`.
+    /// `VAT_code`: Value of `VAT_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `VAT_code`, documented type `string` (OpenAPI `ContactResponse.VAT_code`).
     pub const VAT_CODE: Field<Contact, String> = Field {
         name: "VAT_code",
         types: PhantomData,
     };
     /// `fiscal_code`: This number is used in file exports of invoices.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `fiscal_code`, documented type `string` (OpenAPI `ContactResponse.fiscal_code`).
     pub const FISCAL_CODE: Field<Contact, String> = Field {
         name: "fiscal_code",
         types: PhantomData,
     };
-    /// `commerce_code`: Rentman field `commerce_code`.
+    /// `commerce_code`: Value of `commerce_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `commerce_code`, documented type `string` (OpenAPI `ContactResponse.commerce_code`).
     pub const COMMERCE_CODE: Field<Contact, String> = Field {
         name: "commerce_code",
         types: PhantomData,
     };
-    /// `purchase_number`: Rentman field `purchase_number`.
+    /// `purchase_number`: Value of `purchase_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchase_number`, documented type `string` (OpenAPI `ContactResponse.purchase_number`).
     pub const PURCHASE_NUMBER: Field<Contact, String> = Field {
         name: "purchase_number",
         types: PhantomData,
     };
-    /// `bic`: Rentman field `bic`.
+    /// `bic`: Value of `bic`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `bic`, documented type `string` (OpenAPI `ContactResponse.bic`).
     pub const BIC: Field<Contact, String> = Field {
         name: "bic",
         types: PhantomData,
     };
-    /// `bank_account`: Rentman field `bank_account`.
+    /// `bank_account`: Value of `bank_account`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `bank_account`, documented type `string` (OpenAPI `ContactResponse.bank_account`).
     pub const BANK_ACCOUNT: Field<Contact, String> = Field {
         name: "bank_account",
         types: PhantomData,
     };
     /// `default_person`: This contact person is automatically selected if you choose this contact in a project or subrental.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `default_person`, documented type `string` (OpenAPI `ContactResponse.default_person`).
     pub const DEFAULT_PERSON: Field<Contact, Id<ContactPerson>> = Field {
         name: "default_person",
         types: PhantomData,
     };
     /// `admin_contactperson`: This contact person is automatically selected when creating invoices.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `admin_contactperson`, documented type `string` (OpenAPI `ContactResponse.admin_contactperson`).
     pub const ADMIN_CONTACTPERSON: Field<Contact, Id<ContactPerson>> = Field {
         name: "admin_contactperson",
         types: PhantomData,
     };
     /// `discount_crew`: Discount applied to the 'crew' category upon selecting this contact as a client in a project.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_crew`, documented type `number` (OpenAPI `ContactResponse.discount_crew`).
     pub const DISCOUNT_CREW: Field<Contact, Decimal> = Field {
         name: "discount_crew",
         types: PhantomData,
     };
     /// `discount_transport`: Discount applied to the 'transport' category upon selecting this contact as a client in a project.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_transport`, documented type `number` (OpenAPI `ContactResponse.discount_transport`).
     pub const DISCOUNT_TRANSPORT: Field<Contact, Decimal> = Field {
         name: "discount_transport",
         types: PhantomData,
     };
     /// `discount_rental`: Discount applied to the 'rental' category upon selecting this contact as a client in a project.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_rental`, documented type `number` (OpenAPI `ContactResponse.discount_rental`).
     pub const DISCOUNT_RENTAL: Field<Contact, Decimal> = Field {
         name: "discount_rental",
         types: PhantomData,
     };
     /// `discount_sale`: Discount applied to the 'sales' category upon selecting this contact as a client in a project.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_sale`, documented type `number` (OpenAPI `ContactResponse.discount_sale`).
     pub const DISCOUNT_SALE: Field<Contact, Decimal> = Field {
         name: "discount_sale",
         types: PhantomData,
     };
     /// `discount_total`: Discount applied to the total (sub)project upon selecting this contact as a client in a project.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_total`, documented type `number` (OpenAPI `ContactResponse.discount_total`).
     pub const DISCOUNT_TOTAL: Field<Contact, Decimal> = Field {
         name: "discount_total",
         types: PhantomData,
     };
     /// `projectnote`: This remark is automatically added to projects upon selecting this contact as client or location.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `projectnote`, documented type `string` (OpenAPI `ContactResponse.projectnote`).
     pub const PROJECTNOTE: Field<Contact, String> = Field {
         name: "projectnote",
         types: PhantomData,
     };
     /// `projectnote_title`: This remark is automatically added to projects upon selecting this contact as client or location.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `projectnote_title`, documented type `string` (OpenAPI `ContactResponse.projectnote_title`).
     pub const PROJECTNOTE_TITLE: Field<Contact, String> = Field {
         name: "projectnote_title",
         types: PhantomData,
     };
     /// `contact_warning`: This warning is shown when this contact is selected as a client in a project.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_warning`, documented type `string` (OpenAPI `ContactResponse.contact_warning`).
     pub const CONTACT_WARNING: Field<Contact, String> = Field {
         name: "contact_warning",
         types: PhantomData,
     };
     /// `discount_subrent`: Discount applied to rental equipment upon selecting this contact as a supplier in a subrental.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_subrent`, documented type `number` (OpenAPI `ContactResponse.discount_subrent`).
     pub const DISCOUNT_SUBRENT: Field<Contact, Decimal> = Field {
         name: "discount_subrent",
         types: PhantomData,
     };
-    /// `image`: Rentman field `image`.
+    /// `image`: Value of `image`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `image`, documented type `string` (OpenAPI `ContactResponse.image`).
     pub const IMAGE: Field<Contact, Id<File>> = Field {
         name: "image",
         types: PhantomData,
@@ -721,92 +1380,190 @@ pub mod contact {
 pub mod contact_person {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ContactPersonResponse.id`).
     pub const ID: Field<ContactPerson, Id<ContactPerson>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ContactPersonResponse.created`).
     pub const CREATED: Field<ContactPerson, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ContactPersonResponse.modified`).
     pub const MODIFIED: Field<ContactPerson, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ContactPersonResponse.creator`).
     pub const CREATOR: Field<ContactPerson, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `contact`: Rentman field `contact`.
+    /// `contact`: Value of `contact`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact`, documented type `string` (OpenAPI `ContactPersonResponse.contact`).
     pub const CONTACT: Field<ContactPerson, Id<Contact>> = Field {
         name: "contact",
         types: PhantomData,
     };
-    /// `firstname`: Rentman field `firstname`.
+    /// `firstname`: Value of `firstname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `firstname`, documented type `string` (OpenAPI `ContactPersonResponse.firstname`).
     pub const FIRSTNAME: Field<ContactPerson, String> = Field {
         name: "firstname",
         types: PhantomData,
     };
-    /// `middle_name`: Rentman field `middle_name`.
+    /// `middle_name`: Value of `middle_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `middle_name`, documented type `string` (OpenAPI `ContactPersonResponse.middle_name`).
     pub const MIDDLE_NAME: Field<ContactPerson, String> = Field {
         name: "middle_name",
         types: PhantomData,
     };
-    /// `lastname`: Rentman field `lastname`.
+    /// `lastname`: Value of `lastname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `lastname`, documented type `string` (OpenAPI `ContactPersonResponse.lastname`).
     pub const LASTNAME: Field<ContactPerson, String> = Field {
         name: "lastname",
         types: PhantomData,
     };
-    /// `function`: Rentman field `function`.
+    /// `function`: Value of `function`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `function`, documented type `string` (OpenAPI `ContactPersonResponse.function`).
     pub const FUNCTION: Field<ContactPerson, String> = Field {
         name: "function",
         types: PhantomData,
     };
-    /// `phone`: Rentman field `phone`.
+    /// `phone`: Value of `phone`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `phone`, documented type `string` (OpenAPI `ContactPersonResponse.phone`).
     pub const PHONE: Field<ContactPerson, String> = Field {
         name: "phone",
         types: PhantomData,
     };
-    /// `street`: Rentman field `street`.
+    /// `street`: Value of `street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `street`, documented type `string` (OpenAPI `ContactPersonResponse.street`).
     pub const STREET: Field<ContactPerson, String> = Field {
         name: "street",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `ContactPersonResponse.number`).
     pub const NUMBER: Field<ContactPerson, String> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `postalcode`: Rentman field `postalcode`.
+    /// `postalcode`: Value of `postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `postalcode`, documented type `string` (OpenAPI `ContactPersonResponse.postalcode`).
     pub const POSTALCODE: Field<ContactPerson, String> = Field {
         name: "postalcode",
         types: PhantomData,
     };
-    /// `city`: Rentman field `city`.
+    /// `city`: Value of `city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `city`, documented type `string` (OpenAPI `ContactPersonResponse.city`).
     pub const CITY: Field<ContactPerson, String> = Field {
         name: "city",
         types: PhantomData,
     };
-    /// `state`: Rentman field `state`.
+    /// `state`: Value of `state`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `state`, documented type `string` (OpenAPI `ContactPersonResponse.state`).
     pub const STATE: Field<ContactPerson, String> = Field {
         name: "state",
         types: PhantomData,
     };
-    /// `country`: Rentman field `country`.
+    /// `country`: Value of `country`.
+    ///
+    /// Rust value: `ContactPersonCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ContactPersonCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `country`, documented type `string` (OpenAPI `ContactPersonResponse.country`).
     pub const COUNTRY: Field<ContactPerson, ContactPersonCountry> = Field {
         name: "country",
         types: PhantomData,
     };
-    /// `mobilephone`: Rentman field `mobilephone`.
+    /// `mobilephone`: Value of `mobilephone`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mobilephone`, documented type `string` (OpenAPI `ContactPersonResponse.mobilephone`).
     pub const MOBILEPHONE: Field<ContactPerson, String> = Field {
         name: "mobilephone",
         types: PhantomData,
     };
-    /// `email`: Rentman field `email`.
+    /// `email`: Value of `email`.
+    ///
+    /// Rust value: `EmailAddress`.
+    /// An email string using [`EmailAddress`]; empty addresses are allowed.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `email`, documented type `string` (OpenAPI `ContactPersonResponse.email`).
     pub const EMAIL: Field<ContactPerson, EmailAddress> = Field {
         name: "email",
         types: PhantomData,
@@ -817,72 +1574,150 @@ pub mod contact_person {
 pub mod contract {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Contract>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ContractResponse.id`).
     pub const ID: Field<Contract, Id<Contract>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ContractResponse.created`).
     pub const CREATED: Field<Contract, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ContractResponse.modified`).
     pub const MODIFIED: Field<Contract, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ContractResponse.creator`).
     pub const CREATOR: Field<Contract, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `ContractResponse.number`).
     pub const NUMBER: Field<Contract, String> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `customer`: Rentman field `customer`.
+    /// `customer`: Value of `customer`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `customer`, documented type `string` (OpenAPI `ContractResponse.customer`).
     pub const CUSTOMER: Field<Contract, Id<Contact>> = Field {
         name: "customer",
         types: PhantomData,
     };
-    /// `contact`: Rentman field `contact`.
+    /// `contact`: Value of `contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact`, documented type `string` (OpenAPI `ContractResponse.contact`).
     pub const CONTACT: Field<Contract, Id<ContactPerson>> = Field {
         name: "contact",
         types: PhantomData,
     };
-    /// `date`: Rentman field `date`.
+    /// `date`: Value of `date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `date`, documented type `string` (OpenAPI `ContractResponse.date`).
     pub const DATE: Field<Contract, String> = Field {
         name: "date",
         types: PhantomData,
     };
     /// `expiration_date`: The date on which this quotation expires.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiration_date`, documented type `string` (OpenAPI `ContractResponse.expiration_date`).
     pub const EXPIRATION_DATE: Field<Contract, String> = Field {
         name: "expiration_date",
         types: PhantomData,
     };
-    /// `version`: Rentman field `version`.
+    /// `version`: Value of `version`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `version`, documented type `integer` (OpenAPI `ContractResponse.version`).
     pub const VERSION: Field<Contract, i64> = Field {
         name: "version",
         types: PhantomData,
     };
-    /// `subject`: Rentman field `subject`.
+    /// `subject`: Value of `subject`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subject`, documented type `string` (OpenAPI `ContractResponse.subject`).
     pub const SUBJECT: Field<Contract, String> = Field {
         name: "subject",
         types: PhantomData,
     };
-    /// `show_tax`: Rentman field `show_tax`.
+    /// `show_tax`: Value of `show_tax`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `show_tax`, documented type `boolean` (OpenAPI `ContractResponse.show_tax`).
     pub const SHOW_TAX: Field<Contract, bool> = Field {
         name: "show_tax",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `ContractResponse.project`).
     pub const PROJECT: Field<Contract, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `filename`: Rentman field `filename`.
+    /// `filename`: Value of `filename`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `filename`, documented type `string` (OpenAPI `ContractResponse.filename`).
     pub const FILENAME: Field<Contract, String> = Field {
         name: "filename",
         types: PhantomData,
@@ -893,182 +1728,374 @@ pub mod contract {
 pub mod crew {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `CrewResponse.id`).
     pub const ID: Field<Crew, Id<Crew>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `CrewResponse.created`).
     pub const CREATED: Field<Crew, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `CrewResponse.modified`).
     pub const MODIFIED: Field<Crew, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `CrewResponse.creator`).
     pub const CREATOR: Field<Crew, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `folder`: Rentman field `folder`.
+    /// `folder`: Value of `folder`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `folder`, documented type `string` (OpenAPI `CrewResponse.folder`).
     pub const FOLDER: Field<Crew, Id<Folder>> = Field {
         name: "folder",
         types: PhantomData,
     };
-    /// `street`: Rentman field `street`.
+    /// `street`: Value of `street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `street`, documented type `string` (OpenAPI `CrewResponse.street`).
     pub const STREET: Field<Crew, String> = Field {
         name: "street",
         types: PhantomData,
     };
-    /// `housenumber`: Rentman field `housenumber`.
+    /// `housenumber`: Value of `housenumber`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `housenumber`, documented type `string` (OpenAPI `CrewResponse.housenumber`).
     pub const HOUSENUMBER: Field<Crew, String> = Field {
         name: "housenumber",
         types: PhantomData,
     };
-    /// `unit_number`: Rentman field `unit_number`.
+    /// `unit_number`: Value of `unit_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit_number`, documented type `string` (OpenAPI `CrewResponse.unit_number`).
     pub const UNIT_NUMBER: Field<Crew, String> = Field {
         name: "unit_number",
         types: PhantomData,
     };
-    /// `district`: Rentman field `district`.
+    /// `district`: Value of `district`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `district`, documented type `string` (OpenAPI `CrewResponse.district`).
     pub const DISTRICT: Field<Crew, String> = Field {
         name: "district",
         types: PhantomData,
     };
-    /// `city`: Rentman field `city`.
+    /// `city`: Value of `city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `city`, documented type `string` (OpenAPI `CrewResponse.city`).
     pub const CITY: Field<Crew, String> = Field {
         name: "city",
         types: PhantomData,
     };
-    /// `postal_code`: Rentman field `postal_code`.
+    /// `postal_code`: Value of `postal_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `postal_code`, documented type `string` (OpenAPI `CrewResponse.postal_code`).
     pub const POSTAL_CODE: Field<Crew, String> = Field {
         name: "postal_code",
         types: PhantomData,
     };
-    /// `addressline2`: Rentman field `addressline2`.
+    /// `addressline2`: Value of `addressline2`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `addressline2`, documented type `string` (OpenAPI `CrewResponse.addressline2`).
     pub const ADDRESSLINE2: Field<Crew, String> = Field {
         name: "addressline2",
         types: PhantomData,
     };
-    /// `extraaddressline`: Rentman field `extraaddressline`.
+    /// `extraaddressline`: Value of `extraaddressline`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `extraaddressline`, documented type `string` (OpenAPI `CrewResponse.extraaddressline`).
     pub const EXTRAADDRESSLINE: Field<Crew, String> = Field {
         name: "extraaddressline",
         types: PhantomData,
     };
-    /// `state`: Rentman field `state`.
+    /// `state`: Value of `state`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `state`, documented type `string` (OpenAPI `CrewResponse.state`).
     pub const STATE: Field<Crew, String> = Field {
         name: "state",
         types: PhantomData,
     };
-    /// `country`: Rentman field `country`.
+    /// `country`: Value of `country`.
+    ///
+    /// Rust value: `CrewCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`CrewCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `country`, documented type `string` (OpenAPI `CrewResponse.country`).
     pub const COUNTRY: Field<Crew, CrewCountry> = Field {
         name: "country",
         types: PhantomData,
     };
-    /// `birthdate`: Rentman field `birthdate`.
+    /// `birthdate`: Value of `birthdate`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `birthdate`, documented type `string` (OpenAPI `CrewResponse.birthdate`).
     pub const BIRTHDATE: Field<Crew, String> = Field {
         name: "birthdate",
         types: PhantomData,
     };
-    /// `passport_number`: Rentman field `passport_number`.
+    /// `passport_number`: Value of `passport_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `passport_number`, documented type `string` (OpenAPI `CrewResponse.passport_number`).
     pub const PASSPORT_NUMBER: Field<Crew, String> = Field {
         name: "passport_number",
         types: PhantomData,
     };
-    /// `emergency_contact`: Rentman field `emergency_contact`.
+    /// `emergency_contact`: Value of `emergency_contact`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `emergency_contact`, documented type `string` (OpenAPI `CrewResponse.emergency_contact`).
     pub const EMERGENCY_CONTACT: Field<Crew, String> = Field {
         name: "emergency_contact",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `CrewResponse.remark`).
     pub const REMARK: Field<Crew, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `driving_license`: Rentman field `driving_license`.
+    /// `driving_license`: Value of `driving_license`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `driving_license`, documented type `string` (OpenAPI `CrewResponse.driving_license`).
     pub const DRIVING_LICENSE: Field<Crew, String> = Field {
         name: "driving_license",
         types: PhantomData,
     };
-    /// `contract`: Rentman field `contract`.
+    /// `contract`: Value of `contract`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contract`, documented type `string` (OpenAPI `CrewResponse.contract`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const CONTRACT: Field<Crew, i64> = Field {
         name: "contract",
         types: PhantomData,
     };
-    /// `bank`: Rentman field `bank`.
+    /// `bank`: Value of `bank`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `bank`, documented type `string` (OpenAPI `CrewResponse.bank`).
     pub const BANK: Field<Crew, String> = Field {
         name: "bank",
         types: PhantomData,
     };
-    /// `contract_date`: Rentman field `contract_date`.
+    /// `contract_date`: Value of `contract_date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contract_date`, documented type `string` (OpenAPI `CrewResponse.contract_date`).
     pub const CONTRACT_DATE: Field<Crew, String> = Field {
         name: "contract_date",
         types: PhantomData,
     };
-    /// `company_name`: Rentman field `company_name`.
+    /// `company_name`: Value of `company_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `company_name`, documented type `string` (OpenAPI `CrewResponse.company_name`).
     pub const COMPANY_NAME: Field<Crew, String> = Field {
         name: "company_name",
         types: PhantomData,
     };
-    /// `vat_code`: Rentman field `vat_code`.
+    /// `vat_code`: Value of `vat_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `vat_code`, documented type `string` (OpenAPI `CrewResponse.vat_code`).
     pub const VAT_CODE: Field<Crew, String> = Field {
         name: "vat_code",
         types: PhantomData,
     };
-    /// `coc_code`: Rentman field `coc_code`.
+    /// `coc_code`: Value of `coc_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `coc_code`, documented type `string` (OpenAPI `CrewResponse.coc_code`).
     pub const COC_CODE: Field<Crew, String> = Field {
         name: "coc_code",
         types: PhantomData,
     };
-    /// `firstname`: Rentman field `firstname`.
+    /// `firstname`: Value of `firstname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `firstname`, documented type `string` (OpenAPI `CrewResponse.firstname`).
     pub const FIRSTNAME: Field<Crew, String> = Field {
         name: "firstname",
         types: PhantomData,
     };
-    /// `middle_name`: Rentman field `middle_name`.
+    /// `middle_name`: Value of `middle_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `middle_name`, documented type `string` (OpenAPI `CrewResponse.middle_name`).
     pub const MIDDLE_NAME: Field<Crew, String> = Field {
         name: "middle_name",
         types: PhantomData,
     };
-    /// `lastname`: Rentman field `lastname`.
+    /// `lastname`: Value of `lastname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `lastname`, documented type `string` (OpenAPI `CrewResponse.lastname`).
     pub const LASTNAME: Field<Crew, String> = Field {
         name: "lastname",
         types: PhantomData,
     };
-    /// `email`: Rentman field `email`.
+    /// `email`: Value of `email`.
+    ///
+    /// Rust value: `EmailAddress`.
+    /// An email string using [`EmailAddress`]; empty addresses are allowed.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `email`, documented type `string` (OpenAPI `CrewResponse.email`).
     pub const EMAIL: Field<Crew, EmailAddress> = Field {
         name: "email",
         types: PhantomData,
     };
-    /// `phone`: Rentman field `phone`.
+    /// `phone`: Value of `phone`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `phone`, documented type `string` (OpenAPI `CrewResponse.phone`).
     pub const PHONE: Field<Crew, String> = Field {
         name: "phone",
         types: PhantomData,
     };
-    /// `active`: Rentman field `active`.
+    /// `active`: Value of `active`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `active`, documented type `boolean` (OpenAPI `CrewResponse.active`).
     pub const ACTIVE: Field<Crew, bool> = Field {
         name: "active",
         types: PhantomData,
     };
-    /// `avatar`: Rentman field `avatar`.
+    /// `avatar`: Value of `avatar`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `avatar`, documented type `string` (OpenAPI `CrewResponse.avatar`).
     pub const AVATAR: Field<Crew, Id<File>> = Field {
         name: "avatar",
         types: PhantomData,
     };
-    /// `vt_fullname`: Rentman field `vt_fullname`.
+    /// `vt_fullname`: Value of `vt_fullname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `vt_fullname`, documented type `string` (OpenAPI `CrewResponse.vt_fullname`).
     pub const VT_FULLNAME: Field<Crew, String> = Field {
         name: "vt_fullname",
         types: PhantomData,
     };
-    /// `default_warehouse`: Rentman field `default_warehouse`.
+    /// `default_warehouse`: Value of `default_warehouse`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `default_warehouse`, documented type `string` (OpenAPI `CrewResponse.default_warehouse`).
     pub const DEFAULT_WAREHOUSE: Field<Crew, Id<StockLocation>> = Field {
         name: "default_warehouse",
         types: PhantomData,
     };
     /// `external_reference`: Can be used for the employee ID from your accounting software.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_reference`, documented type `string` (OpenAPI `CrewResponse.external_reference`).
     pub const EXTERNAL_REFERENCE: Field<Crew, String> = Field {
         name: "external_reference",
         types: PhantomData,
@@ -1079,62 +2106,135 @@ pub mod crew {
 pub mod crew_availability {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<CrewAvailability>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `CrewAvailabilityResponse.id`).
     pub const ID: Field<CrewAvailability, Id<CrewAvailability>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `CrewAvailabilityResponse.created`).
     pub const CREATED: Field<CrewAvailability, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `CrewAvailabilityResponse.modified`).
     pub const MODIFIED: Field<CrewAvailability, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `CrewAvailabilityResponse.creator`).
     pub const CREATOR: Field<CrewAvailability, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `last_updater`: Rentman field `last_updater`.
+    /// `last_updater`: Value of `last_updater`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `last_updater`, documented type `string` (OpenAPI `CrewAvailabilityResponse.last_updater`).
     pub const LAST_UPDATER: Field<CrewAvailability, Id<Crew>> = Field {
         name: "last_updater",
         types: PhantomData,
     };
-    /// `last_updated`: Rentman field `last_updated`.
+    /// `last_updated`: Value of `last_updated`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `last_updated`, documented type `string` (OpenAPI `CrewAvailabilityResponse.last_updated`).
     pub const LAST_UPDATED: Field<CrewAvailability, DateTime<FixedOffset>> = Field {
         name: "last_updated",
         types: PhantomData,
     };
-    /// `start`: Rentman field `start`.
+    /// `start`: Value of `start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `start`, documented type `string` (OpenAPI `CrewAvailabilityResponse.start`).
     pub const START: Field<CrewAvailability, DateTime<FixedOffset>> = Field {
         name: "start",
         types: PhantomData,
     };
-    /// `end`: Rentman field `end`.
+    /// `end`: Value of `end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `end`, documented type `string` (OpenAPI `CrewAvailabilityResponse.end`).
     pub const END: Field<CrewAvailability, DateTime<FixedOffset>> = Field {
         name: "end",
         types: PhantomData,
     };
-    /// `crewmember`: Rentman field `crewmember`.
+    /// `crewmember`: Value of `crewmember`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crewmember`, documented type `string` (OpenAPI `CrewAvailabilityResponse.crewmember`).
     pub const CREWMEMBER: Field<CrewAvailability, Id<Crew>> = Field {
         name: "crewmember",
         types: PhantomData,
     };
     /// `status`: `B` - This value is returned when the crew availability status is available `N` - This value is returned when the crew availability status is unavailable `O` - This value is returned when the crew availability status is unknown .
+    ///
+    /// Rust value: `CrewAvailabilityStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`CrewAvailabilityStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `CrewAvailabilityResponse.status`).
     pub const STATUS: Field<CrewAvailability, CrewAvailabilityStatus> = Field {
         name: "status",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `CrewAvailabilityResponse.remark`).
     pub const REMARK: Field<CrewAvailability, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `recurrence_interval_unit`: Rentman field `recurrence_interval_unit`.
+    /// `recurrence_interval_unit`: Value of `recurrence_interval_unit`.
+    ///
+    /// Rust value: `CrewAvailabilityRecurrenceIntervalUnit`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`CrewAvailabilityRecurrenceIntervalUnit`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval_unit`, documented type `string` (OpenAPI `CrewAvailabilityResponse.recurrence_interval_unit`).
     pub const RECURRENCE_INTERVAL_UNIT: Field<
         CrewAvailability,
         CrewAvailabilityRecurrenceIntervalUnit,
@@ -1142,17 +2242,32 @@ pub mod crew_availability {
         name: "recurrence_interval_unit",
         types: PhantomData,
     };
-    /// `recurrence_enddate`: Rentman field `recurrence_enddate`.
+    /// `recurrence_enddate`: Value of `recurrence_enddate`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_enddate`, documented type `string` (OpenAPI `CrewAvailabilityResponse.recurrence_enddate`).
     pub const RECURRENCE_ENDDATE: Field<CrewAvailability, String> = Field {
         name: "recurrence_enddate",
         types: PhantomData,
     };
     /// `recurrence_interval`: interval in how many days/weeks/months/years the availability should reoccur.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval`, documented type `integer` (OpenAPI `CrewAvailabilityResponse.recurrence_interval`).
     pub const RECURRENCE_INTERVAL: Field<CrewAvailability, i64> = Field {
         name: "recurrence_interval",
         types: PhantomData,
     };
-    /// `recurrent_group`: Rentman field `recurrent_group`.
+    /// `recurrent_group`: Value of `recurrent_group`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrent_group`, documented type `integer` (OpenAPI `CrewAvailabilityResponse.recurrent_group`).
     pub const RECURRENT_GROUP: Field<CrewAvailability, i64> = Field {
         name: "recurrent_group",
         types: PhantomData,
@@ -1163,37 +2278,78 @@ pub mod crew_availability {
 pub mod crew_rate {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<CrewRate>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `CrewRatesResponse.id`).
     pub const ID: Field<CrewRate, Id<CrewRate>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `CrewRatesResponse.created`).
     pub const CREATED: Field<CrewRate, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `CrewRatesResponse.modified`).
     pub const MODIFIED: Field<CrewRate, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `CrewRatesResponse.creator`).
     pub const CREATOR: Field<CrewRate, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `naam`: Rentman field `naam`.
+    /// `naam`: Value of `naam`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `naam`, documented type `string` (OpenAPI `CrewRatesResponse.naam`).
     pub const NAAM: Field<CrewRate, String> = Field {
         name: "naam",
         types: PhantomData,
     };
-    /// `cost_rate`: Rentman field `cost_rate`.
+    /// `cost_rate`: Value of `cost_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_rate`, documented type `string` (OpenAPI `CrewRatesResponse.cost_rate`).
     pub const COST_RATE: Field<CrewRate, Id<Rate>> = Field {
         name: "cost_rate",
         types: PhantomData,
     };
-    /// `medewerker`: Rentman field `medewerker`.
+    /// `medewerker`: Value of `medewerker`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `medewerker`, documented type `string` (OpenAPI `CrewRatesResponse.medewerker`).
     pub const MEDEWERKER: Field<CrewRate, Id<Crew>> = Field {
         name: "medewerker",
         types: PhantomData,
@@ -1204,242 +2360,523 @@ pub mod crew_rate {
 pub mod equipment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `EquipmentResponse.id`).
     pub const ID: Field<Equipment, Id<Equipment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `EquipmentResponse.created`).
     pub const CREATED: Field<Equipment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `EquipmentResponse.modified`).
     pub const MODIFIED: Field<Equipment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `EquipmentResponse.creator`).
     pub const CREATOR: Field<Equipment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `folder`: Rentman field `folder`.
+    /// `folder`: Value of `folder`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `folder`, documented type `string` (OpenAPI `EquipmentResponse.folder`).
     pub const FOLDER: Field<Equipment, Id<Folder>> = Field {
         name: "folder",
         types: PhantomData,
     };
-    /// `code`: Rentman field `code`.
+    /// `code`: Value of `code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `code`, documented type `string` (OpenAPI `EquipmentResponse.code`).
     pub const CODE: Field<Equipment, String> = Field {
         name: "code",
         types: PhantomData,
     };
-    /// `factor_group`: Rentman field `factor_group`.
+    /// `factor_group`: Value of `factor_group`.
+    ///
+    /// Rust value: `Id<FactorGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor_group`, documented type `string` (OpenAPI `EquipmentResponse.factor_group`).
     pub const FACTOR_GROUP: Field<Equipment, Id<FactorGroup>> = Field {
         name: "factor_group",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `EquipmentResponse.name`).
     pub const NAME: Field<Equipment, String> = Field {
         name: "name",
         types: PhantomData,
     };
     /// `internal_remark`: Note on packing lists.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `internal_remark`, documented type `string` (OpenAPI `EquipmentResponse.internal_remark`).
     pub const INTERNAL_REMARK: Field<Equipment, String> = Field {
         name: "internal_remark",
         types: PhantomData,
     };
     /// `external_remark`: Note on financial documents.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_remark`, documented type `string` (OpenAPI `EquipmentResponse.external_remark`).
     pub const EXTERNAL_REMARK: Field<Equipment, String> = Field {
         name: "external_remark",
         types: PhantomData,
     };
-    /// `unit`: Rentman field `unit`.
+    /// `unit`: Value of `unit`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit`, documented type `string` (OpenAPI `EquipmentResponse.unit`).
     pub const UNIT: Field<Equipment, String> = Field {
         name: "unit",
         types: PhantomData,
     };
-    /// `in_shop`: Rentman field `in_shop`.
+    /// `in_shop`: Value of `in_shop`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_shop`, documented type `boolean` (OpenAPI `EquipmentResponse.in_shop`).
     pub const IN_SHOP: Field<Equipment, bool> = Field {
         name: "in_shop",
         types: PhantomData,
     };
     /// `surface_article`: Item with price calculation per square meter (width x height). Dimensions can be entered for each project.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `surface_article`, documented type `boolean` (OpenAPI `EquipmentResponse.surface_article`).
     pub const SURFACE_ARTICLE: Field<Equipment, bool> = Field {
         name: "surface_article",
         types: PhantomData,
     };
-    /// `shop_description_short`: Rentman field `shop_description_short`.
+    /// `shop_description_short`: Value of `shop_description_short`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_description_short`, documented type `string` (OpenAPI `EquipmentResponse.shop_description_short`).
     pub const SHOP_DESCRIPTION_SHORT: Field<Equipment, String> = Field {
         name: "shop_description_short",
         types: PhantomData,
     };
-    /// `shop_description_long`: Rentman field `shop_description_long`.
+    /// `shop_description_long`: Value of `shop_description_long`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_description_long`, documented type `string` (OpenAPI `EquipmentResponse.shop_description_long`).
     pub const SHOP_DESCRIPTION_LONG: Field<Equipment, String> = Field {
         name: "shop_description_long",
         types: PhantomData,
     };
-    /// `shop_seo_title`: Rentman field `shop_seo_title`.
+    /// `shop_seo_title`: Value of `shop_seo_title`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_seo_title`, documented type `string` (OpenAPI `EquipmentResponse.shop_seo_title`).
     pub const SHOP_SEO_TITLE: Field<Equipment, String> = Field {
         name: "shop_seo_title",
         types: PhantomData,
     };
-    /// `shop_seo_keyword`: Rentman field `shop_seo_keyword`.
+    /// `shop_seo_keyword`: Value of `shop_seo_keyword`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_seo_keyword`, documented type `string` (OpenAPI `EquipmentResponse.shop_seo_keyword`).
     pub const SHOP_SEO_KEYWORD: Field<Equipment, String> = Field {
         name: "shop_seo_keyword",
         types: PhantomData,
     };
-    /// `shop_seo_description`: Rentman field `shop_seo_description`.
+    /// `shop_seo_description`: Value of `shop_seo_description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_seo_description`, documented type `string` (OpenAPI `EquipmentResponse.shop_seo_description`).
     pub const SHOP_SEO_DESCRIPTION: Field<Equipment, String> = Field {
         name: "shop_seo_description",
         types: PhantomData,
     };
-    /// `shop_featured`: Rentman field `shop_featured`.
+    /// `shop_featured`: Value of `shop_featured`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `shop_featured`, documented type `boolean` (OpenAPI `EquipmentResponse.shop_featured`).
     pub const SHOP_FEATURED: Field<Equipment, bool> = Field {
         name: "shop_featured",
         types: PhantomData,
     };
-    /// `price`: Rentman field `price`.
+    /// `price`: Value of `price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price`, documented type `number` (OpenAPI `EquipmentResponse.price`).
     pub const PRICE: Field<Equipment, Decimal> = Field {
         name: "price",
         types: PhantomData,
     };
-    /// `subrental_costs`: Rentman field `subrental_costs`.
+    /// `subrental_costs`: Value of `subrental_costs`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subrental_costs`, documented type `number` (OpenAPI `EquipmentResponse.subrental_costs`).
     pub const SUBRENTAL_COSTS: Field<Equipment, Decimal> = Field {
         name: "subrental_costs",
         types: PhantomData,
     };
-    /// `critical_stock_level`: Rentman field `critical_stock_level`.
+    /// `critical_stock_level`: Value of `critical_stock_level`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `critical_stock_level`, documented type `integer` (OpenAPI `EquipmentResponse.critical_stock_level`).
     pub const CRITICAL_STOCK_LEVEL: Field<Equipment, i64> = Field {
         name: "critical_stock_level",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `EquipmentType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `EquipmentResponse.type`).
     pub const TYPE: Field<Equipment, EquipmentType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `rental_sales`: Rentman field `rental_sales`.
+    /// `rental_sales`: Value of `rental_sales`.
+    ///
+    /// Rust value: `EquipmentRentalSales`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentRentalSales`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `rental_sales`, documented type `string` (OpenAPI `EquipmentResponse.rental_sales`).
     pub const RENTAL_SALES: Field<Equipment, EquipmentRentalSales> = Field {
         name: "rental_sales",
         types: PhantomData,
     };
-    /// `temporary`: Rentman field `temporary`.
+    /// `temporary`: Value of `temporary`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `temporary`, documented type `boolean` (OpenAPI `EquipmentResponse.temporary`).
     pub const TEMPORARY: Field<Equipment, bool> = Field {
         name: "temporary",
         types: PhantomData,
     };
-    /// `in_planner`: Rentman field `in_planner`.
+    /// `in_planner`: Value of `in_planner`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_planner`, documented type `boolean` (OpenAPI `EquipmentResponse.in_planner`).
     pub const IN_PLANNER: Field<Equipment, bool> = Field {
         name: "in_planner",
         types: PhantomData,
     };
-    /// `in_archive`: Rentman field `in_archive`.
+    /// `in_archive`: Value of `in_archive`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_archive`, documented type `boolean` (OpenAPI `EquipmentResponse.in_archive`).
     pub const IN_ARCHIVE: Field<Equipment, bool> = Field {
         name: "in_archive",
         types: PhantomData,
     };
-    /// `stock_management`: Rentman field `stock_management`.
+    /// `stock_management`: Value of `stock_management`.
+    ///
+    /// Rust value: `EquipmentStockManagement`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentStockManagement`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `stock_management`, documented type `string` (OpenAPI `EquipmentResponse.stock_management`).
     pub const STOCK_MANAGEMENT: Field<Equipment, EquipmentStockManagement> = Field {
         name: "stock_management",
         types: PhantomData,
     };
-    /// `taxclass`: Rentman field `taxclass`.
+    /// `taxclass`: Value of `taxclass`.
+    ///
+    /// Rust value: `Id<TaxClass>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `taxclass`, documented type `string` (OpenAPI `EquipmentResponse.taxclass`).
     pub const TAXCLASS: Field<Equipment, Id<TaxClass>> = Field {
         name: "taxclass",
         types: PhantomData,
     };
-    /// `list_price`: Rentman field `list_price`.
+    /// `list_price`: Value of `list_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `list_price`, documented type `number` (OpenAPI `EquipmentResponse.list_price`).
     pub const LIST_PRICE: Field<Equipment, Decimal> = Field {
         name: "list_price",
         types: PhantomData,
     };
-    /// `volume`: Rentman field `volume`.
+    /// `volume`: Value of `volume`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `volume`, documented type `number` (OpenAPI `EquipmentResponse.volume`).
     pub const VOLUME: Field<Equipment, Decimal> = Field {
         name: "volume",
         types: PhantomData,
     };
-    /// `packed_per`: Rentman field `packed_per`.
+    /// `packed_per`: Value of `packed_per`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `packed_per`, documented type `integer` (OpenAPI `EquipmentResponse.packed_per`).
     pub const PACKED_PER: Field<Equipment, i64> = Field {
         name: "packed_per",
         types: PhantomData,
     };
-    /// `height`: Rentman field `height`.
+    /// `height`: Value of `height`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `height`, documented type `number` (OpenAPI `EquipmentResponse.height`).
     pub const HEIGHT: Field<Equipment, Decimal> = Field {
         name: "height",
         types: PhantomData,
     };
-    /// `width`: Rentman field `width`.
+    /// `width`: Value of `width`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `width`, documented type `number` (OpenAPI `EquipmentResponse.width`).
     pub const WIDTH: Field<Equipment, Decimal> = Field {
         name: "width",
         types: PhantomData,
     };
-    /// `length`: Rentman field `length`.
+    /// `length`: Value of `length`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `length`, documented type `number` (OpenAPI `EquipmentResponse.length`).
     pub const LENGTH: Field<Equipment, Decimal> = Field {
         name: "length",
         types: PhantomData,
     };
-    /// `weight`: Rentman field `weight`.
+    /// `weight`: Value of `weight`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `weight`, documented type `number` (OpenAPI `EquipmentResponse.weight`).
     pub const WEIGHT: Field<Equipment, Decimal> = Field {
         name: "weight",
         types: PhantomData,
     };
-    /// `empty_weight`: Rentman field `empty_weight`.
+    /// `empty_weight`: Value of `empty_weight`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `empty_weight`, documented type `number` (OpenAPI `EquipmentResponse.empty_weight`).
     pub const EMPTY_WEIGHT: Field<Equipment, Decimal> = Field {
         name: "empty_weight",
         types: PhantomData,
     };
-    /// `power`: Rentman field `power`.
+    /// `power`: Value of `power`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `power`, documented type `number` (OpenAPI `EquipmentResponse.power`).
     pub const POWER: Field<Equipment, Decimal> = Field {
         name: "power",
         types: PhantomData,
     };
-    /// `current`: Rentman field `current`.
+    /// `current`: Value of `current`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `current`, documented type `number` (OpenAPI `EquipmentResponse.current`).
     pub const CURRENT: Field<Equipment, Decimal> = Field {
         name: "current",
         types: PhantomData,
     };
     /// `country_of_origin`: The country where the equipment was manufactured. This is used for e.g. carnet exports.
+    ///
+    /// Rust value: `EquipmentCountryOfOrigin`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentCountryOfOrigin`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `country_of_origin`, documented type `string` (OpenAPI `EquipmentResponse.country_of_origin`).
     pub const COUNTRY_OF_ORIGIN: Field<Equipment, EquipmentCountryOfOrigin> = Field {
         name: "country_of_origin",
         types: PhantomData,
     };
-    /// `image`: Rentman field `image`.
+    /// `image`: Value of `image`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `image`, documented type `string` (OpenAPI `EquipmentResponse.image`).
     pub const IMAGE: Field<Equipment, Id<File>> = Field {
         name: "image",
         types: PhantomData,
     };
-    /// `ledger`: Rentman field `ledger`.
+    /// `ledger`: Value of `ledger`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger`, documented type `string` (OpenAPI `EquipmentResponse.ledger`).
     pub const LEDGER: Field<Equipment, Id<LedgerCode>> = Field {
         name: "ledger",
         types: PhantomData,
     };
-    /// `ledger_debit`: Rentman field `ledger_debit`.
+    /// `ledger_debit`: Value of `ledger_debit`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger_debit`, documented type `string` (OpenAPI `EquipmentResponse.ledger_debit`).
     pub const LEDGER_DEBIT: Field<Equipment, Id<LedgerCode>> = Field {
         name: "ledger_debit",
         types: PhantomData,
     };
     /// `defaultgroup`: Enter an equipment group to automatically place the item in when planning.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `defaultgroup`, documented type `string` (OpenAPI `EquipmentResponse.defaultgroup`).
     pub const DEFAULTGROUP: Field<Equipment, String> = Field {
         name: "defaultgroup",
         types: PhantomData,
     };
-    /// `is_combination`: Rentman field `is_combination`.
+    /// `is_combination`: Value of `is_combination`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_combination`, documented type `boolean` (OpenAPI `EquipmentResponse.is_combination`).
     pub const IS_COMBINATION: Field<Equipment, bool> = Field {
         name: "is_combination",
         types: PhantomData,
     };
-    /// `is_physical`: Rentman field `is_physical`.
+    /// `is_physical`: Value of `is_physical`.
+    ///
+    /// Rust value: `EquipmentIsPhysical`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentIsPhysical`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_physical`, documented type `string` (OpenAPI `EquipmentResponse.is_physical`).
     pub const IS_PHYSICAL: Field<Equipment, EquipmentIsPhysical> = Field {
         name: "is_physical",
         types: PhantomData,
     };
     /// `can_edit_content_during_planning`: If 'No' is selected, equipment cannot be added to or removed from this combination. Also, quantities of the content cannot be adjusted.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `can_edit_content_during_planning`, documented type `boolean` (OpenAPI `EquipmentResponse.can_edit_content_during_planning`).
     pub const CAN_EDIT_CONTENT_DURING_PLANNING: Field<Equipment, bool> = Field {
         name: "can_edit_content_during_planning",
         types: PhantomData,
     };
     /// `strict_container_content`: Determine whether the combination can contain actual content that is not part of the default content.
+    ///
+    /// Rust value: `EquipmentStrictContainerContent`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentStrictContainerContent`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `strict_container_content`, documented type `string` (OpenAPI `EquipmentResponse.strict_container_content`).
     pub const STRICT_CONTAINER_CONTENT: Field<Equipment, EquipmentStrictContainerContent> = Field {
         name: "strict_container_content",
         types: PhantomData,
@@ -1450,32 +2887,68 @@ pub mod equipment {
 pub mod equipment_assigned_serial {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<EquipmentAssignedSerial>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `EquipmentAssignedSerialsResponse.id`).
     pub const ID: Field<EquipmentAssignedSerial, Id<EquipmentAssignedSerial>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `EquipmentAssignedSerialsResponse.created`).
     pub const CREATED: Field<EquipmentAssignedSerial, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `EquipmentAssignedSerialsResponse.modified`).
     pub const MODIFIED: Field<EquipmentAssignedSerial, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `EquipmentAssignedSerialsResponse.creator`).
     pub const CREATOR: Field<EquipmentAssignedSerial, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `combination`: Rentman field `combination`.
+    /// `combination`: Value of `combination`.
+    ///
+    /// Rust value: `Id<SerialNumber>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `combination`, documented type `string` (OpenAPI `EquipmentAssignedSerialsResponse.combination`).
     pub const COMBINATION: Field<EquipmentAssignedSerial, Id<SerialNumber>> = Field {
         name: "combination",
         types: PhantomData,
     };
-    /// `serialnumber`: Rentman field `serialnumber`.
+    /// `serialnumber`: Value of `serialnumber`.
+    ///
+    /// Rust value: `Id<SerialNumber>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `serialnumber`, documented type `string` (OpenAPI `EquipmentAssignedSerialsResponse.serialnumber`).
     pub const SERIALNUMBER: Field<EquipmentAssignedSerial, Id<SerialNumber>> = Field {
         name: "serialnumber",
         types: PhantomData,
@@ -1486,52 +2959,114 @@ pub mod equipment_assigned_serial {
 pub mod equipment_set_content {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<EquipmentSetContent>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `EquipmentSetContentResponse.id`).
     pub const ID: Field<EquipmentSetContent, Id<EquipmentSetContent>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `EquipmentSetContentResponse.created`).
     pub const CREATED: Field<EquipmentSetContent, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `EquipmentSetContentResponse.modified`).
     pub const MODIFIED: Field<EquipmentSetContent, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `EquipmentSetContentResponse.creator`).
     pub const CREATOR: Field<EquipmentSetContent, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
     /// `quantity`: Quantity in this combination.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `string` (OpenAPI `EquipmentSetContentResponse.quantity`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const QUANTITY: Field<EquipmentSetContent, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `parent_equipment`: Rentman field `parent_equipment`.
+    /// `parent_equipment`: Value of `parent_equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent_equipment`, documented type `string` (OpenAPI `EquipmentSetContentResponse.parent_equipment`).
     pub const PARENT_EQUIPMENT: Field<EquipmentSetContent, Id<Equipment>> = Field {
         name: "parent_equipment",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `EquipmentSetContentResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<EquipmentSetContent, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `EquipmentSetContentResponse.equipment`).
     pub const EQUIPMENT: Field<EquipmentSetContent, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
     /// `is_fixed`: Permanently reduce the stock by the amount from this combination.
+    ///
+    /// Rust value: `EquipmentSetContentIsFixed`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentSetContentIsFixed`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_fixed`, documented type `string` (OpenAPI `EquipmentSetContentResponse.is_fixed`).
     pub const IS_FIXED: Field<EquipmentSetContent, EquipmentSetContentIsFixed> = Field {
         name: "is_fixed",
         types: PhantomData,
     };
     /// `is_physically_connected`: When emptying combinations in the warehouse, this equipment remains inside the combination. Manual removal from the combination in the actual content tab of the combination remains possible at all times.
+    ///
+    /// Rust value: `EquipmentSetContentIsPhysicallyConnected`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`EquipmentSetContentIsPhysicallyConnected`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_physically_connected`, documented type `string` (OpenAPI `EquipmentSetContentResponse.is_physically_connected`).
     pub const IS_PHYSICALLY_CONNECTED: Field<
         EquipmentSetContent,
         EquipmentSetContentIsPhysicallyConnected,
@@ -1545,77 +3080,168 @@ pub mod equipment_set_content {
 pub mod extra_input_field {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ExtraInputField>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ExtraInputFieldResponse.id`).
     pub const ID: Field<ExtraInputField, Id<ExtraInputField>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ExtraInputFieldResponse.created`).
     pub const CREATED: Field<ExtraInputField, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ExtraInputFieldResponse.modified`).
     pub const MODIFIED: Field<ExtraInputField, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ExtraInputFieldResponse.creator`).
     pub const CREATOR: Field<ExtraInputField, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ExtraInputFieldResponse.name`).
     pub const NAME: Field<ExtraInputField, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `itemtype`: Rentman field `itemtype`.
+    /// `itemtype`: Value of `itemtype`.
+    ///
+    /// Rust value: `ExtraInputFieldItemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ExtraInputFieldItemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `itemtype`, documented type `string` (OpenAPI `ExtraInputFieldResponse.itemtype`).
     pub const ITEMTYPE: Field<ExtraInputField, ExtraInputFieldItemtype> = Field {
         name: "itemtype",
         types: PhantomData,
     };
-    /// `linkedItemType`: Rentman field `linkedItemType`.
+    /// `linkedItemType`: Value of `linkedItemType`.
+    ///
+    /// Rust value: `ExtraInputFieldLinkedItemType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ExtraInputFieldLinkedItemType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linkedItemType`, documented type `string` (OpenAPI `ExtraInputFieldResponse.linkedItemType`).
     pub const LINKED_ITEM_TYPE: Field<ExtraInputField, ExtraInputFieldLinkedItemType> = Field {
         name: "linkedItemType",
         types: PhantomData,
     };
-    /// `parent`: Rentman field `parent`.
+    /// `parent`: Value of `parent`.
+    ///
+    /// Rust value: `Id<ExtraInputField>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `ExtraInputFieldResponse.parent`).
     pub const PARENT: Field<ExtraInputField, Id<ExtraInputField>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `ExtraInputFieldType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ExtraInputFieldType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `ExtraInputFieldResponse.type`).
     pub const TYPE: Field<ExtraInputField, ExtraInputFieldType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ExtraInputFieldResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ExtraInputField, i64> = Field {
         name: "order",
         types: PhantomData,
     };
     /// `hidden`: Hides the field anywhere in the system.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `hidden`, documented type `boolean` (OpenAPI `ExtraInputFieldResponse.hidden`).
     pub const HIDDEN: Field<ExtraInputField, bool> = Field {
         name: "hidden",
         types: PhantomData,
     };
     /// `classified`: Confidential fields are only visible to people with permission to see confidential fields.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `classified`, documented type `boolean` (OpenAPI `ExtraInputFieldResponse.classified`).
     pub const CLASSIFIED: Field<ExtraInputField, bool> = Field {
         name: "classified",
         types: PhantomData,
     };
     /// `search_include`: Enable this option to make this field for searchable in the overviews.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `search_include`, documented type `boolean` (OpenAPI `ExtraInputFieldResponse.search_include`).
     pub const SEARCH_INCLUDE: Field<ExtraInputField, bool> = Field {
         name: "search_include",
         types: PhantomData,
     };
     /// `search_minlength`: The minimum length that a search term must have before this field is searchable.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `search_minlength`, documented type `integer` (OpenAPI `ExtraInputFieldResponse.search_minlength`).
     pub const SEARCH_MINLENGTH: Field<ExtraInputField, i64> = Field {
         name: "search_minlength",
         types: PhantomData,
     };
     /// `is_customfield_mandatory`: Required input fields must be filled in.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_customfield_mandatory`, documented type `boolean` (OpenAPI `ExtraInputFieldResponse.is_customfield_mandatory`).
     pub const IS_CUSTOMFIELD_MANDATORY: Field<ExtraInputField, bool> = Field {
         name: "is_customfield_mandatory",
         types: PhantomData,
@@ -1626,42 +3252,89 @@ pub mod extra_input_field {
 pub mod factor {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Factor>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FactorsResponse.id`).
     pub const ID: Field<Factor, Id<Factor>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FactorsResponse.created`).
     pub const CREATED: Field<Factor, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FactorsResponse.modified`).
     pub const MODIFIED: Field<Factor, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FactorsResponse.creator`).
     pub const CREATOR: Field<Factor, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `from_days`: Rentman field `from_days`.
+    /// `from_days`: Value of `from_days`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `from_days`, documented type `integer` (OpenAPI `FactorsResponse.from_days`).
     pub const FROM_DAYS: Field<Factor, i64> = Field {
         name: "from_days",
         types: PhantomData,
     };
-    /// `to_days`: Rentman field `to_days`.
+    /// `to_days`: Value of `to_days`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `to_days`, documented type `integer` (OpenAPI `FactorsResponse.to_days`).
     pub const TO_DAYS: Field<Factor, i64> = Field {
         name: "to_days",
         types: PhantomData,
     };
-    /// `factor`: Rentman field `factor`.
+    /// `factor`: Value of `factor`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor`, documented type `string` (OpenAPI `FactorsResponse.factor`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const FACTOR: Field<Factor, Decimal> = Field {
         name: "factor",
         types: PhantomData,
     };
-    /// `factor_group`: Rentman field `factor_group`.
+    /// `factor_group`: Value of `factor_group`.
+    ///
+    /// Rust value: `Id<FactorGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor_group`, documented type `string` (OpenAPI `FactorsResponse.factor_group`).
     pub const FACTOR_GROUP: Field<Factor, Id<FactorGroup>> = Field {
         name: "factor_group",
         types: PhantomData,
@@ -1672,27 +3345,56 @@ pub mod factor {
 pub mod factor_group {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<FactorGroup>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FactorGroupsResponse.id`).
     pub const ID: Field<FactorGroup, Id<FactorGroup>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FactorGroupsResponse.created`).
     pub const CREATED: Field<FactorGroup, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FactorGroupsResponse.modified`).
     pub const MODIFIED: Field<FactorGroup, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FactorGroupsResponse.creator`).
     pub const CREATOR: Field<FactorGroup, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `FactorGroupsResponse.name`).
     pub const NAME: Field<FactorGroup, String> = Field {
         name: "name",
         types: PhantomData,
@@ -1703,107 +3405,228 @@ pub mod factor_group {
 pub mod file {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FileResponse.id`).
     pub const ID: Field<File, Id<File>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FileResponse.created`).
     pub const CREATED: Field<File, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FileResponse.modified`).
     pub const MODIFIED: Field<File, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FileResponse.creator`).
     pub const CREATOR: Field<File, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `readable_name`: Rentman field `readable_name`.
+    /// `readable_name`: Value of `readable_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `readable_name`, documented type `string` (OpenAPI `FileResponse.readable_name`).
     pub const READABLE_NAME: Field<File, String> = Field {
         name: "readable_name",
         types: PhantomData,
     };
-    /// `expiration`: Rentman field `expiration`.
+    /// `expiration`: Value of `expiration`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiration`, documented type `string` (OpenAPI `FileResponse.expiration`).
     pub const EXPIRATION: Field<File, String> = Field {
         name: "expiration",
         types: PhantomData,
     };
-    /// `size`: Rentman field `size`.
+    /// `size`: Value of `size`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `size`, documented type `integer` (OpenAPI `FileResponse.size`).
     pub const SIZE: Field<File, i64> = Field {
         name: "size",
         types: PhantomData,
     };
-    /// `image`: Rentman field `image`.
+    /// `image`: Value of `image`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `image`, documented type `boolean` (OpenAPI `FileResponse.image`).
     pub const IMAGE: Field<File, bool> = Field {
         name: "image",
         types: PhantomData,
     };
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
+    ///
+    /// Rust value: `ItemId`.
+    /// A polymorphic [`ItemId`]; the accompanying item type identifies the resource.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `item`, documented type `integer` (OpenAPI `FileResponse.item`).
     pub const ITEM: Field<File, ItemId> = Field {
         name: "item",
         types: PhantomData,
     };
-    /// `itemtype`: Rentman field `itemtype`.
+    /// `itemtype`: Value of `itemtype`.
+    ///
+    /// Rust value: `FileItemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`FileItemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `itemtype`, documented type `string` (OpenAPI `FileResponse.itemtype`).
     pub const ITEMTYPE: Field<File, FileItemtype> = Field {
         name: "itemtype",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `FileResponse.description`).
     pub const DESCRIPTION: Field<File, String> = Field {
         name: "description",
         types: PhantomData,
     };
     /// `in_documents`: This setting relates to the block of images in document templates.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_documents`, documented type `boolean` (OpenAPI `FileResponse.in_documents`).
     pub const IN_DOCUMENTS: Field<File, bool> = Field {
         name: "in_documents",
         types: PhantomData,
     };
-    /// `in_webshop`: Rentman field `in_webshop`.
+    /// `in_webshop`: Value of `in_webshop`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_webshop`, documented type `boolean` (OpenAPI `FileResponse.in_webshop`).
     pub const IN_WEBSHOP: Field<File, bool> = Field {
         name: "in_webshop",
         types: PhantomData,
     };
     /// `classified`: Confidential files are only visible with the user right to download all files.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `classified`, documented type `boolean` (OpenAPI `FileResponse.classified`).
     pub const CLASSIFIED: Field<File, bool> = Field {
         name: "classified",
         types: PhantomData,
     };
-    /// `public`: Rentman field `public`.
+    /// `public`: Value of `public`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `public`, documented type `boolean` (OpenAPI `FileResponse.public`).
     pub const PUBLIC: Field<File, bool> = Field {
         name: "public",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `FileResponse.type`).
     pub const TYPE: Field<File, String> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `preview_of`: Rentman field `preview_of`.
+    /// `preview_of`: Value of `preview_of`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `preview_of`, documented type `string` (OpenAPI `FileResponse.preview_of`).
     pub const PREVIEW_OF: Field<File, Id<File>> = Field {
         name: "preview_of",
         types: PhantomData,
     };
-    /// `previewstatus`: Rentman field `previewstatus`.
+    /// `previewstatus`: Value of `previewstatus`.
+    ///
+    /// Rust value: `FilePreviewstatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`FilePreviewstatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `previewstatus`, documented type `string` (OpenAPI `FileResponse.previewstatus`).
     pub const PREVIEWSTATUS: Field<File, FilePreviewstatus> = Field {
         name: "previewstatus",
         types: PhantomData,
     };
-    /// `file_item`: Rentman field `file_item`.
+    /// `file_item`: Value of `file_item`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `file_item`, documented type `integer` (OpenAPI `FileResponse.file_item`).
     pub const FILE_ITEM: Field<File, i64> = Field {
         name: "file_item",
         types: PhantomData,
     };
-    /// `file_itemtype`: Rentman field `file_itemtype`.
+    /// `file_itemtype`: Value of `file_itemtype`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `file_itemtype`, documented type `string` (OpenAPI `FileResponse.file_itemtype`).
     pub const FILE_ITEMTYPE: Field<File, String> = Field {
         name: "file_itemtype",
         types: PhantomData,
     };
-    /// `folder`: Rentman field `folder`.
+    /// `folder`: Value of `folder`.
+    ///
+    /// Rust value: `Id<FileFolder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `folder`, documented type `string` (OpenAPI `FileResponse.folder`).
     pub const FOLDER: Field<File, Id<FileFolder>> = Field {
         name: "folder",
         types: PhantomData,
@@ -1814,52 +3637,112 @@ pub mod file {
 pub mod file_folder {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<FileFolder>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FileFolderResponse.id`).
     pub const ID: Field<FileFolder, Id<FileFolder>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FileFolderResponse.created`).
     pub const CREATED: Field<FileFolder, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FileFolderResponse.modified`).
     pub const MODIFIED: Field<FileFolder, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FileFolderResponse.creator`).
     pub const CREATOR: Field<FileFolder, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `parent`: Rentman field `parent`.
+    /// `parent`: Value of `parent`.
+    ///
+    /// Rust value: `Id<FileFolder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `FileFolderResponse.parent`).
     pub const PARENT: Field<FileFolder, Id<FileFolder>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `FileFolderResponse.name`).
     pub const NAME: Field<FileFolder, String> = Field {
         name: "name",
         types: PhantomData,
     };
     /// `classified`: Confidential folders are only visible with the user right to download all files.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `classified`, documented type `boolean` (OpenAPI `FileFolderResponse.classified`).
     pub const CLASSIFIED: Field<FileFolder, bool> = Field {
         name: "classified",
         types: PhantomData,
     };
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
+    ///
+    /// Rust value: `ItemId`.
+    /// A polymorphic [`ItemId`]; the accompanying item type identifies the resource.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `item`, documented type `integer` (OpenAPI `FileFolderResponse.item`).
     pub const ITEM: Field<FileFolder, ItemId> = Field {
         name: "item",
         types: PhantomData,
     };
-    /// `itemtype`: Rentman field `itemtype`.
+    /// `itemtype`: Value of `itemtype`.
+    ///
+    /// Rust value: `FileFolderItemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`FileFolderItemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `itemtype`, documented type `string` (OpenAPI `FileFolderResponse.itemtype`).
     pub const ITEMTYPE: Field<FileFolder, FileFolderItemtype> = Field {
         name: "itemtype",
         types: PhantomData,
     };
-    /// `is_template`: Rentman field `is_template`.
+    /// `is_template`: Value of `is_template`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_template`, documented type `boolean` (OpenAPI `FileFolderResponse.is_template`).
     pub const IS_TEMPLATE: Field<FileFolder, bool> = Field {
         name: "is_template",
         types: PhantomData,
@@ -1870,42 +3753,90 @@ pub mod file_folder {
 pub mod folder {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FolderResponse.id`).
     pub const ID: Field<Folder, Id<Folder>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FolderResponse.created`).
     pub const CREATED: Field<Folder, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FolderResponse.modified`).
     pub const MODIFIED: Field<Folder, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FolderResponse.creator`).
     pub const CREATOR: Field<Folder, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `parent`: Rentman field `parent`.
+    /// `parent`: Value of `parent`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `FolderResponse.parent`).
     pub const PARENT: Field<Folder, Id<Folder>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `FolderResponse.name`).
     pub const NAME: Field<Folder, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `FolderResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<Folder, i64> = Field {
         name: "order",
         types: PhantomData,
     };
     /// `itemtype`: The type of item in this folder.
+    ///
+    /// Rust value: `FolderItemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`FolderItemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `itemtype`, documented type `string` (OpenAPI `FolderResponse.itemtype`).
     pub const ITEMTYPE: Field<Folder, FolderItemtype> = Field {
         name: "itemtype",
         types: PhantomData,
@@ -1916,92 +3847,200 @@ pub mod folder {
 pub mod invitation {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Invitation>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `InvitationsResponse.id`).
     pub const ID: Field<Invitation, Id<Invitation>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `InvitationsResponse.created`).
     pub const CREATED: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `InvitationsResponse.modified`).
     pub const MODIFIED: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `InvitationsResponse.creator`).
     pub const CREATOR: Field<Invitation, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
     /// `type`: `availability` - After confirmation, the crew member is marked as available for the specified times. No function or project details are shared. `reservation` - After confirmation, the crew member is marked as reserved for the function times or specified times. No function or project details are shared. `final_planning` - After confirmation, the crew member is final planned on the function. The details of the function and project are shared. `draft_planning` - After confirmation, the crew member is draft planned on the function. The details of the function and project are shared. .
+    ///
+    /// Rust value: `InvitationType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`InvitationType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `InvitationsResponse.type`).
     pub const TYPE: Field<Invitation, InvitationType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `accepted`: Rentman field `accepted`.
+    /// `accepted`: Value of `accepted`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `accepted`, documented type `boolean` (OpenAPI `InvitationsResponse.accepted`).
     pub const ACCEPTED: Field<Invitation, bool> = Field {
         name: "accepted",
         types: PhantomData,
     };
-    /// `responded_timestamp`: Rentman field `responded_timestamp`.
+    /// `responded_timestamp`: Value of `responded_timestamp`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `responded_timestamp`, documented type `string` (OpenAPI `InvitationsResponse.responded_timestamp`).
     pub const RESPONDED_TIMESTAMP: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "responded_timestamp",
         types: PhantomData,
     };
-    /// `expiration_date`: Rentman field `expiration_date`.
+    /// `expiration_date`: Value of `expiration_date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiration_date`, documented type `string` (OpenAPI `InvitationsResponse.expiration_date`).
     pub const EXPIRATION_DATE: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "expiration_date",
         types: PhantomData,
     };
-    /// `start`: Rentman field `start`.
+    /// `start`: Value of `start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `start`, documented type `string` (OpenAPI `InvitationsResponse.start`).
     pub const START: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "start",
         types: PhantomData,
     };
-    /// `end`: Rentman field `end`.
+    /// `end`: Value of `end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `end`, documented type `string` (OpenAPI `InvitationsResponse.end`).
     pub const END: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "end",
         types: PhantomData,
     };
-    /// `function`: Rentman field `function`.
+    /// `function`: Value of `function`.
+    ///
+    /// Rust value: `Id<ProjectFunction>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `function`, documented type `string` (OpenAPI `InvitationsResponse.function`).
     pub const FUNCTION: Field<Invitation, Id<ProjectFunction>> = Field {
         name: "function",
         types: PhantomData,
     };
-    /// `projectcrew`: Rentman field `projectcrew`.
+    /// `projectcrew`: Value of `projectcrew`.
+    ///
+    /// Rust value: `Id<ProjectCrew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `projectcrew`, documented type `string` (OpenAPI `InvitationsResponse.projectcrew`).
     pub const PROJECTCREW: Field<Invitation, Id<ProjectCrew>> = Field {
         name: "projectcrew",
         types: PhantomData,
     };
-    /// `crewmember`: Rentman field `crewmember`.
+    /// `crewmember`: Value of `crewmember`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crewmember`, documented type `string` (OpenAPI `InvitationsResponse.crewmember`).
     pub const CREWMEMBER: Field<Invitation, Id<Crew>> = Field {
         name: "crewmember",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `InvitationsResponse.remark`).
     pub const REMARK: Field<Invitation, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `emailstatus`: Rentman field `emailstatus`.
+    /// `emailstatus`: Value of `emailstatus`.
+    ///
+    /// Rust value: `InvitationEmailstatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`InvitationEmailstatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `emailstatus`, documented type `string` (OpenAPI `InvitationsResponse.emailstatus`).
     pub const EMAILSTATUS: Field<Invitation, InvitationEmailstatus> = Field {
         name: "emailstatus",
         types: PhantomData,
     };
-    /// `last_reminder`: Rentman field `last_reminder`.
+    /// `last_reminder`: Value of `last_reminder`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `last_reminder`, documented type `string` (OpenAPI `InvitationsResponse.last_reminder`).
     pub const LAST_REMINDER: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "last_reminder",
         types: PhantomData,
     };
-    /// `auto_reminder_date`: Rentman field `auto_reminder_date`.
+    /// `auto_reminder_date`: Value of `auto_reminder_date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `auto_reminder_date`, documented type `string` (OpenAPI `InvitationsResponse.auto_reminder_date`).
     pub const AUTO_REMINDER_DATE: Field<Invitation, DateTime<FixedOffset>> = Field {
         name: "auto_reminder_date",
         types: PhantomData,
     };
-    /// `auto_reminder_sent`: Rentman field `auto_reminder_sent`.
+    /// `auto_reminder_sent`: Value of `auto_reminder_sent`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `auto_reminder_sent`, documented type `integer` (OpenAPI `InvitationsResponse.auto_reminder_sent`).
     pub const AUTO_REMINDER_SENT: Field<Invitation, i64> = Field {
         name: "auto_reminder_sent",
         types: PhantomData,
@@ -2012,87 +4051,183 @@ pub mod invitation {
 pub mod invoice {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Invoice>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `FactuurResponse.id`).
     pub const ID: Field<Invoice, Id<Invoice>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `FactuurResponse.created`).
     pub const CREATED: Field<Invoice, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `FactuurResponse.modified`).
     pub const MODIFIED: Field<Invoice, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `FactuurResponse.creator`).
     pub const CREATOR: Field<Invoice, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `customer`: Rentman field `customer`.
+    /// `customer`: Value of `customer`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `customer`, documented type `string` (OpenAPI `FactuurResponse.customer`).
     pub const CUSTOMER: Field<Invoice, Id<Contact>> = Field {
         name: "customer",
         types: PhantomData,
     };
-    /// `account_manager`: Rentman field `account_manager`.
+    /// `account_manager`: Value of `account_manager`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `account_manager`, documented type `string` (OpenAPI `FactuurResponse.account_manager`).
     pub const ACCOUNT_MANAGER: Field<Invoice, Id<Crew>> = Field {
         name: "account_manager",
         types: PhantomData,
     };
-    /// `contact`: Rentman field `contact`.
+    /// `contact`: Value of `contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact`, documented type `string` (OpenAPI `FactuurResponse.contact`).
     pub const CONTACT: Field<Invoice, Id<ContactPerson>> = Field {
         name: "contact",
         types: PhantomData,
     };
     /// `expiration`: The latest payment date for this invoice.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiration`, documented type `string` (OpenAPI `FactuurResponse.expiration`).
     pub const EXPIRATION: Field<Invoice, String> = Field {
         name: "expiration",
         types: PhantomData,
     };
-    /// `date`: Rentman field `date`.
+    /// `date`: Value of `date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `date`, documented type `string` (OpenAPI `FactuurResponse.date`).
     pub const DATE: Field<Invoice, String> = Field {
         name: "date",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `FactuurResponse.number`).
     pub const NUMBER: Field<Invoice, String> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `procent`: Rentman field `procent`.
+    /// `procent`: Value of `procent`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `procent`, documented type `number` (OpenAPI `FactuurResponse.procent`).
     pub const PROCENT: Field<Invoice, Decimal> = Field {
         name: "procent",
         types: PhantomData,
     };
-    /// `from_project`: Rentman field `from_project`.
+    /// `from_project`: Value of `from_project`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `from_project`, documented type `boolean` (OpenAPI `FactuurResponse.from_project`).
     pub const FROM_PROJECT: Field<Invoice, bool> = Field {
         name: "from_project",
         types: PhantomData,
     };
-    /// `subject`: Rentman field `subject`.
+    /// `subject`: Value of `subject`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subject`, documented type `string` (OpenAPI `FactuurResponse.subject`).
     pub const SUBJECT: Field<Invoice, String> = Field {
         name: "subject",
         types: PhantomData,
     };
-    /// `finalized`: Rentman field `finalized`.
+    /// `finalized`: Value of `finalized`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `finalized`, documented type `boolean` (OpenAPI `FactuurResponse.finalized`).
     pub const FINALIZED: Field<Invoice, bool> = Field {
         name: "finalized",
         types: PhantomData,
     };
-    /// `integration_reference_id`: Rentman field `integration_reference_id`.
+    /// `integration_reference_id`: Value of `integration_reference_id`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `integration_reference_id`, documented type `string` (OpenAPI `FactuurResponse.integration_reference_id`).
     pub const INTEGRATION_REFERENCE_ID: Field<Invoice, String> = Field {
         name: "integration_reference_id",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `FactuurResponse.project`).
     pub const PROJECT: Field<Invoice, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `filename`: Rentman field `filename`.
+    /// `filename`: Value of `filename`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `filename`, documented type `string` (OpenAPI `FactuurResponse.filename`).
     pub const FILENAME: Field<Invoice, String> = Field {
         name: "filename",
         types: PhantomData,
@@ -2103,37 +4238,79 @@ pub mod invoice {
 pub mod invoice_line {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<InvoiceLine>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `InvoiceLineResponse.id`).
     pub const ID: Field<InvoiceLine, Id<InvoiceLine>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `InvoiceLineResponse.created`).
     pub const CREATED: Field<InvoiceLine, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `InvoiceLineResponse.modified`).
     pub const MODIFIED: Field<InvoiceLine, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `InvoiceLineResponse.creator`).
     pub const CREATOR: Field<InvoiceLine, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
+    ///
+    /// Rust value: `ItemId`.
+    /// A polymorphic [`ItemId`]; the accompanying item type identifies the resource.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `item`, documented type `integer` (OpenAPI `InvoiceLineResponse.item`).
     pub const ITEM: Field<InvoiceLine, ItemId> = Field {
         name: "item",
         types: PhantomData,
     };
-    /// `base`: Rentman field `base`.
+    /// `base`: Value of `base`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `base`, documented type `number` (OpenAPI `InvoiceLineResponse.base`).
     pub const BASE: Field<InvoiceLine, Decimal> = Field {
         name: "base",
         types: PhantomData,
     };
-    /// `ledger`: Rentman field `ledger`.
+    /// `ledger`: Value of `ledger`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger`, documented type `string` (OpenAPI `InvoiceLineResponse.ledger`).
     pub const LEDGER: Field<InvoiceLine, Id<LedgerCode>> = Field {
         name: "ledger",
         types: PhantomData,
@@ -2144,47 +4321,99 @@ pub mod invoice_line {
 pub mod leave_mutation {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<LeaveMutation>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `LeaveMutationsResponse.id`).
     pub const ID: Field<LeaveMutation, Id<LeaveMutation>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `LeaveMutationsResponse.created`).
     pub const CREATED: Field<LeaveMutation, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `LeaveMutationsResponse.modified`).
     pub const MODIFIED: Field<LeaveMutation, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `LeaveMutationsResponse.creator`).
     pub const CREATOR: Field<LeaveMutation, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `LeaveMutationsResponse.description`).
     pub const DESCRIPTION: Field<LeaveMutation, String> = Field {
         name: "description",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `LeaveMutationsResponse.duration`).
     pub const DURATION: Field<LeaveMutation, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `crewmember`: Rentman field `crewmember`.
+    /// `crewmember`: Value of `crewmember`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crewmember`, documented type `string` (OpenAPI `LeaveMutationsResponse.crewmember`).
     pub const CREWMEMBER: Field<LeaveMutation, Id<Crew>> = Field {
         name: "crewmember",
         types: PhantomData,
     };
-    /// `leavetype`: Rentman field `leavetype`.
+    /// `leavetype`: Value of `leavetype`.
+    ///
+    /// Rust value: `Id<LeaveType>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `leavetype`, documented type `string` (OpenAPI `LeaveMutationsResponse.leavetype`).
     pub const LEAVETYPE: Field<LeaveMutation, Id<LeaveType>> = Field {
         name: "leavetype",
         types: PhantomData,
     };
-    /// `mutation_date`: Rentman field `mutation_date`.
+    /// `mutation_date`: Value of `mutation_date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `mutation_date`, documented type `string` (OpenAPI `LeaveMutationsResponse.mutation_date`).
     pub const MUTATION_DATE: Field<LeaveMutation, String> = Field {
         name: "mutation_date",
         types: PhantomData,
@@ -2195,47 +4424,101 @@ pub mod leave_mutation {
 pub mod leave_request {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<LeaveRequest>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `LeaveRequestResponse.id`).
     pub const ID: Field<LeaveRequest, Id<LeaveRequest>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `LeaveRequestResponse.created`).
     pub const CREATED: Field<LeaveRequest, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `LeaveRequestResponse.modified`).
     pub const MODIFIED: Field<LeaveRequest, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `LeaveRequestResponse.creator`).
     pub const CREATOR: Field<LeaveRequest, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `LeaveRequestResponse.description`).
     pub const DESCRIPTION: Field<LeaveRequest, String> = Field {
         name: "description",
         types: PhantomData,
     };
-    /// `approval_status`: Rentman field `approval_status`.
+    /// `approval_status`: Value of `approval_status`.
+    ///
+    /// Rust value: `LeaveRequestApprovalStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`LeaveRequestApprovalStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `approval_status`, documented type `string` (OpenAPI `LeaveRequestResponse.approval_status`).
     pub const APPROVAL_STATUS: Field<LeaveRequest, LeaveRequestApprovalStatus> = Field {
         name: "approval_status",
         types: PhantomData,
     };
-    /// `requested_for`: Rentman field `requested_for`.
+    /// `requested_for`: Value of `requested_for`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `requested_for`, documented type `string` (OpenAPI `LeaveRequestResponse.requested_for`).
     pub const REQUESTED_FOR: Field<LeaveRequest, Id<Crew>> = Field {
         name: "requested_for",
         types: PhantomData,
     };
-    /// `reviewed_on`: Rentman field `reviewed_on`.
+    /// `reviewed_on`: Value of `reviewed_on`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `reviewed_on`, documented type `string` (OpenAPI `LeaveRequestResponse.reviewed_on`).
     pub const REVIEWED_ON: Field<LeaveRequest, DateTime<FixedOffset>> = Field {
         name: "reviewed_on",
         types: PhantomData,
     };
-    /// `reviewer`: Rentman field `reviewer`.
+    /// `reviewer`: Value of `reviewer`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `reviewer`, documented type `string` (OpenAPI `LeaveRequestResponse.reviewer`).
     pub const REVIEWER: Field<LeaveRequest, Id<Crew>> = Field {
         name: "reviewer",
         types: PhantomData,
@@ -2246,82 +4529,176 @@ pub mod leave_request {
 pub mod leave_type {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<LeaveType>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `LeaveTypesResponse.id`).
     pub const ID: Field<LeaveType, Id<LeaveType>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `LeaveTypesResponse.created`).
     pub const CREATED: Field<LeaveType, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `LeaveTypesResponse.modified`).
     pub const MODIFIED: Field<LeaveType, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `LeaveTypesResponse.creator`).
     pub const CREATOR: Field<LeaveType, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `LeaveTypeType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`LeaveTypeType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `LeaveTypesResponse.type`).
     pub const TYPE: Field<LeaveType, LeaveTypeType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `LeaveTypesResponse.name`).
     pub const NAME: Field<LeaveType, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `payroll_code`: Rentman field `payroll_code`.
+    /// `payroll_code`: Value of `payroll_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `payroll_code`, documented type `string` (OpenAPI `LeaveTypesResponse.payroll_code`).
     pub const PAYROLL_CODE: Field<LeaveType, String> = Field {
         name: "payroll_code",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `LeaveTypesResponse.color`).
     pub const COLOR: Field<LeaveType, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `requires_approval`: Rentman field `requires_approval`.
+    /// `requires_approval`: Value of `requires_approval`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `requires_approval`, documented type `boolean` (OpenAPI `LeaveTypesResponse.requires_approval`).
     pub const REQUIRES_APPROVAL: Field<LeaveType, bool> = Field {
         name: "requires_approval",
         types: PhantomData,
     };
-    /// `affects_availability`: Rentman field `affects_availability`.
+    /// `affects_availability`: Value of `affects_availability`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `affects_availability`, documented type `boolean` (OpenAPI `LeaveTypesResponse.affects_availability`).
     pub const AFFECTS_AVAILABILITY: Field<LeaveType, bool> = Field {
         name: "affects_availability",
         types: PhantomData,
     };
-    /// `has_balance`: Rentman field `has_balance`.
+    /// `has_balance`: Value of `has_balance`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `has_balance`, documented type `boolean` (OpenAPI `LeaveTypesResponse.has_balance`).
     pub const HAS_BALANCE: Field<LeaveType, bool> = Field {
         name: "has_balance",
         types: PhantomData,
     };
-    /// `balance_start_date`: Rentman field `balance_start_date`.
+    /// `balance_start_date`: Value of `balance_start_date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `balance_start_date`, documented type `string` (OpenAPI `LeaveTypesResponse.balance_start_date`).
     pub const BALANCE_START_DATE: Field<LeaveType, String> = Field {
         name: "balance_start_date",
         types: PhantomData,
     };
-    /// `is_labor`: Rentman field `is_labor`.
+    /// `is_labor`: Value of `is_labor`.
+    ///
+    /// Rust value: `LeaveTypeIsLabor`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`LeaveTypeIsLabor`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_labor`, documented type `string` (OpenAPI `LeaveTypesResponse.is_labor`).
     pub const IS_LABOR: Field<LeaveType, LeaveTypeIsLabor> = Field {
         name: "is_labor",
         types: PhantomData,
     };
-    /// `has_calculated_duration`: Rentman field `has_calculated_duration`.
+    /// `has_calculated_duration`: Value of `has_calculated_duration`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `has_calculated_duration`, documented type `boolean` (OpenAPI `LeaveTypesResponse.has_calculated_duration`).
     pub const HAS_CALCULATED_DURATION: Field<LeaveType, bool> = Field {
         name: "has_calculated_duration",
         types: PhantomData,
     };
-    /// `can_have_activities`: Rentman field `can_have_activities`.
+    /// `can_have_activities`: Value of `can_have_activities`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `can_have_activities`, documented type `boolean` (OpenAPI `LeaveTypesResponse.can_have_activities`).
     pub const CAN_HAVE_ACTIVITIES: Field<LeaveType, bool> = Field {
         name: "can_have_activities",
         types: PhantomData,
     };
-    /// `counts_in_totals`: Rentman field `counts_in_totals`.
+    /// `counts_in_totals`: Value of `counts_in_totals`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `counts_in_totals`, documented type `boolean` (OpenAPI `LeaveTypesResponse.counts_in_totals`).
     pub const COUNTS_IN_TOTALS: Field<LeaveType, bool> = Field {
         name: "counts_in_totals",
         types: PhantomData,
@@ -2332,37 +4709,78 @@ pub mod leave_type {
 pub mod ledger_code {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `LedgerResponse.id`).
     pub const ID: Field<LedgerCode, Id<LedgerCode>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `LedgerResponse.created`).
     pub const CREATED: Field<LedgerCode, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `LedgerResponse.modified`).
     pub const MODIFIED: Field<LedgerCode, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `LedgerResponse.creator`).
     pub const CREATOR: Field<LedgerCode, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `code`: Rentman field `code`.
+    /// `code`: Value of `code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `code`, documented type `string` (OpenAPI `LedgerResponse.code`).
     pub const CODE: Field<LedgerCode, String> = Field {
         name: "code",
         types: PhantomData,
     };
-    /// `is_credit`: Rentman field `is_credit`.
+    /// `is_credit`: Value of `is_credit`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_credit`, documented type `boolean` (OpenAPI `LedgerResponse.is_credit`).
     pub const IS_CREDIT: Field<LedgerCode, bool> = Field {
         name: "is_credit",
         types: PhantomData,
     };
-    /// `is_debit`: Rentman field `is_debit`.
+    /// `is_debit`: Value of `is_debit`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_debit`, documented type `boolean` (OpenAPI `LedgerResponse.is_debit`).
     pub const IS_DEBIT: Field<LedgerCode, bool> = Field {
         name: "is_debit",
         types: PhantomData,
@@ -2373,47 +4791,101 @@ pub mod ledger_code {
 pub mod payment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Payment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `PaymentResponse.id`).
     pub const ID: Field<Payment, Id<Payment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `PaymentResponse.created`).
     pub const CREATED: Field<Payment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `PaymentResponse.modified`).
     pub const MODIFIED: Field<Payment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `PaymentResponse.creator`).
     pub const CREATOR: Field<Payment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `invoice`: Rentman field `invoice`.
+    /// `invoice`: Value of `invoice`.
+    ///
+    /// Rust value: `Id<Invoice>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice`, documented type `string` (OpenAPI `PaymentResponse.invoice`).
     pub const INVOICE: Field<Payment, Id<Invoice>> = Field {
         name: "invoice",
         types: PhantomData,
     };
-    /// `moment`: Rentman field `moment`.
+    /// `moment`: Value of `moment`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `moment`, documented type `string` (OpenAPI `PaymentResponse.moment`).
     pub const MOMENT: Field<Payment, DateTime<FixedOffset>> = Field {
         name: "moment",
         types: PhantomData,
     };
-    /// `amount`: Rentman field `amount`.
+    /// `amount`: Value of `amount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `amount`, documented type `number` (OpenAPI `PaymentResponse.amount`).
     pub const AMOUNT: Field<Payment, Decimal> = Field {
         name: "amount",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `PaymentResponse.description`).
     pub const DESCRIPTION: Field<Payment, String> = Field {
         name: "description",
         types: PhantomData,
     };
     /// `payment_import_source`: Accounting software this payment was imported from.
+    ///
+    /// Rust value: `PaymentPaymentImportSource`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PaymentPaymentImportSource`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `payment_import_source`, documented type `string` (OpenAPI `PaymentResponse.payment_import_source`).
     pub const PAYMENT_IMPORT_SOURCE: Field<Payment, PaymentPaymentImportSource> = Field {
         name: "payment_import_source",
         types: PhantomData,
@@ -2424,87 +4896,186 @@ pub mod payment {
 pub mod project {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectResponse.id`).
     pub const ID: Field<Project, Id<Project>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectResponse.created`).
     pub const CREATED: Field<Project, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectResponse.modified`).
     pub const MODIFIED: Field<Project, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectResponse.creator`).
     pub const CREATOR: Field<Project, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `location`: Rentman field `location`.
+    /// `location`: Value of `location`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location`, documented type `string` (OpenAPI `ProjectResponse.location`).
     pub const LOCATION: Field<Project, Id<Contact>> = Field {
         name: "location",
         types: PhantomData,
     };
-    /// `refundabledeposit`: Rentman field `refundabledeposit`.
+    /// `refundabledeposit`: Value of `refundabledeposit`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `refundabledeposit`, documented type `number` (OpenAPI `ProjectResponse.refundabledeposit`).
     pub const REFUNDABLEDEPOSIT: Field<Project, Decimal> = Field {
         name: "refundabledeposit",
         types: PhantomData,
     };
-    /// `deposit_status`: Rentman field `deposit_status`.
+    /// `deposit_status`: Value of `deposit_status`.
+    ///
+    /// Rust value: `ProjectDepositStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectDepositStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deposit_status`, documented type `string` (OpenAPI `ProjectResponse.deposit_status`).
     pub const DEPOSIT_STATUS: Field<Project, ProjectDepositStatus> = Field {
         name: "deposit_status",
         types: PhantomData,
     };
-    /// `customer`: Rentman field `customer`.
+    /// `customer`: Value of `customer`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `customer`, documented type `string` (OpenAPI `ProjectResponse.customer`).
     pub const CUSTOMER: Field<Project, Id<Contact>> = Field {
         name: "customer",
         types: PhantomData,
     };
-    /// `loc_contact`: Rentman field `loc_contact`.
+    /// `loc_contact`: Value of `loc_contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `loc_contact`, documented type `string` (OpenAPI `ProjectResponse.loc_contact`).
     pub const LOC_CONTACT: Field<Project, Id<ContactPerson>> = Field {
         name: "loc_contact",
         types: PhantomData,
     };
-    /// `cust_contact`: Rentman field `cust_contact`.
+    /// `cust_contact`: Value of `cust_contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cust_contact`, documented type `string` (OpenAPI `ProjectResponse.cust_contact`).
     pub const CUST_CONTACT: Field<Project, Id<ContactPerson>> = Field {
         name: "cust_contact",
         types: PhantomData,
     };
-    /// `project_type`: Rentman field `project_type`.
+    /// `project_type`: Value of `project_type`.
+    ///
+    /// Rust value: `Id<ProjectType>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project_type`, documented type `string` (OpenAPI `ProjectResponse.project_type`).
     pub const PROJECT_TYPE: Field<Project, Id<ProjectType>> = Field {
         name: "project_type",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectResponse.name`).
     pub const NAME: Field<Project, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `reference`: Rentman field `reference`.
+    /// `reference`: Value of `reference`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `reference`, documented type `string` (OpenAPI `ProjectResponse.reference`).
     pub const REFERENCE: Field<Project, String> = Field {
         name: "reference",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `ProjectResponse.number`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const NUMBER: Field<Project, i64> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `account_manager`: Rentman field `account_manager`.
+    /// `account_manager`: Value of `account_manager`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `account_manager`, documented type `string` (OpenAPI `ProjectResponse.account_manager`).
     pub const ACCOUNT_MANAGER: Field<Project, Id<Crew>> = Field {
         name: "account_manager",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `ProjectResponse.color`).
     pub const COLOR: Field<Project, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `conditions`: Rentman field `conditions`.
+    /// `conditions`: Value of `conditions`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `conditions`, documented type `string` (OpenAPI `ProjectResponse.conditions`).
     pub const CONDITIONS: Field<Project, String> = Field {
         name: "conditions",
         types: PhantomData,
@@ -2515,87 +5086,186 @@ pub mod project {
 pub mod project_cost {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectCost>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectCostResponse.id`).
     pub const ID: Field<ProjectCost, Id<ProjectCost>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectCostResponse.created`).
     pub const CREATED: Field<ProjectCost, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectCostResponse.modified`).
     pub const MODIFIED: Field<ProjectCost, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectCostResponse.creator`).
     pub const CREATOR: Field<ProjectCost, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectCostResponse.name`).
     pub const NAME: Field<ProjectCost, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectCostResponse.remark`).
     pub const REMARK: Field<ProjectCost, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `ProjectCostResponse.project`).
     pub const PROJECT: Field<ProjectCost, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `integer` (OpenAPI `ProjectCostResponse.quantity`).
     pub const QUANTITY: Field<ProjectCost, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `discount`: Rentman field `discount`.
+    /// `discount`: Value of `discount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount`, documented type `number` (OpenAPI `ProjectCostResponse.discount`).
     pub const DISCOUNT: Field<ProjectCost, Decimal> = Field {
         name: "discount",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ProjectCostResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ProjectCost, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `subproject`: Rentman field `subproject`.
+    /// `subproject`: Value of `subproject`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject`, documented type `string` (OpenAPI `ProjectCostResponse.subproject`).
     pub const SUBPROJECT: Field<ProjectCost, Id<Subproject>> = Field {
         name: "subproject",
         types: PhantomData,
     };
-    /// `is_template`: Rentman field `is_template`.
+    /// `is_template`: Value of `is_template`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_template`, documented type `boolean` (OpenAPI `ProjectCostResponse.is_template`).
     pub const IS_TEMPLATE: Field<ProjectCost, bool> = Field {
         name: "is_template",
         types: PhantomData,
     };
     /// `taxclass`: This class, in combination with the chosen VAT scheme at project level, determines the final VAT rate.
+    ///
+    /// Rust value: `Id<TaxClass>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `taxclass`, documented type `string` (OpenAPI `ProjectCostResponse.taxclass`).
     pub const TAXCLASS: Field<ProjectCost, Id<TaxClass>> = Field {
         name: "taxclass",
         types: PhantomData,
     };
-    /// `ledger`: Rentman field `ledger`.
+    /// `ledger`: Value of `ledger`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger`, documented type `string` (OpenAPI `ProjectCostResponse.ledger`).
     pub const LEDGER: Field<ProjectCost, Id<LedgerCode>> = Field {
         name: "ledger",
         types: PhantomData,
     };
-    /// `ledger_debit`: Rentman field `ledger_debit`.
+    /// `ledger_debit`: Value of `ledger_debit`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger_debit`, documented type `string` (OpenAPI `ProjectCostResponse.ledger_debit`).
     pub const LEDGER_DEBIT: Field<ProjectCost, Id<LedgerCode>> = Field {
         name: "ledger_debit",
         types: PhantomData,
     };
-    /// `sale_price`: Rentman field `sale_price`.
+    /// `sale_price`: Value of `sale_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `sale_price`, documented type `number` (OpenAPI `ProjectCostResponse.sale_price`).
     pub const SALE_PRICE: Field<ProjectCost, Decimal> = Field {
         name: "sale_price",
         types: PhantomData,
     };
-    /// `purchase_price`: Rentman field `purchase_price`.
+    /// `purchase_price`: Value of `purchase_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchase_price`, documented type `number` (OpenAPI `ProjectCostResponse.purchase_price`).
     pub const PURCHASE_PRICE: Field<ProjectCost, Decimal> = Field {
         name: "purchase_price",
         types: PhantomData,
@@ -2606,102 +5276,220 @@ pub mod project_cost {
 pub mod project_crew {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectCrew>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectCrewResponse.id`).
     pub const ID: Field<ProjectCrew, Id<ProjectCrew>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectCrewResponse.created`).
     pub const CREATED: Field<ProjectCrew, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectCrewResponse.modified`).
     pub const MODIFIED: Field<ProjectCrew, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectCrewResponse.creator`).
     pub const CREATOR: Field<ProjectCrew, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `cost_rate`: Rentman field `cost_rate`.
+    /// `cost_rate`: Value of `cost_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_rate`, documented type `string` (OpenAPI `ProjectCrewResponse.cost_rate`).
     pub const COST_RATE: Field<ProjectCrew, Id<Rate>> = Field {
         name: "cost_rate",
         types: PhantomData,
     };
-    /// `cost_accommodation`: Rentman field `cost_accommodation`.
+    /// `cost_accommodation`: Value of `cost_accommodation`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_accommodation`, documented type `number` (OpenAPI `ProjectCrewResponse.cost_accommodation`).
     pub const COST_ACCOMMODATION: Field<ProjectCrew, Decimal> = Field {
         name: "cost_accommodation",
         types: PhantomData,
     };
-    /// `cost_catering`: Rentman field `cost_catering`.
+    /// `cost_catering`: Value of `cost_catering`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_catering`, documented type `number` (OpenAPI `ProjectCrewResponse.cost_catering`).
     pub const COST_CATERING: Field<ProjectCrew, Decimal> = Field {
         name: "cost_catering",
         types: PhantomData,
     };
-    /// `cost_travel`: Rentman field `cost_travel`.
+    /// `cost_travel`: Value of `cost_travel`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_travel`, documented type `number` (OpenAPI `ProjectCrewResponse.cost_travel`).
     pub const COST_TRAVEL: Field<ProjectCrew, Decimal> = Field {
         name: "cost_travel",
         types: PhantomData,
     };
-    /// `cost_other`: Rentman field `cost_other`.
+    /// `cost_other`: Value of `cost_other`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_other`, documented type `number` (OpenAPI `ProjectCrewResponse.cost_other`).
     pub const COST_OTHER: Field<ProjectCrew, Decimal> = Field {
         name: "cost_other",
         types: PhantomData,
     };
-    /// `function`: Rentman field `function`.
+    /// `function`: Value of `function`.
+    ///
+    /// Rust value: `Id<ProjectFunction>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `function`, documented type `string` (OpenAPI `ProjectCrewResponse.function`).
     pub const FUNCTION: Field<ProjectCrew, Id<ProjectFunction>> = Field {
         name: "function",
         types: PhantomData,
     };
-    /// `crewmember`: Rentman field `crewmember`.
+    /// `crewmember`: Value of `crewmember`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crewmember`, documented type `string` (OpenAPI `ProjectCrewResponse.crewmember`).
     pub const CREWMEMBER: Field<ProjectCrew, Id<Crew>> = Field {
         name: "crewmember",
         types: PhantomData,
     };
-    /// `visible`: Rentman field `visible`.
+    /// `visible`: Value of `visible`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `visible`, documented type `boolean` (OpenAPI `ProjectCrewResponse.visible`).
     pub const VISIBLE: Field<ProjectCrew, bool> = Field {
         name: "visible",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `ProjectCrewResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<ProjectCrew, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `ProjectCrewResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<ProjectCrew, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `transport`: Rentman field `transport`.
+    /// `transport`: Value of `transport`.
+    ///
+    /// Rust value: `ProjectCrewTransport`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectCrewTransport`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `transport`, documented type `string` (OpenAPI `ProjectCrewResponse.transport`).
     pub const TRANSPORT: Field<ProjectCrew, ProjectCrewTransport> = Field {
         name: "transport",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectCrewResponse.remark`).
     pub const REMARK: Field<ProjectCrew, String> = Field {
         name: "remark",
         types: PhantomData,
     };
     /// `remark_planner`: Only visible to crew planners.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark_planner`, documented type `string` (OpenAPI `ProjectCrewResponse.remark_planner`).
     pub const REMARK_PLANNER: Field<ProjectCrew, String> = Field {
         name: "remark_planner",
         types: PhantomData,
     };
-    /// `invoice_reference`: Rentman field `invoice_reference`.
+    /// `invoice_reference`: Value of `invoice_reference`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `invoice_reference`, documented type `string` (OpenAPI `ProjectCrewResponse.invoice_reference`).
     pub const INVOICE_REFERENCE: Field<ProjectCrew, String> = Field {
         name: "invoice_reference",
         types: PhantomData,
     };
-    /// `project_leader`: Rentman field `project_leader`.
+    /// `project_leader`: Value of `project_leader`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project_leader`, documented type `boolean` (OpenAPI `ProjectCrewResponse.project_leader`).
     pub const PROJECT_LEADER: Field<ProjectCrew, bool> = Field {
         name: "project_leader",
         types: PhantomData,
     };
-    /// `is_visible_on_dashboard`: Rentman field `is_visible_on_dashboard`.
+    /// `is_visible_on_dashboard`: Value of `is_visible_on_dashboard`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_visible_on_dashboard`, documented type `boolean` (OpenAPI `ProjectCrewResponse.is_visible_on_dashboard`).
     pub const IS_VISIBLE_ON_DASHBOARD: Field<ProjectCrew, bool> = Field {
         name: "is_visible_on_dashboard",
         types: PhantomData,
@@ -2712,112 +5500,241 @@ pub mod project_crew {
 pub mod project_equipment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectEquipment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectEquipmentResponse.id`).
     pub const ID: Field<ProjectEquipment, Id<ProjectEquipment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectEquipmentResponse.created`).
     pub const CREATED: Field<ProjectEquipment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectEquipmentResponse.modified`).
     pub const MODIFIED: Field<ProjectEquipment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectEquipmentResponse.creator`).
     pub const CREATOR: Field<ProjectEquipment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `ProjectEquipmentResponse.equipment`).
     pub const EQUIPMENT: Field<ProjectEquipment, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
     /// `parent`: The combination it is part of.
+    ///
+    /// Rust value: `Id<ProjectEquipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `ProjectEquipmentResponse.parent`).
     pub const PARENT: Field<ProjectEquipment, Id<ProjectEquipment>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `ledger`: Rentman field `ledger`.
+    /// `ledger`: Value of `ledger`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger`, documented type `string` (OpenAPI `ProjectEquipmentResponse.ledger`).
     pub const LEDGER: Field<ProjectEquipment, Id<LedgerCode>> = Field {
         name: "ledger",
         types: PhantomData,
     };
-    /// `ledger_debit`: Rentman field `ledger_debit`.
+    /// `ledger_debit`: Value of `ledger_debit`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger_debit`, documented type `string` (OpenAPI `ProjectEquipmentResponse.ledger_debit`).
     pub const LEDGER_DEBIT: Field<ProjectEquipment, Id<LedgerCode>> = Field {
         name: "ledger_debit",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `string` (OpenAPI `ProjectEquipmentResponse.quantity`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const QUANTITY: Field<ProjectEquipment, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `quantity_total`: Rentman field `quantity_total`.
+    /// `quantity_total`: Value of `quantity_total`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity_total`, documented type `integer` (OpenAPI `ProjectEquipmentResponse.quantity_total`).
     pub const QUANTITY_TOTAL: Field<ProjectEquipment, i64> = Field {
         name: "quantity_total",
         types: PhantomData,
     };
-    /// `equipment_group`: Rentman field `equipment_group`.
+    /// `equipment_group`: Value of `equipment_group`.
+    ///
+    /// Rust value: `Id<ProjectEquipmentGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment_group`, documented type `string` (OpenAPI `ProjectEquipmentResponse.equipment_group`).
     pub const EQUIPMENT_GROUP: Field<ProjectEquipment, Id<ProjectEquipmentGroup>> = Field {
         name: "equipment_group",
         types: PhantomData,
     };
-    /// `discount`: Rentman field `discount`.
+    /// `discount`: Value of `discount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount`, documented type `number` (OpenAPI `ProjectEquipmentResponse.discount`).
     pub const DISCOUNT: Field<ProjectEquipment, Decimal> = Field {
         name: "discount",
         types: PhantomData,
     };
-    /// `is_option`: Rentman field `is_option`.
+    /// `is_option`: Value of `is_option`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_option`, documented type `boolean` (OpenAPI `ProjectEquipmentResponse.is_option`).
     pub const IS_OPTION: Field<ProjectEquipment, bool> = Field {
         name: "is_option",
         types: PhantomData,
     };
-    /// `factor`: Rentman field `factor`.
+    /// `factor`: Value of `factor`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor`, documented type `string` (OpenAPI `ProjectEquipmentResponse.factor`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const FACTOR: Field<ProjectEquipment, Decimal> = Field {
         name: "factor",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ProjectEquipmentResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ProjectEquipment, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `unit_price`: Rentman field `unit_price`.
+    /// `unit_price`: Value of `unit_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit_price`, documented type `number` (OpenAPI `ProjectEquipmentResponse.unit_price`).
     pub const UNIT_PRICE: Field<ProjectEquipment, Decimal> = Field {
         name: "unit_price",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectEquipmentResponse.name`).
     pub const NAME: Field<ProjectEquipment, String> = Field {
         name: "name",
         types: PhantomData,
     };
     /// `external_remark`: Note on financial documents.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_remark`, documented type `string` (OpenAPI `ProjectEquipmentResponse.external_remark`).
     pub const EXTERNAL_REMARK: Field<ProjectEquipment, String> = Field {
         name: "external_remark",
         types: PhantomData,
     };
     /// `internal_remark`: Note on packing lists.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `internal_remark`, documented type `string` (OpenAPI `ProjectEquipmentResponse.internal_remark`).
     pub const INTERNAL_REMARK: Field<ProjectEquipment, String> = Field {
         name: "internal_remark",
         types: PhantomData,
     };
-    /// `delay_notified`: Rentman field `delay_notified`.
+    /// `delay_notified`: Value of `delay_notified`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delay_notified`, documented type `boolean` (OpenAPI `ProjectEquipmentResponse.delay_notified`).
     pub const DELAY_NOTIFIED: Field<ProjectEquipment, bool> = Field {
         name: "delay_notified",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `ProjectEquipmentResponse.duration`).
     pub const DURATION: Field<ProjectEquipment, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `is_delayed`: Rentman field `is_delayed`.
+    /// `is_delayed`: Value of `is_delayed`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_delayed`, documented type `boolean` (OpenAPI `ProjectEquipmentResponse.is_delayed`).
     pub const IS_DELAYED: Field<ProjectEquipment, bool> = Field {
         name: "is_delayed",
         types: PhantomData,
@@ -2828,87 +5745,187 @@ pub mod project_equipment {
 pub mod project_equipment_group {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectEquipmentGroup>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectEquipmentGroupResponse.id`).
     pub const ID: Field<ProjectEquipmentGroup, Id<ProjectEquipmentGroup>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.created`).
     pub const CREATED: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.modified`).
     pub const MODIFIED: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.creator`).
     pub const CREATOR: Field<ProjectEquipmentGroup, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.project`).
     pub const PROJECT: Field<ProjectEquipmentGroup, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `subproject`: Rentman field `subproject`.
+    /// `subproject`: Value of `subproject`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.subproject`).
     pub const SUBPROJECT: Field<ProjectEquipmentGroup, Id<Subproject>> = Field {
         name: "subproject",
         types: PhantomData,
     };
     /// `additional_scanned`: This group was additionally scanned from the warehouse.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `additional_scanned`, documented type `boolean` (OpenAPI `ProjectEquipmentGroupResponse.additional_scanned`).
     pub const ADDITIONAL_SCANNED: Field<ProjectEquipmentGroup, bool> = Field {
         name: "additional_scanned",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.name`).
     pub const NAME: Field<ProjectEquipmentGroup, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `usageperiod_start`: Rentman field `usageperiod_start`.
+    /// `usageperiod_start`: Value of `usageperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.usageperiod_start`).
     pub const USAGEPERIOD_START: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "usageperiod_start",
         types: PhantomData,
     };
-    /// `usageperiod_end`: Rentman field `usageperiod_end`.
+    /// `usageperiod_end`: Value of `usageperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.usageperiod_end`).
     pub const USAGEPERIOD_END: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "usageperiod_end",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `ProjectEquipmentGroupResponse.duration`).
     pub const DURATION: Field<ProjectEquipmentGroup, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<ProjectEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `is_delayed`: Rentman field `is_delayed`.
+    /// `is_delayed`: Value of `is_delayed`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_delayed`, documented type `boolean` (OpenAPI `ProjectEquipmentGroupResponse.is_delayed`).
     pub const IS_DELAYED: Field<ProjectEquipmentGroup, bool> = Field {
         name: "is_delayed",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ProjectEquipmentGroup, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `in_price_calculation`: Rentman field `in_price_calculation`.
+    /// `in_price_calculation`: Value of `in_price_calculation`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_price_calculation`, documented type `boolean` (OpenAPI `ProjectEquipmentGroupResponse.in_price_calculation`).
     pub const IN_PRICE_CALCULATION: Field<ProjectEquipmentGroup, bool> = Field {
         name: "in_price_calculation",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectEquipmentGroupResponse.remark`).
     pub const REMARK: Field<ProjectEquipmentGroup, String> = Field {
         name: "remark",
         types: PhantomData,
@@ -2919,132 +5936,287 @@ pub mod project_equipment_group {
 pub mod project_function {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectFunction>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectFunctionResponse.id`).
     pub const ID: Field<ProjectFunction, Id<ProjectFunction>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectFunctionResponse.created`).
     pub const CREATED: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectFunctionResponse.modified`).
     pub const MODIFIED: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectFunctionResponse.creator`).
     pub const CREATOR: Field<ProjectFunction, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `cost_rate`: Rentman field `cost_rate`.
+    /// `cost_rate`: Value of `cost_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_rate`, documented type `string` (OpenAPI `ProjectFunctionResponse.cost_rate`).
     pub const COST_RATE: Field<ProjectFunction, Id<Rate>> = Field {
         name: "cost_rate",
         types: PhantomData,
     };
-    /// `cost_accommodation`: Rentman field `cost_accommodation`.
+    /// `cost_accommodation`: Value of `cost_accommodation`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_accommodation`, documented type `number` (OpenAPI `ProjectFunctionResponse.cost_accommodation`).
     pub const COST_ACCOMMODATION: Field<ProjectFunction, Decimal> = Field {
         name: "cost_accommodation",
         types: PhantomData,
     };
-    /// `cost_catering`: Rentman field `cost_catering`.
+    /// `cost_catering`: Value of `cost_catering`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_catering`, documented type `number` (OpenAPI `ProjectFunctionResponse.cost_catering`).
     pub const COST_CATERING: Field<ProjectFunction, Decimal> = Field {
         name: "cost_catering",
         types: PhantomData,
     };
-    /// `cost_travel`: Rentman field `cost_travel`.
+    /// `cost_travel`: Value of `cost_travel`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_travel`, documented type `number` (OpenAPI `ProjectFunctionResponse.cost_travel`).
     pub const COST_TRAVEL: Field<ProjectFunction, Decimal> = Field {
         name: "cost_travel",
         types: PhantomData,
     };
-    /// `cost_other`: Rentman field `cost_other`.
+    /// `cost_other`: Value of `cost_other`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_other`, documented type `number` (OpenAPI `ProjectFunctionResponse.cost_other`).
     pub const COST_OTHER: Field<ProjectFunction, Decimal> = Field {
         name: "cost_other",
         types: PhantomData,
     };
-    /// `price_rate`: Rentman field `price_rate`.
+    /// `price_rate`: Value of `price_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price_rate`, documented type `string` (OpenAPI `ProjectFunctionResponse.price_rate`).
     pub const PRICE_RATE: Field<ProjectFunction, Id<Rate>> = Field {
         name: "price_rate",
         types: PhantomData,
     };
-    /// `price_accommodation`: Rentman field `price_accommodation`.
+    /// `price_accommodation`: Value of `price_accommodation`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price_accommodation`, documented type `number` (OpenAPI `ProjectFunctionResponse.price_accommodation`).
     pub const PRICE_ACCOMMODATION: Field<ProjectFunction, Decimal> = Field {
         name: "price_accommodation",
         types: PhantomData,
     };
-    /// `price_catering`: Rentman field `price_catering`.
+    /// `price_catering`: Value of `price_catering`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price_catering`, documented type `number` (OpenAPI `ProjectFunctionResponse.price_catering`).
     pub const PRICE_CATERING: Field<ProjectFunction, Decimal> = Field {
         name: "price_catering",
         types: PhantomData,
     };
-    /// `price_travel`: Rentman field `price_travel`.
+    /// `price_travel`: Value of `price_travel`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price_travel`, documented type `number` (OpenAPI `ProjectFunctionResponse.price_travel`).
     pub const PRICE_TRAVEL: Field<ProjectFunction, Decimal> = Field {
         name: "price_travel",
         types: PhantomData,
     };
-    /// `price_other`: Rentman field `price_other`.
+    /// `price_other`: Value of `price_other`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price_other`, documented type `number` (OpenAPI `ProjectFunctionResponse.price_other`).
     pub const PRICE_OTHER: Field<ProjectFunction, Decimal> = Field {
         name: "price_other",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `ProjectFunctionResponse.project`).
     pub const PROJECT: Field<ProjectFunction, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `subproject`: Rentman field `subproject`.
+    /// `subproject`: Value of `subproject`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject`, documented type `string` (OpenAPI `ProjectFunctionResponse.subproject`).
     pub const SUBPROJECT: Field<ProjectFunction, Id<Subproject>> = Field {
         name: "subproject",
         types: PhantomData,
     };
-    /// `is_template`: Rentman field `is_template`.
+    /// `is_template`: Value of `is_template`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_template`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.is_template`).
     pub const IS_TEMPLATE: Field<ProjectFunction, bool> = Field {
         name: "is_template",
         types: PhantomData,
     };
-    /// `group`: Rentman field `group`.
+    /// `group`: Value of `group`.
+    ///
+    /// Rust value: `Id<ProjectFunctionGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `group`, documented type `string` (OpenAPI `ProjectFunctionResponse.group`).
     pub const GROUP: Field<ProjectFunction, Id<ProjectFunctionGroup>> = Field {
         name: "group",
         types: PhantomData,
     };
     /// `name_external`: Name on financial documents.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name_external`, documented type `string` (OpenAPI `ProjectFunctionResponse.name_external`).
     pub const NAME_EXTERNAL: Field<ProjectFunction, String> = Field {
         name: "name_external",
         types: PhantomData,
     };
     /// `name`: Name on packing lists.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectFunctionResponse.name`).
     pub const NAME: Field<ProjectFunction, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `travel_time_before`: Rentman field `travel_time_before`.
+    /// `travel_time_before`: Value of `travel_time_before`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `travel_time_before`, documented type `number` (OpenAPI `ProjectFunctionResponse.travel_time_before`).
     pub const TRAVEL_TIME_BEFORE: Field<ProjectFunction, Decimal> = Field {
         name: "travel_time_before",
         types: PhantomData,
     };
-    /// `travel_time_after`: Rentman field `travel_time_after`.
+    /// `travel_time_after`: Value of `travel_time_after`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `travel_time_after`, documented type `number` (OpenAPI `ProjectFunctionResponse.travel_time_after`).
     pub const TRAVEL_TIME_AFTER: Field<ProjectFunction, Decimal> = Field {
         name: "travel_time_after",
         types: PhantomData,
     };
-    /// `use_travel_time_from_location`: Rentman field `use_travel_time_from_location`.
+    /// `use_travel_time_from_location`: Value of `use_travel_time_from_location`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `use_travel_time_from_location`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.use_travel_time_from_location`).
     pub const USE_TRAVEL_TIME_FROM_LOCATION: Field<ProjectFunction, bool> = Field {
         name: "use_travel_time_from_location",
         types: PhantomData,
     };
-    /// `use_distance_from_location`: Rentman field `use_distance_from_location`.
+    /// `use_distance_from_location`: Value of `use_distance_from_location`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `use_distance_from_location`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.use_distance_from_location`).
     pub const USE_DISTANCE_FROM_LOCATION: Field<ProjectFunction, bool> = Field {
         name: "use_distance_from_location",
         types: PhantomData,
     };
-    /// `usageperiod_start`: Rentman field `usageperiod_start`.
+    /// `usageperiod_start`: Value of `usageperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.usageperiod_start`).
     pub const USAGEPERIOD_START: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "usageperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_start_schedule_is_start`: Rentman field `planperiod_start_schedule_is_start`.
+    /// `planperiod_start_schedule_is_start`: Value of `planperiod_start_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionPlanperiodStartScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionPlanperiodStartScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.planperiod_start_schedule_is_start`).
     pub const PLANPERIOD_START_SCHEDULE_IS_START: Field<
         ProjectFunction,
         ProjectFunctionPlanperiodStartScheduleIsStart,
@@ -3052,7 +6224,14 @@ pub mod project_function {
         name: "planperiod_start_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_start_schedule_is_start`: Rentman field `usageperiod_start_schedule_is_start`.
+    /// `usageperiod_start_schedule_is_start`: Value of `usageperiod_start_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionUsageperiodStartScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionUsageperiodStartScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.usageperiod_start_schedule_is_start`).
     pub const USAGEPERIOD_START_SCHEDULE_IS_START: Field<
         ProjectFunction,
         ProjectFunctionUsageperiodStartScheduleIsStart,
@@ -3060,7 +6239,14 @@ pub mod project_function {
         name: "usageperiod_start_schedule_is_start",
         types: PhantomData,
     };
-    /// `planperiod_end_schedule_is_start`: Rentman field `planperiod_end_schedule_is_start`.
+    /// `planperiod_end_schedule_is_start`: Value of `planperiod_end_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionPlanperiodEndScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionPlanperiodEndScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.planperiod_end_schedule_is_start`).
     pub const PLANPERIOD_END_SCHEDULE_IS_START: Field<
         ProjectFunction,
         ProjectFunctionPlanperiodEndScheduleIsStart,
@@ -3068,7 +6254,14 @@ pub mod project_function {
         name: "planperiod_end_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_end_schedule_is_start`: Rentman field `usageperiod_end_schedule_is_start`.
+    /// `usageperiod_end_schedule_is_start`: Value of `usageperiod_end_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionUsageperiodEndScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionUsageperiodEndScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.usageperiod_end_schedule_is_start`).
     pub const USAGEPERIOD_END_SCHEDULE_IS_START: Field<
         ProjectFunction,
         ProjectFunctionUsageperiodEndScheduleIsStart,
@@ -3076,112 +6269,240 @@ pub mod project_function {
         name: "usageperiod_end_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_end`: Rentman field `usageperiod_end`.
+    /// `usageperiod_end`: Value of `usageperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end`, documented type `string` (OpenAPI `ProjectFunctionResponse.usageperiod_end`).
     pub const USAGEPERIOD_END: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "usageperiod_end",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `ProjectFunctionResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `ProjectFunctionResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<ProjectFunction, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `ProjectFunctionType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `ProjectFunctionResponse.type`).
     pub const TYPE: Field<ProjectFunction, ProjectFunctionType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `ProjectFunctionResponse.duration`).
     pub const DURATION: Field<ProjectFunction, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `amount`: Rentman field `amount`.
+    /// `amount`: Value of `amount`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `amount`, documented type `integer` (OpenAPI `ProjectFunctionResponse.amount`).
     pub const AMOUNT: Field<ProjectFunction, i64> = Field {
         name: "amount",
         types: PhantomData,
     };
-    /// `break`: Rentman field `break`.
+    /// `break`: Value of `break`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `break`, documented type `number` (OpenAPI `ProjectFunctionResponse.break`).
     pub const BREAK: Field<ProjectFunction, Decimal> = Field {
         name: "break",
         types: PhantomData,
     };
-    /// `distance`: Rentman field `distance`.
+    /// `distance`: Value of `distance`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `distance`, documented type `number` (OpenAPI `ProjectFunctionResponse.distance`).
     pub const DISTANCE: Field<ProjectFunction, Decimal> = Field {
         name: "distance",
         types: PhantomData,
     };
-    /// `twoway`: Rentman field `twoway`.
+    /// `twoway`: Value of `twoway`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `twoway`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.twoway`).
     pub const TWOWAY: Field<ProjectFunction, bool> = Field {
         name: "twoway",
         types: PhantomData,
     };
-    /// `taxclass`: Rentman field `taxclass`.
+    /// `taxclass`: Value of `taxclass`.
+    ///
+    /// Rust value: `Id<TaxClass>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `taxclass`, documented type `string` (OpenAPI `ProjectFunctionResponse.taxclass`).
     pub const TAXCLASS: Field<ProjectFunction, Id<TaxClass>> = Field {
         name: "taxclass",
         types: PhantomData,
     };
-    /// `ledger`: Rentman field `ledger`.
+    /// `ledger`: Value of `ledger`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger`, documented type `string` (OpenAPI `ProjectFunctionResponse.ledger`).
     pub const LEDGER: Field<ProjectFunction, Id<LedgerCode>> = Field {
         name: "ledger",
         types: PhantomData,
     };
-    /// `ledger_debit`: Rentman field `ledger_debit`.
+    /// `ledger_debit`: Value of `ledger_debit`.
+    ///
+    /// Rust value: `Id<LedgerCode>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ledger_debit`, documented type `string` (OpenAPI `ProjectFunctionResponse.ledger_debit`).
     pub const LEDGER_DEBIT: Field<ProjectFunction, Id<LedgerCode>> = Field {
         name: "ledger_debit",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ProjectFunctionResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ProjectFunction, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `remark_client`: Rentman field `remark_client`.
+    /// `remark_client`: Value of `remark_client`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark_client`, documented type `string` (OpenAPI `ProjectFunctionResponse.remark_client`).
     pub const REMARK_CLIENT: Field<ProjectFunction, String> = Field {
         name: "remark_client",
         types: PhantomData,
     };
-    /// `remark_planner`: Rentman field `remark_planner`.
+    /// `remark_planner`: Value of `remark_planner`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark_planner`, documented type `string` (OpenAPI `ProjectFunctionResponse.remark_planner`).
     pub const REMARK_PLANNER: Field<ProjectFunction, String> = Field {
         name: "remark_planner",
         types: PhantomData,
     };
-    /// `remark_crew`: Rentman field `remark_crew`.
+    /// `remark_crew`: Value of `remark_crew`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark_crew`, documented type `string` (OpenAPI `ProjectFunctionResponse.remark_crew`).
     pub const REMARK_CREW: Field<ProjectFunction, String> = Field {
         name: "remark_crew",
         types: PhantomData,
     };
-    /// `in_financial`: Rentman field `in_financial`.
+    /// `in_financial`: Value of `in_financial`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_financial`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.in_financial`).
     pub const IN_FINANCIAL: Field<ProjectFunction, bool> = Field {
         name: "in_financial",
         types: PhantomData,
     };
-    /// `in_planning`: Rentman field `in_planning`.
+    /// `in_planning`: Value of `in_planning`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_planning`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.in_planning`).
     pub const IN_PLANNING: Field<ProjectFunction, bool> = Field {
         name: "in_planning",
         types: PhantomData,
     };
     /// `is_plannable`: If yes, crew members scheduled on this shift will be shown as available for other functions.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_plannable`, documented type `boolean` (OpenAPI `ProjectFunctionResponse.is_plannable`).
     pub const IS_PLANNABLE: Field<ProjectFunction, bool> = Field {
         name: "is_plannable",
         types: PhantomData,
     };
     /// `recurrence_group`: Identification which recurrences belong together.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_group`, documented type `integer` (OpenAPI `ProjectFunctionResponse.recurrence_group`).
     pub const RECURRENCE_GROUP: Field<ProjectFunction, i64> = Field {
         name: "recurrence_group",
         types: PhantomData,
     };
     /// `recurrence_enddate`: Date the recurrence ends.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_enddate`, documented type `string` (OpenAPI `ProjectFunctionResponse.recurrence_enddate`).
     pub const RECURRENCE_ENDDATE: Field<ProjectFunction, String> = Field {
         name: "recurrence_enddate",
         types: PhantomData,
     };
     /// `recurrence_interval_unit`: Period between each recurrence. E.g. every x day/week/month/year.
+    ///
+    /// Rust value: `ProjectFunctionRecurrenceIntervalUnit`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionRecurrenceIntervalUnit`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval_unit`, documented type `string` (OpenAPI `ProjectFunctionResponse.recurrence_interval_unit`).
     pub const RECURRENCE_INTERVAL_UNIT: Field<
         ProjectFunction,
         ProjectFunctionRecurrenceIntervalUnit,
@@ -3190,6 +6511,11 @@ pub mod project_function {
         types: PhantomData,
     };
     /// `recurrence_interval`: Number of days/weeks/months/years between each recurrence. E.g. every 2 weeks.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurrence_interval`, documented type `integer` (OpenAPI `ProjectFunctionResponse.recurrence_interval`).
     pub const RECURRENCE_INTERVAL: Field<ProjectFunction, i64> = Field {
         name: "recurrence_interval",
         types: PhantomData,
@@ -3200,47 +6526,101 @@ pub mod project_function {
 pub mod project_function_group {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectFunctionGroup>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectFunctionGroupResponse.id`).
     pub const ID: Field<ProjectFunctionGroup, Id<ProjectFunctionGroup>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.created`).
     pub const CREATED: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.modified`).
     pub const MODIFIED: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.creator`).
     pub const CREATOR: Field<ProjectFunctionGroup, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.name`).
     pub const NAME: Field<ProjectFunctionGroup, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.project`).
     pub const PROJECT: Field<ProjectFunctionGroup, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `subproject`: Rentman field `subproject`.
+    /// `subproject`: Value of `subproject`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.subproject`).
     pub const SUBPROJECT: Field<ProjectFunctionGroup, Id<Subproject>> = Field {
         name: "subproject",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `ProjectFunctionGroupResponse.duration`).
     pub const DURATION: Field<ProjectFunctionGroup, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `planperiod_start_schedule_is_start`: Rentman field `planperiod_start_schedule_is_start`.
+    /// `planperiod_start_schedule_is_start`: Value of `planperiod_start_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionGroupPlanperiodStartScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionGroupPlanperiodStartScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.planperiod_start_schedule_is_start`).
     pub const PLANPERIOD_START_SCHEDULE_IS_START: Field<
         ProjectFunctionGroup,
         ProjectFunctionGroupPlanperiodStartScheduleIsStart,
@@ -3248,7 +6628,14 @@ pub mod project_function_group {
         name: "planperiod_start_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_start_schedule_is_start`: Rentman field `usageperiod_start_schedule_is_start`.
+    /// `usageperiod_start_schedule_is_start`: Value of `usageperiod_start_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionGroupUsageperiodStartScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionGroupUsageperiodStartScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.usageperiod_start_schedule_is_start`).
     pub const USAGEPERIOD_START_SCHEDULE_IS_START: Field<
         ProjectFunctionGroup,
         ProjectFunctionGroupUsageperiodStartScheduleIsStart,
@@ -3256,7 +6643,14 @@ pub mod project_function_group {
         name: "usageperiod_start_schedule_is_start",
         types: PhantomData,
     };
-    /// `planperiod_end_schedule_is_start`: Rentman field `planperiod_end_schedule_is_start`.
+    /// `planperiod_end_schedule_is_start`: Value of `planperiod_end_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionGroupPlanperiodEndScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionGroupPlanperiodEndScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.planperiod_end_schedule_is_start`).
     pub const PLANPERIOD_END_SCHEDULE_IS_START: Field<
         ProjectFunctionGroup,
         ProjectFunctionGroupPlanperiodEndScheduleIsStart,
@@ -3264,7 +6658,14 @@ pub mod project_function_group {
         name: "planperiod_end_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_end_schedule_is_start`: Rentman field `usageperiod_end_schedule_is_start`.
+    /// `usageperiod_end_schedule_is_start`: Value of `usageperiod_end_schedule_is_start`.
+    ///
+    /// Rust value: `ProjectFunctionGroupUsageperiodEndScheduleIsStart`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectFunctionGroupUsageperiodEndScheduleIsStart`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end_schedule_is_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.usageperiod_end_schedule_is_start`).
     pub const USAGEPERIOD_END_SCHEDULE_IS_START: Field<
         ProjectFunctionGroup,
         ProjectFunctionGroupUsageperiodEndScheduleIsStart,
@@ -3272,27 +6673,56 @@ pub mod project_function_group {
         name: "usageperiod_end_schedule_is_start",
         types: PhantomData,
     };
-    /// `usageperiod_start`: Rentman field `usageperiod_start`.
+    /// `usageperiod_start`: Value of `usageperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.usageperiod_start`).
     pub const USAGEPERIOD_START: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "usageperiod_start",
         types: PhantomData,
     };
-    /// `usageperiod_end`: Rentman field `usageperiod_end`.
+    /// `usageperiod_end`: Value of `usageperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.usageperiod_end`).
     pub const USAGEPERIOD_END: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "usageperiod_end",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<ProjectFunctionGroup, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectFunctionGroupResponse.remark`).
     pub const REMARK: Field<ProjectFunctionGroup, String> = Field {
         name: "remark",
         types: PhantomData,
@@ -3303,202 +6733,423 @@ pub mod project_function_group {
 pub mod project_request {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectRequest>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectRequestResponse.id`).
     pub const ID: Field<ProjectRequest, Id<ProjectRequest>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectRequestResponse.created`).
     pub const CREATED: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectRequestResponse.modified`).
     pub const MODIFIED: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectRequestResponse.creator`).
     pub const CREATOR: Field<ProjectRequest, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `linked_contact`: Rentman field `linked_contact`.
+    /// `linked_contact`: Value of `linked_contact`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linked_contact`, documented type `string` (OpenAPI `ProjectRequestResponse.linked_contact`).
     pub const LINKED_CONTACT: Field<ProjectRequest, Id<Contact>> = Field {
         name: "linked_contact",
         types: PhantomData,
     };
-    /// `contact_mailing_number`: Rentman field `contact_mailing_number`.
+    /// `contact_mailing_number`: Value of `contact_mailing_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_mailing_number`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_mailing_number`).
     pub const CONTACT_MAILING_NUMBER: Field<ProjectRequest, String> = Field {
         name: "contact_mailing_number",
         types: PhantomData,
     };
-    /// `contact_mailing_country`: Rentman field `contact_mailing_country`.
+    /// `contact_mailing_country`: Value of `contact_mailing_country`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_mailing_country`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_mailing_country`).
     pub const CONTACT_MAILING_COUNTRY: Field<ProjectRequest, String> = Field {
         name: "contact_mailing_country",
         types: PhantomData,
     };
-    /// `contact_name`: Rentman field `contact_name`.
+    /// `contact_name`: Value of `contact_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_name`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_name`).
     pub const CONTACT_NAME: Field<ProjectRequest, String> = Field {
         name: "contact_name",
         types: PhantomData,
     };
-    /// `contact_mailing_postalcode`: Rentman field `contact_mailing_postalcode`.
+    /// `contact_mailing_postalcode`: Value of `contact_mailing_postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_mailing_postalcode`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_mailing_postalcode`).
     pub const CONTACT_MAILING_POSTALCODE: Field<ProjectRequest, String> = Field {
         name: "contact_mailing_postalcode",
         types: PhantomData,
     };
-    /// `contact_phone`: Rentman field `contact_phone`.
+    /// `contact_phone`: Value of `contact_phone`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_phone`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_phone`).
     pub const CONTACT_PHONE: Field<ProjectRequest, String> = Field {
         name: "contact_phone",
         types: PhantomData,
     };
-    /// `contact_mailing_city`: Rentman field `contact_mailing_city`.
+    /// `contact_mailing_city`: Value of `contact_mailing_city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_mailing_city`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_mailing_city`).
     pub const CONTACT_MAILING_CITY: Field<ProjectRequest, String> = Field {
         name: "contact_mailing_city",
         types: PhantomData,
     };
-    /// `contact_mailing_street`: Rentman field `contact_mailing_street`.
+    /// `contact_mailing_street`: Value of `contact_mailing_street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_mailing_street`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_mailing_street`).
     pub const CONTACT_MAILING_STREET: Field<ProjectRequest, String> = Field {
         name: "contact_mailing_street",
         types: PhantomData,
     };
-    /// `linked_contact_person`: Rentman field `linked_contact_person`.
+    /// `linked_contact_person`: Value of `linked_contact_person`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linked_contact_person`, documented type `string` (OpenAPI `ProjectRequestResponse.linked_contact_person`).
     pub const LINKED_CONTACT_PERSON: Field<ProjectRequest, Id<ContactPerson>> = Field {
         name: "linked_contact_person",
         types: PhantomData,
     };
-    /// `contact_person_lastname`: Rentman field `contact_person_lastname`.
+    /// `contact_person_lastname`: Value of `contact_person_lastname`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_person_lastname`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_person_lastname`).
     pub const CONTACT_PERSON_LASTNAME: Field<ProjectRequest, String> = Field {
         name: "contact_person_lastname",
         types: PhantomData,
     };
-    /// `contact_person_email`: Rentman field `contact_person_email`.
+    /// `contact_person_email`: Value of `contact_person_email`.
+    ///
+    /// Rust value: `EmailAddress`.
+    /// An email string using [`EmailAddress`]; empty addresses are allowed.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_person_email`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_person_email`).
     pub const CONTACT_PERSON_EMAIL: Field<ProjectRequest, EmailAddress> = Field {
         name: "contact_person_email",
         types: PhantomData,
     };
-    /// `contact_person_middle_name`: Rentman field `contact_person_middle_name`.
+    /// `contact_person_middle_name`: Value of `contact_person_middle_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_person_middle_name`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_person_middle_name`).
     pub const CONTACT_PERSON_MIDDLE_NAME: Field<ProjectRequest, String> = Field {
         name: "contact_person_middle_name",
         types: PhantomData,
     };
-    /// `contact_person_first_name`: Rentman field `contact_person_first_name`.
+    /// `contact_person_first_name`: Value of `contact_person_first_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_person_first_name`, documented type `string` (OpenAPI `ProjectRequestResponse.contact_person_first_name`).
     pub const CONTACT_PERSON_FIRST_NAME: Field<ProjectRequest, String> = Field {
         name: "contact_person_first_name",
         types: PhantomData,
     };
-    /// `usageperiod_end`: Rentman field `usageperiod_end`.
+    /// `usageperiod_end`: Value of `usageperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end`, documented type `string` (OpenAPI `ProjectRequestResponse.usageperiod_end`).
     pub const USAGEPERIOD_END: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "usageperiod_end",
         types: PhantomData,
     };
-    /// `usageperiod_start`: Rentman field `usageperiod_start`.
+    /// `usageperiod_start`: Value of `usageperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start`, documented type `string` (OpenAPI `ProjectRequestResponse.usageperiod_start`).
     pub const USAGEPERIOD_START: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "usageperiod_start",
         types: PhantomData,
     };
-    /// `is_paid`: Rentman field `is_paid`.
+    /// `is_paid`: Value of `is_paid`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_paid`, documented type `boolean` (OpenAPI `ProjectRequestResponse.is_paid`).
     pub const IS_PAID: Field<ProjectRequest, bool> = Field {
         name: "is_paid",
         types: PhantomData,
     };
-    /// `language`: Rentman field `language`.
+    /// `language`: Value of `language`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `language`, documented type `string` (OpenAPI `ProjectRequestResponse.language`).
     pub const LANGUAGE: Field<ProjectRequest, String> = Field {
         name: "language",
         types: PhantomData,
     };
-    /// `in`: Rentman field `in`.
+    /// `in`: Value of `in`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in`, documented type `string` (OpenAPI `ProjectRequestResponse.in`).
     pub const IN: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "in",
         types: PhantomData,
     };
-    /// `out`: Rentman field `out`.
+    /// `out`: Value of `out`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `out`, documented type `string` (OpenAPI `ProjectRequestResponse.out`).
     pub const OUT: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "out",
         types: PhantomData,
     };
-    /// `linked_location`: Rentman field `linked_location`.
+    /// `linked_location`: Value of `linked_location`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linked_location`, documented type `string` (OpenAPI `ProjectRequestResponse.linked_location`).
     pub const LINKED_LOCATION: Field<ProjectRequest, Id<Contact>> = Field {
         name: "linked_location",
         types: PhantomData,
     };
-    /// `location_mailing_number`: Rentman field `location_mailing_number`.
+    /// `location_mailing_number`: Value of `location_mailing_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_mailing_number`, documented type `string` (OpenAPI `ProjectRequestResponse.location_mailing_number`).
     pub const LOCATION_MAILING_NUMBER: Field<ProjectRequest, String> = Field {
         name: "location_mailing_number",
         types: PhantomData,
     };
-    /// `location_mailing_country`: Rentman field `location_mailing_country`.
+    /// `location_mailing_country`: Value of `location_mailing_country`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_mailing_country`, documented type `string` (OpenAPI `ProjectRequestResponse.location_mailing_country`).
     pub const LOCATION_MAILING_COUNTRY: Field<ProjectRequest, String> = Field {
         name: "location_mailing_country",
         types: PhantomData,
     };
-    /// `location_name`: Rentman field `location_name`.
+    /// `location_name`: Value of `location_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_name`, documented type `string` (OpenAPI `ProjectRequestResponse.location_name`).
     pub const LOCATION_NAME: Field<ProjectRequest, String> = Field {
         name: "location_name",
         types: PhantomData,
     };
-    /// `location_mailing_postalcode`: Rentman field `location_mailing_postalcode`.
+    /// `location_mailing_postalcode`: Value of `location_mailing_postalcode`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_mailing_postalcode`, documented type `string` (OpenAPI `ProjectRequestResponse.location_mailing_postalcode`).
     pub const LOCATION_MAILING_POSTALCODE: Field<ProjectRequest, String> = Field {
         name: "location_mailing_postalcode",
         types: PhantomData,
     };
-    /// `location_mailing_city`: Rentman field `location_mailing_city`.
+    /// `location_mailing_city`: Value of `location_mailing_city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_mailing_city`, documented type `string` (OpenAPI `ProjectRequestResponse.location_mailing_city`).
     pub const LOCATION_MAILING_CITY: Field<ProjectRequest, String> = Field {
         name: "location_mailing_city",
         types: PhantomData,
     };
-    /// `location_mailing_street`: Rentman field `location_mailing_street`.
+    /// `location_mailing_street`: Value of `location_mailing_street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_mailing_street`, documented type `string` (OpenAPI `ProjectRequestResponse.location_mailing_street`).
     pub const LOCATION_MAILING_STREET: Field<ProjectRequest, String> = Field {
         name: "location_mailing_street",
         types: PhantomData,
     };
-    /// `location_phone`: Rentman field `location_phone`.
+    /// `location_phone`: Value of `location_phone`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_phone`, documented type `string` (OpenAPI `ProjectRequestResponse.location_phone`).
     pub const LOCATION_PHONE: Field<ProjectRequest, String> = Field {
         name: "location_phone",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectRequestResponse.name`).
     pub const NAME: Field<ProjectRequest, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `external_reference`: Rentman field `external_reference`.
+    /// `external_reference`: Value of `external_reference`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_reference`, documented type `integer` (OpenAPI `ProjectRequestResponse.external_reference`).
     pub const EXTERNAL_REFERENCE: Field<ProjectRequest, i64> = Field {
         name: "external_reference",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectRequestResponse.remark`).
     pub const REMARK: Field<ProjectRequest, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `ProjectRequestResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `ProjectRequestResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<ProjectRequest, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `price`: Rentman field `price`.
+    /// `price`: Value of `price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price`, documented type `number` (OpenAPI `ProjectRequestResponse.price`).
     pub const PRICE: Field<ProjectRequest, Decimal> = Field {
         name: "price",
         types: PhantomData,
     };
-    /// `linked_project`: Rentman field `linked_project`.
+    /// `linked_project`: Value of `linked_project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linked_project`, documented type `string` (OpenAPI `ProjectRequestResponse.linked_project`).
     pub const LINKED_PROJECT: Field<ProjectRequest, Id<Project>> = Field {
         name: "linked_project",
         types: PhantomData,
     };
-    /// `source`: Rentman field `source`.
+    /// `source`: Value of `source`.
+    ///
+    /// Rust value: `ProjectRequestSource`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectRequestSource`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `source`, documented type `string` (OpenAPI `ProjectRequestResponse.source`).
     pub const SOURCE: Field<ProjectRequest, ProjectRequestSource> = Field {
         name: "source",
         types: PhantomData,
     };
-    /// `status`: Rentman field `status`.
+    /// `status`: Value of `status`.
+    ///
+    /// Rust value: `ProjectRequestStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectRequestStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `ProjectRequestResponse.status`).
     pub const STATUS: Field<ProjectRequest, ProjectRequestStatus> = Field {
         name: "status",
         types: PhantomData,
@@ -3509,87 +7160,186 @@ pub mod project_request {
 pub mod project_request_equipment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectRequestEquipment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectRequestEquipmentResponse.id`).
     pub const ID: Field<ProjectRequestEquipment, Id<ProjectRequestEquipment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.created`).
     pub const CREATED: Field<ProjectRequestEquipment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.modified`).
     pub const MODIFIED: Field<ProjectRequestEquipment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.creator`).
     pub const CREATOR: Field<ProjectRequestEquipment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `integer` (OpenAPI `ProjectRequestEquipmentResponse.quantity`).
     pub const QUANTITY: Field<ProjectRequestEquipment, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `quantity_total`: Rentman field `quantity_total`.
+    /// `quantity_total`: Value of `quantity_total`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity_total`, documented type `integer` (OpenAPI `ProjectRequestEquipmentResponse.quantity_total`).
     pub const QUANTITY_TOTAL: Field<ProjectRequestEquipment, i64> = Field {
         name: "quantity_total",
         types: PhantomData,
     };
-    /// `is_comment`: Rentman field `is_comment`.
+    /// `is_comment`: Value of `is_comment`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_comment`, documented type `boolean` (OpenAPI `ProjectRequestEquipmentResponse.is_comment`).
     pub const IS_COMMENT: Field<ProjectRequestEquipment, bool> = Field {
         name: "is_comment",
         types: PhantomData,
     };
-    /// `is_kit`: Rentman field `is_kit`.
+    /// `is_kit`: Value of `is_kit`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_kit`, documented type `boolean` (OpenAPI `ProjectRequestEquipmentResponse.is_kit`).
     pub const IS_KIT: Field<ProjectRequestEquipment, bool> = Field {
         name: "is_kit",
         types: PhantomData,
     };
-    /// `discount`: Rentman field `discount`.
+    /// `discount`: Value of `discount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount`, documented type `number` (OpenAPI `ProjectRequestEquipmentResponse.discount`).
     pub const DISCOUNT: Field<ProjectRequestEquipment, Decimal> = Field {
         name: "discount",
         types: PhantomData,
     };
-    /// `linked_equipment`: Rentman field `linked_equipment`.
+    /// `linked_equipment`: Value of `linked_equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `linked_equipment`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.linked_equipment`).
     pub const LINKED_EQUIPMENT: Field<ProjectRequestEquipment, Id<Equipment>> = Field {
         name: "linked_equipment",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.name`).
     pub const NAME: Field<ProjectRequestEquipment, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `external_remark`: Rentman field `external_remark`.
+    /// `external_remark`: Value of `external_remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_remark`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.external_remark`).
     pub const EXTERNAL_REMARK: Field<ProjectRequestEquipment, String> = Field {
         name: "external_remark",
         types: PhantomData,
     };
     /// `parent`: The combination it is part of.
+    ///
+    /// Rust value: `Id<ProjectRequestEquipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.parent`).
     pub const PARENT: Field<ProjectRequestEquipment, Id<ProjectRequestEquipment>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `unit_price`: Rentman field `unit_price`.
+    /// `unit_price`: Value of `unit_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit_price`, documented type `number` (OpenAPI `ProjectRequestEquipmentResponse.unit_price`).
     pub const UNIT_PRICE: Field<ProjectRequestEquipment, Decimal> = Field {
         name: "unit_price",
         types: PhantomData,
     };
-    /// `project_request`: Rentman field `project_request`.
+    /// `project_request`: Value of `project_request`.
+    ///
+    /// Rust value: `Id<ProjectRequest>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project_request`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.project_request`).
     pub const PROJECT_REQUEST: Field<ProjectRequestEquipment, Id<ProjectRequest>> = Field {
         name: "project_request",
         types: PhantomData,
     };
-    /// `factor`: Rentman field `factor`.
+    /// `factor`: Value of `factor`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.factor`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const FACTOR: Field<ProjectRequestEquipment, Decimal> = Field {
         name: "factor",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `ProjectRequestEquipmentResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<ProjectRequestEquipment, i64> = Field {
         name: "order",
         types: PhantomData,
@@ -3600,27 +7350,56 @@ pub mod project_request_equipment {
 pub mod project_status {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectStatus>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectStatusResponse.id`).
     pub const ID: Field<ProjectStatus, Id<ProjectStatus>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectStatusResponse.created`).
     pub const CREATED: Field<ProjectStatus, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectStatusResponse.modified`).
     pub const MODIFIED: Field<ProjectStatus, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectStatusResponse.creator`).
     pub const CREATOR: Field<ProjectStatus, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectStatusResponse.name`).
     pub const NAME: Field<ProjectStatus, String> = Field {
         name: "name",
         types: PhantomData,
@@ -3631,27 +7410,56 @@ pub mod project_status {
 pub mod project_template {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectTemplate>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectTemplateResponse.id`).
     pub const ID: Field<ProjectTemplate, Id<ProjectTemplate>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectTemplateResponse.created`).
     pub const CREATED: Field<ProjectTemplate, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectTemplateResponse.modified`).
     pub const MODIFIED: Field<ProjectTemplate, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectTemplateResponse.creator`).
     pub const CREATOR: Field<ProjectTemplate, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectTemplateResponse.name`).
     pub const NAME: Field<ProjectTemplate, String> = Field {
         name: "name",
         types: PhantomData,
@@ -3662,37 +7470,78 @@ pub mod project_template {
 pub mod project_type {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectType>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectTypeResponse.id`).
     pub const ID: Field<ProjectType, Id<ProjectType>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectTypeResponse.created`).
     pub const CREATED: Field<ProjectType, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectTypeResponse.modified`).
     pub const MODIFIED: Field<ProjectType, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectTypeResponse.creator`).
     pub const CREATOR: Field<ProjectType, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `ProjectTypeResponse.name`).
     pub const NAME: Field<ProjectType, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `ProjectTypeResponse.color`).
     pub const COLOR: Field<ProjectType, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `ProjectTypeType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectTypeType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `ProjectTypeResponse.type`).
     pub const TYPE: Field<ProjectType, ProjectTypeType> = Field {
         name: "type",
         types: PhantomData,
@@ -3703,62 +7552,133 @@ pub mod project_type {
 pub mod project_vehicle {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<ProjectVehicle>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `ProjectVehicleResponse.id`).
     pub const ID: Field<ProjectVehicle, Id<ProjectVehicle>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `ProjectVehicleResponse.created`).
     pub const CREATED: Field<ProjectVehicle, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `ProjectVehicleResponse.modified`).
     pub const MODIFIED: Field<ProjectVehicle, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `ProjectVehicleResponse.creator`).
     pub const CREATOR: Field<ProjectVehicle, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `cost_rate`: Rentman field `cost_rate`.
+    /// `cost_rate`: Value of `cost_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_rate`, documented type `string` (OpenAPI `ProjectVehicleResponse.cost_rate`).
     pub const COST_RATE: Field<ProjectVehicle, Id<Rate>> = Field {
         name: "cost_rate",
         types: PhantomData,
     };
-    /// `function`: Rentman field `function`.
+    /// `function`: Value of `function`.
+    ///
+    /// Rust value: `Id<ProjectFunction>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `function`, documented type `string` (OpenAPI `ProjectVehicleResponse.function`).
     pub const FUNCTION: Field<ProjectVehicle, Id<ProjectFunction>> = Field {
         name: "function",
         types: PhantomData,
     };
-    /// `transport`: Rentman field `transport`.
+    /// `transport`: Value of `transport`.
+    ///
+    /// Rust value: `ProjectVehicleTransport`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`ProjectVehicleTransport`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `transport`, documented type `string` (OpenAPI `ProjectVehicleResponse.transport`).
     pub const TRANSPORT: Field<ProjectVehicle, ProjectVehicleTransport> = Field {
         name: "transport",
         types: PhantomData,
     };
-    /// `vehicle`: Rentman field `vehicle`.
+    /// `vehicle`: Value of `vehicle`.
+    ///
+    /// Rust value: `Id<Vehicle>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `vehicle`, documented type `string` (OpenAPI `ProjectVehicleResponse.vehicle`).
     pub const VEHICLE: Field<ProjectVehicle, Id<Vehicle>> = Field {
         name: "vehicle",
         types: PhantomData,
     };
-    /// `planningperiod_start`: Rentman field `planningperiod_start`.
+    /// `planningperiod_start`: Value of `planningperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planningperiod_start`, documented type `string` (OpenAPI `ProjectVehicleResponse.planningperiod_start`).
     pub const PLANNINGPERIOD_START: Field<ProjectVehicle, DateTime<FixedOffset>> = Field {
         name: "planningperiod_start",
         types: PhantomData,
     };
-    /// `planningperiod_end`: Rentman field `planningperiod_end`.
+    /// `planningperiod_end`: Value of `planningperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planningperiod_end`, documented type `string` (OpenAPI `ProjectVehicleResponse.planningperiod_end`).
     pub const PLANNINGPERIOD_END: Field<ProjectVehicle, DateTime<FixedOffset>> = Field {
         name: "planningperiod_end",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `ProjectVehicleResponse.remark`).
     pub const REMARK: Field<ProjectVehicle, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `remark_planner`: Rentman field `remark_planner`.
+    /// `remark_planner`: Value of `remark_planner`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark_planner`, documented type `string` (OpenAPI `ProjectVehicleResponse.remark_planner`).
     pub const REMARK_PLANNER: Field<ProjectVehicle, String> = Field {
         name: "remark_planner",
         types: PhantomData,
@@ -3769,122 +7689,263 @@ pub mod project_vehicle {
 pub mod purchase_order {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<PurchaseOrder>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `PurchaseOrderResponse.id`).
     pub const ID: Field<PurchaseOrder, Id<PurchaseOrder>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `PurchaseOrderResponse.created`).
     pub const CREATED: Field<PurchaseOrder, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `PurchaseOrderResponse.modified`).
     pub const MODIFIED: Field<PurchaseOrder, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `PurchaseOrderResponse.creator`).
     pub const CREATOR: Field<PurchaseOrder, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `filename`: Rentman field `filename`.
+    /// `filename`: Value of `filename`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `filename`, documented type `string` (OpenAPI `PurchaseOrderResponse.filename`).
     pub const FILENAME: Field<PurchaseOrder, String> = Field {
         name: "filename",
         types: PhantomData,
     };
-    /// `subject`: Rentman field `subject`.
+    /// `subject`: Value of `subject`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subject`, documented type `string` (OpenAPI `PurchaseOrderResponse.subject`).
     pub const SUBJECT: Field<PurchaseOrder, String> = Field {
         name: "subject",
         types: PhantomData,
     };
-    /// `owner`: Rentman field `owner`.
+    /// `owner`: Value of `owner`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `owner`, documented type `string` (OpenAPI `PurchaseOrderResponse.owner`).
     pub const OWNER: Field<PurchaseOrder, Id<Crew>> = Field {
         name: "owner",
         types: PhantomData,
     };
-    /// `date_of_issue`: Rentman field `date_of_issue`.
+    /// `date_of_issue`: Value of `date_of_issue`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `date_of_issue`, documented type `string` (OpenAPI `PurchaseOrderResponse.date_of_issue`).
     pub const DATE_OF_ISSUE: Field<PurchaseOrder, String> = Field {
         name: "date_of_issue",
         types: PhantomData,
     };
-    /// `delivery_date`: Rentman field `delivery_date`.
+    /// `delivery_date`: Value of `delivery_date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_date`, documented type `string` (OpenAPI `PurchaseOrderResponse.delivery_date`).
     pub const DELIVERY_DATE: Field<PurchaseOrder, DateTime<FixedOffset>> = Field {
         name: "delivery_date",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `PurchaseOrderResponse.description`).
     pub const DESCRIPTION: Field<PurchaseOrder, String> = Field {
         name: "description",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `PurchaseOrderResponse.number`).
     pub const NUMBER: Field<PurchaseOrder, String> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `approval_status`: Rentman field `approval_status`.
+    /// `approval_status`: Value of `approval_status`.
+    ///
+    /// Rust value: `PurchaseOrderApprovalStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PurchaseOrderApprovalStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `approval_status`, documented type `string` (OpenAPI `PurchaseOrderResponse.approval_status`).
     pub const APPROVAL_STATUS: Field<PurchaseOrder, PurchaseOrderApprovalStatus> = Field {
         name: "approval_status",
         types: PhantomData,
     };
-    /// `previous_status`: Rentman field `previous_status`.
+    /// `previous_status`: Value of `previous_status`.
+    ///
+    /// Rust value: `PurchaseOrderPreviousStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PurchaseOrderPreviousStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `previous_status`, documented type `string` (OpenAPI `PurchaseOrderResponse.previous_status`).
     pub const PREVIOUS_STATUS: Field<PurchaseOrder, PurchaseOrderPreviousStatus> = Field {
         name: "previous_status",
         types: PhantomData,
     };
-    /// `approved_amount`: Rentman field `approved_amount`.
+    /// `approved_amount`: Value of `approved_amount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `approved_amount`, documented type `number` (OpenAPI `PurchaseOrderResponse.approved_amount`).
     pub const APPROVED_AMOUNT: Field<PurchaseOrder, Decimal> = Field {
         name: "approved_amount",
         types: PhantomData,
     };
-    /// `supplier`: Rentman field `supplier`.
+    /// `supplier`: Value of `supplier`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `supplier`, documented type `string` (OpenAPI `PurchaseOrderResponse.supplier`).
     pub const SUPPLIER: Field<PurchaseOrder, Id<Contact>> = Field {
         name: "supplier",
         types: PhantomData,
     };
-    /// `contact_person`: Rentman field `contact_person`.
+    /// `contact_person`: Value of `contact_person`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact_person`, documented type `string` (OpenAPI `PurchaseOrderResponse.contact_person`).
     pub const CONTACT_PERSON: Field<PurchaseOrder, Id<ContactPerson>> = Field {
         name: "contact_person",
         types: PhantomData,
     };
-    /// `delivery_type`: Rentman field `delivery_type`.
+    /// `delivery_type`: Value of `delivery_type`.
+    ///
+    /// Rust value: `PurchaseOrderDeliveryType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PurchaseOrderDeliveryType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_type`, documented type `string` (OpenAPI `PurchaseOrderResponse.delivery_type`).
     pub const DELIVERY_TYPE: Field<PurchaseOrder, PurchaseOrderDeliveryType> = Field {
         name: "delivery_type",
         types: PhantomData,
     };
-    /// `delivery_location`: Rentman field `delivery_location`.
+    /// `delivery_location`: Value of `delivery_location`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_location`, documented type `string` (OpenAPI `PurchaseOrderResponse.delivery_location`).
     pub const DELIVERY_LOCATION: Field<PurchaseOrder, Id<Contact>> = Field {
         name: "delivery_location",
         types: PhantomData,
     };
-    /// `delivery_location_person`: Rentman field `delivery_location_person`.
+    /// `delivery_location_person`: Value of `delivery_location_person`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_location_person`, documented type `string` (OpenAPI `PurchaseOrderResponse.delivery_location_person`).
     pub const DELIVERY_LOCATION_PERSON: Field<PurchaseOrder, Id<ContactPerson>> = Field {
         name: "delivery_location_person",
         types: PhantomData,
     };
-    /// `delivery_warehouse`: Rentman field `delivery_warehouse`.
+    /// `delivery_warehouse`: Value of `delivery_warehouse`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_warehouse`, documented type `string` (OpenAPI `PurchaseOrderResponse.delivery_warehouse`).
     pub const DELIVERY_WAREHOUSE: Field<PurchaseOrder, Id<StockLocation>> = Field {
         name: "delivery_warehouse",
         types: PhantomData,
     };
     /// `accounting_code`: External identifier used for integrations with accounting software.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `accounting_code`, documented type `string` (OpenAPI `PurchaseOrderResponse.accounting_code`).
     pub const ACCOUNTING_CODE: Field<PurchaseOrder, String> = Field {
         name: "accounting_code",
         types: PhantomData,
     };
-    /// `export_status`: Rentman field `export_status`.
+    /// `export_status`: Value of `export_status`.
+    ///
+    /// Rust value: `PurchaseOrderExportStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PurchaseOrderExportStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `export_status`, documented type `string` (OpenAPI `PurchaseOrderResponse.export_status`).
     pub const EXPORT_STATUS: Field<PurchaseOrder, PurchaseOrderExportStatus> = Field {
         name: "export_status",
         types: PhantomData,
     };
-    /// `export_date`: Rentman field `export_date`.
+    /// `export_date`: Value of `export_date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `export_date`, documented type `string` (OpenAPI `PurchaseOrderResponse.export_date`).
     pub const EXPORT_DATE: Field<PurchaseOrder, DateTime<FixedOffset>> = Field {
         name: "export_date",
         types: PhantomData,
     };
-    /// `export_message`: Rentman field `export_message`.
+    /// `export_message`: Value of `export_message`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `export_message`, documented type `string` (OpenAPI `PurchaseOrderResponse.export_message`).
     pub const EXPORT_MESSAGE: Field<PurchaseOrder, String> = Field {
         name: "export_message",
         types: PhantomData,
@@ -3895,42 +7956,90 @@ pub mod purchase_order {
 pub mod purchase_order_cost {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<PurchaseOrderCost>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `PurchaseOrderCostResponse.id`).
     pub const ID: Field<PurchaseOrderCost, Id<PurchaseOrderCost>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `PurchaseOrderCostResponse.created`).
     pub const CREATED: Field<PurchaseOrderCost, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `PurchaseOrderCostResponse.modified`).
     pub const MODIFIED: Field<PurchaseOrderCost, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `PurchaseOrderCostResponse.creator`).
     pub const CREATOR: Field<PurchaseOrderCost, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `purchase_order`: Rentman field `purchase_order`.
+    /// `purchase_order`: Value of `purchase_order`.
+    ///
+    /// Rust value: `Id<PurchaseOrder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchase_order`, documented type `string` (OpenAPI `PurchaseOrderCostResponse.purchase_order`).
     pub const PURCHASE_ORDER: Field<PurchaseOrderCost, Id<PurchaseOrder>> = Field {
         name: "purchase_order",
         types: PhantomData,
     };
-    /// `costitem`: Rentman field `costitem`.
+    /// `costitem`: Value of `costitem`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `costitem`, documented type `integer` (OpenAPI `PurchaseOrderCostResponse.costitem`).
     pub const COSTITEM: Field<PurchaseOrderCost, i64> = Field {
         name: "costitem",
         types: PhantomData,
     };
-    /// `costitemtype`: Rentman field `costitemtype`.
+    /// `costitemtype`: Value of `costitemtype`.
+    ///
+    /// Rust value: `PurchaseOrderCostCostitemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`PurchaseOrderCostCostitemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `costitemtype`, documented type `string` (OpenAPI `PurchaseOrderCostResponse.costitemtype`).
     pub const COSTITEMTYPE: Field<PurchaseOrderCost, PurchaseOrderCostCostitemtype> = Field {
         name: "costitemtype",
         types: PhantomData,
     };
-    /// `approved_amount`: Rentman field `approved_amount`.
+    /// `approved_amount`: Value of `approved_amount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `approved_amount`, documented type `number` (OpenAPI `PurchaseOrderCostResponse.approved_amount`).
     pub const APPROVED_AMOUNT: Field<PurchaseOrderCost, Decimal> = Field {
         name: "approved_amount",
         types: PhantomData,
@@ -3941,47 +8050,99 @@ pub mod purchase_order_cost {
 pub mod purchase_order_global_cost {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<PurchaseOrderGlobalCost>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `PurchaseOrderGlobalCostResponse.id`).
     pub const ID: Field<PurchaseOrderGlobalCost, Id<PurchaseOrderGlobalCost>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.created`).
     pub const CREATED: Field<PurchaseOrderGlobalCost, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.modified`).
     pub const MODIFIED: Field<PurchaseOrderGlobalCost, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.creator`).
     pub const CREATOR: Field<PurchaseOrderGlobalCost, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `purchase_order`: Rentman field `purchase_order`.
+    /// `purchase_order`: Value of `purchase_order`.
+    ///
+    /// Rust value: `Id<PurchaseOrder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchase_order`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.purchase_order`).
     pub const PURCHASE_ORDER: Field<PurchaseOrderGlobalCost, Id<PurchaseOrder>> = Field {
         name: "purchase_order",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.name`).
     pub const NAME: Field<PurchaseOrderGlobalCost, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `unit_purchase_cost`: Rentman field `unit_purchase_cost`.
+    /// `unit_purchase_cost`: Value of `unit_purchase_cost`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit_purchase_cost`, documented type `number` (OpenAPI `PurchaseOrderGlobalCostResponse.unit_purchase_cost`).
     pub const UNIT_PURCHASE_COST: Field<PurchaseOrderGlobalCost, Decimal> = Field {
         name: "unit_purchase_cost",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `integer` (OpenAPI `PurchaseOrderGlobalCostResponse.quantity`).
     pub const QUANTITY: Field<PurchaseOrderGlobalCost, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `taxclass`: Rentman field `taxclass`.
+    /// `taxclass`: Value of `taxclass`.
+    ///
+    /// Rust value: `Id<TaxClass>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `taxclass`, documented type `string` (OpenAPI `PurchaseOrderGlobalCostResponse.taxclass`).
     pub const TAXCLASS: Field<PurchaseOrderGlobalCost, Id<TaxClass>> = Field {
         name: "taxclass",
         types: PhantomData,
@@ -3992,72 +8153,150 @@ pub mod purchase_order_global_cost {
 pub mod quote {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Quote>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `QuotationResponse.id`).
     pub const ID: Field<Quote, Id<Quote>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `QuotationResponse.created`).
     pub const CREATED: Field<Quote, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `QuotationResponse.modified`).
     pub const MODIFIED: Field<Quote, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `QuotationResponse.creator`).
     pub const CREATOR: Field<Quote, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `QuotationResponse.number`).
     pub const NUMBER: Field<Quote, String> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `customer`: Rentman field `customer`.
+    /// `customer`: Value of `customer`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `customer`, documented type `string` (OpenAPI `QuotationResponse.customer`).
     pub const CUSTOMER: Field<Quote, Id<Contact>> = Field {
         name: "customer",
         types: PhantomData,
     };
-    /// `contact`: Rentman field `contact`.
+    /// `contact`: Value of `contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact`, documented type `string` (OpenAPI `QuotationResponse.contact`).
     pub const CONTACT: Field<Quote, Id<ContactPerson>> = Field {
         name: "contact",
         types: PhantomData,
     };
-    /// `date`: Rentman field `date`.
+    /// `date`: Value of `date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `date`, documented type `string` (OpenAPI `QuotationResponse.date`).
     pub const DATE: Field<Quote, String> = Field {
         name: "date",
         types: PhantomData,
     };
     /// `expiration_date`: The date on which this quotation expires.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiration_date`, documented type `string` (OpenAPI `QuotationResponse.expiration_date`).
     pub const EXPIRATION_DATE: Field<Quote, String> = Field {
         name: "expiration_date",
         types: PhantomData,
     };
-    /// `version`: Rentman field `version`.
+    /// `version`: Value of `version`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `version`, documented type `integer` (OpenAPI `QuotationResponse.version`).
     pub const VERSION: Field<Quote, i64> = Field {
         name: "version",
         types: PhantomData,
     };
-    /// `subject`: Rentman field `subject`.
+    /// `subject`: Value of `subject`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subject`, documented type `string` (OpenAPI `QuotationResponse.subject`).
     pub const SUBJECT: Field<Quote, String> = Field {
         name: "subject",
         types: PhantomData,
     };
-    /// `show_tax`: Rentman field `show_tax`.
+    /// `show_tax`: Value of `show_tax`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `show_tax`, documented type `boolean` (OpenAPI `QuotationResponse.show_tax`).
     pub const SHOW_TAX: Field<Quote, bool> = Field {
         name: "show_tax",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `QuotationResponse.project`).
     pub const PROJECT: Field<Quote, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `filename`: Rentman field `filename`.
+    /// `filename`: Value of `filename`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `filename`, documented type `string` (OpenAPI `QuotationResponse.filename`).
     pub const FILENAME: Field<Quote, String> = Field {
         name: "filename",
         types: PhantomData,
@@ -4068,42 +8307,91 @@ pub mod quote {
 pub mod rate {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `CrewRateResponse.id`).
     pub const ID: Field<Rate, Id<Rate>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `CrewRateResponse.created`).
     pub const CREATED: Field<Rate, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `CrewRateResponse.modified`).
     pub const MODIFIED: Field<Rate, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `CrewRateResponse.creator`).
     pub const CREATOR: Field<Rate, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `CrewRateResponse.name`).
     pub const NAME: Field<Rate, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `archived`: Rentman field `archived`.
+    /// `archived`: Value of `archived`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `archived`, documented type `boolean` (OpenAPI `CrewRateResponse.archived`).
     pub const ARCHIVED: Field<Rate, bool> = Field {
         name: "archived",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `RateType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`RateType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `CrewRateResponse.type`).
     pub const TYPE: Field<Rate, RateType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `subtype`: Rentman field `subtype`.
+    /// `subtype`: Value of `subtype`.
+    ///
+    /// Rust value: `RateSubtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`RateSubtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subtype`, documented type `string` (OpenAPI `CrewRateResponse.subtype`).
     pub const SUBTYPE: Field<Rate, RateSubtype> = Field {
         name: "subtype",
         types: PhantomData,
@@ -4114,47 +8402,101 @@ pub mod rate {
 pub mod rate_factor {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<RateFactor>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `CrewRateFactorResponse.id`).
     pub const ID: Field<RateFactor, Id<RateFactor>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `CrewRateFactorResponse.created`).
     pub const CREATED: Field<RateFactor, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `CrewRateFactorResponse.modified`).
     pub const MODIFIED: Field<RateFactor, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `CrewRateFactorResponse.creator`).
     pub const CREATOR: Field<RateFactor, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `rate_id`: Rentman field `rate_id`.
+    /// `rate_id`: Value of `rate_id`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `rate_id`, documented type `string` (OpenAPI `CrewRateFactorResponse.rate_id`).
     pub const RATE_ID: Field<RateFactor, Id<Rate>> = Field {
         name: "rate_id",
         types: PhantomData,
     };
-    /// `from`: Rentman field `from`.
+    /// `from`: Value of `from`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `from`, documented type `number` (OpenAPI `CrewRateFactorResponse.from`).
     pub const FROM: Field<RateFactor, Decimal> = Field {
         name: "from",
         types: PhantomData,
     };
-    /// `to`: Rentman field `to`.
+    /// `to`: Value of `to`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `to`, documented type `number` (OpenAPI `CrewRateFactorResponse.to`).
     pub const TO: Field<RateFactor, Decimal> = Field {
         name: "to",
         types: PhantomData,
     };
-    /// `variable`: Rentman field `variable`.
+    /// `variable`: Value of `variable`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `variable`, documented type `number` (OpenAPI `CrewRateFactorResponse.variable`).
     pub const VARIABLE: Field<RateFactor, Decimal> = Field {
         name: "variable",
         types: PhantomData,
     };
-    /// `fixed`: Rentman field `fixed`.
+    /// `fixed`: Value of `fixed`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `fixed`, documented type `number` (OpenAPI `CrewRateFactorResponse.fixed`).
     pub const FIXED: Field<RateFactor, Decimal> = Field {
         name: "fixed",
         types: PhantomData,
@@ -4165,112 +8507,243 @@ pub mod rate_factor {
 pub mod repair {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Repair>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `RepairResponse.id`).
     pub const ID: Field<Repair, Id<Repair>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `RepairResponse.created`).
     pub const CREATED: Field<Repair, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `RepairResponse.modified`).
     pub const MODIFIED: Field<Repair, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `RepairResponse.creator`).
     pub const CREATOR: Field<Repair, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `internal_name`: Rentman field `internal_name`.
+    /// `internal_name`: Value of `internal_name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `internal_name`, documented type `string` (OpenAPI `RepairResponse.internal_name`).
     pub const INTERNAL_NAME: Field<Repair, String> = Field {
         name: "internal_name",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `RepairResponse.equipment`).
     pub const EQUIPMENT: Field<Repair, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `serialnumber`: Rentman field `serialnumber`.
+    /// `serialnumber`: Value of `serialnumber`.
+    ///
+    /// Rust value: `Id<SerialNumber>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `serialnumber`, documented type `string` (OpenAPI `RepairResponse.serialnumber`).
     pub const SERIALNUMBER: Field<Repair, Id<SerialNumber>> = Field {
         name: "serialnumber",
         types: PhantomData,
     };
-    /// `reporter`: Rentman field `reporter`.
+    /// `reporter`: Value of `reporter`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `reporter`, documented type `string` (OpenAPI `RepairResponse.reporter`).
     pub const REPORTER: Field<Repair, Id<Crew>> = Field {
         name: "reporter",
         types: PhantomData,
     };
-    /// `assignee`: Rentman field `assignee`.
+    /// `assignee`: Value of `assignee`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `assignee`, documented type `string` (OpenAPI `RepairResponse.assignee`).
     pub const ASSIGNEE: Field<Repair, Id<Crew>> = Field {
         name: "assignee",
         types: PhantomData,
     };
-    /// `external_repairer`: Rentman field `external_repairer`.
+    /// `external_repairer`: Value of `external_repairer`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `external_repairer`, documented type `string` (OpenAPI `RepairResponse.external_repairer`).
     pub const EXTERNAL_REPAIRER: Field<Repair, Id<Contact>> = Field {
         name: "external_repairer",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `RepairResponse.number`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const NUMBER: Field<Repair, i64> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `repairperiod_start`: Rentman field `repairperiod_start`.
+    /// `repairperiod_start`: Value of `repairperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `repairperiod_start`, documented type `string` (OpenAPI `RepairResponse.repairperiod_start`).
     pub const REPAIRPERIOD_START: Field<Repair, DateTime<FixedOffset>> = Field {
         name: "repairperiod_start",
         types: PhantomData,
     };
-    /// `repairperiod_end`: Rentman field `repairperiod_end`.
+    /// `repairperiod_end`: Value of `repairperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `repairperiod_end`, documented type `string` (OpenAPI `RepairResponse.repairperiod_end`).
     pub const REPAIRPERIOD_END: Field<Repair, DateTime<FixedOffset>> = Field {
         name: "repairperiod_end",
         types: PhantomData,
     };
-    /// `amount`: Rentman field `amount`.
+    /// `amount`: Value of `amount`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `amount`, documented type `integer` (OpenAPI `RepairResponse.amount`).
     pub const AMOUNT: Field<Repair, i64> = Field {
         name: "amount",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `RepairResponse.remark`).
     pub const REMARK: Field<Repair, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `repair_costs`: Rentman field `repair_costs`.
+    /// `repair_costs`: Value of `repair_costs`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `repair_costs`, documented type `number` (OpenAPI `RepairResponse.repair_costs`).
     pub const REPAIR_COSTS: Field<Repair, Decimal> = Field {
         name: "repair_costs",
         types: PhantomData,
     };
     /// `is_usable`: Whether the item can still be planned during the repair period. Becomes available automatically after the repair end date.
+    ///
+    /// Rust value: `RepairIsUsable`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`RepairIsUsable`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_usable`, documented type `string` (OpenAPI `RepairResponse.is_usable`).
     pub const IS_USABLE: Field<Repair, RepairIsUsable> = Field {
         name: "is_usable",
         types: PhantomData,
     };
-    /// `costs_charged_to_customer`: Rentman field `costs_charged_to_customer`.
+    /// `costs_charged_to_customer`: Value of `costs_charged_to_customer`.
+    ///
+    /// Rust value: `Id<ProjectCost>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `costs_charged_to_customer`, documented type `string` (OpenAPI `RepairResponse.costs_charged_to_customer`).
     pub const COSTS_CHARGED_TO_CUSTOMER: Field<Repair, Id<ProjectCost>> = Field {
         name: "costs_charged_to_customer",
         types: PhantomData,
     };
-    /// `subproject`: Rentman field `subproject`.
+    /// `subproject`: Value of `subproject`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject`, documented type `string` (OpenAPI `RepairResponse.subproject`).
     pub const SUBPROJECT: Field<Repair, Id<Subproject>> = Field {
         name: "subproject",
         types: PhantomData,
     };
-    /// `stock_location`: Rentman field `stock_location`.
+    /// `stock_location`: Value of `stock_location`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `stock_location`, documented type `string` (OpenAPI `RepairResponse.stock_location`).
     pub const STOCK_LOCATION: Field<Repair, Id<StockLocation>> = Field {
         name: "stock_location",
         types: PhantomData,
     };
-    /// `repair_status`: Rentman field `repair_status`.
+    /// `repair_status`: Value of `repair_status`.
+    ///
+    /// Rust value: `RepairRepairStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`RepairRepairStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `repair_status`, documented type `string` (OpenAPI `RepairResponse.repair_status`).
     pub const REPAIR_STATUS: Field<Repair, RepairRepairStatus> = Field {
         name: "repair_status",
         types: PhantomData,
     };
-    /// `unrepairable_of`: Rentman field `unrepairable_of`.
+    /// `unrepairable_of`: Value of `unrepairable_of`.
+    ///
+    /// Rust value: `Id<Repair>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unrepairable_of`, documented type `string` (OpenAPI `RepairResponse.unrepairable_of`).
     pub const UNREPAIRABLE_OF: Field<Repair, Id<Repair>> = Field {
         name: "unrepairable_of",
         types: PhantomData,
@@ -4281,82 +8754,174 @@ pub mod repair {
 pub mod serial_number {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<SerialNumber>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SerialNumberResponse.id`).
     pub const ID: Field<SerialNumber, Id<SerialNumber>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SerialNumberResponse.created`).
     pub const CREATED: Field<SerialNumber, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SerialNumberResponse.modified`).
     pub const MODIFIED: Field<SerialNumber, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SerialNumberResponse.creator`).
     pub const CREATOR: Field<SerialNumber, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `SerialNumberResponse.equipment`).
     pub const EQUIPMENT: Field<SerialNumber, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
     /// `serial`: The manufacturer serial number of the equipment.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `serial`, documented type `string` (OpenAPI `SerialNumberResponse.serial`).
     pub const SERIAL: Field<SerialNumber, String> = Field {
         name: "serial",
         types: PhantomData,
     };
-    /// `purchasedate`: Rentman field `purchasedate`.
+    /// `purchasedate`: Value of `purchasedate`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchasedate`, documented type `string` (OpenAPI `SerialNumberResponse.purchasedate`).
     pub const PURCHASEDATE: Field<SerialNumber, String> = Field {
         name: "purchasedate",
         types: PhantomData,
     };
-    /// `depreciation_monthly`: Rentman field `depreciation_monthly`.
+    /// `depreciation_monthly`: Value of `depreciation_monthly`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `depreciation_monthly`, documented type `number` (OpenAPI `SerialNumberResponse.depreciation_monthly`).
     pub const DEPRECIATION_MONTHLY: Field<SerialNumber, Decimal> = Field {
         name: "depreciation_monthly",
         types: PhantomData,
     };
-    /// `book_value`: Rentman field `book_value`.
+    /// `book_value`: Value of `book_value`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `book_value`, documented type `number` (OpenAPI `SerialNumberResponse.book_value`).
     pub const BOOK_VALUE: Field<SerialNumber, Decimal> = Field {
         name: "book_value",
         types: PhantomData,
     };
-    /// `residual_value`: Rentman field `residual_value`.
+    /// `residual_value`: Value of `residual_value`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `residual_value`, documented type `number` (OpenAPI `SerialNumberResponse.residual_value`).
     pub const RESIDUAL_VALUE: Field<SerialNumber, Decimal> = Field {
         name: "residual_value",
         types: PhantomData,
     };
-    /// `purchase_costs`: Rentman field `purchase_costs`.
+    /// `purchase_costs`: Value of `purchase_costs`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `purchase_costs`, documented type `number` (OpenAPI `SerialNumberResponse.purchase_costs`).
     pub const PURCHASE_COSTS: Field<SerialNumber, Decimal> = Field {
         name: "purchase_costs",
         types: PhantomData,
     };
-    /// `active`: Rentman field `active`.
+    /// `active`: Value of `active`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `active`, documented type `boolean` (OpenAPI `SerialNumberResponse.active`).
     pub const ACTIVE: Field<SerialNumber, bool> = Field {
         name: "active",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `SerialNumberResponse.remark`).
     pub const REMARK: Field<SerialNumber, String> = Field {
         name: "remark",
         types: PhantomData,
     };
     /// `ref`: Internal reference of a specific serial number.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `ref`, documented type `string` (OpenAPI `SerialNumberResponse.ref`).
     pub const REF: Field<SerialNumber, String> = Field {
         name: "ref",
         types: PhantomData,
     };
-    /// `asset_location`: Rentman field `asset_location`.
+    /// `asset_location`: Value of `asset_location`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `asset_location`, documented type `string` (OpenAPI `SerialNumberResponse.asset_location`).
     pub const ASSET_LOCATION: Field<SerialNumber, Id<StockLocation>> = Field {
         name: "asset_location",
         types: PhantomData,
     };
-    /// `image`: Rentman field `image`.
+    /// `image`: Value of `image`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `image`, documented type `string` (OpenAPI `SerialNumberResponse.image`).
     pub const IMAGE: Field<SerialNumber, Id<File>> = Field {
         name: "image",
         types: PhantomData,
@@ -4367,27 +8932,56 @@ pub mod serial_number {
 pub mod status {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Status>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `StatusResponse.id`).
     pub const ID: Field<Status, Id<Status>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `StatusResponse.created`).
     pub const CREATED: Field<Status, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `StatusResponse.modified`).
     pub const MODIFIED: Field<Status, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `StatusResponse.creator`).
     pub const CREATOR: Field<Status, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `StatusResponse.name`).
     pub const NAME: Field<Status, String> = Field {
         name: "name",
         types: PhantomData,
@@ -4398,77 +8992,162 @@ pub mod status {
 pub mod stock_location {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `StockLocationResponse.id`).
     pub const ID: Field<StockLocation, Id<StockLocation>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `StockLocationResponse.created`).
     pub const CREATED: Field<StockLocation, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `StockLocationResponse.modified`).
     pub const MODIFIED: Field<StockLocation, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `StockLocationResponse.creator`).
     pub const CREATOR: Field<StockLocation, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `StockLocationResponse.name`).
     pub const NAME: Field<StockLocation, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `city`: Rentman field `city`.
+    /// `city`: Value of `city`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `city`, documented type `string` (OpenAPI `StockLocationResponse.city`).
     pub const CITY: Field<StockLocation, String> = Field {
         name: "city",
         types: PhantomData,
     };
-    /// `street`: Rentman field `street`.
+    /// `street`: Value of `street`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `street`, documented type `string` (OpenAPI `StockLocationResponse.street`).
     pub const STREET: Field<StockLocation, String> = Field {
         name: "street",
         types: PhantomData,
     };
-    /// `house_number`: Rentman field `house_number`.
+    /// `house_number`: Value of `house_number`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `house_number`, documented type `string` (OpenAPI `StockLocationResponse.house_number`).
     pub const HOUSE_NUMBER: Field<StockLocation, String> = Field {
         name: "house_number",
         types: PhantomData,
     };
-    /// `postal_code`: Rentman field `postal_code`.
+    /// `postal_code`: Value of `postal_code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `postal_code`, documented type `string` (OpenAPI `StockLocationResponse.postal_code`).
     pub const POSTAL_CODE: Field<StockLocation, String> = Field {
         name: "postal_code",
         types: PhantomData,
     };
-    /// `state_province`: Rentman field `state_province`.
+    /// `state_province`: Value of `state_province`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `state_province`, documented type `string` (OpenAPI `StockLocationResponse.state_province`).
     pub const STATE_PROVINCE: Field<StockLocation, String> = Field {
         name: "state_province",
         types: PhantomData,
     };
-    /// `country`: Rentman field `country`.
+    /// `country`: Value of `country`.
+    ///
+    /// Rust value: `StockLocationCountry`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`StockLocationCountry`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `country`, documented type `string` (OpenAPI `StockLocationResponse.country`).
     pub const COUNTRY: Field<StockLocation, StockLocationCountry> = Field {
         name: "country",
         types: PhantomData,
     };
-    /// `active`: Rentman field `active`.
+    /// `active`: Value of `active`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `active`, documented type `boolean` (OpenAPI `StockLocationResponse.active`).
     pub const ACTIVE: Field<StockLocation, bool> = Field {
         name: "active",
         types: PhantomData,
     };
     /// `type`: Projects can only be planned from warehouses. Storage locations are used as (temporary) storage and deliver equipment to warehouses. You can change the number of paid warehouses in your license. Storage locations are free of charge.
+    ///
+    /// Rust value: `StockLocationType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`StockLocationType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `StockLocationResponse.type`).
     pub const TYPE: Field<StockLocation, StockLocationType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `StockLocationResponse.color`).
     pub const COLOR: Field<StockLocation, String> = Field {
         name: "color",
         types: PhantomData,
     };
     /// `in_archive`: This stock location is archived. This means that it cannot be used in equipment planning.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_archive`, documented type `boolean` (OpenAPI `StockLocationResponse.in_archive`).
     pub const IN_ARCHIVE: Field<StockLocation, bool> = Field {
         name: "in_archive",
         types: PhantomData,
@@ -4479,67 +9158,142 @@ pub mod stock_location {
 pub mod stock_movement {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<StockMovement>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `StockMovementResponse.id`).
     pub const ID: Field<StockMovement, Id<StockMovement>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `StockMovementResponse.created`).
     pub const CREATED: Field<StockMovement, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `StockMovementResponse.modified`).
     pub const MODIFIED: Field<StockMovement, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `StockMovementResponse.creator`).
     pub const CREATOR: Field<StockMovement, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `amount`: Rentman field `amount`.
+    /// `amount`: Value of `amount`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `amount`, documented type `integer` (OpenAPI `StockMovementResponse.amount`).
     pub const AMOUNT: Field<StockMovement, i64> = Field {
         name: "amount",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `StockMovementResponse.equipment`).
     pub const EQUIPMENT: Field<StockMovement, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `projectequipment`: Rentman field `projectequipment`.
+    /// `projectequipment`: Value of `projectequipment`.
+    ///
+    /// Rust value: `Id<ProjectEquipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `projectequipment`, documented type `string` (OpenAPI `StockMovementResponse.projectequipment`).
     pub const PROJECTEQUIPMENT: Field<StockMovement, Id<ProjectEquipment>> = Field {
         name: "projectequipment",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `StockMovementResponse.description`).
     pub const DESCRIPTION: Field<StockMovement, String> = Field {
         name: "description",
         types: PhantomData,
     };
-    /// `details`: Rentman field `details`.
+    /// `details`: Value of `details`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `details`, documented type `string` (OpenAPI `StockMovementResponse.details`).
     pub const DETAILS: Field<StockMovement, String> = Field {
         name: "details",
         types: PhantomData,
     };
-    /// `date`: Rentman field `date`.
+    /// `date`: Value of `date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `date`, documented type `string` (OpenAPI `StockMovementResponse.date`).
     pub const DATE: Field<StockMovement, DateTime<FixedOffset>> = Field {
         name: "date",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `StockMovementType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`StockMovementType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `StockMovementResponse.type`).
     pub const TYPE: Field<StockMovement, StockMovementType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `stock_location`: Rentman field `stock_location`.
+    /// `stock_location`: Value of `stock_location`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `stock_location`, documented type `string` (OpenAPI `StockMovementResponse.stock_location`).
     pub const STOCK_LOCATION: Field<StockMovement, Id<StockLocation>> = Field {
         name: "stock_location",
         types: PhantomData,
     };
-    /// `api_client`: Rentman field `api_client`.
+    /// `api_client`: Value of `api_client`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `api_client`, documented type `string` (OpenAPI `StockMovementResponse.api_client`).
     pub const API_CLIENT: Field<StockMovement, String> = Field {
         name: "api_client",
         types: PhantomData,
@@ -4550,127 +9304,276 @@ pub mod stock_movement {
 pub mod subproject {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SubprojectResponse.id`).
     pub const ID: Field<Subproject, Id<Subproject>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SubprojectResponse.created`).
     pub const CREATED: Field<Subproject, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SubprojectResponse.modified`).
     pub const MODIFIED: Field<Subproject, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SubprojectResponse.creator`).
     pub const CREATOR: Field<Subproject, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `project`: Rentman field `project`.
+    /// `project`: Value of `project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project`, documented type `string` (OpenAPI `SubprojectResponse.project`).
     pub const PROJECT: Field<Subproject, Id<Project>> = Field {
         name: "project",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `SubprojectResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<Subproject, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `SubprojectResponse.name`).
     pub const NAME: Field<Subproject, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `status`: Rentman field `status`.
+    /// `status`: Value of `status`.
+    ///
+    /// Rust value: `Id<Status>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `SubprojectResponse.status`).
     pub const STATUS: Field<Subproject, Id<Status>> = Field {
         name: "status",
         types: PhantomData,
     };
-    /// `is_template`: Rentman field `is_template`.
+    /// `is_template`: Value of `is_template`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_template`, documented type `boolean` (OpenAPI `SubprojectResponse.is_template`).
     pub const IS_TEMPLATE: Field<Subproject, bool> = Field {
         name: "is_template",
         types: PhantomData,
     };
-    /// `location`: Rentman field `location`.
+    /// `location`: Value of `location`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location`, documented type `string` (OpenAPI `SubprojectResponse.location`).
     pub const LOCATION: Field<Subproject, Id<Contact>> = Field {
         name: "location",
         types: PhantomData,
     };
-    /// `loc_contact`: Rentman field `loc_contact`.
+    /// `loc_contact`: Value of `loc_contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `loc_contact`, documented type `string` (OpenAPI `SubprojectResponse.loc_contact`).
     pub const LOC_CONTACT: Field<Subproject, Id<ContactPerson>> = Field {
         name: "loc_contact",
         types: PhantomData,
     };
-    /// `insurance_rate`: Rentman field `insurance_rate`.
+    /// `insurance_rate`: Value of `insurance_rate`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `insurance_rate`, documented type `number` (OpenAPI `SubprojectResponse.insurance_rate`).
     pub const INSURANCE_RATE: Field<Subproject, Decimal> = Field {
         name: "insurance_rate",
         types: PhantomData,
     };
-    /// `discount_rental`: Rentman field `discount_rental`.
+    /// `discount_rental`: Value of `discount_rental`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_rental`, documented type `number` (OpenAPI `SubprojectResponse.discount_rental`).
     pub const DISCOUNT_RENTAL: Field<Subproject, Decimal> = Field {
         name: "discount_rental",
         types: PhantomData,
     };
-    /// `discount_sale`: Rentman field `discount_sale`.
+    /// `discount_sale`: Value of `discount_sale`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_sale`, documented type `number` (OpenAPI `SubprojectResponse.discount_sale`).
     pub const DISCOUNT_SALE: Field<Subproject, Decimal> = Field {
         name: "discount_sale",
         types: PhantomData,
     };
-    /// `discount_crew`: Rentman field `discount_crew`.
+    /// `discount_crew`: Value of `discount_crew`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_crew`, documented type `number` (OpenAPI `SubprojectResponse.discount_crew`).
     pub const DISCOUNT_CREW: Field<Subproject, Decimal> = Field {
         name: "discount_crew",
         types: PhantomData,
     };
-    /// `discount_transport`: Rentman field `discount_transport`.
+    /// `discount_transport`: Value of `discount_transport`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_transport`, documented type `number` (OpenAPI `SubprojectResponse.discount_transport`).
     pub const DISCOUNT_TRANSPORT: Field<Subproject, Decimal> = Field {
         name: "discount_transport",
         types: PhantomData,
     };
-    /// `discount_additional_costs`: Rentman field `discount_additional_costs`.
+    /// `discount_additional_costs`: Value of `discount_additional_costs`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_additional_costs`, documented type `number` (OpenAPI `SubprojectResponse.discount_additional_costs`).
     pub const DISCOUNT_ADDITIONAL_COSTS: Field<Subproject, Decimal> = Field {
         name: "discount_additional_costs",
         types: PhantomData,
     };
-    /// `discount_services`: Rentman field `discount_services`.
+    /// `discount_services`: Value of `discount_services`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_services`, documented type `number` (OpenAPI `SubprojectResponse.discount_services`).
     pub const DISCOUNT_SERVICES: Field<Subproject, Decimal> = Field {
         name: "discount_services",
         types: PhantomData,
     };
-    /// `discount_subproject`: Rentman field `discount_subproject`.
+    /// `discount_subproject`: Value of `discount_subproject`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_subproject`, documented type `number` (OpenAPI `SubprojectResponse.discount_subproject`).
     pub const DISCOUNT_SUBPROJECT: Field<Subproject, Decimal> = Field {
         name: "discount_subproject",
         types: PhantomData,
     };
-    /// `discount_fixed`: Rentman field `discount_fixed`.
+    /// `discount_fixed`: Value of `discount_fixed`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_fixed`, documented type `boolean` (OpenAPI `SubprojectResponse.discount_fixed`).
     pub const DISCOUNT_FIXED: Field<Subproject, bool> = Field {
         name: "discount_fixed",
         types: PhantomData,
     };
-    /// `discount_fixed_amount`: Rentman field `discount_fixed_amount`.
+    /// `discount_fixed_amount`: Value of `discount_fixed_amount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount_fixed_amount`, documented type `number` (OpenAPI `SubprojectResponse.discount_fixed_amount`).
     pub const DISCOUNT_FIXED_AMOUNT: Field<Subproject, Decimal> = Field {
         name: "discount_fixed_amount",
         types: PhantomData,
     };
-    /// `fixed_price`: Rentman field `fixed_price`.
+    /// `fixed_price`: Value of `fixed_price`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `fixed_price`, documented type `boolean` (OpenAPI `SubprojectResponse.fixed_price`).
     pub const FIXED_PRICE: Field<Subproject, bool> = Field {
         name: "fixed_price",
         types: PhantomData,
     };
-    /// `in_planning`: Rentman field `in_planning`.
+    /// `in_planning`: Value of `in_planning`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_planning`, documented type `boolean` (OpenAPI `SubprojectResponse.in_planning`).
     pub const IN_PLANNING: Field<Subproject, bool> = Field {
         name: "in_planning",
         types: PhantomData,
     };
-    /// `in_financial`: Rentman field `in_financial`.
+    /// `in_financial`: Value of `in_financial`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_financial`, documented type `boolean` (OpenAPI `SubprojectResponse.in_financial`).
     pub const IN_FINANCIAL: Field<Subproject, bool> = Field {
         name: "in_financial",
         types: PhantomData,
     };
-    /// `asset_location_from`: Rentman field `asset_location_from`.
+    /// `asset_location_from`: Value of `asset_location_from`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `asset_location_from`, documented type `string` (OpenAPI `SubprojectResponse.asset_location_from`).
     pub const ASSET_LOCATION_FROM: Field<Subproject, Id<StockLocation>> = Field {
         name: "asset_location_from",
         types: PhantomData,
@@ -4681,152 +9584,330 @@ pub mod subproject {
 pub mod subrental {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Subrental>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SubrentalResponse.id`).
     pub const ID: Field<Subrental, Id<Subrental>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SubrentalResponse.created`).
     pub const CREATED: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SubrentalResponse.modified`).
     pub const MODIFIED: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SubrentalResponse.creator`).
     pub const CREATOR: Field<Subrental, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `SubrentalResponse.name`).
     pub const NAME: Field<Subrental, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `accountmanager`: Rentman field `accountmanager`.
+    /// `accountmanager`: Value of `accountmanager`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `accountmanager`, documented type `string` (OpenAPI `SubrentalResponse.accountmanager`).
     pub const ACCOUNTMANAGER: Field<Subrental, Id<Crew>> = Field {
         name: "accountmanager",
         types: PhantomData,
     };
-    /// `reference`: Rentman field `reference`.
+    /// `reference`: Value of `reference`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `reference`, documented type `string` (OpenAPI `SubrentalResponse.reference`).
     pub const REFERENCE: Field<Subrental, String> = Field {
         name: "reference",
         types: PhantomData,
     };
-    /// `supplier`: Rentman field `supplier`.
+    /// `supplier`: Value of `supplier`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `supplier`, documented type `string` (OpenAPI `SubrentalResponse.supplier`).
     pub const SUPPLIER: Field<Subrental, Id<Contact>> = Field {
         name: "supplier",
         types: PhantomData,
     };
-    /// `number`: Rentman field `number`.
+    /// `number`: Value of `number`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `number`, documented type `string` (OpenAPI `SubrentalResponse.number`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const NUMBER: Field<Subrental, i64> = Field {
         name: "number",
         types: PhantomData,
     };
-    /// `contactperson`: Rentman field `contactperson`.
+    /// `contactperson`: Value of `contactperson`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contactperson`, documented type `string` (OpenAPI `SubrentalResponse.contactperson`).
     pub const CONTACTPERSON: Field<Subrental, Id<ContactPerson>> = Field {
         name: "contactperson",
         types: PhantomData,
     };
-    /// `location`: Rentman field `location`.
+    /// `location`: Value of `location`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location`, documented type `string` (OpenAPI `SubrentalResponse.location`).
     pub const LOCATION: Field<Subrental, Id<Contact>> = Field {
         name: "location",
         types: PhantomData,
     };
-    /// `location_contact`: Rentman field `location_contact`.
+    /// `location_contact`: Value of `location_contact`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `location_contact`, documented type `string` (OpenAPI `SubrentalResponse.location_contact`).
     pub const LOCATION_CONTACT: Field<Subrental, Id<ContactPerson>> = Field {
         name: "location_contact",
         types: PhantomData,
     };
-    /// `usageperiod_start`: Rentman field `usageperiod_start`.
+    /// `usageperiod_start`: Value of `usageperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_start`, documented type `string` (OpenAPI `SubrentalResponse.usageperiod_start`).
     pub const USAGEPERIOD_START: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "usageperiod_start",
         types: PhantomData,
     };
-    /// `usageperiod_end`: Rentman field `usageperiod_end`.
+    /// `usageperiod_end`: Value of `usageperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `usageperiod_end`, documented type `string` (OpenAPI `SubrentalResponse.usageperiod_end`).
     pub const USAGEPERIOD_END: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "usageperiod_end",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `SubrentalResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `SubrentalResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `delivery_in`: Rentman field `delivery_in`.
+    /// `delivery_in`: Value of `delivery_in`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_in`, documented type `string` (OpenAPI `SubrentalResponse.delivery_in`).
     pub const DELIVERY_IN: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "delivery_in",
         types: PhantomData,
     };
-    /// `delivery_out`: Rentman field `delivery_out`.
+    /// `delivery_out`: Value of `delivery_out`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `delivery_out`, documented type `string` (OpenAPI `SubrentalResponse.delivery_out`).
     pub const DELIVERY_OUT: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "delivery_out",
         types: PhantomData,
     };
-    /// `equipment_cost`: Rentman field `equipment_cost`.
+    /// `equipment_cost`: Value of `equipment_cost`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment_cost`, documented type `number` (OpenAPI `SubrentalResponse.equipment_cost`).
     pub const EQUIPMENT_COST: Field<Subrental, Decimal> = Field {
         name: "equipment_cost",
         types: PhantomData,
     };
-    /// `price`: Rentman field `price`.
+    /// `price`: Value of `price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price`, documented type `number` (OpenAPI `SubrentalResponse.price`).
     pub const PRICE: Field<Subrental, Decimal> = Field {
         name: "price",
         types: PhantomData,
     };
     /// `extra_cost`: For possible transport costs, administration costs etc.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `extra_cost`, documented type `number` (OpenAPI `SubrentalResponse.extra_cost`).
     pub const EXTRA_COST: Field<Subrental, Decimal> = Field {
         name: "extra_cost",
         types: PhantomData,
     };
-    /// `auto_update_costs`: Rentman field `auto_update_costs`.
+    /// `auto_update_costs`: Value of `auto_update_costs`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `auto_update_costs`, documented type `boolean` (OpenAPI `SubrentalResponse.auto_update_costs`).
     pub const AUTO_UPDATE_COSTS: Field<Subrental, bool> = Field {
         name: "auto_update_costs",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `SubrentalResponse.remark`).
     pub const REMARK: Field<Subrental, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `SubrentalType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`SubrentalType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `SubrentalResponse.type`).
     pub const TYPE: Field<Subrental, SubrentalType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `status`: Rentman field `status`.
+    /// `status`: Value of `status`.
+    ///
+    /// Rust value: `Id<Status>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `SubrentalResponse.status`).
     pub const STATUS: Field<Subrental, Id<Status>> = Field {
         name: "status",
         types: PhantomData,
     };
-    /// `sent`: Rentman field `sent`.
+    /// `sent`: Value of `sent`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `sent`, documented type `string` (OpenAPI `SubrentalResponse.sent`).
     pub const SENT: Field<Subrental, DateTime<FixedOffset>> = Field {
         name: "sent",
         types: PhantomData,
     };
-    /// `asset_location_to`: Rentman field `asset_location_to`.
+    /// `asset_location_to`: Value of `asset_location_to`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `asset_location_to`, documented type `string` (OpenAPI `SubrentalResponse.asset_location_to`).
     pub const ASSET_LOCATION_TO: Field<Subrental, Id<StockLocation>> = Field {
         name: "asset_location_to",
         types: PhantomData,
     };
-    /// `asset_location_from`: Rentman field `asset_location_from`.
+    /// `asset_location_from`: Value of `asset_location_from`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `asset_location_from`, documented type `string` (OpenAPI `SubrentalResponse.asset_location_from`).
     pub const ASSET_LOCATION_FROM: Field<Subrental, Id<StockLocation>> = Field {
         name: "asset_location_from",
         types: PhantomData,
     };
-    /// `is_internal`: Rentman field `is_internal`.
+    /// `is_internal`: Value of `is_internal`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_internal`, documented type `boolean` (OpenAPI `SubrentalResponse.is_internal`).
     pub const IS_INTERNAL: Field<Subrental, bool> = Field {
         name: "is_internal",
         types: PhantomData,
     };
-    /// `supplier_project`: Rentman field `supplier_project`.
+    /// `supplier_project`: Value of `supplier_project`.
+    ///
+    /// Rust value: `Id<Project>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `supplier_project`, documented type `string` (OpenAPI `SubrentalResponse.supplier_project`).
     pub const SUPPLIER_PROJECT: Field<Subrental, Id<Project>> = Field {
         name: "supplier_project",
         types: PhantomData,
@@ -4837,97 +9918,208 @@ pub mod subrental {
 pub mod subrental_equipment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<SubrentalEquipment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SubrentalEquipmentResponse.id`).
     pub const ID: Field<SubrentalEquipment, Id<SubrentalEquipment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.created`).
     pub const CREATED: Field<SubrentalEquipment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.modified`).
     pub const MODIFIED: Field<SubrentalEquipment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.creator`).
     pub const CREATOR: Field<SubrentalEquipment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `subrental_group`: Rentman field `subrental_group`.
+    /// `subrental_group`: Value of `subrental_group`.
+    ///
+    /// Rust value: `Id<SubrentalEquipmentGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subrental_group`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.subrental_group`).
     pub const SUBRENTAL_GROUP: Field<SubrentalEquipment, Id<SubrentalEquipmentGroup>> = Field {
         name: "subrental_group",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.equipment`).
     pub const EQUIPMENT: Field<SubrentalEquipment, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `parent`: Rentman field `parent`.
+    /// `parent`: Value of `parent`.
+    ///
+    /// Rust value: `Id<SubrentalEquipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `parent`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.parent`).
     pub const PARENT: Field<SubrentalEquipment, Id<SubrentalEquipment>> = Field {
         name: "parent",
         types: PhantomData,
     };
-    /// `planperiod_start`: Rentman field `planperiod_start`.
+    /// `planperiod_start`: Value of `planperiod_start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_start`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.planperiod_start`).
     pub const PLANPERIOD_START: Field<SubrentalEquipment, DateTime<FixedOffset>> = Field {
         name: "planperiod_start",
         types: PhantomData,
     };
-    /// `planperiod_end`: Rentman field `planperiod_end`.
+    /// `planperiod_end`: Value of `planperiod_end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `planperiod_end`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.planperiod_end`).
     pub const PLANPERIOD_END: Field<SubrentalEquipment, DateTime<FixedOffset>> = Field {
         name: "planperiod_end",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.name`).
     pub const NAME: Field<SubrentalEquipment, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `quantity`: Rentman field `quantity`.
+    /// `quantity`: Value of `quantity`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity`, documented type `integer` (OpenAPI `SubrentalEquipmentResponse.quantity`).
     pub const QUANTITY: Field<SubrentalEquipment, i64> = Field {
         name: "quantity",
         types: PhantomData,
     };
-    /// `quantity_total`: Rentman field `quantity_total`.
+    /// `quantity_total`: Value of `quantity_total`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `quantity_total`, documented type `integer` (OpenAPI `SubrentalEquipmentResponse.quantity_total`).
     pub const QUANTITY_TOTAL: Field<SubrentalEquipment, i64> = Field {
         name: "quantity_total",
         types: PhantomData,
     };
-    /// `unit_price`: Rentman field `unit_price`.
+    /// `unit_price`: Value of `unit_price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `unit_price`, documented type `number` (OpenAPI `SubrentalEquipmentResponse.unit_price`).
     pub const UNIT_PRICE: Field<SubrentalEquipment, Decimal> = Field {
         name: "unit_price",
         types: PhantomData,
     };
-    /// `discount`: Rentman field `discount`.
+    /// `discount`: Value of `discount`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `discount`, documented type `number` (OpenAPI `SubrentalEquipmentResponse.discount`).
     pub const DISCOUNT: Field<SubrentalEquipment, Decimal> = Field {
         name: "discount",
         types: PhantomData,
     };
-    /// `factor`: Rentman field `factor`.
+    /// `factor`: Value of `factor`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `factor`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.factor`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const FACTOR: Field<SubrentalEquipment, Decimal> = Field {
         name: "factor",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<SubrentalEquipment, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.remark`).
     pub const REMARK: Field<SubrentalEquipment, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `lineprice`: Rentman field `lineprice`.
+    /// `lineprice`: Value of `lineprice`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `lineprice`, documented type `number` (OpenAPI `SubrentalEquipmentResponse.lineprice`).
     pub const LINEPRICE: Field<SubrentalEquipment, Decimal> = Field {
         name: "lineprice",
         types: PhantomData,
     };
-    /// `supplier_planningmateriaal`: Rentman field `supplier_planningmateriaal`.
+    /// `supplier_planningmateriaal`: Value of `supplier_planningmateriaal`.
+    ///
+    /// Rust value: `Id<ProjectEquipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `supplier_planningmateriaal`, documented type `string` (OpenAPI `SubrentalEquipmentResponse.supplier_planningmateriaal`).
     pub const SUPPLIER_PLANNINGMATERIAAL: Field<SubrentalEquipment, Id<ProjectEquipment>> = Field {
         name: "supplier_planningmateriaal",
         types: PhantomData,
@@ -4938,42 +10130,89 @@ pub mod subrental_equipment {
 pub mod subrental_equipment_group {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<SubrentalEquipmentGroup>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SubrentalEquipmentGroupResponse.id`).
     pub const ID: Field<SubrentalEquipmentGroup, Id<SubrentalEquipmentGroup>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.created`).
     pub const CREATED: Field<SubrentalEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.modified`).
     pub const MODIFIED: Field<SubrentalEquipmentGroup, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.creator`).
     pub const CREATOR: Field<SubrentalEquipmentGroup, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `subrental`: Rentman field `subrental`.
+    /// `subrental`: Value of `subrental`.
+    ///
+    /// Rust value: `Id<Subrental>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subrental`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.subrental`).
     pub const SUBRENTAL: Field<SubrentalEquipmentGroup, Id<Subrental>> = Field {
         name: "subrental",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.name`).
     pub const NAME: Field<SubrentalEquipmentGroup, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<SubrentalEquipmentGroup, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `supplier_category`: Rentman field `supplier_category`.
+    /// `supplier_category`: Value of `supplier_category`.
+    ///
+    /// Rust value: `Id<ProjectEquipmentGroup>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `supplier_category`, documented type `string` (OpenAPI `SubrentalEquipmentGroupResponse.supplier_category`).
     pub const SUPPLIER_CATEGORY: Field<SubrentalEquipmentGroup, Id<ProjectEquipmentGroup>> =
         Field {
             name: "supplier_category",
@@ -4985,37 +10224,78 @@ pub mod subrental_equipment_group {
 pub mod subtask {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Subtask>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SubtaskResponse.id`).
     pub const ID: Field<Subtask, Id<Subtask>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SubtaskResponse.created`).
     pub const CREATED: Field<Subtask, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SubtaskResponse.modified`).
     pub const MODIFIED: Field<Subtask, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SubtaskResponse.creator`).
     pub const CREATOR: Field<Subtask, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `task`: Rentman field `task`.
+    /// `task`: Value of `task`.
+    ///
+    /// Rust value: `Id<Task>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `task`, documented type `string` (OpenAPI `SubtaskResponse.task`).
     pub const TASK: Field<Subtask, Id<Task>> = Field {
         name: "task",
         types: PhantomData,
     };
-    /// `title`: Rentman field `title`.
+    /// `title`: Value of `title`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `title`, documented type `string` (OpenAPI `SubtaskResponse.title`).
     pub const TITLE: Field<Subtask, String> = Field {
         name: "title",
         types: PhantomData,
     };
-    /// `completed`: Rentman field `completed`.
+    /// `completed`: Value of `completed`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `completed`, documented type `boolean` (OpenAPI `SubtaskResponse.completed`).
     pub const COMPLETED: Field<Subtask, bool> = Field {
         name: "completed",
         types: PhantomData,
@@ -5026,47 +10306,100 @@ pub mod subtask {
 pub mod supplier {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Supplier>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `SupplierResponse.id`).
     pub const ID: Field<Supplier, Id<Supplier>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `SupplierResponse.created`).
     pub const CREATED: Field<Supplier, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `SupplierResponse.modified`).
     pub const MODIFIED: Field<Supplier, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `SupplierResponse.creator`).
     pub const CREATOR: Field<Supplier, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `equipment`: Rentman field `equipment`.
+    /// `equipment`: Value of `equipment`.
+    ///
+    /// Rust value: `Id<Equipment>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `equipment`, documented type `string` (OpenAPI `SupplierResponse.equipment`).
     pub const EQUIPMENT: Field<Supplier, Id<Equipment>> = Field {
         name: "equipment",
         types: PhantomData,
     };
-    /// `contact`: Rentman field `contact`.
+    /// `contact`: Value of `contact`.
+    ///
+    /// Rust value: `Id<Contact>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contact`, documented type `string` (OpenAPI `SupplierResponse.contact`).
     pub const CONTACT: Field<Supplier, Id<Contact>> = Field {
         name: "contact",
         types: PhantomData,
     };
-    /// `contactperson`: Rentman field `contactperson`.
+    /// `contactperson`: Value of `contactperson`.
+    ///
+    /// Rust value: `Id<ContactPerson>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `contactperson`, documented type `string` (OpenAPI `SupplierResponse.contactperson`).
     pub const CONTACTPERSON: Field<Supplier, Id<ContactPerson>> = Field {
         name: "contactperson",
         types: PhantomData,
     };
-    /// `price`: Rentman field `price`.
+    /// `price`: Value of `price`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `price`, documented type `number` (OpenAPI `SupplierResponse.price`).
     pub const PRICE: Field<Supplier, Decimal> = Field {
         name: "price",
         types: PhantomData,
     };
-    /// `details`: Rentman field `details`.
+    /// `details`: Value of `details`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `details`, documented type `string` (OpenAPI `SupplierResponse.details`).
     pub const DETAILS: Field<Supplier, String> = Field {
         name: "details",
         types: PhantomData,
@@ -5077,153 +10410,335 @@ pub mod supplier {
 pub mod task {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Task>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TaskResponse.id`).
     pub const ID: Field<Task, Id<Task>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TaskResponse.created`).
     pub const CREATED: Field<Task, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TaskResponse.modified`).
     pub const MODIFIED: Field<Task, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TaskResponse.creator`).
     pub const CREATOR: Field<Task, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `recurhoe`: Rentman field `recurhoe`.
+    /// `recurhoe`: Value of `recurhoe`.
+    ///
+    /// Rust value: `TaskRecurhoe`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskRecurhoe`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurhoe`, documented type `string` (OpenAPI `TaskResponse.recurhoe`).
     pub const RECURHOE: Field<Task, TaskRecurhoe> = Field {
         name: "recurhoe",
         types: PhantomData,
     };
-    /// `recureind`: Rentman field `recureind`.
+    /// `recureind`: Value of `recureind`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recureind`, documented type `string` (OpenAPI `TaskResponse.recureind`).
     pub const RECUREIND: Field<Task, String> = Field {
         name: "recureind",
         types: PhantomData,
     };
-    /// `recurperiode`: Rentman field `recurperiode`.
+    /// `recurperiode`: Value of `recurperiode`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `recurperiode`, documented type `integer` (OpenAPI `TaskResponse.recurperiode`).
     pub const RECURPERIODE: Field<Task, i64> = Field {
         name: "recurperiode",
         types: PhantomData,
     };
-    /// `is_template`: Rentman field `is_template`.
+    /// `is_template`: Value of `is_template`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_template`, documented type `boolean` (OpenAPI `TaskResponse.is_template`).
     pub const IS_TEMPLATE: Field<Task, bool> = Field {
         name: "is_template",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `TaskResponse.name`).
     pub const NAME: Field<Task, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `details`: Rentman field `details`.
+    /// `details`: Value of `details`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `details`, documented type `string` (OpenAPI `TaskResponse.details`).
     pub const DETAILS: Field<Task, String> = Field {
         name: "details",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `TaskResponse.color`).
     pub const COLOR: Field<Task, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `priority`: Rentman field `priority`.
+    /// `priority`: Value of `priority`.
+    ///
+    /// Rust value: `TaskPriority`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskPriority`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `priority`, documented type `string` (OpenAPI `TaskResponse.priority`).
     pub const PRIORITY: Field<Task, TaskPriority> = Field {
         name: "priority",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `TaskResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<Task, i64> = Field {
         name: "order",
         types: PhantomData,
     };
-    /// `deadline`: Rentman field `deadline`.
+    /// `deadline`: Value of `deadline`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline`, documented type `string` (OpenAPI `TaskResponse.deadline`).
     pub const DEADLINE: Field<Task, DateTime<FixedOffset>> = Field {
         name: "deadline",
         types: PhantomData,
     };
-    /// `deadline_type`: Rentman field `deadline_type`.
+    /// `deadline_type`: Value of `deadline_type`.
+    ///
+    /// Rust value: `TaskDeadlineType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskDeadlineType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline_type`, documented type `string` (OpenAPI `TaskResponse.deadline_type`).
     pub const DEADLINE_TYPE: Field<Task, TaskDeadlineType> = Field {
         name: "deadline_type",
         types: PhantomData,
     };
-    /// `deadline_relative_offset_base`: Rentman field `deadline_relative_offset_base`.
+    /// `deadline_relative_offset_base`: Value of `deadline_relative_offset_base`.
+    ///
+    /// Rust value: `TaskDeadlineRelativeOffsetBase`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskDeadlineRelativeOffsetBase`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline_relative_offset_base`, documented type `string` (OpenAPI `TaskResponse.deadline_relative_offset_base`).
     pub const DEADLINE_RELATIVE_OFFSET_BASE: Field<Task, TaskDeadlineRelativeOffsetBase> = Field {
         name: "deadline_relative_offset_base",
         types: PhantomData,
     };
-    /// `deadline_relative_offset_amount`: Rentman field `deadline_relative_offset_amount`.
+    /// `deadline_relative_offset_amount`: Value of `deadline_relative_offset_amount`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline_relative_offset_amount`, documented type `integer` (OpenAPI `TaskResponse.deadline_relative_offset_amount`).
     pub const DEADLINE_RELATIVE_OFFSET_AMOUNT: Field<Task, i64> = Field {
         name: "deadline_relative_offset_amount",
         types: PhantomData,
     };
-    /// `deadline_relative_offset_unit`: Rentman field `deadline_relative_offset_unit`.
+    /// `deadline_relative_offset_unit`: Value of `deadline_relative_offset_unit`.
+    ///
+    /// Rust value: `TaskDeadlineRelativeOffsetUnit`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskDeadlineRelativeOffsetUnit`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline_relative_offset_unit`, documented type `string` (OpenAPI `TaskResponse.deadline_relative_offset_unit`).
     pub const DEADLINE_RELATIVE_OFFSET_UNIT: Field<Task, TaskDeadlineRelativeOffsetUnit> = Field {
         name: "deadline_relative_offset_unit",
         types: PhantomData,
     };
-    /// `deadline_relative_offset_direction`: Rentman field `deadline_relative_offset_direction`.
+    /// `deadline_relative_offset_direction`: Value of `deadline_relative_offset_direction`.
+    ///
+    /// Rust value: `TaskDeadlineRelativeOffsetDirection`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskDeadlineRelativeOffsetDirection`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `deadline_relative_offset_direction`, documented type `string` (OpenAPI `TaskResponse.deadline_relative_offset_direction`).
     pub const DEADLINE_RELATIVE_OFFSET_DIRECTION: Field<Task, TaskDeadlineRelativeOffsetDirection> =
         Field {
             name: "deadline_relative_offset_direction",
             types: PhantomData,
         };
-    /// `completed_at`: Rentman field `completed_at`.
+    /// `completed_at`: Value of `completed_at`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `completed_at`, documented type `string` (OpenAPI `TaskResponse.completed_at`).
     pub const COMPLETED_AT: Field<Task, DateTime<FixedOffset>> = Field {
         name: "completed_at",
         types: PhantomData,
     };
-    /// `status`: Rentman field `status`.
+    /// `status`: Value of `status`.
+    ///
+    /// Rust value: `Id<TaskStatus>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `TaskResponse.status`).
     pub const STATUS: Field<Task, Id<TaskStatus>> = Field {
         name: "status",
         types: PhantomData,
     };
     /// `item`: Numeric ID of the linked item (plain integer, not a path).
+    ///
+    /// Rust value: `ItemId`.
+    /// A polymorphic [`ItemId`]; the accompanying item type identifies the resource.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `item`, documented type `integer` (OpenAPI `TaskResponse.item`).
     pub const ITEM: Field<Task, ItemId> = Field {
         name: "item",
         types: PhantomData,
     };
-    /// `itemtype`: Rentman field `itemtype`.
+    /// `itemtype`: Value of `itemtype`.
+    ///
+    /// Rust value: `TaskItemtype`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskItemtype`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `itemtype`, documented type `string` (OpenAPI `TaskResponse.itemtype`).
     pub const ITEMTYPE: Field<Task, TaskItemtype> = Field {
         name: "itemtype",
         types: PhantomData,
     };
-    /// `synchronization_id`: Rentman field `synchronization_id`.
+    /// `synchronization_id`: Value of `synchronization_id`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `synchronization_id`, documented type `string` (OpenAPI `TaskResponse.synchronization_id`).
     pub const SYNCHRONIZATION_ID: Field<Task, String> = Field {
         name: "synchronization_id",
         types: PhantomData,
     };
-    /// `synchronization_uri`: Rentman field `synchronization_uri`.
+    /// `synchronization_uri`: Value of `synchronization_uri`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `synchronization_uri`, documented type `string` (OpenAPI `TaskResponse.synchronization_uri`).
     pub const SYNCHRONIZATION_URI: Field<Task, String> = Field {
         name: "synchronization_uri",
         types: PhantomData,
     };
-    /// `public`: Rentman field `public`.
+    /// `public`: Value of `public`.
+    ///
+    /// Rust value: `i64`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`i64`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `public`, documented type `string` (OpenAPI `TaskResponse.public`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const PUBLIC: Field<Task, i64> = Field {
         name: "public",
         types: PhantomData,
     };
-    /// `assignment_type`: Rentman field `assignment_type`.
+    /// `assignment_type`: Value of `assignment_type`.
+    ///
+    /// Rust value: `TaskAssignmentType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskAssignmentType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `assignment_type`, documented type `string` (OpenAPI `TaskResponse.assignment_type`).
     pub const ASSIGNMENT_TYPE: Field<Task, TaskAssignmentType> = Field {
         name: "assignment_type",
         types: PhantomData,
     };
-    /// `completed_by`: Rentman field `completed_by`.
+    /// `completed_by`: Value of `completed_by`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `completed_by`, documented type `string` (OpenAPI `TaskResponse.completed_by`).
     pub const COMPLETED_BY: Field<Task, Id<Crew>> = Field {
         name: "completed_by",
         types: PhantomData,
     };
-    /// `expiry_notification_date`: Rentman field `expiry_notification_date`.
+    /// `expiry_notification_date`: Value of `expiry_notification_date`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `expiry_notification_date`, documented type `string` (OpenAPI `TaskResponse.expiry_notification_date`).
     pub const EXPIRY_NOTIFICATION_DATE: Field<Task, DateTime<FixedOffset>> = Field {
         name: "expiry_notification_date",
         types: PhantomData,
     };
-    /// `time_budget`: Rentman field `time_budget`.
+    /// `time_budget`: Value of `time_budget`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `time_budget`, documented type `number` (OpenAPI `TaskResponse.time_budget`).
     pub const TIME_BUDGET: Field<Task, Decimal> = Field {
         name: "time_budget",
         types: PhantomData,
@@ -5234,32 +10749,68 @@ pub mod task {
 pub mod task_assignment {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<TaskAssignment>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TaskAssignmentResponse.id`).
     pub const ID: Field<TaskAssignment, Id<TaskAssignment>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TaskAssignmentResponse.created`).
     pub const CREATED: Field<TaskAssignment, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TaskAssignmentResponse.modified`).
     pub const MODIFIED: Field<TaskAssignment, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TaskAssignmentResponse.creator`).
     pub const CREATOR: Field<TaskAssignment, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `task`: Rentman field `task`.
+    /// `task`: Value of `task`.
+    ///
+    /// Rust value: `Id<Task>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `task`, documented type `string` (OpenAPI `TaskAssignmentResponse.task`).
     pub const TASK: Field<TaskAssignment, Id<Task>> = Field {
         name: "task",
         types: PhantomData,
     };
-    /// `crew`: Rentman field `crew`.
+    /// `crew`: Value of `crew`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crew`, documented type `string` (OpenAPI `TaskAssignmentResponse.crew`).
     pub const CREW: Field<TaskAssignment, Id<Crew>> = Field {
         name: "crew",
         types: PhantomData,
@@ -5270,42 +10821,89 @@ pub mod task_assignment {
 pub mod task_status {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<TaskStatus>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TaskStatusResponse.id`).
     pub const ID: Field<TaskStatus, Id<TaskStatus>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TaskStatusResponse.created`).
     pub const CREATED: Field<TaskStatus, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TaskStatusResponse.modified`).
     pub const MODIFIED: Field<TaskStatus, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TaskStatusResponse.creator`).
     pub const CREATOR: Field<TaskStatus, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `TaskStatusResponse.name`).
     pub const NAME: Field<TaskStatus, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `color`: Rentman field `color`.
+    /// `color`: Value of `color`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `color`, documented type `string` (OpenAPI `TaskStatusResponse.color`).
     pub const COLOR: Field<TaskStatus, String> = Field {
         name: "color",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `TaskStatusType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaskStatusType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `TaskStatusResponse.type`).
     pub const TYPE: Field<TaskStatus, TaskStatusType> = Field {
         name: "type",
         types: PhantomData,
     };
-    /// `order`: Rentman field `order`.
+    /// `order`: Value of `order`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `order`, documented type `string` (OpenAPI `TaskStatusResponse.order`).
+    /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     pub const ORDER: Field<TaskStatus, i64> = Field {
         name: "order",
         types: PhantomData,
@@ -5316,37 +10914,78 @@ pub mod task_status {
 pub mod tax_class {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<TaxClass>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TaxClassResponse.id`).
     pub const ID: Field<TaxClass, Id<TaxClass>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TaxClassResponse.created`).
     pub const CREATED: Field<TaxClass, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TaxClassResponse.modified`).
     pub const MODIFIED: Field<TaxClass, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TaxClassResponse.creator`).
     pub const CREATOR: Field<TaxClass, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `TaxClassResponse.name`).
     pub const NAME: Field<TaxClass, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `code`: Rentman field `code`.
+    /// `code`: Value of `code`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `code`, documented type `string` (OpenAPI `TaxClassResponse.code`).
     pub const CODE: Field<TaxClass, String> = Field {
         name: "code",
         types: PhantomData,
     };
-    /// `type`: Rentman field `type`.
+    /// `type`: Value of `type`.
+    ///
+    /// Rust value: `TaxClassType`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TaxClassType`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `type`, documented type `string` (OpenAPI `TaxClassResponse.type`).
     pub const TYPE: Field<TaxClass, TaxClassType> = Field {
         name: "type",
         types: PhantomData,
@@ -5357,87 +10996,189 @@ pub mod tax_class {
 pub mod time_registration {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<TimeRegistration>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TimeRegistrationResponse.id`).
     pub const ID: Field<TimeRegistration, Id<TimeRegistration>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TimeRegistrationResponse.created`).
     pub const CREATED: Field<TimeRegistration, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TimeRegistrationResponse.modified`).
     pub const MODIFIED: Field<TimeRegistration, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TimeRegistrationResponse.creator`).
     pub const CREATOR: Field<TimeRegistration, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `crewmember`: Rentman field `crewmember`.
+    /// `crewmember`: Value of `crewmember`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `crewmember`, documented type `string` (OpenAPI `TimeRegistrationResponse.crewmember`).
     pub const CREWMEMBER: Field<TimeRegistration, Id<Crew>> = Field {
         name: "crewmember",
         types: PhantomData,
     };
-    /// `start`: Rentman field `start`.
+    /// `start`: Value of `start`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `start`, documented type `string` (OpenAPI `TimeRegistrationResponse.start`).
     pub const START: Field<TimeRegistration, DateTime<FixedOffset>> = Field {
         name: "start",
         types: PhantomData,
     };
-    /// `end`: Rentman field `end`.
+    /// `end`: Value of `end`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `end`, documented type `string` (OpenAPI `TimeRegistrationResponse.end`).
     pub const END: Field<TimeRegistration, DateTime<FixedOffset>> = Field {
         name: "end",
         types: PhantomData,
     };
-    /// `distance`: Rentman field `distance`.
+    /// `distance`: Value of `distance`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `distance`, documented type `number` (OpenAPI `TimeRegistrationResponse.distance`).
     pub const DISTANCE: Field<TimeRegistration, Decimal> = Field {
         name: "distance",
         types: PhantomData,
     };
-    /// `is_lunch_included`: Rentman field `is_lunch_included`.
+    /// `is_lunch_included`: Value of `is_lunch_included`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_lunch_included`, documented type `boolean` (OpenAPI `TimeRegistrationResponse.is_lunch_included`).
     pub const IS_LUNCH_INCLUDED: Field<TimeRegistration, bool> = Field {
         name: "is_lunch_included",
         types: PhantomData,
     };
-    /// `leavetype`: Rentman field `leavetype`.
+    /// `leavetype`: Value of `leavetype`.
+    ///
+    /// Rust value: `Id<LeaveType>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `leavetype`, documented type `string` (OpenAPI `TimeRegistrationResponse.leavetype`).
     pub const LEAVETYPE: Field<TimeRegistration, Id<LeaveType>> = Field {
         name: "leavetype",
         types: PhantomData,
     };
-    /// `leaverequest`: Rentman field `leaverequest`.
+    /// `leaverequest`: Value of `leaverequest`.
+    ///
+    /// Rust value: `Id<LeaveRequest>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `leaverequest`, documented type `string` (OpenAPI `TimeRegistrationResponse.leaverequest`).
     pub const LEAVEREQUEST: Field<TimeRegistration, Id<LeaveRequest>> = Field {
         name: "leaverequest",
         types: PhantomData,
     };
     /// `duration`: For time registration of worked hours, the duration will be calculated automatically based on the start and end time. For leave registrations that affect an hour balance, the duration can differ from the start and end time and should contain the number of hours that have to be deducted from the hour balance of the crew member.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `TimeRegistrationResponse.duration`).
     pub const DURATION: Field<TimeRegistration, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `break_duration`: Rentman field `break_duration`.
+    /// `break_duration`: Value of `break_duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `break_duration`, documented type `number` (OpenAPI `TimeRegistrationResponse.break_duration`).
     pub const BREAK_DURATION: Field<TimeRegistration, Decimal> = Field {
         name: "break_duration",
         types: PhantomData,
     };
-    /// `travel_time`: Rentman field `travel_time`.
+    /// `travel_time`: Value of `travel_time`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `travel_time`, documented type `number` (OpenAPI `TimeRegistrationResponse.travel_time`).
     pub const TRAVEL_TIME: Field<TimeRegistration, Decimal> = Field {
         name: "travel_time",
         types: PhantomData,
     };
-    /// `correction_duration`: Rentman field `correction_duration`.
+    /// `correction_duration`: Value of `correction_duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `correction_duration`, documented type `number` (OpenAPI `TimeRegistrationResponse.correction_duration`).
     pub const CORRECTION_DURATION: Field<TimeRegistration, Decimal> = Field {
         name: "correction_duration",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `TimeRegistrationResponse.remark`).
     pub const REMARK: Field<TimeRegistration, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `status`: Rentman field `status`.
+    /// `status`: Value of `status`.
+    ///
+    /// Rust value: `TimeRegistrationStatus`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`TimeRegistrationStatus`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `status`, documented type `string` (OpenAPI `TimeRegistrationResponse.status`).
     pub const STATUS: Field<TimeRegistration, TimeRegistrationStatus> = Field {
         name: "status",
         types: PhantomData,
@@ -5448,62 +11189,133 @@ pub mod time_registration {
 pub mod time_registration_activity {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<TimeRegistrationActivity>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `TimeRegistrationActivityResponse.id`).
     pub const ID: Field<TimeRegistrationActivity, Id<TimeRegistrationActivity>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.created`).
     pub const CREATED: Field<TimeRegistrationActivity, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.modified`).
     pub const MODIFIED: Field<TimeRegistrationActivity, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.creator`).
     pub const CREATOR: Field<TimeRegistrationActivity, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `time_registration`: Rentman field `time_registration`.
+    /// `time_registration`: Value of `time_registration`.
+    ///
+    /// Rust value: `Id<TimeRegistration>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `time_registration`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.time_registration`).
     pub const TIME_REGISTRATION: Field<TimeRegistrationActivity, Id<TimeRegistration>> = Field {
         name: "time_registration",
         types: PhantomData,
     };
-    /// `project_function`: Rentman field `project_function`.
+    /// `project_function`: Value of `project_function`.
+    ///
+    /// Rust value: `Id<ProjectFunction>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `project_function`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.project_function`).
     pub const PROJECT_FUNCTION: Field<TimeRegistrationActivity, Id<ProjectFunction>> = Field {
         name: "project_function",
         types: PhantomData,
     };
-    /// `subproject_function`: Rentman field `subproject_function`.
+    /// `subproject_function`: Value of `subproject_function`.
+    ///
+    /// Rust value: `Id<Subproject>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `subproject_function`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.subproject_function`).
     pub const SUBPROJECT_FUNCTION: Field<TimeRegistrationActivity, Id<Subproject>> = Field {
         name: "subproject_function",
         types: PhantomData,
     };
-    /// `description`: Rentman field `description`.
+    /// `description`: Value of `description`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `description`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.description`).
     pub const DESCRIPTION: Field<TimeRegistrationActivity, String> = Field {
         name: "description",
         types: PhantomData,
     };
-    /// `duration`: Rentman field `duration`.
+    /// `duration`: Value of `duration`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `duration`, documented type `number` (OpenAPI `TimeRegistrationActivityResponse.duration`).
     pub const DURATION: Field<TimeRegistrationActivity, Decimal> = Field {
         name: "duration",
         types: PhantomData,
     };
-    /// `is_activity`: Rentman field `is_activity`.
+    /// `is_activity`: Value of `is_activity`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `is_activity`, documented type `boolean` (OpenAPI `TimeRegistrationActivityResponse.is_activity`).
     pub const IS_ACTIVITY: Field<TimeRegistrationActivity, bool> = Field {
         name: "is_activity",
         types: PhantomData,
     };
-    /// `from`: Rentman field `from`.
+    /// `from`: Value of `from`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `from`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.from`).
     pub const FROM: Field<TimeRegistrationActivity, DateTime<FixedOffset>> = Field {
         name: "from",
         types: PhantomData,
     };
-    /// `to`: Rentman field `to`.
+    /// `to`: Value of `to`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `to`, documented type `string` (OpenAPI `TimeRegistrationActivityResponse.to`).
     pub const TO: Field<TimeRegistrationActivity, DateTime<FixedOffset>> = Field {
         name: "to",
         types: PhantomData,
@@ -5514,102 +11326,217 @@ pub mod time_registration_activity {
 pub mod vehicle {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<Vehicle>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `VehicleResponse.id`).
     pub const ID: Field<Vehicle, Id<Vehicle>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `VehicleResponse.created`).
     pub const CREATED: Field<Vehicle, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `VehicleResponse.modified`).
     pub const MODIFIED: Field<Vehicle, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `VehicleResponse.creator`).
     pub const CREATOR: Field<Vehicle, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `folder`: Rentman field `folder`.
+    /// `folder`: Value of `folder`.
+    ///
+    /// Rust value: `Id<Folder>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `folder`, documented type `string` (OpenAPI `VehicleResponse.folder`).
     pub const FOLDER: Field<Vehicle, Id<Folder>> = Field {
         name: "folder",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `VehicleResponse.name`).
     pub const NAME: Field<Vehicle, String> = Field {
         name: "name",
         types: PhantomData,
     };
-    /// `cost_rate`: Rentman field `cost_rate`.
+    /// `cost_rate`: Value of `cost_rate`.
+    ///
+    /// Rust value: `Id<Rate>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `cost_rate`, documented type `string` (OpenAPI `VehicleResponse.cost_rate`).
     pub const COST_RATE: Field<Vehicle, Id<Rate>> = Field {
         name: "cost_rate",
         types: PhantomData,
     };
-    /// `in_planner`: Rentman field `in_planner`.
+    /// `in_planner`: Value of `in_planner`.
+    ///
+    /// Rust value: `bool`.
+    /// Use a Rust boolean; typed query filters send it as `1` or `0`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `in_planner`, documented type `boolean` (OpenAPI `VehicleResponse.in_planner`).
     pub const IN_PLANNER: Field<Vehicle, bool> = Field {
         name: "in_planner",
         types: PhantomData,
     };
-    /// `height`: Rentman field `height`.
+    /// `height`: Value of `height`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `height`, documented type `number` (OpenAPI `VehicleResponse.height`).
     pub const HEIGHT: Field<Vehicle, Decimal> = Field {
         name: "height",
         types: PhantomData,
     };
-    /// `length`: Rentman field `length`.
+    /// `length`: Value of `length`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `length`, documented type `number` (OpenAPI `VehicleResponse.length`).
     pub const LENGTH: Field<Vehicle, Decimal> = Field {
         name: "length",
         types: PhantomData,
     };
-    /// `width`: Rentman field `width`.
+    /// `width`: Value of `width`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `width`, documented type `number` (OpenAPI `VehicleResponse.width`).
     pub const WIDTH: Field<Vehicle, Decimal> = Field {
         name: "width",
         types: PhantomData,
     };
-    /// `seats`: Rentman field `seats`.
+    /// `seats`: Value of `seats`.
+    ///
+    /// Rust value: `i64`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `seats`, documented type `integer` (OpenAPI `VehicleResponse.seats`).
     pub const SEATS: Field<Vehicle, i64> = Field {
         name: "seats",
         types: PhantomData,
     };
-    /// `inspection_date`: Rentman field `inspection_date`.
+    /// `inspection_date`: Value of `inspection_date`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `inspection_date`, documented type `string` (OpenAPI `VehicleResponse.inspection_date`).
     pub const INSPECTION_DATE: Field<Vehicle, String> = Field {
         name: "inspection_date",
         types: PhantomData,
     };
-    /// `licenseplate`: Rentman field `licenseplate`.
+    /// `licenseplate`: Value of `licenseplate`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `licenseplate`, documented type `string` (OpenAPI `VehicleResponse.licenseplate`).
     pub const LICENSEPLATE: Field<Vehicle, String> = Field {
         name: "licenseplate",
         types: PhantomData,
     };
-    /// `remark`: Rentman field `remark`.
+    /// `remark`: Value of `remark`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `remark`, documented type `string` (OpenAPI `VehicleResponse.remark`).
     pub const REMARK: Field<Vehicle, String> = Field {
         name: "remark",
         types: PhantomData,
     };
-    /// `payload_capacity`: Rentman field `payload_capacity`.
+    /// `payload_capacity`: Value of `payload_capacity`.
+    ///
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `payload_capacity`, documented type `number` (OpenAPI `VehicleResponse.payload_capacity`).
     pub const PAYLOAD_CAPACITY: Field<Vehicle, Decimal> = Field {
         name: "payload_capacity",
         types: PhantomData,
     };
-    /// `surface_area`: Rentman field `surface_area`.
+    /// `surface_area`: Value of `surface_area`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `surface_area`, documented type `string` (OpenAPI `VehicleResponse.surface_area`).
     pub const SURFACE_AREA: Field<Vehicle, String> = Field {
         name: "surface_area",
         types: PhantomData,
     };
     /// `multiple`: Can be scheduled more than once at the same time. For example, for employment agencies.
+    ///
+    /// Rust value: `VehicleMultiple`.
+    /// The generated enum names every documented value and preserves new response values as `Unknown(String)`.
+    /// See [`VehicleMultiple`] for the documented variants.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `multiple`, documented type `string` (OpenAPI `VehicleResponse.multiple`).
     pub const MULTIPLE: Field<Vehicle, VehicleMultiple> = Field {
         name: "multiple",
         types: PhantomData,
     };
-    /// `image`: Rentman field `image`.
+    /// `image`: Value of `image`.
+    ///
+    /// Rust value: `Id<File>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `image`, documented type `string` (OpenAPI `VehicleResponse.image`).
     pub const IMAGE: Field<Vehicle, Id<File>> = Field {
         name: "image",
         types: PhantomData,
     };
-    /// `asset_location`: Rentman field `asset_location`.
+    /// `asset_location`: Value of `asset_location`.
+    ///
+    /// Rust value: `Id<StockLocation>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `asset_location`, documented type `string` (OpenAPI `VehicleResponse.asset_location`).
     pub const ASSET_LOCATION: Field<Vehicle, Id<StockLocation>> = Field {
         name: "asset_location",
         types: PhantomData,
@@ -5620,27 +11547,56 @@ pub mod vehicle {
 pub mod warehouse_status {
     use super::*;
 
-    /// `id`: Rentman field `id`.
+    /// `id`: Value of `id`.
+    ///
+    /// Rust value: `Id<WarehouseStatus>`.
+    /// A numeric resource identifier uses a typed [`Id`] to prevent mixing resources.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `id`, documented type `integer` (OpenAPI `WarehouseStatusResponse.id`).
     pub const ID: Field<WarehouseStatus, Id<WarehouseStatus>> = Field {
         name: "id",
         types: PhantomData,
     };
-    /// `created`: Rentman field `created`.
+    /// `created`: Value of `created`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `created`, documented type `string` (OpenAPI `WarehouseStatusResponse.created`).
     pub const CREATED: Field<WarehouseStatus, DateTime<FixedOffset>> = Field {
         name: "created",
         types: PhantomData,
     };
-    /// `modified`: Rentman field `modified`.
+    /// `modified`: Value of `modified`.
+    ///
+    /// Rust value: `DateTime<FixedOffset>`.
+    /// A parsed timestamp retaining its UTC offset, rather than an unvalidated string.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `modified`, documented type `string` (OpenAPI `WarehouseStatusResponse.modified`).
     pub const MODIFIED: Field<WarehouseStatus, DateTime<FixedOffset>> = Field {
         name: "modified",
         types: PhantomData,
     };
-    /// `creator`: Rentman field `creator`.
+    /// `creator`: Value of `creator`.
+    ///
+    /// Rust value: `Id<Crew>`.
+    /// A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`].
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `creator`, documented type `string` (OpenAPI `WarehouseStatusResponse.creator`).
     pub const CREATOR: Field<WarehouseStatus, Id<Crew>> = Field {
         name: "creator",
         types: PhantomData,
     };
-    /// `name`: Rentman field `name`.
+    /// `name`: Value of `name`.
+    ///
+    /// Rust value: `String`.
+    /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
+    ///
+    /// Rentman representation: `name`, documented type `string` (OpenAPI `WarehouseStatusResponse.name`).
     pub const NAME: Field<WarehouseStatus, String> = Field {
         name: "name",
         types: PhantomData,

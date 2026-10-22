@@ -1,4 +1,5 @@
-use crate::openapi::{Context, enum_variant_name, escape, properties, rust_doc, rust_field};
+use super::resources::payload_expression;
+use crate::openapi::{Context, enum_variant_name, escape, properties, rust_doc, rust_member};
 use serde_json::Value;
 use std::collections::BTreeSet;
 use std::fmt::Write as _;
@@ -36,7 +37,28 @@ pub fn generate(context: &Context<'_>) -> Result<String, String> {
             } else {
                 "Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize"
             };
-            writeln!(enums, "/// Values documented for `{name}.{field}`.\n#[derive({derives})]\npub enum {enum_name} {{").unwrap();
+            let owner = context.type_name(name);
+            let behavior = if is_open {
+                "Match named variants for known values and `Unknown(String)` for new values returned by Rentman."
+            } else {
+                "Use one of the named variants when constructing a write payload; arbitrary values cannot be sent."
+            };
+            let description = rust_doc(
+                field_schema.get("description").and_then(Value::as_str),
+                &format!("Values of `{field}` on [`{owner}`]."),
+            );
+            let first = enum_variant_name(
+                values
+                    .first()
+                    .ok_or_else(|| format!("empty enum at {name}.{field}"))?,
+                &mut if is_open {
+                    BTreeSet::from(["Unknown".to_owned()])
+                } else {
+                    BTreeSet::new()
+                },
+            );
+            let example = enum_example(context, name, field, &enum_name, &first, is_open);
+            writeln!(enums, "/// {description}\n///\n/// {behavior}\n/// Each variant lists the value Rentman transmits. Source field: `{name}.{field}`.\n///\n{example}\n#[derive({derives})]\npub enum {enum_name} {{").unwrap();
             let mut used = BTreeSet::new();
             if is_open {
                 used.insert("Unknown".to_owned());
@@ -81,23 +103,71 @@ pub fn generate(context: &Context<'_>) -> Result<String, String> {
                         .and_then(Value::as_str)
                         .unwrap_or("")
                 ),
-                &format!("Rentman API schema `{schema_name}`.")
+                &if is_payload {
+                    format!("Write payload `{rust_name}`.")
+                } else {
+                    format!("Response data `{rust_name}`.")
+                }
             )
         ));
+        lines.push("///".to_owned());
+        lines.push(format!(
+            "/// Rust type: `{rust_name}`. Rentman's schema name is `{schema_name}`."
+        ));
+        if let Some((collection, resource)) = context
+            .resources
+            .iter()
+            .find(|(_, resource)| resource.as_str() == rust_name)
+        {
+            let accessor = super::live_sweep::accessor_name(resource);
+            lines.push(format!("/// Resource collection: `/{collection}`; access it through [`RentmanClient::{accessor}`](crate::RentmanClient::{accessor})."));
+            lines.push("///".to_owned());
+            lines.push(format!("/// A read snapshot with both `id: Id<{rust_name}>` and `revision: Revision<{rust_name}>`."));
+            lines.push(
+                "/// The ID identifies the item; the revision identifies its observed version."
+                    .to_owned(),
+            );
+            lines.push(
+                "/// Keep both when storing data or comparing later reads. Every full resource"
+                    .to_owned(),
+            );
+            lines.push("/// implements [`Revisioned`]; see the [objects and revisions guide](crate#change-detection).".to_owned());
+            lines.push("///".to_owned());
+            // Every resource is defined by its item GET, so `get` always exists.
+            let read = format!(
+                "let item: {rust_name} = client.{accessor}().get(rentman_client::Id::new(12)).await?;"
+            );
+            lines.extend(doc_example(&format!(
+                "use rentman_client::model::{rust_name};\n\n# async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {{\n{read}\n// Store both to recognize this exact version later.\nlet (id, revision) = (item.id, item.revision.clone());\n# let _ = (id, revision);\n# Ok(())\n# }}"
+            )));
+        } else if is_payload
+            && let Ok(expression) = payload_expression(context, schema_name, "rentman_client::")
+        {
+            let how = if required.is_empty() {
+                "Every field is optional, so start from `Default`"
+            } else {
+                "Pass the required fields to `new`; the optional ones start as `None`"
+            };
+            lines.push("///".to_owned());
+            lines.push(format!("/// {how} and set what you want to send:"));
+            lines.push("///".to_owned());
+            lines.extend(doc_example(&format!(
+                "let payload = {expression};\n# let _ = payload;"
+            )));
+        }
         lines.push(format!("#[derive({derives})]"));
         lines.push(format!("pub struct {rust_name} {{"));
-        for (field, field_schema) in properties(schema) {
-            let rust_name = rust_field(field);
+        for (field, _) in properties(schema) {
+            let rust_name = rust_member(field);
             let ty = context.field_type(schema_name, field, &required);
             lines.push(format!(
                 "    /// {}",
-                rust_doc(
-                    field_schema.get("description").and_then(Value::as_str),
-                    &format!("Rentman API field `{schema_name}.{field}`.")
-                )
+                context
+                    .field_documentation(schema_name, field, &ty, Some(required.contains(field)))
+                    .replace('\n', "\n    /// ")
             ));
             let mut attrs = Vec::new();
-            if rust_name != *field {
+            if rust_name.trim_start_matches("r#") != *field {
                 attrs.push(format!("rename = \"{}\"", escape(field)));
             }
             let is_link =
@@ -125,7 +195,12 @@ pub fn generate(context: &Context<'_>) -> Result<String, String> {
         }
         if has_revision(context, schema_name, schema)? {
             lines.extend([
-                "    /// Revision of the item as read; changes on every update.".to_owned(),
+                "    /// Observed version of this item, always present alongside `id`.".to_owned(),
+                "    ///".to_owned(),
+                "    /// Compare with a stored revision of the same ID to detect updates or".to_owned(),
+                "    /// reuse unchanged data. This is an opaque [`Revision`], not a timestamp".to_owned(),
+                "    /// or counter; local field edits do not update it. Rentman sends it as".to_owned(),
+                format!("    /// `{revision_field}`. See the [synchronization guide](crate#change-detection)."),
                 format!("    #[serde(rename = \"{revision_field}\")] "),
                 format!("    pub revision: Revision<{rust_name}>,"),
             ]);
@@ -139,6 +214,81 @@ pub fn generate(context: &Context<'_>) -> Result<String, String> {
     append_resource_impls(context, &mut lines);
     append_inventory(context, &mut lines)?;
     Ok(lines.join("\n"))
+}
+
+/// Lines of a compile-checked rustdoc example of `body` on an item.
+fn doc_example(body: &str) -> Vec<String> {
+    let mut lines = vec!["/// ```".to_owned()];
+    lines.extend(body.lines().map(|line| {
+        if line.is_empty() {
+            "///".to_owned()
+        } else {
+            format!("/// {line}")
+        }
+    }));
+    lines.push("/// ```".to_owned());
+    lines
+}
+
+/// An example of the enum of `schema.field`: reading it from a response, or
+/// writing it into a payload.
+fn enum_example(
+    context: &Context<'_>,
+    schema: &str,
+    field: &str,
+    enum_name: &str,
+    first: &str,
+    is_open: bool,
+) -> String {
+    let body = if is_open {
+        format!(
+            "use rentman_client::model::{enum_name};\n\nfn label(value: &{enum_name}) -> String {{\n    match value {{\n        {enum_name}::Unknown(text) => format!(\"not yet documented: {{text}}\"),\n        known => format!(\"{{known:?}}\"),\n    }}\n}}\nassert_eq!(label(&{enum_name}::{first}), \"{first}\");"
+        )
+    } else {
+        let owner = context.type_name(schema);
+        let member = rust_member(field);
+        let required = context.effective_required(schema, &context.schemas[schema]);
+        match payload_expression(context, schema, "rentman_client::") {
+            Ok(expression) if !required.contains(field) => format!(
+                "use rentman_client::model::{{{enum_name}, {owner}}};\n\nlet mut payload: {owner} = {expression};\npayload.{member} = Some({enum_name}::{first});"
+            ),
+            _ => format!(
+                "use rentman_client::model::{enum_name};\n\nlet value = {enum_name}::{first};\n# let _ = value;"
+            ),
+        }
+    };
+    doc_example(&body).join("\n")
+}
+
+pub fn resource_names(context: &Context<'_>) -> String {
+    let mut output = String::from(
+        "\n## Resource names and API collections\n\nRust names describe singular resources; request schemas become `Payload` types.\nNames are normalized to resource-focused English where the API uses another\nlanguage or inconsistent singular/plural forms. In particular,\n`CrewRateResponse` is `Rate` (`/rates`), whereas `CrewRatesResponse` is\n`CrewRate` (`/crewrates`): these are distinct resources.\n\nThe complete mapping below is generated from the same contract as the models.\nA request schema listed here identifies its payload type, not a promise that\nevery collection supports every write operation.\n\n| Rust resource | Response schema | Request schema | Rust payload | API collection | Client accessor |\n| --- | --- | --- | --- | --- | --- |\n",
+    );
+    let mut resources = context.resources.iter().collect::<Vec<_>>();
+    resources.sort_by_key(|(_, resource)| *resource);
+    for (collection, resource) in resources {
+        let (response, _) = context.resource_schema(resource);
+        let request = response
+            .strip_suffix("Response")
+            .map(|name| format!("{name}Request"));
+        let (request_name, payload) = request
+            .as_deref()
+            .filter(|name| context.schemas.contains_key(*name))
+            .map(|name| {
+                (
+                    format!("`{name}`"),
+                    format!(
+                        "[`{}`](crate::model::{})",
+                        context.type_name(name),
+                        context.type_name(name)
+                    ),
+                )
+            })
+            .unwrap_or_else(|| ("Not documented".to_owned(), "Not documented".to_owned()));
+        let accessor = super::live_sweep::accessor_name(resource);
+        writeln!(output, "| [`{resource}`](crate::model::{resource}) | `{response}` | {request_name} | {payload} | `/{collection}` | [`{accessor}()`](crate::RentmanClient::{accessor}) |").unwrap();
+    }
+    output
 }
 
 fn fixed_model_types() -> Vec<String> {
@@ -189,6 +339,15 @@ pub(crate) struct ItemResponse<T> {
 }
 
 /// Email address string from Rentman. Empty when the address is not set.
+///
+/// ```
+/// # fn show(member: rentman_client::model::Crew) {
+/// match member.email.as_ref().map(|email| email.as_str()) {
+///     Some("") | None => println!("no email address"),
+///     Some(address) => println!("mail to {address}"),
+/// }
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[serde(transparent)]
 pub struct EmailAddress(String);
@@ -211,13 +370,48 @@ impl<'de> Deserialize<'de> for EmailAddress {
     }
 }
 
-/// Explicitly open custom fields object.
+/// The account-specific custom fields of an item, keyed `custom_<id>`.
+///
+/// Register the fields you use with
+/// [`RentmanClient::with_custom_fields`](crate::RentmanClient::with_custom_fields),
+/// then read and write them with [`get`](Self::get) and [`set`](Self::set):
+///
+/// ```
+/// use rentman_client::model::CustomFields;
+///
+/// let mut custom = CustomFields::default();
+/// custom.set(8, &"Warehouse A")?;
+/// custom.set(9, &true)?;
+/// assert_eq!(custom.get::<String>(8)?, "Warehouse A");
+/// assert!(custom.get::<bool>(9)?);
+/// # Ok::<(), rentman_client::CustomFieldValueError>(())
+/// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(transparent)]
 pub struct CustomFields(pub BTreeMap<String, CustomFieldValue>);
 
 impl CustomFields {
     /// Reads `custom_<id>` into an application-defined Rust type.
+    ///
+    /// Use `Option<T>` for nullable values. An absent key returns
+    /// [`CustomFieldValueError::Missing`](crate::CustomFieldValueError::Missing);
+    /// an incompatible value returns [`CustomFieldValueError::Json`](crate::CustomFieldValueError::Json).
+    /// Only registered values survive response processing; see the
+    /// [initialization guide](crate#initializing-custom-fields).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Decimal, model::EquipmentId};
+    ///
+    /// let equipment = client.equipment().get(EquipmentId::new(42)).await?;
+    /// if let Some(custom) = &equipment.custom {
+    ///     let label: Option<String> = custom.get(8)?;   // nullable text field
+    ///     let weight: Option<Decimal> = custom.get(9)?; // nullable number field
+    ///     println!("{label:?} {weight:?}");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get<T: serde::de::DeserializeOwned>(&self, id: u64) -> Result<T, crate::CustomFieldValueError> {
         let value = self.0.get(&format!("custom_{id}")).ok_or(crate::CustomFieldValueError::Missing { id })?;
         let encoded = serde_json::to_string(value).expect("CustomFieldValue contains only JSON-compatible values");
@@ -225,6 +419,25 @@ impl CustomFields {
     }
 
     /// Serializes an application-defined value into `custom_<id>`.
+    ///
+    /// This modifies local data only. Put this object in a resource's write
+    /// payload and call its update method to send it. Application-defined
+    /// types need Serde implementations. Numeric values use exact decimal
+    /// storage, subject to [`Decimal`](crate::Decimal)'s range and scale.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::model::{CustomFields, EquipmentId, EquipmentPayload};
+    ///
+    /// let mut custom = CustomFields::default();
+    /// custom.set(8, &"Warehouse B")?;
+    /// custom.set(9, &Option::<String>::None)?; // send null
+    /// let mut payload = EquipmentPayload::default();
+    /// payload.custom = Some(custom);
+    /// client.equipment().update(EquipmentId::new(42), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn set<T: Serialize>(&mut self, id: u64, value: &T) -> Result<(), crate::CustomFieldValueError> {
         let encoded = serde_json::to_string(value)?;
         self.0.insert(format!("custom_{id}"), serde_json::from_str(&encoded)?);
@@ -233,6 +446,23 @@ impl CustomFields {
 }
 
 /// Value inside Rentman's custom fields object.
+///
+/// Prefer [`CustomFields::get`] with your own Rust type; match this enum for
+/// fields whose shape is not known in advance:
+///
+/// ```
+/// use rentman_client::model::{CustomFieldValue, CustomFields};
+///
+/// fn describe(custom: &CustomFields, id: u64) -> String {
+///     match custom.0.get(&format!("custom_{id}")) {
+///         Some(CustomFieldValue::Text(text)) => text.clone(),
+///         Some(CustomFieldValue::Number(number)) => number.to_string(),
+///         Some(CustomFieldValue::Bool(flag)) => flag.to_string(),
+///         Some(CustomFieldValue::Null) | None => "not set".to_owned(),
+///         Some(other) => format!("{other:?}"),
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum CustomFieldValue {
@@ -316,7 +546,7 @@ fn payload_constructor(
         .map(|(field, _)| {
             format!(
                 "{}: {}",
-                rust_field(field),
+                rust_member(field),
                 context.field_type(schema_name, field, required)
             )
         })
@@ -324,7 +554,7 @@ fn payload_constructor(
     output.push(format!("    pub fn new({}) -> Self {{", params.join(", ")));
     output.push("        Self {".to_owned());
     for (field, _) in properties(schema) {
-        let rust_name = rust_field(field);
+        let rust_name = rust_member(field);
         output.push(format!(
             "            {rust_name}{}",
             if required.contains(field) {
@@ -496,12 +726,19 @@ mod tests {
             "    #[serde(rename = \"1\")]\n    One,",
             "    #[serde(untagged)]\n    Unknown(String),",
             "#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]\npub enum WidgetPayloadStatus {",
-            "/// A widget.\n#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]\npub struct Widget {",
-            "    /// Display name.\n    #[serde(deserialize_with = \"std::option::Option::deserialize\")]\n    pub name: Option<String>,",
+            "/// A widget.\n///\n/// Rust type: `Widget`. Rentman's schema name is `WidgetResponse`.",
+            "    /// Display name.\n    /// \n    /// Rust value: `Option<String>`.",
             "    #[serde(default, skip_serializing_if = \"Option::is_none\", with = \"crate::id::optional_link\")]\n    pub part: Option<Id<Part>>,",
-            "    #[serde(rename = \"type\", default, skip_serializing_if = \"Option::is_none\")]\n    pub type_: Option<String>,",
+            "    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub r#type: Option<String>,",
+            "Optional in writes: `None` leaves the key out of the request instead of sending null.",
+            "/// let item: Widget = client.widgets().get(rentman_client::Id::new(12)).await?;",
+            "/// let payload = rentman_client::model::WidgetPayload::new(",
+            "///         known => format!(\"{known:?}\"),",
+            "/// let item: Widget = client.widgets().get(rentman_client::Id::new(12)).await?;",
             "    #[serde(with = \"crate::id::link\")]\n    pub part: Id<Part>,",
             "    pub revision: Revision<Widget>,",
+            "/// A read snapshot with both `id: Id<Widget>` and `revision: Revision<Widget>`.",
+            "    /// Observed version of this item, always present alongside `id`.",
             "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]\npub struct WidgetUpdatePayload {",
             "    pub fn new(name: String) -> Self {\n        Self {\n            name,\n        }\n    }",
             "            label: None,",
@@ -514,6 +751,27 @@ mod tests {
         ] {
             assert!(code.contains(expected), "missing {expected:?}");
         }
+    }
+
+    #[test]
+    fn documents_required_nullable_payload_fields_and_rejects_empty_enums() {
+        let mut spec = spec();
+        let request = &mut spec["components"]["schemas"]["WidgetRequest"];
+        request["properties"]["note"] = json!({"type": ["string", "null"]});
+        request["required"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!("note"));
+        assert!(models(&spec).unwrap().contains(
+            "Required in writes and set through the payload's `new` constructor; `None` is sent as null."
+        ));
+
+        let mut spec = crate::test_support::spec();
+        spec["components"]["schemas"]["WidgetResponse"]["properties"]["status"]["enum"] = json!([]);
+        assert_eq!(
+            models(&spec).unwrap_err(),
+            "empty enum at WidgetResponse.status"
+        );
     }
 
     #[test]
@@ -530,8 +788,157 @@ mod tests {
             .remove("status");
         schemas["WidgetRequest"]["required"] = json!(["name"]);
         let code = models(&spec).unwrap();
-        assert!(!code.contains("/// Values documented for"));
+        assert!(!code.contains("pub enum WidgetStatus"));
+        assert!(!code.contains("pub enum WidgetPayloadStatus"));
         assert!(code.contains("pub(crate) struct NoRequest;"));
+    }
+
+    #[test]
+    fn resource_overview_uses_resolved_names_and_collections() {
+        let spec = serde_json::from_str(include_str!("../../../openapi/rentman-oas.json")).unwrap();
+        let context = Context::with_config(&spec, crate::openapi::config()).unwrap();
+        let overview = resource_names(&context);
+        assert!(
+            overview.contains(
+                "[`Invoice`](crate::model::Invoice) | `FactuurResponse` | `FactuurRequest`"
+            )
+        );
+        assert!(overview.contains("`/invoices` | [`invoices()`](crate::RentmanClient::invoices)"));
+        assert!(overview.contains("[`Rate`](crate::model::Rate) | `CrewRateResponse`"));
+        assert!(overview.contains("[`CrewRate`](crate::model::CrewRate) | `CrewRatesResponse`"));
+        for (original, resource) in &context.config.resource_names {
+            assert!(overview.contains(&format!(
+                "[`{resource}`](crate::model::{resource}) | `{original}Response`"
+            )));
+        }
+        assert_eq!(
+            overview
+                .lines()
+                .filter(|line| line.starts_with("| [`"))
+                .count(),
+            context.resources.len()
+        );
+        let models = generate(&context).unwrap();
+        assert!(
+            models.contains("Rust type: `Invoice`. Rentman's schema name is `FactuurResponse`.")
+        );
+        assert!(models.contains("Resource collection: `/invoices`"));
+    }
+
+    #[test]
+    fn resource_overview_marks_resources_without_a_request_schema() {
+        let mut spec = spec();
+        spec["components"]["schemas"]
+            .as_object_mut()
+            .unwrap()
+            .remove("PartRequest");
+        spec["paths"]["/widgets/{id}/parts"]
+            .as_object_mut()
+            .unwrap()
+            .remove("post");
+        let overview = resource_names(&Context::with_config(&spec, config()).unwrap());
+        assert!(overview.contains(
+            "| [`Part`](crate::model::Part) | `PartResponse` | Not documented | Not documented | `/parts` |"
+        ));
+        assert!(overview.contains(
+            "| [`Widget`](crate::model::Widget) | `WidgetResponse` | `WidgetRequest` | [`WidgetPayload`](crate::model::WidgetPayload) | `/widgets` |"
+        ));
+    }
+
+    #[test]
+    fn documents_field_types_and_presence_in_each_context() {
+        let mut spec = spec();
+        spec["components"]["schemas"]["WidgetResponse"]["properties"]["part"]["description"] =
+            json!("The linked part.");
+        spec["components"]["schemas"]["WidgetResponse"]["required"] = json!(["id", "name", "part"]);
+        let context = Context::with_config(&spec, config()).unwrap();
+        let model =
+            context.field_documentation("WidgetResponse", "part", "Option<Id<Part>>", Some(false));
+        assert!(model.contains("The linked part."));
+        assert!(model.contains("Rust value: `Option<Id<Part>>`"));
+        assert!(model.contains("links to another collection are rejected"));
+        assert!(model.contains("The key may be omitted or null"));
+        assert!(
+            model.find("Rust value:").unwrap() < model.find("Rentman representation:").unwrap()
+        );
+        assert!(
+            model.find("The key may be omitted").unwrap()
+                < model.find("Rentman representation:").unwrap()
+        );
+        let undocumented =
+            context.field_documentation("WidgetResponse", "count", "Option<i64>", Some(false));
+        assert!(undocumented.starts_with("Value of `count`.\n\nRust value: `Option<i64>`."));
+        let projection = crate::generator::fields::generate_projection_fields(&context);
+        assert!(projection.contains("Rust value: `Id<Part>`"));
+        assert!(projection.contains("The key must be present and non-null."));
+        let filter = crate::generator::fields::generate_fields(&context).unwrap();
+        assert!(filter.contains("use `is_null` to test for null"));
+        assert!(
+            generate(&context)
+                .unwrap()
+                .contains(&model.replace('\n', "\n    /// "))
+        );
+        let nullable =
+            context.field_documentation("WidgetResponse", "name", "Option<String>", Some(true));
+        assert!(nullable.contains("key must be present, but null reads as `None`"));
+    }
+
+    #[test]
+    fn documents_semantic_types_and_configured_response_deviations() {
+        let mut spec = spec();
+        let fields = spec["components"]["schemas"]["WidgetResponse"]["properties"]
+            .as_object_mut()
+            .unwrap();
+        fields.insert("integer_text".to_owned(), json!({"type": "string"}));
+        fields.insert("item".to_owned(), json!({"type": "integer"}));
+        let config = config_with(|config| {
+            config
+                .response_string_integer_fields
+                .push("integer_text".to_owned());
+            config.response_type_overrides.push(FieldOverride {
+                schema: "WidgetResponse".to_owned(),
+                field: "item".to_owned(),
+                rust_type: "ItemId".to_owned(),
+            });
+        });
+        let context = Context::with_config(&spec, config).unwrap();
+        for (field, explanation) in [
+            ("price", "not a binary float"),
+            ("active", "`1` or `0`"),
+            ("day", "without a time or timezone"),
+            ("created", "retaining its UTC offset"),
+            ("email", "empty addresses are allowed"),
+            ("homepage_url", "parsed URL"),
+            ("custom", "Register retained keys"),
+            ("item", "polymorphic"),
+            ("status", "Unknown(String)"),
+            ("id", "prevent mixing resources"),
+            ("integer_text", "without manual conversion"),
+        ] {
+            let doc = context.field_documentation(
+                "WidgetResponse",
+                field,
+                context.base_type("WidgetResponse", field),
+                None,
+            );
+            assert!(doc.contains(explanation), "{field}: {doc}");
+        }
+        let request_enum = context.field_documentation(
+            "WidgetRequest",
+            "status",
+            "WidgetPayloadStatus",
+            Some(true),
+        );
+        assert!(request_enum.contains("accepts only documented values"));
+        assert!(request_enum.contains("See [`WidgetPayloadStatus`]"));
+        let override_doc = context.field_documentation(
+            "WidgetResponse",
+            "integer_text",
+            "Option<i64>",
+            Some(false),
+        );
+        assert!(override_doc.contains("documented type `string`"));
+        assert!(override_doc.contains("Rust value: `Option<i64>`"));
     }
 
     #[test]

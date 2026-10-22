@@ -59,6 +59,20 @@ impl Operation {
 }
 
 /// A collection whose items can be listed.
+///
+/// Use it to write code for any listable collection:
+///
+/// ```
+/// use rentman_client::resource::{Collection, List};
+///
+/// async fn count<M: List>(collection: &Collection<M>) -> rentman_client::Result<usize> {
+///     Ok(collection.list().all().await?.len())
+/// }
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// let crew = count(&client.crew()).await?;
+/// # Ok(())
+/// # }
+/// ```
 pub trait List: sealed::Sealed {
     /// Item type of the collection.
     type Item: Resource + CustomFieldsResource + DeserializeOwned;
@@ -67,6 +81,14 @@ pub trait List: sealed::Sealed {
 }
 
 /// A collection whose items can be read one by one.
+///
+/// ```
+/// use rentman_client::{Id, resource::{Collection, Get}};
+///
+/// async fn exists<M: Get>(collection: &Collection<M>, id: Id<M::Item>) -> bool {
+///     collection.get(id).await.is_ok()
+/// }
+/// ```
 pub trait Get: sealed::Sealed {
     /// Item type of the collection.
     type Item: Resource + CustomFieldsResource + DeserializeOwned;
@@ -84,6 +106,17 @@ pub trait GetItem: Resource + CustomFieldsResource + DeserializeOwned + sealed::
 }
 
 /// A collection that items can be created in.
+///
+/// Implemented by every collection with [`Collection::create`]:
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::model::TaskStatusPayload;
+///
+/// let status = client.task_statuses().create(&TaskStatusPayload::new("green".to_string())).await?;
+/// # Ok(())
+/// # }
+/// ```
 pub trait Create: sealed::Sealed {
     /// Write payload of a new item.
     type Payload: Serialize;
@@ -94,6 +127,18 @@ pub trait Create: sealed::Sealed {
 }
 
 /// A collection whose items can be updated.
+///
+/// Implemented by every collection with [`Collection::update`]:
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::model::{TaskStatusId, TaskStatusPayload};
+///
+/// let payload = TaskStatusPayload::new("blue".to_string());
+/// let status = client.task_statuses().update(TaskStatusId::new(12), &payload).await?;
+/// # Ok(())
+/// # }
+/// ```
 pub trait Update: sealed::Sealed {
     /// Write payload with the fields to change.
     type Payload: Serialize;
@@ -104,6 +149,17 @@ pub trait Update: sealed::Sealed {
 }
 
 /// A collection whose items can be deleted.
+///
+/// ```
+/// use rentman_client::{Id, resource::{Collection, Delete}};
+///
+/// async fn delete_all<M: Delete>(collection: &Collection<M>, ids: &[Id<M::Item>]) -> rentman_client::Result<()> {
+///     for id in ids {
+///         collection.delete(*id).await?;
+///     }
+///     Ok(())
+/// }
+/// ```
 pub trait Delete: sealed::Sealed {
     /// Item type of the collection.
     type Item: Resource;
@@ -115,7 +171,29 @@ pub trait Delete: sealed::Sealed {
 /// crew member.
 ///
 /// `M` names the collection; which methods exist depends on what Rentman
-/// documents for it.
+/// documents for it. Get one from a [`RentmanClient`] accessor, or from a
+/// collection method for nested collections:
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::model::CrewId;
+///
+/// let crew = client.crew();                              // `/crew`
+/// let appointments = crew.appointments(CrewId::new(12)); // `/crew/12/appointments`
+/// let items = appointments.list().all().await?;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// An operation Rentman does not document for a collection does not compile:
+///
+/// ```compile_fail
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// // Appointments of a crew member can be listed, but not read one by one.
+/// client.crew().appointments(rentman_client::model::CrewId::new(12)).get(rentman_client::Id::new(1)).await?;
+/// # Ok(())
+/// # }
+/// ```
 pub struct Collection<M> {
     client: RentmanClient,
     /// ID of the parent item of a nested collection, e.g. the crew member in
@@ -146,6 +224,14 @@ impl<M> fmt::Debug for Collection<M> {
 impl<M: List> Collection<M> {
     /// Starts a list request; nothing is sent before [`ListRequest::all`] or
     /// [`ListRequest::first`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let request = client.crew().list(); // nothing sent yet
+    /// let crew: Vec<rentman_client::model::Crew> = request.all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn list(&self) -> ListRequest<M::Item> {
         ListRequest {
             client: self.client.clone(),
@@ -161,6 +247,14 @@ impl<M: List> Collection<M> {
 
 impl<M: Get> Collection<M> {
     /// Reads one item. Transient failures are retried.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let member: rentman_client::model::Crew = client.crew().get(rentman_client::model::CrewId::new(12)).await?;
+    /// println!("{} {}", member.id, member.revision);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn get(&self, id: Id<M::Item>) -> Result<M::Item> {
         let spec = M::GET.0;
         let mut item = self
@@ -180,6 +274,17 @@ impl<M: Get> Collection<M> {
 impl<M: Get> Collection<M> {
     /// Reads one item as projection `P`: only the fields `P` declares are
     /// requested. Transient failures are retried.
+    ///
+    /// ```
+    /// rentman_client::projection! { pub struct CrewName from Crew { id, firstname } }
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let member = client.crew().get_as::<CrewName>(rentman_client::model::CrewId::new(12)).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// See [`projection!`](crate::projection) for field lookup, inferred types,
+    /// and registered custom-field validation, which also applies to projections.
     pub async fn get_as<P: Projection<Resource = M::Item>>(&self, id: Id<M::Item>) -> Result<P> {
         let spec = M::GET.0;
         let selected_fields = selected_fields::<M::Item, P>(&self.client);
@@ -209,6 +314,23 @@ where
     /// [`Error::outcome`](crate::Error::outcome) says whether it may have been applied; when it is
     /// [`RequestOutcome::Unknown`](crate::RequestOutcome::Unknown), read the
     /// collection with [`Self::list`] before creating the item again.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::{RequestOutcome, model::TaskStatusPayload};
+    ///
+    /// match client.task_statuses().create(&TaskStatusPayload::new("green".to_string())).await {
+    ///     Ok(status) => println!("created {}", status.id),
+    ///     Err(error) if error.outcome() == RequestOutcome::Unknown => {
+    ///         // The item may exist: look for it before creating it again.
+    ///         let existing = client.task_statuses().list().all().await?;
+    ///         # let _ = existing;
+    ///     }
+    ///     Err(error) => return Err(error),
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn create(&self, payload: &M::Payload) -> Result<M::Item> {
         let spec = M::CREATE.0;
         let response = self
@@ -256,6 +378,21 @@ where
     ///
     /// The create request is sent exactly once. If Rentman's response omits
     /// selected fields, the item is fetched once by ID to complete the projection.
+    /// That GET may be retried. After an uncertain create failure, reconcile
+    /// through this resource's list/get methods before creating it again.
+    ///
+    /// ```
+    /// rentman_client::projection! { pub struct StatusId from TaskStatus { id } }
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::TaskStatusPayload::new("green".to_string());
+    /// let status = client.task_statuses().create_as::<StatusId>(&payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// The [`projection!`](crate::projection) fields describe the returned
+    /// value, not which payload fields are sent. A failed follow-up read after
+    /// an acknowledged write reports [`RequestOutcome::Applied`](crate::RequestOutcome::Applied).
     pub async fn create_as<P>(&self, payload: &M::Payload) -> Result<P>
     where
         P: Projection<Resource = <M as Create>::Item>,
@@ -309,6 +446,17 @@ where
     ///
     /// Rentman leaves fields the payload does not send unchanged. `PUT` is
     /// idempotent, so transient failures are retried.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::model::{TaskStatusId, TaskStatusPayload};
+    ///
+    /// let mut payload = TaskStatusPayload::new("blue".to_string());
+    /// payload.name = Some("Done".to_string()); // `None` fields are left unchanged
+    /// let status = client.task_statuses().update(TaskStatusId::new(12), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn update(&self, id: Id<M::Item>, payload: &M::Payload) -> Result<M::Item> {
         let spec = M::UPDATE.0;
         let response = self
@@ -357,6 +505,21 @@ where
     ///
     /// If Rentman's update response omits selected fields, the item is fetched
     /// once by ID to complete the projection. The PUT is safe to retry.
+    /// The follow-up GET may also be retried; it is not a second write.
+    ///
+    /// ```
+    /// rentman_client::projection! { pub struct StatusId from TaskStatus { id, revision } }
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::TaskStatusPayload::new("blue".to_string());
+    /// let status = client.task_statuses().update_as::<StatusId>(
+    ///     rentman_client::model::TaskStatusId::new(12), &payload,
+    /// ).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// See [`projection!`](crate::projection) for return-field selection and
+    /// [`Error::outcome`](crate::Error::outcome) for failures after a successful write.
     pub async fn update_as<P>(&self, id: Id<M::Item>, payload: &M::Payload) -> Result<P>
     where
         P: Projection<Resource = M::Item>,
@@ -405,6 +568,13 @@ where
 impl<M: Delete> Collection<M> {
     /// Deletes an item. `DELETE` is idempotent, so transient failures are
     /// retried.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// client.task_statuses().delete(rentman_client::model::TaskStatusId::new(12)).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn delete(&self, id: Id<M::Item>) -> Result<()> {
         let spec = M::DELETE.0;
         self.client
@@ -492,6 +662,23 @@ impl<M> Collection<M> {
 }
 
 /// A request for the items of a collection, built step by step.
+///
+/// Created by [`Collection::list`]. Add filters, sorting, and a page size,
+/// then send it with [`all`](Self::all), [`first`](Self::first),
+/// [`revisions`](Self::revisions), or their projection variants.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::{PageSize, fields::crew};
+///
+/// let crew = client.crew().list()
+///     .filter(crew::ACTIVE.eq(true))
+///     .sort(crew::LASTNAME.asc())
+///     .page_size(PageSize::new(500)?)
+///     .all().await?;
+/// # Ok(())
+/// # }
+/// ```
 pub struct ListRequest<T> {
     client: RentmanClient,
     path: String,
@@ -519,8 +706,20 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     /// Filters are built from the field constants in [`crate::fields`], e.g.
     /// `fields::contact::COUNTRY.eq(model::ContactCountry::Gb)`. Rentman
     /// carries them over to every page.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::fields::crew;
+    ///
+    /// let active_smiths = client.crew().list()
+    ///     .filter(crew::ACTIVE.eq(true))
+    ///     .filter(crew::LASTNAME.eq("Smith".to_string()))
+    ///     .all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn filter(mut self, filter: Filter<T>) -> Self {
-        self.query.push((filter.key, filter.value));
+        self.query.extend(filter.conditions);
         self
     }
 
@@ -530,12 +729,31 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     /// applied before paging, so items sorted by later fields can be ordered
     /// differently across pages. [`Self::first`] reads a single page and is
     /// not affected.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::fields::crew;
+    ///
+    /// let newest_first = client.crew().list().sort(crew::MODIFIED.desc()).first(20).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn sort(mut self, sort: Sort<T>) -> Self {
         self.sort.push(sort.term);
         self
     }
 
     /// Sets how many items each page holds (default 300, at most 1500).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::PageSize;
+    ///
+    /// // Fewer, larger requests; `all` still returns every item.
+    /// let crew = client.crew().list().page_size(PageSize::MAX).all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn page_size(mut self, page_size: PageSize) -> Self {
         self.page_size = page_size;
         self
@@ -545,6 +763,13 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     ///
     /// Follows Rentman's `next_page_url` until the collection is complete;
     /// each page is retried on transient failures.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let every_contact: Vec<rentman_client::model::Contact> = client.contacts().list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn all(self) -> Result<Vec<T>> {
         let sort = self.sort.join(",");
         let query = self.query_pairs(&sort);
@@ -569,6 +794,21 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     ///
     /// Filters and sorting are preserved. Items that stop matching the filters
     /// appear in `deleted` when compared with a prior snapshot.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::{Revisions, model::Crew};
+    ///
+    /// let previous: Revisions<Crew> = Revisions::new(); // stored by the last sync
+    /// let current = client.crew().list().revisions().await?;
+    /// let changes = current.changes_since(&previous);
+    /// for id in changes.created.iter().chain(&changes.updated) {
+    ///     let member = client.crew().get(*id).await?;
+    ///     # let _ = member;
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn revisions(self) -> Result<Revisions<T>>
     where
         T: Revisioned,
@@ -603,6 +843,16 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
 
     /// Reads at most `count` items (1 to 1500) with a single request, in
     /// Rentman's order or the requested sorting.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// use rentman_client::fields::crew;
+    ///
+    /// let ten = client.crew().list().sort(crew::LASTNAME.asc()).first(10).await?;
+    /// assert!(ten.len() <= 10);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn first(self, count: usize) -> Result<Vec<T>> {
         let limit = PageSize::new(count)
             .map_err(|error| error.in_operation(self.operation))?
@@ -630,6 +880,20 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
     /// Reads every page as projection `P`: only the fields `P` declares are
     /// requested (`fields=`), and Rentman carries the selection through every
     /// page.
+    ///
+    /// ```
+    /// rentman_client::projection! { pub struct CrewName from Crew { id, firstname } }
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let names = client.crew().list()
+    ///     .filter(rentman_client::fields::crew::ACTIVE.eq(true))
+    ///     .sort(rentman_client::fields::crew::LASTNAME.asc())
+    ///     .all_as::<CrewName>().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// `page_size` controls each page, not the total result size. See
+    /// [`projection!`](crate::projection) for the declaration and value types.
     pub async fn all_as<P: Projection<Resource = T>>(self) -> Result<Vec<P>> {
         let fields = selected_fields::<T, P>(&self.client);
         let sort = self.sort.join(",");
@@ -656,6 +920,18 @@ impl<T: Resource + CustomFieldsResource + DeserializeOwned> ListRequest<T> {
 
     /// Reads at most `count` items (1 to 1500) as projection `P` with a single
     /// request.
+    /// Transient failures can retry that request; this does not follow later pages.
+    ///
+    /// ```
+    /// rentman_client::projection! { pub struct CrewName from Crew { id, firstname } }
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first_ten = client.crew().list().first_as::<CrewName>(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// For all pages use [`ListRequest::all_as`]. See [`projection!`](crate::projection)
+    /// for field selection, revisions, and custom fields.
     pub async fn first_as<P: Projection<Resource = T>>(self, count: usize) -> Result<Vec<P>> {
         let limit = PageSize::new(count)
             .map_err(|error| error.in_operation(self.operation))?
@@ -829,7 +1105,7 @@ mod tests {
 
         assert_eq!(statuses.len(), 2);
         assert_eq!(statuses[0].id, TaskStatusId::new(5));
-        assert_eq!(statuses[0].type_, Some(TaskStatusType::Done));
+        assert_eq!(statuses[0].r#type, Some(TaskStatusType::Done));
         assert_eq!(statuses[1].id, TaskStatusId::new(6));
         let first = server.next_request();
         assert_request(&first, "GET", "/taskstatuses");
@@ -970,7 +1246,7 @@ mod tests {
             .task_statuses()
             .list()
             .filter(task_status::TYPE.eq(TaskStatusType::Done))
-            .filter(task_status::ORDER.gte(2))
+            .filter(task_status::ORDER.ge(2))
             .sort(task_status::ORDER.asc())
             .sort(task_status::NAME.desc())
             .page_size(PageSize::new(1).unwrap())
@@ -994,7 +1270,7 @@ mod tests {
         let top = client
             .task_statuses()
             .list()
-            .filter(task_status::COLOR.neq("red".to_string()))
+            .filter(task_status::COLOR.ne("red".to_string()))
             .sort(task_status::ORDER.desc())
             .first(5)
             .await

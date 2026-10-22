@@ -83,6 +83,10 @@ pub fn render_selected(
             PathBuf::from("src/model/generated.rs"),
             models::generate(&context)?,
         ));
+        outputs.push((
+            PathBuf::from("src/model/resource_names.md"),
+            models::resource_names(&context),
+        ));
     }
     if includes(Group::Endpoints) {
         outputs.push((
@@ -287,7 +291,7 @@ mod tests {
     fn renders_every_contract_artifact_from_the_checked_in_spec() {
         let outputs = render(&checked_in_spec(), crate::openapi::config()).unwrap();
         let paths = paths(&outputs);
-        assert_eq!(paths.len(), 10);
+        assert_eq!(paths.len(), 11);
         assert!(paths.contains(&"src/model/generated.rs".to_owned()));
         assert!(paths.contains(&"src/resource/generated_tests.rs".to_owned()));
         assert!(paths.contains(&"tests/contract/generated_revisions.rs".to_owned()));
@@ -297,7 +301,7 @@ mod tests {
     fn each_group_renders_only_its_own_outputs() {
         let spec = spec();
         let expected: [&[&str]; 6] = [
-            &["src/model/generated.rs"],
+            &["src/model/generated.rs", "src/model/resource_names.md"],
             &["src/endpoint/generated.rs"],
             &["src/resource/generated.rs"],
             &["src/fields.rs"],

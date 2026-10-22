@@ -477,7 +477,7 @@ async fn filters_survive_the_cursor_live() {
 
 rentman_client::projection! {
     /// The fields of an equipment item this test selects.
-    struct EquipmentName from Equipment { id, name, in_archive, creator, updateHash }
+    struct EquipmentName from Equipment { id, name, in_archive, creator, revision }
 }
 
 /// Runs without credentials: the projection used by the live test below
@@ -502,7 +502,7 @@ fn equipment_projection_decodes_outside_the_crate() {
         equipment.creator,
         Some(rentman_client::model::CrewId::new(2))
     );
-    assert_eq!(equipment.updateHash.as_str(), "h3");
+    assert_eq!(equipment.revision.as_str(), "h3");
 
     // Every field that does not decode fails with its name.
     let valid = serde_json::json!({"id": 3, "name": "Mixer", "in_archive": true, "creator": "/crew/2", "updateHash": "h3"});
@@ -553,7 +553,7 @@ async fn projections_keep_their_field_selection_across_the_cursor_live() {
         assert_eq!(Some(projected.name.as_str()), full.name.as_deref());
         assert!(projected.in_archive);
         assert_eq!(projected.creator, full.creator);
-        assert_eq!(&projected.updateHash, full.revision());
+        assert_eq!(&projected.revision, full.revision());
     }
 }
 

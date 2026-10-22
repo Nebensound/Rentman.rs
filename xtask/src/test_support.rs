@@ -37,6 +37,16 @@ impl Drop for ScratchDir {
 /// Serves one canned response per request path on a local port and returns
 /// the base URL. `responses` receives that URL so bodies can link back to it.
 pub fn serve(responses: impl FnOnce(&str) -> Vec<(&'static str, u16, String)>) -> String {
+    serve_bytes(|base| {
+        responses(base)
+            .into_iter()
+            .map(|(path, status, body)| (path, status, body.into_bytes()))
+            .collect()
+    })
+}
+
+/// Serves binary responses, including packaged crate archives.
+pub fn serve_bytes(responses: impl FnOnce(&str) -> Vec<(&'static str, u16, Vec<u8>)>) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());
     let routes = responses(&base)
@@ -54,13 +64,14 @@ pub fn serve(responses: impl FnOnce(&str) -> Vec<(&'static str, u16, String)>) -
             let (status, body) = routes
                 .get(path)
                 .cloned()
-                .unwrap_or((404, "not found".to_owned()));
+                .unwrap_or((404, b"not found".to_vec()));
             write!(
                 stream,
-                "HTTP/1.1 {status} Test\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                "HTTP/1.1 {status} Test\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
                 body.len()
             )
             .unwrap();
+            stream.write_all(&body).unwrap();
         }
     });
     base

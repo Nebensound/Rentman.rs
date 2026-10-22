@@ -12,15 +12,48 @@ use std::{
     marker::PhantomData,
 };
 
-/// Revision of one resource item, as returned by Rentman's `updateHash`.
+/// A revision cannot be constructed because its text is empty.
 ///
-/// The hash is opaque: its algorithm is undocumented, so revisions can only
-/// be compared. It is typed by resource and cannot be empty.
+/// ```
+/// use rentman_client::{InvalidRevision, Revision, model::Crew};
+///
+/// assert_eq!(Revision::<Crew>::new("").unwrap_err(), InvalidRevision);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 #[error("a Rentman revision (updateHash) must not be empty")]
 pub struct InvalidRevision;
 
 /// Revision of an item of resource `R`.
+///
+/// Every full resource model includes both `id: Id<R>` and
+/// `revision: Revision<R>`. Its data and this pair form a read snapshot:
+/// the ID identifies the item, and the revision identifies its observed
+/// version. No separate revision request is needed when reading a full item.
+///
+/// Compare revisions for equality only after checking that the IDs match.
+/// They are opaque, non-empty values, not ordered counters, timestamps, or
+/// globally unique item identifiers. Local field edits do not update the
+/// revision, and the client does not use it as an automatic write precondition.
+///
+/// Rentman sends this value as `updateHash`; full models and
+/// [`projection!`](crate::projection) structs expose it as `revision`. A
+/// projection includes it only when `revision` is selected. Bare IDs and
+/// write payloads are not revisioned snapshots.
+///
+/// Store the revision with the object to reuse unchanged data or build a
+/// [`Revisions`] index for synchronization. See the
+/// [objects and revisions guide](crate#change-detection) for complete examples.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient, stored: rentman_client::model::Crew) -> rentman_client::Result<()> {
+/// // `stored` was read earlier and kept together with its revision.
+/// let current = client.crew().get(stored.id).await?;
+/// if current.revision == stored.revision {
+///     println!("crew member {} is unchanged", stored.id);
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub struct Revision<R> {
     value: String,
     resource: PhantomData<fn() -> R>,
@@ -28,6 +61,17 @@ pub struct Revision<R> {
 
 impl<R> Revision<R> {
     /// Creates a revision from its text, e.g. one stored after an earlier read.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, model::Crew};
+    ///
+    /// // E.g. restored from your database.
+    /// let revision: Revision<Crew> = Revision::new("a1b2c3")?;
+    /// assert_eq!(revision.as_str(), "a1b2c3");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(value: impl Into<String>) -> Result<Self, InvalidRevision> {
         let value = value.into();
         if value.is_empty() {
@@ -40,6 +84,16 @@ impl<R> Revision<R> {
     }
 
     /// Returns the revision text exactly as Rentman sent it.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, model::Crew};
+    ///
+    /// let revision = Revision::<Crew>::new("a1b2c3")?;
+    /// let to_store: String = revision.as_str().to_owned();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn as_str(&self) -> &str {
         &self.value
     }
@@ -100,6 +154,21 @@ impl<'de, R> Deserialize<'de> for Revision<R> {
 }
 
 /// Resource item that exposes its ID and revision for generic synchronization.
+///
+/// Implemented by every full generated resource model. Both methods describe
+/// the same read snapshot; this trait does not fetch data. Custom projections
+/// do not implement it automatically. See [`Revision`] and the
+/// [synchronization guide](crate#change-detection).
+///
+/// One generic function serves every resource:
+///
+/// ```
+/// use rentman_client::Revisioned;
+///
+/// fn changed<T: Revisioned>(stored: &T, current: &T) -> bool {
+///     stored.id() == current.id() && stored.revision() != current.revision()
+/// }
+/// ```
 pub trait Revisioned: Resource + Sized {
     /// ID of this item.
     fn id(&self) -> Id<Self>;
@@ -108,12 +177,32 @@ pub trait Revisioned: Resource + Sized {
 }
 
 /// Revisions of all items in one resource listing, keyed by item ID.
+///
+/// Full objects already contain their revisions: collect their references
+/// into this index, or call [`ListRequest::revisions`](crate::resource::ListRequest::revisions)
+/// to read an ID/revision listing without full bodies. Persist the previous
+/// index and compare equivalent listings with [`Self::changes_since`].
+///
+/// ```
+/// use rentman_client::{Revisions, model::Crew};
+///
+/// fn index(stored: &[Crew]) -> Revisions<Crew> {
+///     stored.iter().collect()
+/// }
+/// ```
 pub struct Revisions<R> {
     items: BTreeMap<Id<R>, Revision<R>>,
 }
 
 impl<R> Revisions<R> {
     /// Creates an empty revision set.
+    ///
+    /// ```
+    /// use rentman_client::{Revisions, model::Crew};
+    ///
+    /// let first_sync: Revisions<Crew> = Revisions::new();
+    /// assert!(first_sync.is_empty());
+    /// ```
     pub fn new() -> Self {
         Self {
             items: BTreeMap::new(),
@@ -121,31 +210,109 @@ impl<R> Revisions<R> {
     }
 
     /// Inserts a revision, returning the revision it replaces.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, Revisions, model::CrewId};
+    ///
+    /// let mut known = Revisions::new();
+    /// assert!(known.insert(CrewId::new(12), Revision::new("a")?).is_none());
+    /// let replaced = known.insert(CrewId::new(12), Revision::new("b")?);
+    /// assert_eq!(replaced.unwrap().as_str(), "a");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn insert(&mut self, id: Id<R>, revision: Revision<R>) -> Option<Revision<R>> {
         self.items.insert(id, revision)
     }
 
     /// Gets the revision of one item.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, Revisions, model::CrewId};
+    ///
+    /// let mut known = Revisions::new();
+    /// known.insert(CrewId::new(12), Revision::new("a")?);
+    /// assert_eq!(known.get(CrewId::new(12)).map(Revision::as_str), Some("a"));
+    /// assert!(known.get(CrewId::new(13)).is_none());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn get(&self, id: Id<R>) -> Option<&Revision<R>> {
         self.items.get(&id)
     }
 
     /// Number of items in the set.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, Revisions, model::CrewId};
+    ///
+    /// let mut known = Revisions::new();
+    /// known.insert(CrewId::new(12), Revision::new("a")?);
+    /// assert_eq!(known.len(), 1);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn len(&self) -> usize {
         self.items.len()
     }
 
     /// Whether the set is empty.
+    ///
+    /// ```
+    /// assert!(rentman_client::Revisions::<rentman_client::model::Crew>::new().is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }
 
     /// Iterates over item IDs and revisions in ID order.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, Revisions, model::CrewId};
+    ///
+    /// let mut known = Revisions::new();
+    /// known.insert(CrewId::new(12), Revision::new("a")?);
+    /// for (id, revision) in known.iter() {
+    ///     println!("{id}: {revision}"); // store these pairs for the next sync
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn iter(&self) -> impl Iterator<Item = (Id<R>, &Revision<R>)> {
         self.items.iter().map(|(id, revision)| (*id, revision))
     }
 
     /// Compares this listing with a prior one; both must use the same filters.
+    ///
+    /// New IDs are `created`, changed revisions of known IDs are `updated`,
+    /// and missing IDs are `deleted`. Missing items may have stopped matching
+    /// a filter rather than been deleted from Rentman. Both indexes must cover
+    /// the same account and complete listing scope; a partial list gives
+    /// misleading deletions. This compares observed states, not a history of
+    /// intermediate edits or an atomic snapshot across paginated reads.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{Revision, Revisions, model::CrewId};
+    ///
+    /// let mut before = Revisions::new();
+    /// before.insert(CrewId::new(1), Revision::new("a")?);
+    /// before.insert(CrewId::new(2), Revision::new("b")?);
+    /// let mut now = Revisions::new();
+    /// now.insert(CrewId::new(1), Revision::new("a2")?);
+    /// now.insert(CrewId::new(3), Revision::new("c")?);
+    ///
+    /// let changes = now.changes_since(&before);
+    /// assert_eq!(changes.created, [CrewId::new(3)]);
+    /// assert_eq!(changes.updated, [CrewId::new(1)]);
+    /// assert_eq!(changes.deleted, [CrewId::new(2)]);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn changes_since(&self, known: &Self) -> Changes<R> {
         let mut changes = Changes::default();
         for (id, revision) in &self.items {
@@ -218,7 +385,22 @@ impl<R> IntoIterator for Revisions<R> {
     }
 }
 
-/// Created, updated, and deleted IDs between two revision sets.
+/// Created, updated, and deleted IDs between two revision sets, returned by
+/// [`Revisions::changes_since`].
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient, known: rentman_client::Revisions<rentman_client::model::Crew>) -> rentman_client::Result<()> {
+/// let changes = client.crew().list().revisions().await?.changes_since(&known);
+/// for id in changes.created.iter().chain(&changes.updated) {
+///     let member = client.crew().get(*id).await?; // fetch only what changed
+///     # let _ = member;
+/// }
+/// for id in &changes.deleted {
+///     println!("crew member {id} left the listing");
+/// }
+/// # Ok(())
+/// # }
+/// ```
 pub struct Changes<R> {
     /// Items present now but not previously.
     pub created: Vec<Id<R>>,
@@ -230,6 +412,13 @@ pub struct Changes<R> {
 
 impl<R> Changes<R> {
     /// Whether no IDs changed.
+    ///
+    /// ```
+    /// use rentman_client::{Revisions, model::Crew};
+    ///
+    /// let same: Revisions<Crew> = Revisions::new();
+    /// assert!(same.changes_since(&Revisions::new()).is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.created.is_empty() && self.updated.is_empty() && self.deleted.is_empty()
     }

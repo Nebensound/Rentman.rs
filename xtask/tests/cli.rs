@@ -16,6 +16,7 @@ fn cli_displays_help_and_rejects_unknown_commands() {
     assert!(help_text.contains("fetch-openapi"));
     assert!(help_text.contains("generate-openapi [--only X]"));
     assert!(help_text.contains("update-openapi"));
+    assert!(help_text.contains("api-status [--unavailable]"));
 
     let unknown = Command::new(env!("CARGO_BIN_EXE_xtask"))
         .arg("unknown")

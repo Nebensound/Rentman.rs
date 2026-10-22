@@ -1,5 +1,6 @@
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
+mod api_status;
 mod generator;
 mod openapi;
 
@@ -7,13 +8,14 @@ use std::env;
 use std::path::Path;
 use std::process;
 
-const USAGE: &str = "cargo xtask <command>\n\nCommands:\n  fetch-openapi                 Download the current Rentman OpenAPI spec\n  generate-openapi [--only X]   Generate all outputs or one group\n  update-openapi                Fetch the spec and generate everything\n\nGroups: models, endpoints, resources, fields, projections, tests";
+const USAGE: &str = "cargo xtask <command>\n\nCommands:\n  fetch-openapi                 Download the current Rentman OpenAPI spec\n  generate-openapi [--only X]   Generate all outputs or one group\n  update-openapi                Fetch the spec and generate everything\n  api-status [--unavailable]    Report the published crate's OpenAPI status as JSON\n\nGroups: models, endpoints, resources, fields, projections, tests";
 
 enum Command {
     Help,
     Fetch,
     Generate(Option<generator::Group>),
     Update,
+    ApiStatus(bool),
 }
 
 fn main() {
@@ -40,6 +42,10 @@ fn dispatch(args: Vec<String>, settings: &generator::Settings<'_>) -> Result<(),
             Command::Generate(Some(generator::Group::parse(group)?))
         }
         [command] if command == "update-openapi" => Command::Update,
+        [command] if command == "api-status" => Command::ApiStatus(true),
+        [command, flag] if command == "api-status" && flag == "--unavailable" => {
+            Command::ApiStatus(false)
+        }
         _ => return Err(format!("Usage: {USAGE}")),
     };
     match command {
@@ -50,6 +56,7 @@ fn dispatch(args: Vec<String>, settings: &generator::Settings<'_>) -> Result<(),
         Command::Fetch => generator::fetch(settings),
         Command::Generate(group) => generator::generate(settings, group),
         Command::Update => generator::update(settings),
+        Command::ApiStatus(available) => api_status::run(settings.root, available),
     }
 }
 
@@ -128,6 +135,18 @@ mod tests {
             dispatch(args(&["generate-openapi", "--only", "unknown"]), &settings),
             Err("unknown generator group \"unknown\"; choose models, endpoints, resources, fields, projections, or tests".to_owned())
         );
+    }
+
+    #[test]
+    fn api_status_reports_unavailable_without_a_refresh_or_local_contract() {
+        let root = ScratchDir::new();
+        let settings = settings(root.path(), "http://127.0.0.1:9/");
+        for arguments in [&["api-status"][..], &["api-status", "--unavailable"]] {
+            assert_eq!(
+                dispatch(args(arguments), &settings),
+                Err("Release contract status is unavailable".to_owned())
+            );
+        }
     }
 
     #[test]

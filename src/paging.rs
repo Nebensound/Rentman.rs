@@ -12,6 +12,18 @@ use std::collections::HashSet;
 /// Number of items Rentman returns per page of a collection.
 ///
 /// Rentman documents a default of 300 and a maximum of 1500 items per page.
+/// The page size controls how many items each request returns, not how many
+/// [`ListRequest::all`](crate::resource::ListRequest::all) returns in total.
+///
+/// ```
+/// use rentman_client::PageSize;
+///
+/// assert_eq!(PageSize::DEFAULT.get(), 300);
+/// assert_eq!(PageSize::MAX.get(), 1500);
+/// assert_eq!(PageSize::new(100)?.get(), 100);
+/// assert!(PageSize::new(0).is_err());
+/// # Ok::<(), rentman_client::Error>(())
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PageSize(usize);
 

@@ -9,6 +9,22 @@ const NEVER_REQUESTED_FIELDS: &[&str] = &["updateHash"];
 
 /// A struct declared with [`projection!`](crate::projection), whose fields
 /// are the `fields=` selection of its resource.
+///
+/// The macro implements it; use it to write code that works for any projection:
+///
+/// ```
+/// use rentman_client::{Projection, RentmanClient, model::Crew};
+///
+/// rentman_client::projection! { pub struct CrewName from Crew { id, firstname } }
+///
+/// async fn all_crew<P: Projection<Resource = Crew>>(client: &RentmanClient) -> rentman_client::Result<Vec<P>> {
+///     client.crew().list().all_as::<P>().await
+/// }
+/// # async fn example(client: RentmanClient) -> rentman_client::Result<()> {
+/// let names: Vec<CrewName> = all_crew(&client).await?;
+/// # Ok(())
+/// # }
+/// ```
 pub trait Projection: Sized {
     /// Resource the projection selects from, e.g. `model::Crew`.
     type Resource: Resource;
@@ -22,6 +38,16 @@ pub trait Projection: Sized {
 
 /// A field of a resource that a projection can select; generated per field in
 /// [`projection_fields`](crate::projection_fields).
+///
+/// The marker names the field as the model does and knows Rentman's name:
+///
+/// ```
+/// use rentman_client::{ProjectionField, model::CrewId, projection_fields};
+///
+/// assert_eq!(<projection_fields::Contact::vat_code as ProjectionField>::NAME, "VAT_code");
+/// assert_eq!(<projection_fields::Crew::revision as ProjectionField>::NAME, "updateHash");
+/// let id: <projection_fields::Crew::id as ProjectionField>::Value = CrewId::new(12);
+/// ```
 pub trait ProjectionField {
     /// Resource the field belongs to.
     type Resource;
@@ -30,7 +56,7 @@ pub trait ProjectionField {
     /// Wire form of the value, e.g. a link `/crew/12` for an `Id<Crew>`.
     #[doc(hidden)]
     type Wire: DeserializeOwned + IntoValue<Self::Value>;
-    /// Rentman name of the field, e.g. `type`.
+    /// Rentman name of the field, e.g. `type` for the marker `r#type`.
     const NAME: &'static str;
     /// Whether this key must be present in the selected response.
     const REQUIRED: bool = false;
@@ -184,11 +210,31 @@ pub(crate) fn fields_named(fields: &[&str]) -> String {
 
 /// Declares a struct whose fields are a selection of a resource's fields.
 ///
-/// The field types come from the generated model, and the struct is the
-/// `fields=` list Rentman is asked for, so the two cannot drift apart. An
-/// unknown field name does not compile. Use the Rentman field name; Rust
-/// keywords are written as raw identifiers (`r#type` selects `type`).
-/// Account-specific custom fields are selected as a whole through `custom`.
+/// # Declaration and field types
+///
+/// Write `pub struct YourName from Resource { field, another_field }`.
+/// `Resource` is the item name in [`model`](crate::model), not an API path,
+/// payload name, or qualified Rust path. Look up selectable fields and their
+/// value types in [`projection_fields`](crate::projection_fields).
+/// Name at least one field; a trailing comma is allowed. Field aliases,
+/// explicit types, and attributes on individual fields are not supported.
+///
+/// The macro declares a struct with public fields, implements [`Projection`],
+/// and derives `Debug`, `Clone`, and `PartialEq`. Struct documentation,
+/// attributes, and visibility are preserved. Consumers need no Serde dependency.
+/// Name fields exactly as the full model does (see [field names](crate#field-names)):
+/// `firstname`, `vat_code`, `r#type`, `revision`. The macro translates them
+/// to Rentman's names (`VAT_code` on contacts, `type`, `updateHash`) internally. An unknown
+/// field or a projection for the wrong resource does not compile.
+///
+/// Types are inferred from the generated projection markers. They can differ
+/// from the full model: a field that may be omitted from a full response can
+/// be required when explicitly selected. `Option<T>` represents a nullable or
+/// optional selected value; required nullable keys must still be present.
+/// Links such as `/crew/3` become typed IDs, not strings or fetched resources.
+/// Enum fields keep their generated enum type.
+///
+/// # Reading a selection
 ///
 /// ```
 /// rentman_client::projection! {
@@ -197,15 +243,70 @@ pub(crate) fn fields_named(fields: &[&str]) -> String {
 /// }
 ///
 /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
-/// let names: Vec<CrewName> = client.crew().list().all_as::<CrewName>().await?;
+/// let names: Vec<CrewName> = client.crew().list()
+///     .filter(rentman_client::fields::crew::ACTIVE.eq(true))
+///     .sort(rentman_client::fields::crew::LASTNAME.asc())
+///     .all_as::<CrewName>().await?;
+/// let first = client.crew().list().first_as::<CrewName>(10).await?;
+/// let member = client.crew().get_as::<CrewName>(rentman_client::model::CrewId::new(12)).await?;
 /// # Ok(())
 /// # }
 /// ```
+///
+/// `all_as` follows every page; `first_as(n)` limits the number of returned
+/// items. Filters and sorting select resources independently of the returned
+/// fields. The resource layer sends the selected names as `fields=`.
+///
+/// # Core fields, revisions, and custom fields
+///
+/// Rentman also returns core fields (`id`, `created`, `modified`, `creator`)
+/// and the revision. They do not become struct members unless declared; extra
+/// response fields are ignored. Select `revision` to obtain a typed
+/// [`Revision`](crate::Revision), as on the full model; unlike other fields,
+/// it is not sent in `fields=` because Rentman always returns it.
+///
+/// ```
+/// rentman_client::projection! {
+///     /// A task status with its revision, enum, and creator link.
+///     pub struct StatusSummary from TaskStatus { id, name, r#type, creator, revision }
+/// }
+/// # fn check(value: StatusSummary) {
+/// let _: rentman_client::model::TaskStatusType = value.r#type;
+/// let _: Option<rentman_client::model::CrewId> = value.creator;
+/// let _: rentman_client::Revision<rentman_client::model::TaskStatus> = value.revision;
+/// # }
+/// ```
+///
+/// Select account-specific custom fields as the whole `custom` object, never
+/// as `custom_8`. Configure [`RentmanClient::with_custom_fields`](crate::RentmanClient::with_custom_fields)
+/// before reading them. Registered keys are requested and validated even if
+/// the projection does not declare `custom`; a narrow selection does not
+/// bypass registry validation. See the crate's
+/// [initialization guide](crate#initializing-custom-fields).
+///
+/// # Writing a selection
+///
+/// [`Collection::create_as`](crate::resource::Collection::create_as) and
+/// [`Collection::update_as`](crate::resource::Collection::update_as) accept the
+/// usual write payload and return a projection. The projection describes the
+/// result, not the fields to write. Missing selected fields in a write response
+/// can trigger a follow-up GET; do not assume one HTTP request. Creates are
+/// sent exactly once; updates and reads can be retried.
+///
+/// # Compile-time checks
 ///
 /// ```compile_fail
 /// rentman_client::projection! {
 ///     pub struct Broken from Crew { id, not_a_field }
 /// }
+/// ```
+///
+/// ```compile_fail
+/// rentman_client::projection! { pub struct CrewName from Crew { id, firstname } }
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// let wrong = client.equipment().list().all_as::<CrewName>().await?;
+/// # Ok(())
+/// # }
 /// ```
 #[macro_export]
 macro_rules! projection {
@@ -252,7 +353,7 @@ mod tests {
 
     crate::projection! {
         /// Some fields of a task status.
-        struct StatusName from TaskStatus { id, updateHash, name, r#type, creator }
+        struct StatusName from TaskStatus { id, revision, name, r#type, creator }
     }
 
     fn decode_json(value: serde_json::Value) -> crate::Result<StatusName> {
@@ -270,11 +371,11 @@ mod tests {
     }
 
     crate::projection! {
-        struct OnlyRevision from TaskStatus { updateHash }
+        struct OnlyRevision from TaskStatus { revision }
     }
 
     crate::projection! {
-        struct StatusCore from TaskStatus { id, updateHash, created, modified, creator }
+        struct StatusCore from TaskStatus { id, revision, created, modified, creator }
     }
 
     #[test]
@@ -288,7 +389,7 @@ mod tests {
             status,
             StatusName {
                 id: TaskStatusId::new(5),
-                updateHash: crate::Revision::new("status-5").unwrap(),
+                revision: crate::Revision::new("status-5").unwrap(),
                 name: "Done".to_string(),
                 r#type: TaskStatusType::Done,
                 creator: Some(CrewId::new(3)),

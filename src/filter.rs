@@ -3,16 +3,32 @@
 //! The generated module [`fields`](crate::fields) has one constant per
 //! queryable field of every resource, e.g. `fields::contact::COUNTRY`. A
 //! constant knows its resource and value type, so a filter for another
-//! resource or with a value of the wrong type does not compile:
+//! resource or with a value of the wrong type does not compile. The methods
+//! are named like Rust's comparison methods ([`PartialOrd::le`] and so on);
+//! the client translates them into Rentman's query syntax:
+//!
+//! | Method | Matches items whose field | Sent as |
+//! | --- | --- | --- |
+//! | [`eq(v)`](Field::eq) | equals `v` | `field=v` |
+//! | [`ne(v)`](Field::ne) | does not equal `v` | `field[neq]=v` |
+//! | [`lt(v)`](Field::lt) / [`le(v)`](Field::le) | is less than / at most `v` | `field[lt]=v` / `field[lte]=v` |
+//! | [`gt(v)`](Field::gt) / [`ge(v)`](Field::ge) | is greater than / at least `v` | `field[gt]=v` / `field[gte]=v` |
+//! | [`in_range(a..b)`](Field::in_range) | lies in a Rust range | the matching lower and upper bounds |
+//! | [`is_none()`](Field::is_none) / [`is_some()`](Field::is_some) | is null / is not null | `field[isnull]=1` / `0` |
+//!
+//! Values keep their Rust type: booleans are sent as `1`/`0`, IDs and links
+//! as the numeric ID, enums as their documented text, decimals exactly, and
+//! timestamps in RFC 3339. Several [`filter`](crate::resource::ListRequest::filter)
+//! calls must all match.
 //!
 //! ```
-//! # use rentman_client::{RentmanApiToken, RentmanClient, fields::contact, model};
+//! # use rentman_client::{RentmanClient, fields::contact, model};
 //! # async fn example(client: RentmanClient) -> rentman_client::Result<()> {
 //! let contacts: Vec<model::Contact> = client
 //!     .contacts()
 //!     .list()
 //!     .filter(contact::COUNTRY.eq(model::ContactCountry::Gb))
-//!     .filter(contact::FOLDER.is_null(false))
+//!     .filter(contact::FOLDER.is_some())
 //!     .sort(contact::NAME.asc())
 //!     .all()
 //!     .await?;
@@ -21,14 +37,15 @@
 //! ```
 //!
 //! Fields Rentman marks as `GENERATED FIELD` can neither be filtered nor
-//! sorted on and have no constant.
+//! sorted on and have no constant. Filter on the field's value type, not on
+//! `Option`: nullability is tested with `is_none`/`is_some`.
 //!
 //! A value of the wrong type does not compile:
 //!
 //! ```compile_fail
 //! # use rentman_client::{RentmanClient, fields::contact};
 //! # fn example(client: RentmanClient) {
-//! let _ = client.contacts().list().filter(contact::DISTANCE.lte("300".to_string()));
+//! let _ = client.contacts().list().filter(contact::DISTANCE.le("300".to_string()));
 //! # }
 //! ```
 //!
@@ -48,9 +65,25 @@ use crate::{
 };
 use chrono::{DateTime, FixedOffset};
 use serde::Serialize;
-use std::{fmt, marker::PhantomData};
+use std::{
+    fmt,
+    marker::PhantomData,
+    ops::{Bound, RangeBounds},
+};
 
 /// A queryable field of resource `R` with values of type `V`.
+///
+/// Take one from [`fields`](crate::fields), e.g. `fields::crew::LASTNAME`,
+/// and turn it into a [`Filter`] or [`Sort`]:
+///
+/// ```
+/// use rentman_client::fields::crew;
+///
+/// assert_eq!(crew::LASTNAME.name(), "lastname");
+/// let active = crew::ACTIVE.eq(true);
+/// let by_name = crew::LASTNAME.asc();
+/// # let _ = (active, by_name);
+/// ```
 pub struct Field<R, V> {
     pub(crate) name: &'static str,
     pub(crate) types: PhantomData<fn() -> (R, V)>,
@@ -72,47 +105,142 @@ impl<R, V> fmt::Debug for Field<R, V> {
 
 impl<R, V: FilterValue> Field<R, V> {
     /// Rentman's name of the field, e.g. `country`.
+    ///
+    /// ```
+    /// assert_eq!(rentman_client::fields::contact::COUNTRY.name(), "country");
+    /// ```
     pub fn name(self) -> &'static str {
         self.name
     }
 
-    /// Items whose field equals `value` (`field=value`).
+    /// Items whose field equals `value`.
+    ///
+    /// ```
+    /// use rentman_client::fields::crew;
+    ///
+    /// let filter = crew::ACTIVE.eq(true);
+    /// assert_eq!(format!("{filter:?}"), "Filter(active=1)");
+    /// ```
     pub fn eq(self, value: V) -> Filter<R> {
         self.filter("", &value)
     }
 
-    /// Items whose field does not equal `value` (`field[neq]=value`).
-    pub fn neq(self, value: V) -> Filter<R> {
+    /// Items whose field does not equal `value`.
+    ///
+    /// ```
+    /// use rentman_client::fields::task_status;
+    ///
+    /// let filter = task_status::COLOR.ne("red".to_string());
+    /// assert_eq!(format!("{filter:?}"), "Filter(color[neq]=red)");
+    /// ```
+    pub fn ne(self, value: V) -> Filter<R> {
         self.filter("[neq]", &value)
     }
 
-    /// Items whose field is less than `value` (`field[lt]=value`).
+    /// Items whose field is less than `value`.
+    ///
+    /// ```
+    /// use rentman_client::fields::task_status;
+    ///
+    /// let filter = task_status::ORDER.lt(10);
+    /// assert_eq!(format!("{filter:?}"), "Filter(order[lt]=10)");
+    /// ```
     pub fn lt(self, value: V) -> Filter<R> {
         self.filter("[lt]", &value)
     }
 
-    /// Items whose field is greater than `value` (`field[gt]=value`).
+    /// Items whose field is at most `value`.
+    ///
+    /// ```
+    /// use rentman_client::{Decimal, fields::contact};
+    ///
+    /// let filter = contact::DISTANCE.le(Decimal::new(12505, 2));
+    /// assert_eq!(format!("{filter:?}"), "Filter(distance[lte]=125.05)");
+    /// ```
+    pub fn le(self, value: V) -> Filter<R> {
+        self.filter("[lte]", &value)
+    }
+
+    /// Items whose field is greater than `value`.
+    ///
+    /// ```
+    /// use chrono::DateTime;
+    /// use rentman_client::fields::crew;
+    ///
+    /// let since = DateTime::parse_from_rfc3339("2026-10-01T00:00:00+02:00").unwrap();
+    /// let filter = crew::MODIFIED.gt(since);
+    /// assert_eq!(format!("{filter:?}"), "Filter(modified[gt]=2026-10-01T00:00:00+02:00)");
+    /// ```
     pub fn gt(self, value: V) -> Filter<R> {
         self.filter("[gt]", &value)
     }
 
-    /// Items whose field is at most `value` (`field[lte]=value`).
-    pub fn lte(self, value: V) -> Filter<R> {
-        self.filter("[lte]", &value)
-    }
-
-    /// Items whose field is at least `value` (`field[gte]=value`).
-    pub fn gte(self, value: V) -> Filter<R> {
+    /// Items whose field is at least `value`.
+    ///
+    /// ```
+    /// use rentman_client::fields::task_status;
+    ///
+    /// let filter = task_status::ORDER.ge(2);
+    /// assert_eq!(format!("{filter:?}"), "Filter(order[gte]=2)");
+    /// ```
+    pub fn ge(self, value: V) -> Filter<R> {
         self.filter("[gte]", &value)
     }
 
-    /// Items whose field is (`true`) or is not (`false`) null
-    /// (`field[isnull]=1` or `0`).
-    pub fn is_null(self, is_null: bool) -> Filter<R> {
-        self.filter("[isnull]", &is_null)
+    /// Items whose field lies in `range`, written as a Rust range.
+    ///
+    /// Each bound becomes one condition: an inclusive start becomes `ge`, an
+    /// exclusive end `lt`, an inclusive end `le`. An unbounded side adds no
+    /// condition, so `..` matches every item.
+    ///
+    /// ```
+    /// use rentman_client::fields::task_status;
+    ///
+    /// let filter = task_status::ORDER.in_range(2..5);
+    /// assert_eq!(format!("{filter:?}"), "Filter(order[gte]=2&order[lt]=5)");
+    ///
+    /// let filter = task_status::ORDER.in_range(..=9);
+    /// assert_eq!(format!("{filter:?}"), "Filter(order[lte]=9)");
+    /// ```
+    pub fn in_range(self, range: impl RangeBounds<V>) -> Filter<R> {
+        Filter::new(range_conditions(
+            self.name,
+            erase(range.start_bound()),
+            erase(range.end_bound()),
+        ))
     }
 
-    /// Sorts by this field, ascending (`sort=+field`).
+    /// Items whose field is null, the `None` of an `Option` field.
+    ///
+    /// ```
+    /// use rentman_client::fields::contact;
+    ///
+    /// let filter = contact::FOLDER.is_none();
+    /// assert_eq!(format!("{filter:?}"), "Filter(folder[isnull]=1)");
+    /// ```
+    pub fn is_none(self) -> Filter<R> {
+        self.filter("[isnull]", &true)
+    }
+
+    /// Items whose field is not null, the `Some` of an `Option` field.
+    ///
+    /// ```
+    /// use rentman_client::fields::contact;
+    ///
+    /// let filter = contact::FOLDER.is_some();
+    /// assert_eq!(format!("{filter:?}"), "Filter(folder[isnull]=0)");
+    /// ```
+    pub fn is_some(self) -> Filter<R> {
+        self.filter("[isnull]", &false)
+    }
+
+    /// Sorts by this field, ascending.
+    ///
+    /// ```
+    /// use rentman_client::fields::crew;
+    ///
+    /// assert_eq!(format!("{:?}", crew::LASTNAME.asc()), "Sort(+lastname)");
+    /// ```
     pub fn asc(self) -> Sort<R> {
         Sort {
             term: format!("+{}", self.name),
@@ -120,7 +248,13 @@ impl<R, V: FilterValue> Field<R, V> {
         }
     }
 
-    /// Sorts by this field, descending (`sort=-field`).
+    /// Sorts by this field, descending.
+    ///
+    /// ```
+    /// use rentman_client::fields::crew;
+    ///
+    /// assert_eq!(format!("{:?}", crew::MODIFIED.desc()), "Sort(-modified)");
+    /// ```
     pub fn desc(self) -> Sort<R> {
         Sort {
             term: format!("-{}", self.name),
@@ -129,28 +263,92 @@ impl<R, V: FilterValue> Field<R, V> {
     }
 
     fn filter(self, operator: &str, value: &dyn FilterValue) -> Filter<R> {
-        Filter {
-            key: format!("{}{operator}", self.name),
-            value: value.filter_value(),
+        Filter::new(vec![self.condition(operator, value)])
+    }
+
+    fn condition(self, operator: &str, value: &dyn FilterValue) -> (String, String) {
+        condition(self.name, operator, value)
+    }
+}
+
+fn condition(name: &str, operator: &str, value: &dyn FilterValue) -> (String, String) {
+    (format!("{name}{operator}"), value.filter_value())
+}
+
+/// Erases the value type so the range translation below is not instantiated
+/// once per range type.
+fn erase<V: FilterValue>(bound: Bound<&V>) -> Bound<&dyn FilterValue> {
+    match bound {
+        Bound::Included(value) => Bound::Included(value),
+        Bound::Excluded(value) => Bound::Excluded(value),
+        Bound::Unbounded => Bound::Unbounded,
+    }
+}
+
+/// Rentman conditions for a range: a lower bound becomes `[gte]` or `[gt]`,
+/// an upper bound `[lte]` or `[lt]`, and an unbounded side nothing.
+fn range_conditions(
+    name: &str,
+    start: Bound<&dyn FilterValue>,
+    end: Bound<&dyn FilterValue>,
+) -> Vec<(String, String)> {
+    let lower = match start {
+        Bound::Included(value) => Some(condition(name, "[gte]", value)),
+        Bound::Excluded(value) => Some(condition(name, "[gt]", value)),
+        Bound::Unbounded => None,
+    };
+    let upper = match end {
+        Bound::Included(value) => Some(condition(name, "[lte]", value)),
+        Bound::Excluded(value) => Some(condition(name, "[lt]", value)),
+        Bound::Unbounded => None,
+    };
+    lower.into_iter().chain(upper).collect()
+}
+
+/// A filter on a list of resource `R`, built from a [`Field`].
+///
+/// Pass it to [`ListRequest::filter`](crate::resource::ListRequest::filter).
+/// Its `Debug` output shows the query it sends:
+///
+/// ```
+/// use rentman_client::fields::crew;
+///
+/// assert_eq!(format!("{:?}", crew::ACTIVE.eq(false)), "Filter(active=0)");
+/// ```
+pub struct Filter<R> {
+    pub(crate) conditions: Vec<(String, String)>,
+    resource: PhantomData<fn() -> R>,
+}
+
+impl<R> Filter<R> {
+    fn new(conditions: Vec<(String, String)>) -> Self {
+        Self {
+            conditions,
             resource: PhantomData,
         }
     }
 }
 
-/// A filter on a list of resource `R`, e.g. `country=gb`.
-pub struct Filter<R> {
-    pub(crate) key: String,
-    pub(crate) value: String,
-    resource: PhantomData<fn() -> R>,
-}
-
 impl<R> fmt::Debug for Filter<R> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Filter({}={})", self.key, self.value)
+        let query = self
+            .conditions
+            .iter()
+            .map(|(key, value)| format!("{key}={value}"))
+            .collect::<Vec<_>>()
+            .join("&");
+        write!(f, "Filter({query})")
     }
 }
 
-/// A sort term for a list of resource `R`, e.g. `+name`.
+/// A sort term for a list of resource `R`, built with [`Field::asc`] or
+/// [`Field::desc`] and passed to [`ListRequest::sort`](crate::resource::ListRequest::sort).
+///
+/// ```
+/// use rentman_client::fields::crew;
+///
+/// assert_eq!(format!("{:?}", crew::LASTNAME.asc()), "Sort(+lastname)");
+/// ```
 pub struct Sort<R> {
     pub(crate) term: String,
     resource: PhantomData<fn() -> R>,
@@ -163,6 +361,17 @@ impl<R> fmt::Debug for Sort<R> {
 }
 
 /// A value that can be compared in a filter.
+///
+/// Implemented for the value types of [`fields`](crate::fields) constants:
+/// `bool`, `i64`, `String`, [`Decimal`], timestamps, [`EmailAddress`],
+/// [`Id`], [`ItemId`], and generated enums. You do not implement it yourself.
+///
+/// ```
+/// use rentman_client::{fields::contact, model::ContactCountry};
+///
+/// // A generated enum is sent as its documented text.
+/// assert_eq!(format!("{:?}", contact::COUNTRY.eq(ContactCountry::Gb)), "Filter(country=gb)");
+/// ```
 pub trait FilterValue {
     /// The value as Rentman expects it in the query string.
     #[doc(hidden)]
@@ -250,7 +459,8 @@ mod tests {
     use rust_decimal::Decimal;
 
     fn pair<R>(filter: super::Filter<R>) -> (String, String) {
-        (filter.key, filter.value)
+        let [condition] = <[_; 1]>::try_from(filter.conditions).unwrap();
+        condition
     }
 
     fn owned(key: &str, value: &str) -> (String, String) {
@@ -265,7 +475,7 @@ mod tests {
             owned("distance", "300")
         );
         assert_eq!(
-            pair(contact::DISTANCE.neq(distance)),
+            pair(contact::DISTANCE.ne(distance)),
             owned("distance[neq]", "300")
         );
         assert_eq!(
@@ -277,21 +487,35 @@ mod tests {
             owned("distance[gt]", "300")
         );
         assert_eq!(
-            pair(contact::DISTANCE.lte(distance)),
+            pair(contact::DISTANCE.le(distance)),
             owned("distance[lte]", "300")
         );
         assert_eq!(
-            pair(contact::DISTANCE.gte(distance)),
+            pair(contact::DISTANCE.ge(distance)),
             owned("distance[gte]", "300")
         );
         assert_eq!(
-            pair(contact::FOLDER.is_null(false)),
+            pair(contact::FOLDER.is_some()),
             owned("folder[isnull]", "0")
         );
         assert_eq!(
-            pair(contact::FOLDER.is_null(true)),
+            pair(contact::FOLDER.is_none()),
             owned("folder[isnull]", "1")
         );
+        assert_eq!(
+            contact::DISTANCE.in_range(distance..=distance).conditions,
+            [owned("distance[gte]", "300"), owned("distance[lte]", "300")]
+        );
+        assert_eq!(
+            contact::DISTANCE
+                .in_range((
+                    std::ops::Bound::Excluded(distance),
+                    std::ops::Bound::Excluded(distance)
+                ))
+                .conditions,
+            [owned("distance[gt]", "300"), owned("distance[lt]", "300")]
+        );
+        assert!(contact::DISTANCE.in_range(..).conditions.is_empty());
         assert_eq!(contact::NAME.asc().term, "+name");
         assert_eq!(contact::NAME.desc().term, "-name");
         assert_eq!(contact::NAME.name(), "name");
@@ -348,11 +572,11 @@ mod tests {
             owned("automatic", "0")
         );
         assert_eq!(
-            pair(accessory::QUANTITY.gte(-2)),
+            pair(accessory::QUANTITY.ge(-2)),
             owned("quantity[gte]", "-2")
         );
         assert_eq!(
-            pair(contact::DISTANCE.lte(Decimal::new(12505, 2))),
+            pair(contact::DISTANCE.le(Decimal::new(12505, 2))),
             owned("distance[lte]", "125.05")
         );
         assert_eq!(
@@ -383,7 +607,7 @@ mod tests {
         assert_eq!(format!("{:?}", field.clone()), "Field(name)");
         assert_eq!(format!("{copy:?}"), "Field(name)");
         assert_eq!(
-            format!("{:?}", contact::DISTANCE.lte(Decimal::new(300, 0))),
+            format!("{:?}", contact::DISTANCE.le(Decimal::new(300, 0))),
             "Filter(distance[lte]=300)"
         );
         assert_eq!(format!("{:?}", contact::NAME.desc()), "Sort(-name)");

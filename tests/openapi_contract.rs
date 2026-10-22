@@ -475,7 +475,7 @@ fn equipment_decodes_the_full_live_collection_response() {
     assert_eq!(equipment.creator, Some(CrewId::new(244)));
     assert_eq!(equipment.factor_group, Some(Id::new(1)));
     assert_eq!(equipment.folder, None);
-    assert_eq!(equipment.type_, Some(EquipmentType::Item));
+    assert_eq!(equipment.r#type, Some(EquipmentType::Item));
     assert_eq!(equipment.rental_sales, Some(EquipmentRentalSales::Rental));
     assert_eq!(
         equipment.stock_management,
@@ -569,9 +569,9 @@ fn an_undocumented_enum_value_does_not_fail_the_collection() {
     ))
     .unwrap();
 
-    assert_eq!(items[0].type_, Some(TaxClassType::Vat));
+    assert_eq!(items[0].r#type, Some(TaxClassType::Vat));
     assert_eq!(
-        items[1].type_,
+        items[1].r#type,
         Some(TaxClassType::Unknown("reverse_charge".to_string()))
     );
     assert_eq!(

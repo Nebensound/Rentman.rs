@@ -11,6 +11,12 @@ pub const MAX_ATTEMPTS_VAR: &str = "RENTMAN_API_MAX_ATTEMPTS";
 pub const RETRY_BASE_DELAY_VAR: &str = "RENTMAN_RETRY_BASE_DELAY_MS";
 /// Environment variable read by [`RentmanClientConfig::from_env`] for
 /// [`RentmanClientConfig::min_request_interval`], in milliseconds.
+///
+/// ```
+/// assert_eq!(rentman_client::MAX_ATTEMPTS_VAR, "RENTMAN_API_MAX_ATTEMPTS");
+/// assert_eq!(rentman_client::RETRY_BASE_DELAY_VAR, "RENTMAN_RETRY_BASE_DELAY_MS");
+/// assert_eq!(rentman_client::MIN_REQUEST_INTERVAL_VAR, "RENTMAN_REQUEST_MIN_INTERVAL_MS");
+/// ```
 pub const MIN_REQUEST_INTERVAL_VAR: &str = "RENTMAN_REQUEST_MIN_INTERVAL_MS";
 
 const DEFAULT_MAX_ATTEMPTS: NonZeroUsize = NonZeroUsize::new(4).expect("4 is not zero");
@@ -18,6 +24,16 @@ const DEFAULT_RETRY_BASE_DELAY: Duration = Duration::from_millis(100);
 const DEFAULT_MIN_REQUEST_INTERVAL: Duration = Duration::from_millis(100);
 
 /// Invalid client setting.
+///
+/// ```
+/// use std::time::Duration;
+/// use rentman_client::RentmanClientConfig;
+///
+/// let error = RentmanClientConfig::default()
+///     .with_min_request_interval(Duration::ZERO)
+///     .unwrap_err();
+/// println!("{} = {:?}: {}", error.setting(), error.value(), error.reason());
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[error("invalid Rentman client setting {setting} = {value:?}: {reason}")]
 pub struct ConfigError {
@@ -56,6 +72,16 @@ impl ConfigError {
 /// [`Default`] gives 4 attempts, a 100 ms retry base delay, and at least
 /// 100 ms between requests. Nothing is read from the environment unless
 /// [`RentmanClientConfig::from_env`] is called.
+///
+/// ```
+/// use std::time::Duration;
+/// use rentman_client::RentmanClientConfig;
+///
+/// let config = RentmanClientConfig::default();
+/// assert_eq!(config.max_attempts().get(), 4);
+/// assert_eq!(config.retry_base_delay(), Duration::from_millis(100));
+/// assert_eq!(config.min_request_interval(), Duration::from_millis(100));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RentmanClientConfig {
     max_attempts: NonZeroUsize,
@@ -80,6 +106,17 @@ impl RentmanClientConfig {
     ///
     /// Unset or empty variables keep their default. A variable that is set to
     /// an invalid value is an error; it never falls back to the default.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{RentmanClientConfig, MAX_ATTEMPTS_VAR};
+    ///
+    /// // With RENTMAN_API_MAX_ATTEMPTS=6 in the environment:
+    /// let config = RentmanClientConfig::from_env()?;
+    /// println!("{MAX_ATTEMPTS_VAR}: {}", config.max_attempts());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn from_env() -> Result<Self, ConfigError> {
         Self::from_lookup(env_var)
     }
@@ -107,6 +144,15 @@ impl RentmanClientConfig {
     }
 
     /// Sets how often a request is sent at most, including the first attempt.
+    ///
+    /// ```
+    /// use std::num::NonZeroUsize;
+    /// use rentman_client::RentmanClientConfig;
+    ///
+    /// // One attempt only: never retry.
+    /// let config = RentmanClientConfig::default().with_max_attempts(NonZeroUsize::MIN);
+    /// assert_eq!(config.max_attempts().get(), 1);
+    /// ```
     pub fn with_max_attempts(mut self, max_attempts: NonZeroUsize) -> Self {
         self.max_attempts = max_attempts;
         self
@@ -114,6 +160,14 @@ impl RentmanClientConfig {
 
     /// Sets the first retry delay; later retries back off exponentially up to
     /// 16 times this value. A `Retry-After` from Rentman takes precedence.
+    ///
+    /// ```
+    /// use std::time::Duration;
+    /// use rentman_client::RentmanClientConfig;
+    ///
+    /// let config = RentmanClientConfig::default().with_retry_base_delay(Duration::from_secs(1));
+    /// assert_eq!(config.retry_base_delay(), Duration::from_secs(1));
+    /// ```
     pub fn with_retry_base_delay(mut self, delay: Duration) -> Self {
         self.retry_base_delay = delay;
         self
@@ -122,6 +176,18 @@ impl RentmanClientConfig {
     /// Sets the minimum time between two requests of the client.
     ///
     /// Fails for a zero interval, which would disable the rate limit.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use std::time::Duration;
+    /// use rentman_client::RentmanClientConfig;
+    ///
+    /// let config = RentmanClientConfig::default().with_min_request_interval(Duration::from_millis(500))?;
+    /// assert_eq!(config.min_request_interval(), Duration::from_millis(500));
+    /// assert!(RentmanClientConfig::default().with_min_request_interval(Duration::ZERO).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_min_request_interval(mut self, interval: Duration) -> Result<Self, ConfigError> {
         if interval.is_zero() {
             return Err(ConfigError::new(

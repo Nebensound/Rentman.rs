@@ -4,6 +4,14 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{cmp::Ordering, fmt, hash, marker::PhantomData};
 
 /// A Rentman resource: the item type of one collection, e.g. `/crew`.
+///
+/// Implemented by every full model in [`model`](crate::model).
+///
+/// ```
+/// use rentman_client::{Resource, model::Crew};
+///
+/// assert_eq!(Crew::COLLECTION, "crew");
+/// ```
 pub trait Resource {
     /// Collection path segment without slashes, e.g. `crew`.
     const COLLECTION: &'static str;
@@ -18,6 +26,22 @@ pub trait Resource {
 /// In an `id` field Rentman sends a number (`12`); in a link field it sends a
 /// path (`"/crew/12"`). The generated models read and write both forms;
 /// [`Id::from_link`] and [`Id::to_link`] convert links by hand.
+///
+/// ```
+/// use rentman_client::{Id, model::{Crew, CrewId}};
+///
+/// let id: Id<Crew> = CrewId::new(12); // `CrewId` is an alias of `Id<Crew>`
+/// assert_eq!(id.get(), 12);
+/// assert_eq!(id.to_string(), "12");
+/// ```
+///
+/// IDs of different resources cannot be mixed up:
+///
+/// ```compile_fail
+/// use rentman_client::model::{CrewId, ProjectId};
+///
+/// let project: ProjectId = CrewId::new(12);
+/// ```
 pub struct Id<R> {
     value: u64,
     resource: PhantomData<fn() -> R>,
@@ -25,6 +49,11 @@ pub struct Id<R> {
 
 impl<R> Id<R> {
     /// Creates an ID from Rentman's numeric value.
+    ///
+    /// ```
+    /// let id = rentman_client::model::ProjectId::new(7);
+    /// assert_eq!(id.get(), 7);
+    /// ```
     pub const fn new(value: u64) -> Self {
         Self {
             value,
@@ -33,6 +62,10 @@ impl<R> Id<R> {
     }
 
     /// Rentman's numeric value of the ID.
+    ///
+    /// ```
+    /// assert_eq!(rentman_client::model::CrewId::new(12).get(), 12);
+    /// ```
     pub const fn get(self) -> u64 {
         self.value
     }
@@ -43,6 +76,13 @@ impl<R: Resource> Id<R> {
     ///
     /// Fails when the link points to another collection, has no numeric ID,
     /// or is not a `/{collection}/{id}` path.
+    ///
+    /// ```
+    /// use rentman_client::{LinkError, model::CrewId};
+    ///
+    /// assert_eq!(CrewId::from_link("/crew/12"), Ok(CrewId::new(12)));
+    /// assert!(matches!(CrewId::from_link("/projects/12"), Err(LinkError::WrongCollection { .. })));
+    /// ```
     pub fn from_link(link: &str) -> Result<Self, LinkError> {
         let malformed = || LinkError::Malformed {
             link: link.to_string(),
@@ -70,12 +110,29 @@ impl<R: Resource> Id<R> {
     }
 
     /// Formats the ID as a link, e.g. `/crew/12`.
+    ///
+    /// ```
+    /// assert_eq!(rentman_client::model::CrewId::new(12).to_link(), "/crew/12");
+    /// ```
     pub fn to_link(self) -> String {
         format!("/{}/{}", R::COLLECTION, self.value)
     }
 }
 
 /// Why a link could not be read as an [`Id`].
+///
+/// ```
+/// use rentman_client::{LinkError, model::CrewId};
+///
+/// for link in ["/projects/1", "/crew/abc", "crew"] {
+///     match CrewId::from_link(link).unwrap_err() {
+///         LinkError::WrongCollection { expected, found } => assert_eq!((expected, found.as_str()), ("crew", "projects")),
+///         LinkError::InvalidId { id } => assert_eq!(id, "abc"),
+///         LinkError::Malformed { link } => assert_eq!(link, "crew"),
+///         _ => unreachable!(),
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[non_exhaustive]
 pub enum LinkError {
@@ -216,6 +273,17 @@ pub(crate) mod optional_link {
 
 /// ID of an item whose collection is named by a separate `itemtype` field,
 /// e.g. the item a file is attached to.
+///
+/// Unlike [`Id`], the type does not say which resource is meant; read the
+/// accompanying item-type field to find out.
+///
+/// ```
+/// use rentman_client::ItemId;
+///
+/// let item = ItemId::new(42);
+/// assert_eq!(item.get(), 42);
+/// assert_eq!(item.to_string(), "42");
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct ItemId(u64);

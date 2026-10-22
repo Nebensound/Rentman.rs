@@ -16,6 +16,21 @@ use std::sync::Arc;
 const DEFAULT_BASE_URL: &str = "https://api.rentman.net";
 
 /// HTTP client for calling the Rentman API.
+///
+/// Create one per application and clone it freely: clones share the
+/// connection pool, rate limit, and custom-field registry. Every resource is
+/// reached through an accessor such as [`crew`](Self::crew).
+///
+/// ```
+/// # async fn example() -> rentman_client::Result<()> {
+/// use rentman_client::{RentmanApiToken, RentmanClient};
+///
+/// let client = RentmanClient::new(RentmanApiToken::new("token"));
+/// let for_task = client.clone(); // shares rate limiting with `client`
+/// let crew = for_task.crew().list().all().await?;
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Clone)]
 pub struct RentmanClient {
     pub(crate) base_url: Url,
@@ -73,6 +88,13 @@ impl RentmanClient {
     ///
     /// Nothing is read from the environment; use [`Self::with_config`] with
     /// [`RentmanClientConfig::from_env`] for that.
+    ///
+    /// ```
+    /// use rentman_client::{RentmanApiToken, RentmanClient};
+    ///
+    /// let token = std::env::var("RENTMAN_TOKEN").unwrap_or_default();
+    /// let client = RentmanClient::new(RentmanApiToken::new(token));
+    /// ```
     pub fn new(token: RentmanApiToken) -> Self {
         Self::build(
             Url::parse(DEFAULT_BASE_URL).expect("default URL is valid"),
@@ -85,6 +107,18 @@ impl RentmanClient {
     /// configuration, e.g. for tests, staging environments, or local proxies.
     ///
     /// Fails unless the base URL is an `http` or `https` URL.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use rentman_client::{RentmanApiToken, RentmanClient, Url};
+    ///
+    /// let client = RentmanClient::with_base_url(
+    ///     Url::parse("http://localhost:8080")?,
+    ///     RentmanApiToken::new("test-token"),
+    /// )?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_base_url(base_url: Url, token: RentmanApiToken) -> Result<Self, ConfigError> {
         Self::with_config(base_url, token, RentmanClientConfig::default())
     }
@@ -92,6 +126,23 @@ impl RentmanClient {
     /// Creates a client for an explicit base URL and configuration.
     ///
     /// Fails unless the base URL is an `http` or `https` URL.
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use std::{num::NonZeroUsize, time::Duration};
+    /// use rentman_client::{RentmanApiToken, RentmanClient, RentmanClientConfig, Url};
+    ///
+    /// let config = RentmanClientConfig::default()
+    ///     .with_max_attempts(NonZeroUsize::new(6).unwrap())
+    ///     .with_min_request_interval(Duration::from_millis(250))?;
+    /// let client = RentmanClient::with_config(
+    ///     Url::parse("https://api.rentman.net")?,
+    ///     RentmanApiToken::new("token"),
+    ///     config,
+    /// )?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_config(
         base_url: Url,
         token: RentmanApiToken,
@@ -120,6 +171,26 @@ impl RentmanClient {
     }
 
     /// Registers the account-specific custom fields that responses must contain.
+    ///
+    /// Call this before reading affected resources. Definitions combine the
+    /// resource, definition ID, and Rentman field type; they do not create or
+    /// discover fields in Rentman. This replaces, rather than merges, any
+    /// existing registry. Without registrations, custom values are not retained.
+    /// Registered keys must exist, but may contain null; unregistered keys are
+    /// removed. See the [initialization guide](crate#initializing-custom-fields)
+    /// for discovery, value types, validation limits, and reading/writing values.
+    ///
+    /// ```
+    /// use rentman_client::{CustomFieldDefinition, CustomFieldRegistry, RentmanApiToken, RentmanClient, model};
+    /// # fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let registry = CustomFieldRegistry::new([
+    ///     CustomFieldDefinition::new::<model::Equipment>(8, model::ExtraInputFieldType::Text),
+    /// ])?;
+    /// let client = RentmanClient::new(RentmanApiToken::new("token"))
+    ///     .with_custom_fields(registry);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_custom_fields(mut self, custom_fields: CustomFieldRegistry) -> Self {
         self.custom_fields = Arc::new(custom_fields);
         self

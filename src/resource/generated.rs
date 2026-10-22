@@ -3772,331 +3772,991 @@ impl GetItem for WarehouseStatus {
 
 impl RentmanClient {
     /// All [`Accessory`] items: `/accessories`.
+    ///
+    /// OpenAPI response schema: `AccessoryResponse`; Rust resource: [`Accessory`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Accessory> = client.accessories().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn accessories(&self) -> Collection<Accessory> {
         Collection::new(self, None)
     }
 
     /// All [`ActualContent`] items: `/actualcontent`.
+    ///
+    /// OpenAPI response schema: `ActualContentResponse`; Rust resource: [`ActualContent`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ActualContent> = client.actual_content().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn actual_content(&self) -> Collection<ActualContent> {
         Collection::new(self, None)
     }
 
     /// All [`Alternative`] items: `/alternatives`.
+    ///
+    /// OpenAPI response schema: `AlternativeResponse`; Rust resource: [`Alternative`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Alternative> = client.alternatives().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn alternatives(&self) -> Collection<Alternative> {
         Collection::new(self, None)
     }
 
     /// All [`AppointmentCrew`] items: `/appointmentcrew`.
+    ///
+    /// OpenAPI response schema: `AppointmentCrewResponse`; Rust resource: [`AppointmentCrew`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::AppointmentCrew> = client.appointment_crew().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn appointment_crew(&self) -> Collection<AppointmentCrew> {
         Collection::new(self, None)
     }
 
     /// All [`Appointment`] items: `/appointments`.
+    ///
+    /// OpenAPI response schema: `AppointmentResponse`; Rust resource: [`Appointment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Appointment> = client.appointments().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn appointments(&self) -> Collection<Appointment> {
         Collection::new(self, None)
     }
 
     /// All [`ContactPerson`] items: `/contactpersons`.
+    ///
+    /// OpenAPI response schema: `ContactPersonResponse`; Rust resource: [`ContactPerson`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ContactPerson> = client.contact_persons().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contact_persons(&self) -> Collection<ContactPerson> {
         Collection::new(self, None)
     }
 
     /// All [`Contact`] items: `/contacts`.
+    ///
+    /// OpenAPI response schema: `ContactResponse`; Rust resource: [`Contact`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Contact> = client.contacts().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contacts(&self) -> Collection<Contact> {
         Collection::new(self, None)
     }
 
     /// All [`Contract`] items: `/contracts`.
+    ///
+    /// OpenAPI response schema: `ContractResponse`; Rust resource: [`Contract`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Contract> = client.contracts().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contracts(&self) -> Collection<Contract> {
         Collection::new(self, None)
     }
 
     /// All [`Crew`] items: `/crew`.
+    ///
+    /// OpenAPI response schema: `CrewResponse`; Rust resource: [`Crew`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Crew> = client.crew().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn crew(&self) -> Collection<Crew> {
         Collection::new(self, None)
     }
 
     /// All [`CrewAvailability`] items: `/crewavailability`.
+    ///
+    /// OpenAPI response schema: `CrewAvailabilityResponse`; Rust resource: [`CrewAvailability`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::CrewAvailability> = client.crew_availability().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn crew_availability(&self) -> Collection<CrewAvailability> {
         Collection::new(self, None)
     }
 
     /// All [`CrewRate`] items: `/crewrates`.
+    ///
+    /// OpenAPI response schema: `CrewRatesResponse`; Rust resource: [`CrewRate`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::CrewRate> = client.crew_rates().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn crew_rates(&self) -> Collection<CrewRate> {
         Collection::new(self, None)
     }
 
     /// All [`Equipment`] items: `/equipment`.
+    ///
+    /// OpenAPI response schema: `EquipmentResponse`; Rust resource: [`Equipment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Equipment> = client.equipment().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn equipment(&self) -> Collection<Equipment> {
         Collection::new(self, None)
     }
 
     /// All [`EquipmentAssignedSerial`] items: `/equipmentassignedserials`.
+    ///
+    /// OpenAPI response schema: `EquipmentAssignedSerialsResponse`; Rust resource: [`EquipmentAssignedSerial`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::EquipmentAssignedSerial> = client.equipment_assigned_serials().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn equipment_assigned_serials(&self) -> Collection<EquipmentAssignedSerial> {
         Collection::new(self, None)
     }
 
     /// All [`EquipmentSetContent`] items: `/equipmentsetscontent`.
+    ///
+    /// OpenAPI response schema: `EquipmentSetContentResponse`; Rust resource: [`EquipmentSetContent`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::EquipmentSetContent> = client.equipment_set_content().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn equipment_set_content(&self) -> Collection<EquipmentSetContent> {
         Collection::new(self, None)
     }
 
     /// All [`ExtraInputField`] items: `/extrainputfields`.
+    ///
+    /// OpenAPI response schema: `ExtraInputFieldResponse`; Rust resource: [`ExtraInputField`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ExtraInputField> = client.extra_input_fields().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn extra_input_fields(&self) -> Collection<ExtraInputField> {
         Collection::new(self, None)
     }
 
     /// All [`FactorGroup`] items: `/factorgroups`.
+    ///
+    /// OpenAPI response schema: `FactorGroupsResponse`; Rust resource: [`FactorGroup`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::FactorGroup> = client.factor_groups().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn factor_groups(&self) -> Collection<FactorGroup> {
         Collection::new(self, None)
     }
 
     /// All [`Factor`] items: `/factors`.
+    ///
+    /// OpenAPI response schema: `FactorsResponse`; Rust resource: [`Factor`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Factor> = client.factors().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn factors(&self) -> Collection<Factor> {
         Collection::new(self, None)
     }
 
     /// All [`FileFolder`] items: `/file_folders`.
+    ///
+    /// OpenAPI response schema: `FileFolderResponse`; Rust resource: [`FileFolder`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::FileFolder> = client.file_folders().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self) -> Collection<FileFolder> {
         Collection::new(self, None)
     }
 
     /// All [`File`] items: `/files`.
+    ///
+    /// OpenAPI response schema: `FileResponse`; Rust resource: [`File`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::File> = client.files().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self) -> Collection<File> {
         Collection::new(self, None)
     }
 
     /// All [`Folder`] items: `/folders`.
+    ///
+    /// OpenAPI response schema: `FolderResponse`; Rust resource: [`Folder`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Folder> = client.folders().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn folders(&self) -> Collection<Folder> {
         Collection::new(self, None)
     }
 
     /// All [`Invitation`] items: `/invitations`.
+    ///
+    /// OpenAPI response schema: `InvitationsResponse`; Rust resource: [`Invitation`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Invitation> = client.invitations().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invitations(&self) -> Collection<Invitation> {
         Collection::new(self, None)
     }
 
     /// All [`InvoiceLine`] items: `/invoicelines`.
+    ///
+    /// OpenAPI response schema: `InvoiceLineResponse`; Rust resource: [`InvoiceLine`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::InvoiceLine> = client.invoice_lines().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoice_lines(&self) -> Collection<InvoiceLine> {
         Collection::new(self, None)
     }
 
     /// All [`Invoice`] items: `/invoices`.
+    ///
+    /// OpenAPI response schema: `FactuurResponse`; Rust resource: [`Invoice`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Invoice> = client.invoices().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoices(&self) -> Collection<Invoice> {
         Collection::new(self, None)
     }
 
     /// All [`LeaveMutation`] items: `/leavemutation`.
+    ///
+    /// OpenAPI response schema: `LeaveMutationsResponse`; Rust resource: [`LeaveMutation`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::LeaveMutation> = client.leave_mutations().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn leave_mutations(&self) -> Collection<LeaveMutation> {
         Collection::new(self, None)
     }
 
     /// All [`LeaveRequest`] items: `/leaverequest`.
+    ///
+    /// OpenAPI response schema: `LeaveRequestResponse`; Rust resource: [`LeaveRequest`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::LeaveRequest> = client.leave_requests().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn leave_requests(&self) -> Collection<LeaveRequest> {
         Collection::new(self, None)
     }
 
     /// All [`LeaveType`] items: `/leavetypes`.
+    ///
+    /// OpenAPI response schema: `LeaveTypesResponse`; Rust resource: [`LeaveType`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::LeaveType> = client.leave_types().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn leave_types(&self) -> Collection<LeaveType> {
         Collection::new(self, None)
     }
 
     /// All [`LedgerCode`] items: `/ledgercodes`.
+    ///
+    /// OpenAPI response schema: `LedgerResponse`; Rust resource: [`LedgerCode`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::LedgerCode> = client.ledger_codes().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn ledger_codes(&self) -> Collection<LedgerCode> {
         Collection::new(self, None)
     }
 
     /// All [`Payment`] items: `/payments`.
+    ///
+    /// OpenAPI response schema: `PaymentResponse`; Rust resource: [`Payment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Payment> = client.payments().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn payments(&self) -> Collection<Payment> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectCost`] items: `/costs`.
+    ///
+    /// OpenAPI response schema: `ProjectCostResponse`; Rust resource: [`ProjectCost`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectCost> = client.project_costs().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_costs(&self) -> Collection<ProjectCost> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectCrew`] items: `/projectcrew`.
+    ///
+    /// OpenAPI response schema: `ProjectCrewResponse`; Rust resource: [`ProjectCrew`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectCrew> = client.project_crew().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_crew(&self) -> Collection<ProjectCrew> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectEquipment`] items: `/projectequipment`.
+    ///
+    /// OpenAPI response schema: `ProjectEquipmentResponse`; Rust resource: [`ProjectEquipment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectEquipment> = client.project_equipment().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment(&self) -> Collection<ProjectEquipment> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectEquipmentGroup`] items: `/projectequipmentgroup`.
+    ///
+    /// OpenAPI response schema: `ProjectEquipmentGroupResponse`; Rust resource: [`ProjectEquipmentGroup`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectEquipmentGroup> = client.project_equipment_groups().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment_groups(&self) -> Collection<ProjectEquipmentGroup> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectFunctionGroup`] items: `/projectfunctiongroups`.
+    ///
+    /// OpenAPI response schema: `ProjectFunctionGroupResponse`; Rust resource: [`ProjectFunctionGroup`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectFunctionGroup> = client.project_function_groups().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_function_groups(&self) -> Collection<ProjectFunctionGroup> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectFunction`] items: `/projectfunctions`.
+    ///
+    /// OpenAPI response schema: `ProjectFunctionResponse`; Rust resource: [`ProjectFunction`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectFunction> = client.project_functions().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_functions(&self) -> Collection<ProjectFunction> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectRequestEquipment`] items: `/projectrequestequipment`.
+    ///
+    /// OpenAPI response schema: `ProjectRequestEquipmentResponse`; Rust resource: [`ProjectRequestEquipment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectRequestEquipment> = client.project_request_equipment().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_request_equipment(&self) -> Collection<ProjectRequestEquipment> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectRequest`] items: `/projectrequests`.
+    ///
+    /// OpenAPI response schema: `ProjectRequestResponse`; Rust resource: [`ProjectRequest`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectRequest> = client.project_requests().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_requests(&self) -> Collection<ProjectRequest> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectStatus`] items: `/projectstatuses`.
+    ///
+    /// OpenAPI response schema: `ProjectStatusResponse`; Rust resource: [`ProjectStatus`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectStatus> = client.project_statuses().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_statuses(&self) -> Collection<ProjectStatus> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectTemplate`] items: `/projecttemplates`.
+    ///
+    /// OpenAPI response schema: `ProjectTemplateResponse`; Rust resource: [`ProjectTemplate`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectTemplate> = client.project_templates().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_templates(&self) -> Collection<ProjectTemplate> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectType`] items: `/projecttypes`.
+    ///
+    /// OpenAPI response schema: `ProjectTypeResponse`; Rust resource: [`ProjectType`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectType> = client.project_types().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_types(&self) -> Collection<ProjectType> {
         Collection::new(self, None)
     }
 
     /// All [`ProjectVehicle`] items: `/projectvehicles`.
+    ///
+    /// OpenAPI response schema: `ProjectVehicleResponse`; Rust resource: [`ProjectVehicle`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::ProjectVehicle> = client.project_vehicles().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_vehicles(&self) -> Collection<ProjectVehicle> {
         Collection::new(self, None)
     }
 
     /// All [`Project`] items: `/projects`.
+    ///
+    /// OpenAPI response schema: `ProjectResponse`; Rust resource: [`Project`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Project> = client.projects().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn projects(&self) -> Collection<Project> {
         Collection::new(self, None)
     }
 
     /// All [`PurchaseOrderCost`] items: `/purchaseordercosts`.
+    ///
+    /// OpenAPI response schema: `PurchaseOrderCostResponse`; Rust resource: [`PurchaseOrderCost`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::PurchaseOrderCost> = client.purchase_order_costs().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn purchase_order_costs(&self) -> Collection<PurchaseOrderCost> {
         Collection::new(self, None)
     }
 
     /// All [`PurchaseOrderGlobalCost`] items: `/purchaseorderglobalcosts`.
+    ///
+    /// OpenAPI response schema: `PurchaseOrderGlobalCostResponse`; Rust resource: [`PurchaseOrderGlobalCost`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::PurchaseOrderGlobalCost> = client.purchase_order_global_costs().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn purchase_order_global_costs(&self) -> Collection<PurchaseOrderGlobalCost> {
         Collection::new(self, None)
     }
 
     /// All [`PurchaseOrder`] items: `/purchaseorders`.
+    ///
+    /// OpenAPI response schema: `PurchaseOrderResponse`; Rust resource: [`PurchaseOrder`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::PurchaseOrder> = client.purchase_orders().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn purchase_orders(&self) -> Collection<PurchaseOrder> {
         Collection::new(self, None)
     }
 
     /// All [`Quote`] items: `/quotes`.
+    ///
+    /// OpenAPI response schema: `QuotationResponse`; Rust resource: [`Quote`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Quote> = client.quotes().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn quotes(&self) -> Collection<Quote> {
         Collection::new(self, None)
     }
 
     /// All [`RateFactor`] items: `/ratefactors`.
+    ///
+    /// OpenAPI response schema: `CrewRateFactorResponse`; Rust resource: [`RateFactor`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::RateFactor> = client.rate_factors().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn rate_factors(&self) -> Collection<RateFactor> {
         Collection::new(self, None)
     }
 
     /// All [`Rate`] items: `/rates`.
+    ///
+    /// OpenAPI response schema: `CrewRateResponse`; Rust resource: [`Rate`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Rate> = client.rates().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn rates(&self) -> Collection<Rate> {
         Collection::new(self, None)
     }
 
     /// All [`Repair`] items: `/repairs`.
+    ///
+    /// OpenAPI response schema: `RepairResponse`; Rust resource: [`Repair`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Repair> = client.repairs().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn repairs(&self) -> Collection<Repair> {
         Collection::new(self, None)
     }
 
     /// All [`SerialNumber`] items: `/serialnumbers`.
+    ///
+    /// OpenAPI response schema: `SerialNumberResponse`; Rust resource: [`SerialNumber`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::SerialNumber> = client.serial_numbers().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn serial_numbers(&self) -> Collection<SerialNumber> {
         Collection::new(self, None)
     }
 
     /// All [`Status`] items: `/statuses`.
+    ///
+    /// OpenAPI response schema: `StatusResponse`; Rust resource: [`Status`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Status> = client.statuses().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn statuses(&self) -> Collection<Status> {
         Collection::new(self, None)
     }
 
     /// All [`StockLocation`] items: `/stocklocations`.
+    ///
+    /// OpenAPI response schema: `StockLocationResponse`; Rust resource: [`StockLocation`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::StockLocation> = client.stock_locations().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn stock_locations(&self) -> Collection<StockLocation> {
         Collection::new(self, None)
     }
 
     /// All [`StockMovement`] items: `/stockmovements`.
+    ///
+    /// OpenAPI response schema: `StockMovementResponse`; Rust resource: [`StockMovement`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::StockMovement> = client.stock_movements().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn stock_movements(&self) -> Collection<StockMovement> {
         Collection::new(self, None)
     }
 
     /// All [`Subproject`] items: `/subprojects`.
+    ///
+    /// OpenAPI response schema: `SubprojectResponse`; Rust resource: [`Subproject`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Subproject> = client.subprojects().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subprojects(&self) -> Collection<Subproject> {
         Collection::new(self, None)
     }
 
     /// All [`SubrentalEquipment`] items: `/subrentalequipment`.
+    ///
+    /// OpenAPI response schema: `SubrentalEquipmentResponse`; Rust resource: [`SubrentalEquipment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::SubrentalEquipment> = client.subrental_equipment().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrental_equipment(&self) -> Collection<SubrentalEquipment> {
         Collection::new(self, None)
     }
 
     /// All [`SubrentalEquipmentGroup`] items: `/subrentalequipmentgroup`.
+    ///
+    /// OpenAPI response schema: `SubrentalEquipmentGroupResponse`; Rust resource: [`SubrentalEquipmentGroup`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::SubrentalEquipmentGroup> = client.subrental_equipment_groups().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrental_equipment_groups(&self) -> Collection<SubrentalEquipmentGroup> {
         Collection::new(self, None)
     }
 
     /// All [`Subrental`] items: `/subrentals`.
+    ///
+    /// OpenAPI response schema: `SubrentalResponse`; Rust resource: [`Subrental`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Subrental> = client.subrentals().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrentals(&self) -> Collection<Subrental> {
         Collection::new(self, None)
     }
 
     /// All [`Subtask`] items: `/subtasks`.
+    ///
+    /// OpenAPI response schema: `SubtaskResponse`; Rust resource: [`Subtask`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Subtask> = client.subtasks().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subtasks(&self) -> Collection<Subtask> {
         Collection::new(self, None)
     }
 
     /// All [`Supplier`] items: `/suppliers`.
+    ///
+    /// OpenAPI response schema: `SupplierResponse`; Rust resource: [`Supplier`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Supplier> = client.suppliers().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn suppliers(&self) -> Collection<Supplier> {
         Collection::new(self, None)
     }
 
     /// All [`TaskAssignment`] items: `/taskassignments`.
+    ///
+    /// OpenAPI response schema: `TaskAssignmentResponse`; Rust resource: [`TaskAssignment`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::TaskAssignment> = client.task_assignments().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn task_assignments(&self) -> Collection<TaskAssignment> {
         Collection::new(self, None)
     }
 
     /// All [`TaskStatus`] items: `/taskstatuses`.
+    ///
+    /// OpenAPI response schema: `TaskStatusResponse`; Rust resource: [`TaskStatus`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::TaskStatus> = client.task_statuses().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn task_statuses(&self) -> Collection<TaskStatus> {
         Collection::new(self, None)
     }
 
     /// All [`Task`] items: `/tasks`.
+    ///
+    /// OpenAPI response schema: `TaskResponse`; Rust resource: [`Task`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Task> = client.tasks().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self) -> Collection<Task> {
         Collection::new(self, None)
     }
 
     /// All [`TaxClass`] items: `/taxclasses`.
+    ///
+    /// OpenAPI response schema: `TaxClassResponse`; Rust resource: [`TaxClass`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::TaxClass> = client.tax_classes().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tax_classes(&self) -> Collection<TaxClass> {
         Collection::new(self, None)
     }
 
     /// All [`TimeRegistrationActivity`] items: `/timeregistrationactivities`.
+    ///
+    /// OpenAPI response schema: `TimeRegistrationActivityResponse`; Rust resource: [`TimeRegistrationActivity`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::TimeRegistrationActivity> = client.time_registration_activities().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn time_registration_activities(&self) -> Collection<TimeRegistrationActivity> {
         Collection::new(self, None)
     }
 
     /// All [`TimeRegistration`] items: `/timeregistration`.
+    ///
+    /// OpenAPI response schema: `TimeRegistrationResponse`; Rust resource: [`TimeRegistration`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::TimeRegistration> = client.time_registrations().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn time_registrations(&self) -> Collection<TimeRegistration> {
         Collection::new(self, None)
     }
 
     /// All [`Vehicle`] items: `/vehicles`.
+    ///
+    /// OpenAPI response schema: `VehicleResponse`; Rust resource: [`Vehicle`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::Vehicle> = client.vehicles().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn vehicles(&self) -> Collection<Vehicle> {
         Collection::new(self, None)
     }
 
     /// All [`WarehouseStatus`] items: `/warehousestatuses`.
+    ///
+    /// OpenAPI response schema: `WarehouseStatusResponse`; Rust resource: [`WarehouseStatus`].
+    /// See the [resource name mapping](crate::model#resource-names-and-api-collections).
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let first: Vec<rentman_client::model::WarehouseStatus> = client.warehouse_statuses().list().first(10).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn warehouse_statuses(&self) -> Collection<WarehouseStatus> {
         Collection::new(self, None)
     }
@@ -4104,6 +4764,13 @@ impl RentmanClient {
 
 impl Collection<Appointment> {
     /// The appointment crew of one item: `/appointments/{id}/appointmentcrew`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.appointments().appointment_crew(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn appointment_crew(
         &self,
         appointment: Id<Appointment>,
@@ -4114,21 +4781,49 @@ impl Collection<Appointment> {
 
 impl Collection<Contact> {
     /// The contact persons of one item: `/contacts/{id}/contactpersons`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contacts().contact_persons(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contact_persons(&self, contact: Id<Contact>) -> Collection<ContactContactPersons> {
         Collection::new(&self.client, Some(contact.get()))
     }
 
     /// The file folders of one item: `/contacts/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contacts().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, contact: Id<Contact>) -> Collection<ContactFileFolders> {
         Collection::new(&self.client, Some(contact.get()))
     }
 
     /// The files of one item: `/contacts/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contacts().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, contact: Id<Contact>) -> Collection<ContactFiles> {
         Collection::new(&self.client, Some(contact.get()))
     }
 
     /// The tasks of one item: `/contacts/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contacts().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, contact: Id<Contact>) -> Collection<ContactTasks> {
         Collection::new(&self.client, Some(contact.get()))
     }
@@ -4136,6 +4831,13 @@ impl Collection<Contact> {
 
 impl Collection<ContactPerson> {
     /// The file folders of one item: `/contactpersons/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contact_persons().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(
         &self,
         contact_person: Id<ContactPerson>,
@@ -4144,11 +4846,25 @@ impl Collection<ContactPerson> {
     }
 
     /// The files of one item: `/contactpersons/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contact_persons().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, contact_person: Id<ContactPerson>) -> Collection<ContactPersonFiles> {
         Collection::new(&self.client, Some(contact_person.get()))
     }
 
     /// The tasks of one item: `/contactpersons/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contact_persons().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, contact_person: Id<ContactPerson>) -> Collection<ContactPersonTasks> {
         Collection::new(&self.client, Some(contact_person.get()))
     }
@@ -4156,16 +4872,37 @@ impl Collection<ContactPerson> {
 
 impl Collection<Contract> {
     /// The files of one item: `/contracts/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contracts().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, contract: Id<Contract>) -> Collection<ContractFiles> {
         Collection::new(&self.client, Some(contract.get()))
     }
 
     /// The invoice lines of one item: `/contracts/{id}/invoicelines`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contracts().invoice_lines(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoice_lines(&self, contract: Id<Contract>) -> Collection<ContractInvoiceLines> {
         Collection::new(&self.client, Some(contract.get()))
     }
 
     /// The tasks of one item: `/contracts/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.contracts().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, contract: Id<Contract>) -> Collection<ContractTasks> {
         Collection::new(&self.client, Some(contract.get()))
     }
@@ -4173,36 +4910,85 @@ impl Collection<Contract> {
 
 impl Collection<Crew> {
     /// The appointments of one item: `/crew/{id}/appointments`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().appointments(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn appointments(&self, crew: Id<Crew>) -> Collection<CrewAppointments> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The crew availability of one item: `/crew/{id}/crewavailability`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().crew_availability(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn crew_availability(&self, crew: Id<Crew>) -> Collection<CrewCrewAvailability> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The crew rates of one item: `/crew/{id}/crewrates`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().crew_rates(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn crew_rates(&self, crew: Id<Crew>) -> Collection<CrewCrewRates> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The file folders of one item: `/crew/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, crew: Id<Crew>) -> Collection<CrewFileFolders> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The files of one item: `/crew/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, crew: Id<Crew>) -> Collection<CrewFiles> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The invitations of one item: `/crew/{id}/invitations`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().invitations(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invitations(&self, crew: Id<Crew>) -> Collection<CrewInvitations> {
         Collection::new(&self.client, Some(crew.get()))
     }
 
     /// The tasks of one item: `/crew/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.crew().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, crew: Id<Crew>) -> Collection<CrewTasks> {
         Collection::new(&self.client, Some(crew.get()))
     }
@@ -4210,16 +4996,37 @@ impl Collection<Crew> {
 
 impl Collection<Equipment> {
     /// The accessories of one item: `/equipment/{id}/accessories`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().accessories(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn accessories(&self, equipment: Id<Equipment>) -> Collection<EquipmentAccessories> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The alternatives of one item: `/equipment/{id}/alternatives`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().alternatives(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn alternatives(&self, equipment: Id<Equipment>) -> Collection<EquipmentAlternatives> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The equipment set content of one item: `/equipment/{id}/equipmentsetscontent`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().equipment_set_content(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn equipment_set_content(
         &self,
         equipment: Id<Equipment>,
@@ -4228,36 +5035,85 @@ impl Collection<Equipment> {
     }
 
     /// The file folders of one item: `/equipment/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, equipment: Id<Equipment>) -> Collection<EquipmentFileFolders> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The files of one item: `/equipment/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, equipment: Id<Equipment>) -> Collection<EquipmentFiles> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The repairs of one item: `/equipment/{id}/repairs`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().repairs(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn repairs(&self, equipment: Id<Equipment>) -> Collection<EquipmentRepairs> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The serial numbers of one item: `/equipment/{id}/serialnumbers`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().serial_numbers(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn serial_numbers(&self, equipment: Id<Equipment>) -> Collection<EquipmentSerialNumbers> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The stock movements of one item: `/equipment/{id}/stockmovements`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().stock_movements(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn stock_movements(&self, equipment: Id<Equipment>) -> Collection<EquipmentStockMovements> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The suppliers of one item: `/equipment/{id}/suppliers`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().suppliers(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn suppliers(&self, equipment: Id<Equipment>) -> Collection<EquipmentSuppliers> {
         Collection::new(&self.client, Some(equipment.get()))
     }
 
     /// The tasks of one item: `/equipment/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.equipment().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, equipment: Id<Equipment>) -> Collection<EquipmentTasks> {
         Collection::new(&self.client, Some(equipment.get()))
     }
@@ -4265,6 +5121,13 @@ impl Collection<Equipment> {
 
 impl Collection<FactorGroup> {
     /// The factors of one item: `/factorgroups/{id}/factors`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.factor_groups().factors(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn factors(&self, factor_group: Id<FactorGroup>) -> Collection<FactorGroupFactors> {
         Collection::new(&self.client, Some(factor_group.get()))
     }
@@ -4272,21 +5135,49 @@ impl Collection<FactorGroup> {
 
 impl Collection<Invoice> {
     /// The files of one item: `/invoices/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.invoices().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, invoice: Id<Invoice>) -> Collection<InvoiceFiles> {
         Collection::new(&self.client, Some(invoice.get()))
     }
 
     /// The invoice lines of one item: `/invoices/{id}/invoicelines`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.invoices().invoice_lines(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoice_lines(&self, invoice: Id<Invoice>) -> Collection<InvoiceInvoiceLines> {
         Collection::new(&self.client, Some(invoice.get()))
     }
 
     /// The payments of one item: `/invoices/{id}/payments`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.invoices().payments(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn payments(&self, invoice: Id<Invoice>) -> Collection<InvoicePayments> {
         Collection::new(&self.client, Some(invoice.get()))
     }
 
     /// The tasks of one item: `/invoices/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.invoices().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, invoice: Id<Invoice>) -> Collection<InvoiceTasks> {
         Collection::new(&self.client, Some(invoice.get()))
     }
@@ -4294,6 +5185,13 @@ impl Collection<Invoice> {
 
 impl Collection<LeaveRequest> {
     /// The time registrations of one item: `/leaverequest/{id}/timeregistration`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.leave_requests().time_registrations(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn time_registrations(
         &self,
         leave_request: Id<LeaveRequest>,
@@ -4306,6 +5204,14 @@ impl Collection<Project> {
     /// Create a new project based on a project template.
     ///
     /// Sent exactly once, like [`Collection::create`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::ProjectsCreateFromTemplatePayload::new(rentman_client::Id::new(1), chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap());
+    /// let result = client.projects().create_from_template(&payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn create_from_template(
         &self,
         payload: &ProjectsCreateFromTemplatePayload,
@@ -4317,6 +5223,14 @@ impl Collection<Project> {
     /// Set the client of a project.
     ///
     /// Sent exactly once, like [`Collection::create`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::ProjectsSetClientPayload::new(rentman_client::Id::new(1));
+    /// let result = client.projects().set_client(rentman_client::Id::new(12), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn set_client(
         &self,
         project: Id<Project>,
@@ -4328,6 +5242,14 @@ impl Collection<Project> {
     /// Set the location of a project.
     ///
     /// Sent exactly once, like [`Collection::create`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::ProjectsSetLocationPayload::new(rentman_client::Id::new(1));
+    /// let result = client.projects().set_location(rentman_client::Id::new(12), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn set_location(
         &self,
         project: Id<Project>,
@@ -4340,6 +5262,14 @@ impl Collection<Project> {
     /// Set the project type of a project.
     ///
     /// Sent exactly once, like [`Collection::create`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::ProjectsSetTypePayload::new(rentman_client::Id::new(1));
+    /// let result = client.projects().set_type(rentman_client::Id::new(12), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn set_type(
         &self,
         project: Id<Project>,
@@ -4349,36 +5279,85 @@ impl Collection<Project> {
     }
 
     /// The contracts of one item: `/projects/{id}/contracts`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().contracts(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contracts(&self, project: Id<Project>) -> Collection<ProjectContracts> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The project costs of one item: `/projects/{id}/costs`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_costs(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_costs(&self, project: Id<Project>) -> Collection<ProjectProjectCosts> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The file folders of one item: `/projects/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, project: Id<Project>) -> Collection<ProjectFileFolders> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The files of one item: `/projects/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, project: Id<Project>) -> Collection<ProjectFiles> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The project crew of one item: `/projects/{id}/projectcrew`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_crew(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_crew(&self, project: Id<Project>) -> Collection<ProjectProjectCrew> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The project equipment of one item: `/projects/{id}/projectequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment(&self, project: Id<Project>) -> Collection<ProjectProjectEquipment> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The project equipment groups of one item: `/projects/{id}/projectequipmentgroup`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_equipment_groups(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment_groups(
         &self,
         project: Id<Project>,
@@ -4387,6 +5366,13 @@ impl Collection<Project> {
     }
 
     /// The project function groups of one item: `/projects/{id}/projectfunctiongroups`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_function_groups(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_function_groups(
         &self,
         project: Id<Project>,
@@ -4395,26 +5381,61 @@ impl Collection<Project> {
     }
 
     /// The project functions of one item: `/projects/{id}/projectfunctions`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_functions(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_functions(&self, project: Id<Project>) -> Collection<ProjectProjectFunctions> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The project vehicles of one item: `/projects/{id}/projectvehicles`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().project_vehicles(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_vehicles(&self, project: Id<Project>) -> Collection<ProjectProjectVehicles> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The quotes of one item: `/projects/{id}/quotes`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().quotes(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn quotes(&self, project: Id<Project>) -> Collection<ProjectQuotes> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The subprojects of one item: `/projects/{id}/subprojects`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().subprojects(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subprojects(&self, project: Id<Project>) -> Collection<ProjectSubprojects> {
         Collection::new(&self.client, Some(project.get()))
     }
 
     /// The tasks of one item: `/projects/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.projects().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, project: Id<Project>) -> Collection<ProjectTasks> {
         Collection::new(&self.client, Some(project.get()))
     }
@@ -4422,6 +5443,13 @@ impl Collection<Project> {
 
 impl Collection<ProjectEquipmentGroup> {
     /// The project equipment of one item: `/projectequipmentgroup/{id}/projectequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.project_equipment_groups().project_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment(
         &self,
         project_equipment_group: Id<ProjectEquipmentGroup>,
@@ -4432,6 +5460,13 @@ impl Collection<ProjectEquipmentGroup> {
 
 impl Collection<ProjectFunction> {
     /// The project crew of one item: `/projectfunctions/{id}/projectcrew`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.project_functions().project_crew(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_crew(
         &self,
         project_function: Id<ProjectFunction>,
@@ -4440,6 +5475,13 @@ impl Collection<ProjectFunction> {
     }
 
     /// The project vehicles of one item: `/projectfunctions/{id}/projectvehicles`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.project_functions().project_vehicles(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_vehicles(
         &self,
         project_function: Id<ProjectFunction>,
@@ -4450,6 +5492,13 @@ impl Collection<ProjectFunction> {
 
 impl Collection<ProjectFunctionGroup> {
     /// The project functions of one item: `/projectfunctiongroups/{id}/projectfunctions`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.project_function_groups().project_functions(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_functions(
         &self,
         project_function_group: Id<ProjectFunctionGroup>,
@@ -4460,6 +5509,13 @@ impl Collection<ProjectFunctionGroup> {
 
 impl Collection<ProjectRequest> {
     /// The project request equipment of one item: `/projectrequests/{id}/projectrequestequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.project_requests().project_request_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_request_equipment(
         &self,
         project_request: Id<ProjectRequest>,
@@ -4470,6 +5526,13 @@ impl Collection<ProjectRequest> {
 
 impl Collection<PurchaseOrder> {
     /// The file folders of one item: `/purchaseorders/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(
         &self,
         purchase_order: Id<PurchaseOrder>,
@@ -4478,11 +5541,25 @@ impl Collection<PurchaseOrder> {
     }
 
     /// The files of one item: `/purchaseorders/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, purchase_order: Id<PurchaseOrder>) -> Collection<PurchaseOrderFiles> {
         Collection::new(&self.client, Some(purchase_order.get()))
     }
 
     /// The invoice lines of one item: `/purchaseorders/{id}/invoicelines`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().invoice_lines(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoice_lines(
         &self,
         purchase_order: Id<PurchaseOrder>,
@@ -4491,6 +5568,13 @@ impl Collection<PurchaseOrder> {
     }
 
     /// The purchase order costs of one item: `/purchaseorders/{id}/purchaseordercosts`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().purchase_order_costs(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn purchase_order_costs(
         &self,
         purchase_order: Id<PurchaseOrder>,
@@ -4499,6 +5583,13 @@ impl Collection<PurchaseOrder> {
     }
 
     /// The purchase order global costs of one item: `/purchaseorders/{id}/purchaseorderglobalcosts`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().purchase_order_global_costs(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn purchase_order_global_costs(
         &self,
         purchase_order: Id<PurchaseOrder>,
@@ -4507,6 +5598,13 @@ impl Collection<PurchaseOrder> {
     }
 
     /// The tasks of one item: `/purchaseorders/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.purchase_orders().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, purchase_order: Id<PurchaseOrder>) -> Collection<PurchaseOrderTasks> {
         Collection::new(&self.client, Some(purchase_order.get()))
     }
@@ -4514,16 +5612,37 @@ impl Collection<PurchaseOrder> {
 
 impl Collection<Quote> {
     /// The files of one item: `/quotes/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.quotes().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, quote: Id<Quote>) -> Collection<QuoteFiles> {
         Collection::new(&self.client, Some(quote.get()))
     }
 
     /// The invoice lines of one item: `/quotes/{id}/invoicelines`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.quotes().invoice_lines(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn invoice_lines(&self, quote: Id<Quote>) -> Collection<QuoteInvoiceLines> {
         Collection::new(&self.client, Some(quote.get()))
     }
 
     /// The tasks of one item: `/quotes/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.quotes().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, quote: Id<Quote>) -> Collection<QuoteTasks> {
         Collection::new(&self.client, Some(quote.get()))
     }
@@ -4531,6 +5650,13 @@ impl Collection<Quote> {
 
 impl Collection<Rate> {
     /// The rate factors of one item: `/rates/{id}/ratefactors`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.rates().rate_factors(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn rate_factors(&self, rate: Id<Rate>) -> Collection<RateRateFactors> {
         Collection::new(&self.client, Some(rate.get()))
     }
@@ -4538,16 +5664,37 @@ impl Collection<Rate> {
 
 impl Collection<Repair> {
     /// The file folders of one item: `/repairs/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.repairs().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, repair: Id<Repair>) -> Collection<RepairFileFolders> {
         Collection::new(&self.client, Some(repair.get()))
     }
 
     /// The files of one item: `/repairs/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.repairs().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, repair: Id<Repair>) -> Collection<RepairFiles> {
         Collection::new(&self.client, Some(repair.get()))
     }
 
     /// The tasks of one item: `/repairs/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.repairs().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, repair: Id<Repair>) -> Collection<RepairTasks> {
         Collection::new(&self.client, Some(repair.get()))
     }
@@ -4555,6 +5702,13 @@ impl Collection<Repair> {
 
 impl Collection<SerialNumber> {
     /// The actual content of one item: `/serialnumbers/{id}/actualcontent`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.serial_numbers().actual_content(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn actual_content(
         &self,
         serial_number: Id<SerialNumber>,
@@ -4563,6 +5717,13 @@ impl Collection<SerialNumber> {
     }
 
     /// The equipment assigned serials of one item: `/serialnumbers/{id}/equipmentassignedserials`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.serial_numbers().equipment_assigned_serials(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn equipment_assigned_serials(
         &self,
         serial_number: Id<SerialNumber>,
@@ -4571,6 +5732,13 @@ impl Collection<SerialNumber> {
     }
 
     /// The file folders of one item: `/serialnumbers/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.serial_numbers().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(
         &self,
         serial_number: Id<SerialNumber>,
@@ -4579,11 +5747,25 @@ impl Collection<SerialNumber> {
     }
 
     /// The files of one item: `/serialnumbers/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.serial_numbers().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, serial_number: Id<SerialNumber>) -> Collection<SerialNumberFiles> {
         Collection::new(&self.client, Some(serial_number.get()))
     }
 
     /// The tasks of one item: `/serialnumbers/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.serial_numbers().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, serial_number: Id<SerialNumber>) -> Collection<SerialNumberTasks> {
         Collection::new(&self.client, Some(serial_number.get()))
     }
@@ -4591,6 +5773,13 @@ impl Collection<SerialNumber> {
 
 impl Collection<StockLocation> {
     /// The vehicles of one item: `/stocklocations/{id}/vehicles`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.stock_locations().vehicles(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn vehicles(&self, stock_location: Id<StockLocation>) -> Collection<StockLocationVehicles> {
         Collection::new(&self.client, Some(stock_location.get()))
     }
@@ -4600,6 +5789,14 @@ impl Collection<Subproject> {
     /// Set the location of a subproject.
     ///
     /// Sent exactly once, like [`Collection::create`].
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let payload = rentman_client::model::SubprojectsSetLocationPayload::new(rentman_client::Id::new(1));
+    /// let result = client.subprojects().set_location(rentman_client::Id::new(12), &payload).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn set_location(
         &self,
         subproject: Id<Subproject>,
@@ -4610,16 +5807,37 @@ impl Collection<Subproject> {
     }
 
     /// The file folders of one item: `/subprojects/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, subproject: Id<Subproject>) -> Collection<SubprojectFileFolders> {
         Collection::new(&self.client, Some(subproject.get()))
     }
 
     /// The project crew of one item: `/subprojects/{id}/projectcrew`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().project_crew(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_crew(&self, subproject: Id<Subproject>) -> Collection<SubprojectProjectCrew> {
         Collection::new(&self.client, Some(subproject.get()))
     }
 
     /// The project equipment of one item: `/subprojects/{id}/projectequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().project_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment(
         &self,
         subproject: Id<Subproject>,
@@ -4628,6 +5846,13 @@ impl Collection<Subproject> {
     }
 
     /// The project equipment groups of one item: `/subprojects/{id}/projectequipmentgroup`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().project_equipment_groups(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_equipment_groups(
         &self,
         subproject: Id<Subproject>,
@@ -4636,6 +5861,13 @@ impl Collection<Subproject> {
     }
 
     /// The project function groups of one item: `/subprojects/{id}/projectfunctiongroups`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().project_function_groups(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_function_groups(
         &self,
         subproject: Id<Subproject>,
@@ -4644,6 +5876,13 @@ impl Collection<Subproject> {
     }
 
     /// The project vehicles of one item: `/subprojects/{id}/projectvehicles`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subprojects().project_vehicles(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn project_vehicles(
         &self,
         subproject: Id<Subproject>,
@@ -4654,16 +5893,37 @@ impl Collection<Subproject> {
 
 impl Collection<Subrental> {
     /// The file folders of one item: `/subrentals/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrentals().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, subrental: Id<Subrental>) -> Collection<SubrentalFileFolders> {
         Collection::new(&self.client, Some(subrental.get()))
     }
 
     /// The files of one item: `/subrentals/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrentals().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, subrental: Id<Subrental>) -> Collection<SubrentalFiles> {
         Collection::new(&self.client, Some(subrental.get()))
     }
 
     /// The subrental equipment of one item: `/subrentals/{id}/subrentalequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrentals().subrental_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrental_equipment(
         &self,
         subrental: Id<Subrental>,
@@ -4672,6 +5932,13 @@ impl Collection<Subrental> {
     }
 
     /// The subrental equipment groups of one item: `/subrentals/{id}/subrentalequipmentgroup`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrentals().subrental_equipment_groups(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrental_equipment_groups(
         &self,
         subrental: Id<Subrental>,
@@ -4680,6 +5947,13 @@ impl Collection<Subrental> {
     }
 
     /// The tasks of one item: `/subrentals/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrentals().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, subrental: Id<Subrental>) -> Collection<SubrentalTasks> {
         Collection::new(&self.client, Some(subrental.get()))
     }
@@ -4687,6 +5961,13 @@ impl Collection<Subrental> {
 
 impl Collection<SubrentalEquipmentGroup> {
     /// The subrental equipment of one item: `/subrentalequipmentgroup/{id}/subrentalequipment`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.subrental_equipment_groups().subrental_equipment(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subrental_equipment(
         &self,
         subrental_equipment_group: Id<SubrentalEquipmentGroup>,
@@ -4697,16 +5978,37 @@ impl Collection<SubrentalEquipmentGroup> {
 
 impl Collection<Supplier> {
     /// The file folders of one item: `/suppliers/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.suppliers().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, supplier: Id<Supplier>) -> Collection<SupplierFileFolders> {
         Collection::new(&self.client, Some(supplier.get()))
     }
 
     /// The files of one item: `/suppliers/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.suppliers().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, supplier: Id<Supplier>) -> Collection<SupplierFiles> {
         Collection::new(&self.client, Some(supplier.get()))
     }
 
     /// The tasks of one item: `/suppliers/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.suppliers().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, supplier: Id<Supplier>) -> Collection<SupplierTasks> {
         Collection::new(&self.client, Some(supplier.get()))
     }
@@ -4714,21 +6016,49 @@ impl Collection<Supplier> {
 
 impl Collection<Task> {
     /// The file folders of one item: `/tasks/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.tasks().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, task: Id<Task>) -> Collection<TaskFileFolders> {
         Collection::new(&self.client, Some(task.get()))
     }
 
     /// The files of one item: `/tasks/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.tasks().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, task: Id<Task>) -> Collection<TaskFiles> {
         Collection::new(&self.client, Some(task.get()))
     }
 
     /// The subtasks of one item: `/tasks/{id}/subtasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.tasks().subtasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn subtasks(&self, task: Id<Task>) -> Collection<TaskSubtasks> {
         Collection::new(&self.client, Some(task.get()))
     }
 
     /// The task assignments of one item: `/tasks/{id}/taskassignments`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.tasks().task_assignments(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn task_assignments(&self, task: Id<Task>) -> Collection<TaskTaskAssignments> {
         Collection::new(&self.client, Some(task.get()))
     }
@@ -4736,6 +6066,13 @@ impl Collection<Task> {
 
 impl Collection<TimeRegistration> {
     /// The files of one item: `/timeregistration/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.time_registrations().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(
         &self,
         time_registration: Id<TimeRegistration>,
@@ -4744,6 +6081,13 @@ impl Collection<TimeRegistration> {
     }
 
     /// The time registration activities of one item: `/timeregistration/{id}/timeregistrationactivities`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.time_registrations().time_registration_activities(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn time_registration_activities(
         &self,
         time_registration: Id<TimeRegistration>,
@@ -4754,16 +6098,37 @@ impl Collection<TimeRegistration> {
 
 impl Collection<Vehicle> {
     /// The file folders of one item: `/vehicles/{id}/file_folders`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.vehicles().file_folders(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn file_folders(&self, vehicle: Id<Vehicle>) -> Collection<VehicleFileFolders> {
         Collection::new(&self.client, Some(vehicle.get()))
     }
 
     /// The files of one item: `/vehicles/{id}/files`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.vehicles().files(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn files(&self, vehicle: Id<Vehicle>) -> Collection<VehicleFiles> {
         Collection::new(&self.client, Some(vehicle.get()))
     }
 
     /// The tasks of one item: `/vehicles/{id}/tasks`.
+    ///
+    /// ```
+    /// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+    /// let items = client.vehicles().tasks(rentman_client::Id::new(12)).list().all().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tasks(&self, vehicle: Id<Vehicle>) -> Collection<VehicleTasks> {
         Collection::new(&self.client, Some(vehicle.get()))
     }

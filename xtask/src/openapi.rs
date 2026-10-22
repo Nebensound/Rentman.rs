@@ -294,6 +294,20 @@ pub fn rust_field(value: &str) -> String {
     field
 }
 
+/// Rust name of a struct field or parameter: [`rust_field`], except that
+/// keywords become raw identifiers (`r#type`) wherever Rust allows them.
+pub fn rust_member(value: &str) -> String {
+    let field = rust_field(value);
+    match field.strip_suffix('_') {
+        Some(keyword)
+            if is_keyword(keyword) && !matches!(keyword, "crate" | "self" | "Self" | "super") =>
+        {
+            format!("r#{keyword}")
+        }
+        _ => field,
+    }
+}
+
 fn is_keyword(value: &str) -> bool {
     matches!(
         value,
@@ -657,6 +671,109 @@ impl<'a> Context<'a> {
         &self.fields[&(schema.to_owned(), field.to_owned())]
     }
 
+    pub fn field_documentation(
+        &self,
+        schema: &str,
+        field: &str,
+        ty: &str,
+        required: Option<bool>,
+    ) -> String {
+        let property = &properties(&self.schemas[schema])[field];
+        let description = rust_doc(
+            property.get("description").and_then(Value::as_str),
+            &format!("Value of `{field}`."),
+        );
+        let base = self.base_type(schema, field);
+        let kind = self.field_kind(schema, field).unwrap_or("unspecified");
+        let mut doc = format!("{description}\n\nRust value: `{ty}`.");
+        let explanation = if base.starts_with("Id<") {
+            if self.field_kind(schema, field) == Some("string") {
+                "A resource link is decoded to a typed ID, not a fetched item; links to another collection are rejected. See [`Id`]."
+            } else {
+                "A numeric resource identifier uses a typed [`Id`] to prevent mixing resources."
+            }
+        } else if property.get("enum").is_some() {
+            if schema.ends_with("Response") {
+                "The generated enum names every documented value and preserves new response values as `Unknown(String)`."
+            } else {
+                "The generated request enum accepts only documented values."
+            }
+        } else {
+            match base {
+                "Decimal" => {
+                    "Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected."
+                }
+                "DateTime<FixedOffset>" => {
+                    "A parsed timestamp retaining its UTC offset, rather than an unvalidated string."
+                }
+                "NaiveDate" => "A calendar date without a time or timezone.",
+                "EmailAddress" => {
+                    "An email string using [`EmailAddress`]; empty addresses are allowed."
+                }
+                "Url" => "A parsed URL rather than an arbitrary string.",
+                "ItemId" => {
+                    "A polymorphic [`ItemId`]; the accompanying item type identifies the resource."
+                }
+                "CustomFields" => {
+                    "Account-specific values in [`CustomFields`]. Register retained keys during [client initialization](crate#initializing-custom-fields)."
+                }
+                "bool" => "Use a Rust boolean; typed query filters send it as `1` or `0`.",
+                _ => "",
+            }
+        };
+        if !explanation.is_empty() {
+            doc.push_str(&format!("\n{explanation}"));
+        }
+        if property.get("enum").is_some() {
+            doc.push_str(&format!("\nSee [`{base}`] for the documented variants."));
+        }
+        if let Some(required) = required {
+            let presence = match (schema.ends_with("Response"), required) {
+                (true, false) => "The key may be omitted or null; either reads as `None`.",
+                (true, true) if ty.starts_with("Option<") => {
+                    "The key must be present, but null reads as `None`."
+                }
+                (true, true) => "The key must be present and non-null.",
+                (false, false) => {
+                    "Optional in writes: `None` leaves the key out of the request instead of sending null."
+                }
+                (false, true) if ty.starts_with("Option<") => {
+                    "Required in writes and set through the payload's `new` constructor; `None` is sent as null."
+                }
+                (false, true) => {
+                    "Required in writes and set through the payload's `new` constructor."
+                }
+            };
+            doc.push_str(&format!("\n{presence}"));
+        } else {
+            doc.push_str("\nFilter and sort values use the underlying type, not `Option`; use `is_null` to test for null.");
+        }
+        if property
+            .get("description")
+            .and_then(Value::as_str)
+            .is_some_and(|text| text.starts_with("GENERATED FIELD"))
+        {
+            doc.push_str("\n\n`GENERATED FIELD` marks a value Rentman computes. It cannot be filtered or sorted on, so [`fields`](crate::fields) has no constant for it. Some generated fields appear in list responses only when selected with [`projection!`](crate::projection).");
+        }
+        doc.push_str(&format!("\n\nRentman representation: `{field}`, documented type `{kind}` (OpenAPI `{schema}.{field}`)."));
+        if schema.ends_with("Response")
+            && (self
+                .config
+                .response_type_overrides
+                .iter()
+                .any(|configured| configured.schema == schema && configured.field == field)
+                || (kind == "string"
+                    && self
+                        .config
+                        .response_string_integer_fields
+                        .iter()
+                        .any(|configured| configured == field)))
+        {
+            doc.push_str("\nThe client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.");
+        }
+        doc
+    }
+
     pub fn effective_required(&self, schema_name: &str, schema: &Value) -> BTreeSet<String> {
         if self.is_resource_schema(schema_name) {
             let fields = properties(schema);
@@ -982,6 +1099,14 @@ mod tests {
             ("a-b", "a_b"),
         ] {
             assert_eq!(rust_field(value), field, "{value:?}");
+        }
+        for (value, member) in [
+            ("type", "r#type"),
+            ("self", "self_"),
+            ("VAT_code", "vat_code"),
+            ("linkedItemType", "linked_item_type"),
+        ] {
+            assert_eq!(rust_member(value), member, "{value:?}");
         }
         assert_eq!(rust_doc(Some("  two\n words "), "fallback"), "two words");
         assert_eq!(rust_doc(Some("   "), "fall \"back\""), "fall \\\"back\\\"");

@@ -6,6 +6,14 @@ use reqwest::StatusCode;
 use std::fmt;
 
 /// Result of a fallible client operation.
+///
+/// ```
+/// use rentman_client::{RentmanClient, model::Crew};
+///
+/// async fn active_crew(client: &RentmanClient) -> rentman_client::Result<Vec<Crew>> {
+///     client.crew().list().filter(rentman_client::fields::crew::ACTIVE.eq(true)).all().await
+/// }
+/// ```
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 /// Error of a Rentman API call.
@@ -13,6 +21,27 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// Match on [`Error::kind`] to tell failures apart; [`Error::operation`] and
 /// [`Error::resource`] say which call failed. For writes, [`Error::outcome`]
 /// says whether Rentman may have applied the request.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::{ErrorKind, model::CrewId};
+///
+/// match client.crew().get(CrewId::new(12)).await {
+///     Ok(member) => println!("found {}", member.id),
+///     Err(error) if error.status().is_some_and(|status| status.as_u16() == 404) => {
+///         println!("no crew member 12");
+///     }
+///     Err(error) => {
+///         eprintln!("{} failed for {:?}: {error}", error.operation().unwrap_or("request"), error.resource());
+///         if let ErrorKind::Transport(_) = error.kind() {
+///             // Network trouble: the client already retried.
+///         }
+///         return Err(error);
+///     }
+/// }
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug)]
 pub struct Error {
     kind: ErrorKind,
@@ -23,6 +52,19 @@ pub struct Error {
 }
 
 /// What went wrong.
+///
+/// The enum is `#[non_exhaustive]`: add a `_` arm when matching it.
+///
+/// ```
+/// use rentman_client::{ErrorKind, InvalidRequest, PageSize};
+///
+/// let error = PageSize::new(0).unwrap_err();
+/// match error.kind() {
+///     ErrorKind::InvalidRequest(InvalidRequest::PageSize { requested }) => assert_eq!(*requested, 0),
+///     ErrorKind::Status { status, body } => println!("{status}: {body}"),
+///     other => println!("{other}"),
+/// }
+/// ```
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum ErrorKind {
@@ -54,7 +96,17 @@ pub enum ErrorKind {
     InvalidRequest(#[source] InvalidRequest),
 }
 
-/// Why a request could not be built.
+/// Why a request could not be built. Nothing was sent to Rentman.
+///
+/// ```
+/// use rentman_client::{ErrorKind, InvalidRequest, PageSize};
+///
+/// let error = PageSize::new(2000).unwrap_err();
+/// assert!(matches!(
+///     error.kind(),
+///     ErrorKind::InvalidRequest(InvalidRequest::PageSize { requested: 2000 })
+/// ));
+/// ```
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum InvalidRequest {
@@ -70,6 +122,20 @@ pub enum InvalidRequest {
 }
 
 /// Rentman item a failed call was about, e.g. `/payments/7`.
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) {
+/// use rentman_client::model::{Crew, CrewId};
+///
+/// if let Err(error) = client.crew().get(CrewId::new(12)).await {
+///     if let Some(resource) = error.resource() {
+///         assert_eq!(resource.collection(), "crew");
+///         assert_eq!(resource.id::<Crew>(), Some(CrewId::new(12)));
+///         println!("failed for {resource}"); // `/crew/12`
+///     }
+/// }
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ResourceRef {
     collection: &'static str,
@@ -105,6 +171,25 @@ impl fmt::Display for ResourceRef {
 }
 
 /// Whether Rentman applied a request that failed.
+///
+/// Reads and idempotent writes (`update`, `delete`) are safe to repeat in
+/// every case. Before repeating a `create` or a named action, check this:
+///
+/// ```
+/// # async fn example(client: rentman_client::RentmanClient) -> rentman_client::Result<()> {
+/// use rentman_client::{RequestOutcome, model::TaskStatusPayload};
+///
+/// let payload = TaskStatusPayload::new("green".to_string());
+/// if let Err(error) = client.task_statuses().create(&payload).await {
+///     match error.outcome() {
+///         RequestOutcome::NotApplied => { /* safe to create again */ }
+///         RequestOutcome::Applied => { /* it exists; read it instead */ }
+///         RequestOutcome::Unknown => { /* list first, then decide */ }
+///     }
+/// }
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RequestOutcome {
     /// Rentman did not apply the request; repeating it is safe.

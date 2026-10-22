@@ -1,6 +1,21 @@
 # Rentman.rs
 
-Typed Rust client for calling the Rentman API.
+[![crates.io](https://img.shields.io/crates/v/rentman-client.svg)](https://crates.io/crates/rentman-client)
+[![Released crate OpenAPI status](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FNebensound%2FRentman.rs%2Fapi-status%2Fapi-status.json&cacheSeconds=300)](https://github.com/Nebensound/Rentman.rs/actions/workflows/update-openapi.yml)
+
+**Using the crate?** Start with [crates.io](https://crates.io/crates/rentman-client)
+and the [end-user documentation and examples](https://docs.rs/rentman-client/latest/rentman_client/).
+This README is the technical guide for contributors working on the crate.
+
+The contract badge compares the **latest stable version published on crates.io**
+with Rentman's published OpenAPI document during the daily update workflow:
+green means identical JSON content (ignoring object key order and formatting),
+orange means different, and grey means the check was unavailable. A difference
+does not necessarily mean incompatibility, and a match is not a live API test.
+The [status data](https://github.com/Nebensound/Rentman.rs/blob/api-status/api-status.json)
+includes the checked version and UTC check time as a Unix timestamp; the badge reports that check,
+not a continuous guarantee. Until the first workflow run publishes it, the
+badge is unavailable.
 
 ## Independence and API access
 
@@ -58,8 +73,13 @@ contract test. `create` and actions are sent exactly once; `get`, `update`,
 Lists take typed filters and sorting built from the generated field
 constants in `fields` (`src/fields.rs`, one module per resource):
 `.filter(contact::COUNTRY.eq(ContactCountry::Gb))`,
-`.filter(contact::DISTANCE.lte(Decimal::from(300)))`,
-`.filter(contact::FOLDER.is_null(false))`, `.sort(contact::NAME.asc())`. A
+`.filter(contact::DISTANCE.le(Decimal::from(300)))`,
+`.filter(contact::FOLDER.is_some())`, `.filter(task_status::ORDER.in_range(2..5))`,
+`.sort(contact::NAME.asc())`. The public operators use the names of Rust's
+comparison methods (`eq`, `ne`, `lt`, `le`, `gt`, `ge`), `Option`-style null
+checks (`is_none`, `is_some`), and Rust ranges; `src/filter.rs` translates them
+into Rentman's `[neq]`, `[lte]`, `[gte]`, and `[isnull]` syntax. A `Filter`
+holds one or more query conditions (a range yields up to two). A
 `Field<R, V>` only accepts values of type `V` and only filters lists of `R`
 (compile-fail doctests in `src/filter.rs`). Values are rendered as Rentman
 expects them (checked live on 2026-10-21): booleans as `1`/`0` (Rentman
@@ -73,10 +93,16 @@ across pages.
 Projections select exactly the fields a struct declares:
 `projection! { pub struct CrewName from Crew { id, firstname, email } }`
 declares the struct by field names only; the field types come from the
-generated model through one marker per field in `projection_fields`
-(`projection_fields::Crew::firstname`, `r#type` for `type`), and
-`all_as::<CrewName>()`, `first_as` and `get_as` send exactly those names as
-`fields=`. An unknown field does not compile (compile-fail doctest in
+generated projection markers in `projection_fields` and can be stricter than
+the full model because explicitly selected fields must satisfy their documented
+requirements. Markers carry the model's Rust field names (`rust_member` in
+`xtask/src/openapi.rs`: snake_case, raw identifiers for keywords, so
+`projection_fields::Crew::firstname`, `Contact::vat_code` for `VAT_code`,
+`r#type` for `type`, and `revision` for `updateHash`); `ProjectionField::NAME`
+keeps Rentman's name for `fields=` and decoding.
+`all_as::<CrewName>()`, `first_as` and `get_as` send the selection as `fields=`;
+the client omits automatically returned `updateHash` and adds `custom` when
+needed for registry validation. An unknown field does not compile (compile-fail doctest in
 `src/projection.rs`). It is a `macro_rules!` macro: the expansion decodes field
 by field through the hand-written `ProjectedItem::take`, so consumers need no
 serde dependency and link fields are read through the same adapters as the
@@ -89,6 +115,28 @@ User-facing crate documentation lives in `crates-io.md`: it is published as
 the crates.io README and included as the crate-level rustdoc, so its Rust
 example is compile-checked by `cargo test --doc`. This README is the
 contributor documentation and stays out of the published package.
+
+The published guide covers initialization (including account-specific custom
+fields), typed reads and writes, paging, errors, projections, and change
+detection. Detailed `projection!` and resource-method examples live beside
+their public APIs. Generated field documentation retains available OpenAPI
+descriptions and explains the resolved Rust value, its wire identity, and
+missing/null behavior separately for models, filters, and projections.
+Write for crate consumers first: explain the Rust type, its meaning, and how
+to use it before describing Rentman's wire format or schema identity. The
+published guide and reference should contain the information needed for normal
+use without consulting Rentman's API documentation: examples, available enum
+values, payload requirements, validation rules, resource names, and limitations.
+Do not infer business meanings when Rentman's description is absent.
+Every public item has a compile-checked example: hand-written items carry
+them in their rustdoc, and the generator emits one for each client accessor,
+nested collection, named action, resource model, payload, and enum. Keep new
+public API in that pattern. Rustfmt does not format Markdown or doc comments
+on stable, so keep code in `crates-io.md` at four-space indentation by hand.
+`src/model/resource_names.md` is generated with the models and included in
+the public `model` module documentation; it maps response/request schemas,
+Rust resource/payload names, collection paths, and client accessors. Keep
+this derived file in the package and the OpenAPI update workflow's file lists.
 
 Hand-written boundary types translate API formats into narrower types such as
 `RentmanApiToken` and `Id<R>`. Every OpenAPI number in generated models,
@@ -122,8 +170,14 @@ let client = RentmanClient::new(RentmanApiToken::new("token"))
   .with_custom_fields(custom_fields);
 ```
 
-Every Resource model carries `revision: Revision<R>` (`updateHash` on the
-wire). `client.equipment().list().revisions().await?` reads a paginated
+Every full resource model is a read snapshot with both `id: Id<R>` and
+`revision: Revision<R>` (`updateHash` on the wire), not only an item ID.
+Published guides and generated model docs explain this pair at the point of
+use: identity stays the same across edits, while revision marks the observed
+state. Compare revisions for the same item ID, retain them with stored objects,
+and do not imply ordered versions, automatic local tracking, or conditional
+writes. Payloads and bare IDs are not read snapshots; custom projections carry
+only declared fields. `client.equipment().list().revisions().await?` reads a paginated
 ID-to-revision snapshot without loading full item bodies; compare snapshots
 with `changes_since`.
 
@@ -169,6 +223,18 @@ the fixed `automation/update-openapi` branch. An open update PR is reused;
 unchanged generated files do not cause another commit or CI run. Keep this
 branch reserved for automation.
 
+After refreshing the contract, the same workflow runs
+`cargo xtask api-status`. It downloads the latest
+stable crates.io package and compares its packaged OpenAPI fixture with the
+freshly downloaded document, rather than comparing the repository head or a
+release tag. Missing packages, missing fixtures, or failed downloads produce
+an unavailable status. A failed refresh also publishes an unavailable status
+instead of comparing a stale local fixture. The Shields endpoint JSON is
+published to `api-status.json` on the reserved `api-status` branch using
+`GITHUB_TOKEN`, independently of whether an update PR is needed. Do not use
+that branch for development. Publication failures fail the workflow; inspect
+the status timestamp if a scheduled run fails before it can publish.
+
 The workflow uses the built-in `GITHUB_TOKEN`; no additional secret is needed.
 Under **Settings > Actions > General > Workflow permissions**, enable
 **Allow GitHub Actions to create and approve pull requests** (organization
@@ -209,6 +275,14 @@ validates schema- and field-specific entries against the OpenAPI fixture and
 fails on stale or misspelled entries.
 
 ## Checks
+
+The release-contract badge command is part of the Rust `xtask` and uses the
+system `tar` to read the released package. Its offline tests are included in
+the workspace tests and can also be run on their own:
+
+```bash
+cargo test -p xtask --locked api_status
+```
 
 Tests:
 
