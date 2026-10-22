@@ -11,7 +11,7 @@ async.
 Every full resource object is a **read snapshot with an ID and a revision**, not
 just an identified set of fields. For example, [`Crew`](model::Crew) contains
 `id: CrewId` and `revision: Revision<Crew>` alongside its data. The ID answers
-*which item?*; the revision answers *which observed version of that item?*
+_which item?_; the revision answers _which observed version of that item?_
 Keep both when storing an object, so later reads can detect changes without
 comparing every data field. See [objects and revisions](#change-detection).
 
@@ -85,12 +85,12 @@ Rust names follow Rust conventions; the client translates them to Rentman's
 names when it sends or reads data. The same rules apply everywhere, so a
 field has the same name in a model, a payload, and a [`projection!`]:
 
-| Rentman's name | Rust field | Filter/sort constant |
-| --- | --- | --- |
-| `firstname` | `firstname` | `fields::crew::FIRSTNAME` |
-| `VAT_code`, `linkedItemType` | `vat_code`, `linked_item_type` | `fields::contact::VAT_CODE` |
-| `type`, `in`, `ref`, `break` (Rust keywords) | `r#type`, `r#in`, `r#ref`, `r#break` | `fields::contact::TYPE` |
-| `updateHash` | `revision` | none: revisions cannot be filtered |
+| Rentman's name                               | Rust field                           | Filter/sort constant               |
+| -------------------------------------------- | ------------------------------------ | ---------------------------------- |
+| `firstname`                                  | `firstname`                          | `fields::crew::FIRSTNAME`          |
+| `VAT_code`, `linkedItemType`                 | `vat_code`, `linked_item_type`       | `fields::contact::VAT_CODE`        |
+| `type`, `in`, `ref`, `break` (Rust keywords) | `r#type`, `r#in`, `r#ref`, `r#break` | `fields::contact::TYPE`            |
+| `updateHash`                                 | `revision`                           | none: revisions cannot be filtered |
 
 Resources are singular Rust types (`model::Crew`, `model::Invoice`); their
 client accessors are snake_case plurals (`client.crew()`,
@@ -110,12 +110,12 @@ fn is_done(status: &TaskStatus) -> bool {
 [`list()`](resource::Collection::list) starts a request; nothing is sent
 until you finish it with one of these:
 
-| Method | Returns | Requests |
-| --- | --- | --- |
-| [`all()`](resource::ListRequest::all) | every item | one per page, following Rentman's paging |
-| [`first(n)`](resource::ListRequest::first) | at most `n` items (1 to 1500) | exactly one |
-| [`revisions()`](resource::ListRequest::revisions) | IDs and revisions only | one per page |
-| [`all_as::<P>()`](resource::ListRequest::all_as), [`first_as::<P>(n)`](resource::ListRequest::first_as) | your [projection](#selecting-response-fields) | as above |
+| Method                                                                                                  | Returns                                       | Requests                                 |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------- |
+| [`all()`](resource::ListRequest::all)                                                                   | every item                                    | one per page, following Rentman's paging |
+| [`first(n)`](resource::ListRequest::first)                                                              | at most `n` items (1 to 1500)                 | exactly one                              |
+| [`revisions()`](resource::ListRequest::revisions)                                                       | IDs and revisions only                        | one per page                             |
+| [`all_as::<P>()`](resource::ListRequest::all_as), [`first_as::<P>(n)`](resource::ListRequest::first_as) | your [projection](#selecting-response-fields) | as above                                 |
 
 [`page_size`](resource::ListRequest::page_size) sets how many items each
 request returns (default 300, at most 1500), not how many `all` returns.
@@ -138,14 +138,14 @@ resource. Its methods are named like Rust's comparison methods; the client
 translates them into Rentman's query syntax. A filter with a value of the
 wrong type, or a field of another resource, does not compile.
 
-| Rust | Matches items whose field | Rentman query |
-| --- | --- | --- |
-| `eq(v)` / `ne(v)` | equals / does not equal `v` | `field=v` / `field[neq]=v` |
-| `lt(v)` / `le(v)` | is less than / at most `v` | `field[lt]=v` / `field[lte]=v` |
-| `gt(v)` / `ge(v)` | is greater than / at least `v` | `field[gt]=v` / `field[gte]=v` |
-| `in_range(a..b)`, `in_range(a..=b)`, `in_range(a..)` | lies in a Rust range | the matching bounds |
-| `is_none()` / `is_some()` | is null / is not null | `field[isnull]=1` / `0` |
-| `asc()` / `desc()` | sorts ascending / descending | `sort=+field` / `sort=-field` |
+| Rust                                                 | Matches items whose field      | Rentman query                  |
+| ---------------------------------------------------- | ------------------------------ | ------------------------------ |
+| `eq(v)` / `ne(v)`                                    | equals / does not equal `v`    | `field=v` / `field[neq]=v`     |
+| `lt(v)` / `le(v)`                                    | is less than / at most `v`     | `field[lt]=v` / `field[lte]=v` |
+| `gt(v)` / `ge(v)`                                    | is greater than / at least `v` | `field[gt]=v` / `field[gte]=v` |
+| `in_range(a..b)`, `in_range(a..=b)`, `in_range(a..)` | lies in a Rust range           | the matching bounds            |
+| `is_none()` / `is_some()`                            | is null / is not null          | `field[isnull]=1` / `0`        |
+| `asc()` / `desc()`                                   | sorts ascending / descending   | `sort=+field` / `sort=-field`  |
 
 ```rust
 use chrono::DateTime;
@@ -361,20 +361,20 @@ Work with the Rust types below directly. The client handles Rentman's JSON
 representation; you do not need to parse resource links, format query
 booleans, or convert monetary amounts through floating point yourself.
 
-| Rust type | How to use it | Rentman's representation |
-| --- | --- | --- |
-| [`Id<R>`](Id), e.g. [`CrewId`](model::CrewId) | Pass to the matching resource's `get`, `update`, or `delete`. An ID identifies an item; it does not contain or automatically fetch it. Different resources have incompatible ID types. | An item's ID is a JSON integer; a reference to it can be a path such as `/crew/12`. Both become the same Rust ID type. |
-| [`ItemId`] | Use with the accompanying item-type field for references that can identify different resource kinds. Unlike `Id<R>`, it does not identify the resource by its Rust type. | A numeric ID whose resource is specified separately. |
-| [`Decimal`] | Construct from integers or decimal strings, calculate without binary floats, and use for amounts and other decimal quantities. At most 28 decimal places are retained; additional places are rounded and out-of-range values rejected. | A JSON number, read from its exact text without an intermediate `f64`. |
-| [`chrono::DateTime<chrono::FixedOffset>`] | Use Chrono's date/time operations; the value retains its UTC offset. Add `chrono` to your application's dependencies when naming or constructing these types. | A timestamp string. |
-| [`chrono::NaiveDate`] | A calendar date with no time or timezone. | A date string. |
-| [`Url`] | Use URL accessors such as `host_str` or `as_str`; construct with `Url::parse`. | A URL string parsed by the client. |
-| [`EmailAddress`](model::EmailAddress) | A dedicated email value; use its `as_str` accessor. An empty address means no address is set; this is not proof that a mailbox exists or is deliverable. | A string, possibly empty. Non-empty values must contain `@`. |
-| Enums in [`model`], e.g. [`TaskStatusType`](model::TaskStatusType) | Match named variants. Include `Unknown(String)` when matching response enums so new values are retained. Request enums accept only their listed variants. The enum reference lists each wire value. | A documented string or numeric enum value. |
-| `Option<T>` | Handle `None` explicitly. In full models, non-core fields may be absent; projections may require explicitly selected keys. In write payloads, `None` leaves an optional field out rather than sending a null. Each field documents its presence rules. | A value can be absent or JSON null; these are not interchangeable for required keys. |
-| [`Revision<R>`](Revision) | Compare opaque revisions to detect changes; do not parse them as counters or timestamps. See [change detection](#change-detection). | The `updateHash` string, exposed as `revision` on full models and projections. |
-| [`CustomFields`](model::CustomFields) | Register your account's definitions at initialization, then use `get::<T>` and `set` for application values. See the [complete setup](#initializing-custom-fields). | A `custom` object containing `custom_<id>` keys. |
-| `String`, `i64`, `bool` | Ordinary Rust text, signed integers, and booleans. Typed filters accept the same underlying value type; boolean filters are formatted automatically. | JSON strings, integers, and booleans; query booleans use `1`/`0`. |
+| Rust type                                                          | How to use it                                                                                                                                                                                                                                          | Rentman's representation                                                                                               |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| [`Id<R>`](Id), e.g. [`CrewId`](model::CrewId)                      | Pass to the matching resource's `get`, `update`, or `delete`. An ID identifies an item; it does not contain or automatically fetch it. Different resources have incompatible ID types.                                                                 | An item's ID is a JSON integer; a reference to it can be a path such as `/crew/12`. Both become the same Rust ID type. |
+| [`ItemId`]                                                         | Use with the accompanying item-type field for references that can identify different resource kinds. Unlike `Id<R>`, it does not identify the resource by its Rust type.                                                                               | A numeric ID whose resource is specified separately.                                                                   |
+| [`Decimal`]                                                        | Construct from integers or decimal strings, calculate without binary floats, and use for amounts and other decimal quantities. At most 28 decimal places are retained; additional places are rounded and out-of-range values rejected.                 | A JSON number, read from its exact text without an intermediate `f64`.                                                 |
+| [`chrono::DateTime<chrono::FixedOffset>`]                          | Use Chrono's date/time operations; the value retains its UTC offset. Add `chrono` to your application's dependencies when naming or constructing these types.                                                                                          | A timestamp string.                                                                                                    |
+| [`chrono::NaiveDate`]                                              | A calendar date with no time or timezone.                                                                                                                                                                                                              | A date string.                                                                                                         |
+| [`Url`]                                                            | Use URL accessors such as `host_str` or `as_str`; construct with `Url::parse`.                                                                                                                                                                         | A URL string parsed by the client.                                                                                     |
+| [`EmailAddress`](model::EmailAddress)                              | A dedicated email value; use its `as_str` accessor. An empty address means no address is set; this is not proof that a mailbox exists or is deliverable.                                                                                               | A string, possibly empty. Non-empty values must contain `@`.                                                           |
+| Enums in [`model`], e.g. [`TaskStatusType`](model::TaskStatusType) | Match named variants. Include `Unknown(String)` when matching response enums so new values are retained. Request enums accept only their listed variants. The enum reference lists each wire value.                                                    | A documented string or numeric enum value.                                                                             |
+| `Option<T>`                                                        | Handle `None` explicitly. In full models, non-core fields may be absent; projections may require explicitly selected keys. In write payloads, `None` leaves an optional field out rather than sending a null. Each field documents its presence rules. | A value can be absent or JSON null; these are not interchangeable for required keys.                                   |
+| [`Revision<R>`](Revision)                                          | Compare opaque revisions to detect changes; do not parse them as counters or timestamps. See [change detection](#change-detection).                                                                                                                    | The `updateHash` string, exposed as `revision` on full models and projections.                                         |
+| [`CustomFields`](model::CustomFields)                              | Register your account's definitions at initialization, then use `get::<T>` and `set` for application values. See the [complete setup](#initializing-custom-fields).                                                                                    | A `custom` object containing `custom_<id>` keys.                                                                       |
+| `String`, `i64`, `bool`                                            | Ordinary Rust text, signed integers, and booleans. Typed filters accept the same underlying value type; boolean filters are formatted automatically.                                                                                                   | JSON strings, integers, and booleans; query booleans use `1`/`0`.                                                      |
 
 Fields documented as `GENERATED FIELD` hold values Rentman computes. They
 are read like any other field, but cannot be filtered or sorted on, and some
@@ -536,15 +536,15 @@ the returned `custom` object; unregistered keys are removed. A present JSON
 `null` is accepted for every field type and differs from a missing key.
 Read nullable values as `Option<T>`.
 
-| Rentman field type | Accepted non-null JSON value | Typical application Rust type |
-| --- | --- | --- |
-| `Bool` | Boolean | `bool` |
-| `Int` | Number with no fractional part | An integer type with sufficient range |
-| `Double`, `Price` | Number | [`Decimal`] |
-| `Text`, `Longtext`, `Html`, `Color`, `Phone` | String | `String` |
-| `Date`, `Datetime`, `Url` | String | `String`, or an application Serde type |
-| `Enum` | String | `String`, or an application Serde enum |
-| `Item`, `Unknown(_)` | Any JSON shape | [`CustomFieldValue`](model::CustomFieldValue) or an application type |
+| Rentman field type                           | Accepted non-null JSON value   | Typical application Rust type                                        |
+| -------------------------------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| `Bool`                                       | Boolean                        | `bool`                                                               |
+| `Int`                                        | Number with no fractional part | An integer type with sufficient range                                |
+| `Double`, `Price`                            | Number                         | [`Decimal`]                                                          |
+| `Text`, `Longtext`, `Html`, `Color`, `Phone` | String                         | `String`                                                             |
+| `Date`, `Datetime`, `Url`                    | String                         | `String`, or an application Serde type                               |
+| `Enum`                                       | String                         | `String`, or an application Serde enum                               |
+| `Item`, `Unknown(_)`                         | Any JSON shape                 | [`CustomFieldValue`](model::CustomFieldValue) or an application type |
 
 Registry validation checks JSON categories, not date/URL syntax or allowed
 enum choices. `Item` and unknown types have no additional shape validation.
@@ -725,11 +725,11 @@ let client = RentmanClient::with_config(
 # }
 ```
 
-| Variable | Default | Valid values | Effect |
-| --- | --- | --- | --- |
-| `RENTMAN_API_MAX_ATTEMPTS` | `4` | integer ≥ 1 | Attempts per request, including the first. |
-| `RENTMAN_RETRY_BASE_DELAY_MS` | `100` | integer ≥ 0 | First retry delay; backoff doubles up to 16×. |
-| `RENTMAN_REQUEST_MIN_INTERVAL_MS` | `100` | integer ≥ 1 | Minimum interval between requests. |
+| Variable                          | Default | Valid values | Effect                                        |
+| --------------------------------- | ------- | ------------ | --------------------------------------------- |
+| `RENTMAN_API_MAX_ATTEMPTS`        | `4`     | integer ≥ 1  | Attempts per request, including the first.    |
+| `RENTMAN_RETRY_BASE_DELAY_MS`     | `100`   | integer ≥ 0  | First retry delay; backoff doubles up to 16×. |
+| `RENTMAN_REQUEST_MIN_INTERVAL_MS` | `100`   | integer ≥ 1  | Minimum interval between requests.            |
 
 Unset or empty variables keep the default. A variable set to an invalid value
 makes `from_env()` fail with a `ConfigError` naming the variable and value; it
