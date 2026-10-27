@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "label": "released crate / OpenAPI",
-  "message": "0.9.0: matches",
+  "message": "0.9.1: matches",
   "color": "brightgreen",
-  "checked_at_unix": 1792993786,
-  "release_version": "0.9.0"
+  "checked_at_unix": 1793080040,
+  "release_version": "0.9.1"
 }
