@@ -1138,6 +1138,26 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn lists_equipment_set_content_with_fractional_quantities() {
+        // Set contents carry fractional quantities too, e.g. a quarter roll of
+        // tape per case (issue #78).
+        let server = spawn_server(vec![json_response(
+            r#"{"data":[{"id":1,"updateHash":"a","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":0.25},{"id":2,"updateHash":"b","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":2}],"itemCount":2,"limit":300,"next_page_url":null}"#,
+        )]);
+        let client = client(&server);
+
+        let contents = client.equipment_set_content().list().all().await.unwrap();
+
+        let quantities: Vec<_> = contents.iter().map(|content| content.quantity).collect();
+        assert_eq!(
+            quantities,
+            [Some(Decimal::new(25, 2)), Some(Decimal::new(2, 0))]
+        );
+        assert_request(&server.next_request(), "GET", "/equipmentsetscontent");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
     async fn reads_revision_snapshots_through_every_page() {
         use crate::fields::task_status;
         use crate::revision::Revision;
