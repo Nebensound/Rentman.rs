@@ -3005,12 +3005,13 @@ pub mod equipment_set_content {
     };
     /// `quantity`: Quantity in this combination.
     ///
-    /// Rust value: `i64`.
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `EquipmentSetContentResponse.quantity`).
     /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
-    pub const QUANTITY: Field<EquipmentSetContent, i64> = Field {
+    pub const QUANTITY: Field<EquipmentSetContent, Decimal> = Field {
         name: "quantity",
         types: PhantomData,
     };
@@ -5590,12 +5591,13 @@ pub mod project_equipment {
     };
     /// `quantity`: Value of `quantity`.
     ///
-    /// Rust value: `i64`.
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// Filter and sort values use the underlying type, not `Option`; use `is_null` to test for null.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `ProjectEquipmentResponse.quantity`).
     /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
-    pub const QUANTITY: Field<ProjectEquipment, i64> = Field {
+    pub const QUANTITY: Field<ProjectEquipment, Decimal> = Field {
         name: "quantity",
         types: PhantomData,
     };

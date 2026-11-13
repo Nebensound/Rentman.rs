@@ -1036,7 +1036,7 @@ mod tests {
     use super::*;
     use crate::test_support::*;
     use crate::{
-        ErrorKind, InvalidRequest, RentmanApiToken, RentmanClientConfig, RequestOutcome,
+        Decimal, ErrorKind, InvalidRequest, RentmanApiToken, RentmanClientConfig, RequestOutcome,
         ResourceRef, Url,
         model::{
             Equipment, EquipmentId, ProjectId, ProjectsSetTypePayload, TaskStatus, TaskStatusId,
@@ -1114,6 +1114,46 @@ mod tests {
             server.next_request().query_value("cursor").as_deref(),
             Some("2")
         );
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn lists_project_equipment_with_fractional_quantities() {
+        // Rentman documents `quantity` as a string but sends JSON numbers,
+        // including fractions for consumables (issue #78).
+        let server = spawn_server(vec![json_response(
+            r#"{"data":[{"id":1,"updateHash":"a","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":0.66},{"id":2,"updateHash":"b","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":3}],"itemCount":2,"limit":300,"next_page_url":null}"#,
+        )]);
+        let client = client(&server);
+
+        let lines = client.project_equipment().list().all().await.unwrap();
+
+        let quantities: Vec<_> = lines.iter().map(|line| line.quantity).collect();
+        assert_eq!(
+            quantities,
+            [Some(Decimal::new(66, 2)), Some(Decimal::new(3, 0))]
+        );
+        assert_request(&server.next_request(), "GET", "/projectequipment");
+        server.assert_no_more_requests();
+    }
+
+    #[tokio::test]
+    async fn lists_equipment_set_content_with_fractional_quantities() {
+        // Set contents carry fractional quantities too, e.g. a quarter roll of
+        // tape per case (issue #78).
+        let server = spawn_server(vec![json_response(
+            r#"{"data":[{"id":1,"updateHash":"a","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":0.25},{"id":2,"updateHash":"b","created":"2026-11-12T10:00:00+01:00","modified":"2026-11-12T10:00:00+01:00","creator":null,"quantity":2}],"itemCount":2,"limit":300,"next_page_url":null}"#,
+        )]);
+        let client = client(&server);
+
+        let contents = client.equipment_set_content().list().all().await.unwrap();
+
+        let quantities: Vec<_> = contents.iter().map(|content| content.quantity).collect();
+        assert_eq!(
+            quantities,
+            [Some(Decimal::new(25, 2)), Some(Decimal::new(2, 0))]
+        );
+        assert_request(&server.next_request(), "GET", "/equipmentsetscontent");
         server.assert_no_more_requests();
     }
 
