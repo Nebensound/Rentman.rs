@@ -20585,13 +20585,14 @@ pub struct EquipmentSetContent {
     pub displayname: Option<String>,
     /// Quantity in this combination.
     ///
-    /// Rust value: `Option<i64>`.
+    /// Rust value: `Option<Decimal>`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// The key may be omitted or null; either reads as `None`.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `EquipmentSetContentResponse.quantity`).
     /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub quantity: Option<i64>,
+    pub quantity: Option<Decimal>,
     /// Value of `parent_equipment`.
     ///
     /// Rust value: `Option<Id<Equipment>>`.
@@ -25133,13 +25134,14 @@ pub struct ProjectEquipment {
     pub ledger_debit: Option<Id<LedgerCode>>,
     /// Value of `quantity`.
     ///
-    /// Rust value: `Option<i64>`.
+    /// Rust value: `Option<Decimal>`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// The key may be omitted or null; either reads as `None`.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `ProjectEquipmentResponse.quantity`).
     /// The client handles the observed response format even where Rentman's schema declares a different type; use the Rust value above without manual conversion. Request types are unchanged.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub quantity: Option<i64>,
+    pub quantity: Option<Decimal>,
     /// Value of `quantity_total`.
     ///
     /// Rust value: `Option<i64>`.

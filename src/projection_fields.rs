@@ -5552,7 +5552,8 @@ pub mod EquipmentSetContent {
 
     /// `quantity`: Quantity in this combination.
     ///
-    /// Rust value: `i64`.
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// The key must be present and non-null.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `EquipmentSetContentResponse.quantity`).
@@ -5561,8 +5562,8 @@ pub mod EquipmentSetContent {
 
     impl ProjectionField for quantity {
         type Resource = EquipmentSetContent;
-        type Value = i64;
-        type Wire = i64;
+        type Value = Decimal;
+        type Wire = Decimal;
         const NAME: &'static str = "quantity";
         const REQUIRED: bool = true;
     }
@@ -11585,7 +11586,8 @@ pub mod ProjectEquipment {
 
     /// `quantity`: Value of `quantity`.
     ///
-    /// Rust value: `i64`.
+    /// Rust value: `Decimal`.
+    /// Uses [`Decimal`], not a binary float, to preserve decimal JSON numbers. More than 28 decimal places are rounded; values beyond its range are rejected.
     /// The key must be present and non-null.
     ///
     /// Rentman representation: `quantity`, documented type `string` (OpenAPI `ProjectEquipmentResponse.quantity`).
@@ -11594,8 +11596,8 @@ pub mod ProjectEquipment {
 
     impl ProjectionField for quantity {
         type Resource = ProjectEquipment;
-        type Value = i64;
-        type Wire = i64;
+        type Value = Decimal;
+        type Wire = Decimal;
         const NAME: &'static str = "quantity";
         const REQUIRED: bool = true;
     }

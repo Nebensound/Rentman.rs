@@ -10,12 +10,12 @@ rust_type = "i64"
 [[response_type_overrides]]
 schema = "EquipmentSetContentResponse"
 field = "quantity"
-rust_type = "i64"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "ProjectEquipmentResponse"
 field = "quantity"
-rust_type = "i64"
+rust_type = "Decimal"
 
 [[response_type_overrides]]
 schema = "FactorsResponse"
